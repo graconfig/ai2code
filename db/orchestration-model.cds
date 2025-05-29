@@ -22,7 +22,7 @@ entity Task : cuid, managed {
     botInstance  : Association to BotInstance;
     type         : Association to TaskType;
     botInstances : Composition of many BotInstance
-                       on botInstances.task = $self;
+                    on botInstances.task = $self;
     contextNodes : Composition of many ContextNode
                        on contextNodes.task = $self; //任务下所有context节点
 }
@@ -49,7 +49,7 @@ entity BotInstance : cuid, managed {
     tasks    : Composition of many Task
                    on tasks.botInstance = $self; //下一级的
     messages : Composition of many BotMessage
-                   on messages.botInstance = $self;
+                on messages.botInstance = $self;
 }
 
 /* Bot消息实体，记录人与AI/系统的对话消息。 */

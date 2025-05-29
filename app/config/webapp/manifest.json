@@ -1,0 +1,208 @@
+{
+  "_version": "1.65.0",
+  "sap.app": {
+    "id": "config",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:lrop",
+      "version": "1.16.1",
+      "toolsId": "5e9d1fc3-ddec-4f7f-875a-d5133f61e13a"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/odata/v4/ConfigService/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.136.1",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.fe.templates": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "config.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "@i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "uri": "i18n/i18n.properties"
+      }
+    },
+    "resources": {
+      "css": []
+    },
+    "routing": {
+      "config": {},
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "TaskTypesList",
+          "target": "TaskTypesList"
+        },
+        {
+          "pattern": "TaskTypes({key}):?query:",
+          "name": "TaskTypesObjectPage",
+          "target": "TaskTypesObjectPage"
+        },
+        {
+          "pattern": "TaskTypes({key})/botTypes({key2}):?query:",
+          "name": "BotTypesObjectPage",
+          "target": "BotTypesObjectPage"
+        },
+        {
+          "name": "TaskTypes_botTypes_promptsObjectPage",
+          "pattern": "TaskTypes({key})/botTypes({key2})/prompts({promptsKey}):?query:",
+          "target": "TaskTypes_botTypes_promptsObjectPage"
+        },
+        {
+          "name": "TaskTypes_botTypes_functionCallsObjectPage",
+          "pattern": "TaskTypes({key})/botTypes({key2})/functionCalls({functionCallsKey}):?query:",
+          "target": "TaskTypes_botTypes_functionCallsObjectPage"
+        }
+      ],
+      "targets": {
+        "TaskTypesList": {
+          "type": "Component",
+          "id": "TaskTypesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/TaskTypes",
+              "variantManagement": "Page",
+              "navigation": {
+                "TaskTypes": {
+                  "detail": {
+                    "route": "TaskTypesObjectPage"
+                  }
+                }
+              },
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": {
+                    "type": "ResponsiveTable"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "TaskTypesObjectPage": {
+          "type": "Component",
+          "id": "TaskTypesObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/TaskTypes",
+              "navigation": {
+                "botTypes": {
+                  "detail": {
+                    "route": "BotTypesObjectPage"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "BotTypesObjectPage": {
+          "type": "Component",
+          "id": "BotTypesObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/TaskTypes/botTypes",
+              "navigation": {
+                "prompts": {
+                  "detail": {
+                    "route": "TaskTypes_botTypes_promptsObjectPage"
+                  }
+                },
+                "functionCalls": {
+                  "detail": {
+                    "route": "TaskTypes_botTypes_functionCallsObjectPage"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "TaskTypes_botTypes_promptsObjectPage": {
+          "type": "Component",
+          "id": "TaskTypes_botTypes_promptsObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "navigation": {},
+              "contextPath": "/TaskTypes/botTypes/prompts"
+            }
+          }
+        },
+        "TaskTypes_botTypes_functionCallsObjectPage": {
+          "type": "Component",
+          "id": "TaskTypes_botTypes_functionCallsObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "navigation": {},
+              "contextPath": "/TaskTypes/botTypes/functionCalls"
+            }
+          }
+        }
+      }
+    }
+  },
+  "sap.fiori": {
+    "registrationIds": [],
+    "archeType": "transactional"
+  }
+}
