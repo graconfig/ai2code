@@ -1,0 +1,1 @@
+ID,taskType_ID,sequence,name,description,functionType_code,autoRun,executionCondition,model_ID,outputContextPath,contextType_code,isRAGEnabled,ragClass,ragSource,ragTopK,implementationClass,createdAt,createdBy,modifiedAt,modifiedBy

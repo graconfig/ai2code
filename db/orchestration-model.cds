@@ -11,7 +11,7 @@ using {
 
 namespace ai.orchestration;
 
-/* 任务实体，支持多级子任务，记录在context中。 */
+/* 任务实体，支 持多级子任务，记录在context中。 */
 entity Task : cuid, managed {
 
     name         : String(100);
