@@ -16,14 +16,6 @@ entity TaskType : cuid, managed {
                   on botTypes.taskType = $self;
 }
 
-/* 任务类型下的Bot执行顺序定义。 */
-//entity TaskBotSequence : cuid, managed {
-//  taskType : Association to TaskType;
-//sequence : Integer;
-//botType  : Association to BotType;
-//remarks  : String;
-// 可扩展唯一性断言: @assert.unique: ['taskType', 'sequence']
-//}
 
 /* BotType: bot类型，增加contextType字段（枚举引用） */
 entity BotType : cuid, managed {

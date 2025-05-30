@@ -8,21 +8,28 @@ import cds.gen.configservice.FunctionCalls;
 import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotMessages;
 // import customer.ai2code.model.Bot;
+import customer.ai2code.model.config.AIServiceConfig;
 
 public interface AIService {
     public String chatWithAI(
             List<BotMessages> messages,
             List<PromptTexts> prompts,
-            String content);
+            String content,
+            AIServiceConfig serviceConfig,
+            String modelName);
 
     public SseEmitter chatWithAIStreaming(
             List<BotMessages> messages,
             List<PromptTexts> prompts,
-            String content);
+            String content,
+            AIServiceConfig serviceConfig,
+            String modelName);
 
     public String functionCalling(
             List<BotMessages> messages,
             List<PromptTexts> prompts,
-            FunctionCalls functionCall);
+            FunctionCalls functionCall,
+            AIServiceConfig serviceConfig,
+            String modelName);
 
 }
