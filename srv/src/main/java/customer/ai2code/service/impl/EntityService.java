@@ -1,4 +1,4 @@
-package customer.ai2code.service;
+package customer.ai2code.service.impl;
 
 import java.util.List;
 

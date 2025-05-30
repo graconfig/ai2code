@@ -13,3 +13,7 @@ service ConfigService {
   entity ContextTypes         as projection on cfg.ContextType;
 }
 
+
+annotate ConfigService.TaskTypes with @odata.draft.enabled ;
+
+

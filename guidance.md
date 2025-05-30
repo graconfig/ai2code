@@ -1,9 +1,9 @@
-程序规定
+# 程序规定
 项目名称
 ai2code
 
 
-实现效果
+# 实现效果
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                        Task Object Page（头部/主属性区）                      │
@@ -32,10 +32,10 @@ ai2code
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-📦 CDS设计
+# 📦 CDS设计
 
 ---
-📁 /db/orchestration-model.cds  
+## 📁 /db/orchestration-model.cds  
 ```
 using {
   cuid,
@@ -93,7 +93,7 @@ entity BotMessage : cuid, managed {
 }
 ```
 
-📁  /db/orchestration-config-model.cds
+## 📁  /db/orchestration-config-model.cds
 ```
 using {
   cuid,
@@ -217,7 +217,7 @@ entity RagFunction : CodeList {
 }
 ```
 
-srv/orchestration-service.cds
+## srv/orchestration-service.cds
 
 ```
 using ai.orchestration as db from '../db/orchestration-model';
@@ -251,7 +251,7 @@ service MainService {
 }
 ```
 
-srv/orchestration-config-service.cds
+## srv/orchestration-config-service.cds
 ```
 using ai.orchestration.config as cfg from '../db/orchestration-config-model';
 
@@ -269,35 +269,35 @@ service ConfigService {
 }
 ```
 
-可以直接用 CDS 标准服务的典型用法
+## 可以直接用 CDS 标准服务的典型用法
 暂时无法在飞书文档外展示此内容
 
-实体标准接口举例（前端可直接使用，无需 action）
+## 实体标准接口举例（前端可直接使用，无需 action）
 - 查询 context Node：GET /Tasks('...')/contextNodes
 - 保存 context 编辑：PATCH /ContextNodes('...')
 - 查询 botInstance 树：GET /Tasks('...')/botInstances
 - 查询消息对话：GET /BotInstances('...')/messages
-需自定义的 action
+## 需自定义的 action
 必须自定义 action 的场景（标准服务不覆盖的业务流）
 
 
 暂时无法在飞书文档外展示此内容
 
 ---
-后端逻辑
-手动执行
-action
-参数
-功能
-createTaskWithBots
-1. 传入：
-  1. name : String,
-  2. description : String,
-  3. typeId : UUID
-2. 传出:
-  1. tasks: Tasks
+# 后端逻辑
+## 手动执行
+| action                              | 参数                   | 功能                                                           |
+|-------------------------------------|------------------------|----------------------------------------------------------------|
+| createTaskWithBots                  |  1. 传入：<br>  a. name : String,<br>  b. description : String,<br>  c. typeId : UUID<br>2. 传出:<br>  a. tasks: Tasks| 1. 根据typeId查询ConfigService中TaskTypes表中条目以及他的botTypes<br>2. 创建一条目MainService.Tasks。<br>a. 将isMain设置为true<br>b. Name<br>c. Description<br>d. contextPath设置为空<br>e. sequence设置为空或0<br>f. Type 设置为typeId查找到的TaskType<br>3. 根据ConfigService.TaskTypes.botTypes的条目数，创建相应条目数的MainService.BotInstances。<br>a. Sequence 设置为 ConfigService.BotTypes.sequence<br>b. Type 设置为ConfigService.BotTypes<br>c. status设置为BotInstanceStatus.code.C (Created)<br>4. (自动执行)将name、description和第二步得到的Tasks.Id，创建两条目MainService.ContextNodes。<br>a. 第一条<br>a. path设置为name<br>b. 第二条<br>a. path设置为description<br>5. 将创建的Tasks条目返回给前端                         |
+| BotInstances/execute                | 1. 传入<br>a. Bound action自带参数<br>2. 传出<br>a. result: String(单纯code运行返回的结果)<br>b. tasks(如果是functioncall类型的Bot，执行分解任务的操作，返回的是taskId的数组)                     | 正常流程(同步)：<br>1. 将BotInstances的status字段设置为R(Running)。<br>F类型BotInstance:<br>a. 取到维护的BotType.prompts<br>b. 调用AI Function call，调用维护的implementationClass维护的类中execute方法。返回结果存储到BotInstances.result字段中。同时通过维护的outputContextPath写到ContextNodes条目中。<br>c. 将BotInstances.Status设置为S(Success)。<br>C类型BotInstance:<br>a. 执行implementationClass维护的Class中execute方法<br>b. 结果存储在BotInstances.result字段中。<br>c. 将BotInstances.Status设置为S(Success)。<br>错误处理：<br>1. 将BotInstances的status字段设置为F(Failed)。|
+| BotInstances/chatCompletion         | 1. 传入<br>a. Bound action自带参数<br>b. content: LargeString<br>2. 传出<br>a. LargeString   | 正常流程: a. 将BotInstances的status字段设置为R(Running)。<br> b. 判断是否第一次对话，第一次对话content字段 作为本次用户对话内容，取BotTypes.prompts作为system消息 组成消息发给AI模型。<br> c. 不是第一次对话，content字段 作为本次用户对话内容，再根据BotInstances.messages取到历史记录消息 组成消息发给AI模型。<br> d. 第一次对话，将system消息、user消息和assistant消息存入BotMessages表中。非第一次对话，将user消息和assistant消息存入BotMessages表中。<br> e. 返回assistant消息。<br> 错误处理: a. 将BotInstances的status字段设置为F(Failed)。|
+| BotMessages/adopt                   | 1. 传入<br>a. Bound action自带参数<br>2. 传出<br>a. array of ContextNodes                     | 1. 获取当前BotMessages条目。<br>2. 根据BotMessages.botInstance获取到BotInstances条目。<br>3. 根据BotInstances.type获取BotTypes条目。<br>4. 将这条消息内容存储到ContextNodes条目中。<br>a. Path: 根据BotTypes设置的outputContextPath<br>b. label:<br>c. type: 根据BotTypes设置的contextType<br>d. Value: BotMessages.message/根据AI function call转成相应的格式。<br>5. 将BotInstances的status字段设置为S(Success)。<br>6. 返回ContextNodes条目。<br>错误处理：<br>a. 将BotInstances的status字段设置为F(Failed)。               |
+| /api/chat/Streaming<br>Restful协议SSE流式接口。| 传参<br>1. 传入<br>a. botInstanceId<br>b. content<br>2. 传出<br>a. SseEmitter对象      | 1. 判断是否第一次对话，第一次对话content字段 作为本次用户对话内容，取BotTypes.prompts作为system消息 组成消息发给AI模型。<br>2. 不是第一次对话，content字段 作为本次用户对话内容，再根据BotInstances.messages取到历史记录消息 组成消息发给AI模型。<br>3. 启动异步线程接收AI返回的流式消息内容：<br>a. 每次AI返回消息段，立刻通过SseEmitter.send()返回消息给前端。<br>b. 在SseEmitter结束的时候启动存储消息的动作：第一次对话，将system消息、user消息和assistant消息存入BotMessages表中。非第一次对话，将user消息和assistant消息存入BotMessages表中。<br>错误处理：<br>1. 将BotInstances的status字段设置为F(Failed)。|
 
-1. 根据typeId查询ConfigService中TaskTypes表中条目以及他的botTypes
+
+<!-- createTaskWithBots -->
+<!-- 1. 传入：<br>  a. name : String,<br>  b. description : String,<br>  c. typeId : UUID<br>2. 传出:<br>  a. tasks: Tasks -->
+<!-- 1. 根据typeId查询ConfigService中TaskTypes表中条目以及他的botTypes
 2. 创建一条目MainService.Tasks。
   1. 将isMain设置为true
   2. Name
@@ -314,315 +314,92 @@ createTaskWithBots
     1. path设置为name
   2. 第二条
     1. path设置为description
-5. 将创建的Tasks条目返回给前端
-BotInstances/execute
+5. 将创建的Tasks条目返回给前端 -->
+<!-- BotInstances/execute
 1. 传入
   1. Bound action自带参数
 2. 传出
   1. result: String(单纯code运行返回的结果)
-  2. tasks(如果是functioncall类型的Bot，执行分解任务的操作，返回的是taskId的数组)
-正常流程(同步)：
-1. 将BotInstances的status字段设置为R(Running)。
-- F类型BotInstance
-  - 取到维护的BotType.prompts
-  - 调用AI Function call，调用维护的implementationClass维护的类中execute方法。返回结果存储到BotInstances.result字段中。同时通过维护的outputContextPath写到ContextNodes条目中。
-  - 将BotInstances.Status设置为S(Success)。
-- C类型BotInstance
-  - 执行implementationClass维护的Class中execute方法
-  - 结果存储在BotInstances.result字段中。
-  - 将BotInstances.Status设置为S(Success)。
-错误处理：
-1. 将BotInstances的status字段设置为F(Failed)。
-BotInstances/chatCompletion
-1. 传入
-  1. Bound action自带参数
-  2. content: LargeString
-2. 传出
-  1. LargeString
-正常流程:
-1. 将BotInstances的status字段设置为R(Running)。
-2. 判断是否第一次对话，第一次对话content字段 作为本次用户对话内容，取BotTypes.prompts作为system消息 组成消息发给AI模型。
-3. 不是第一次对话，content字段 作为本次用户对话内容，再根据BotInstances.messages取到历史记录消息 组成消息发给AI模型。
-4. 第一次对话，将system消息、user消息和assistant消息存入BotMessages表中。非第一次对话，将user消息和assistant消息存入BotMessages表中。
-5. 返回assistant消息。
-错误处理：
-1. 将BotInstances的status字段设置为F(Failed)。
+  2. tasks(如果是functioncall类型的Bot，执行分解任务的操作，返回的是taskId的数组) -->
+<!-- 正常流程(同步)：<br>1. 将BotInstances的status字段设置为R(Running)。<br>F类型BotInstance:<br>a. 取到维护的BotType.prompts<br>b. 调用AI Function call，调用维护的implementationClass维护的类中execute方法。返回结果存储到BotInstances.result字段中。同时通过维护的outputContextPath写到ContextNodes条目中。<br>c. 将BotInstances.Status设置为S(Success)。<br>C类型BotInstance:<br>a. 执行implementationClass维护的Class中execute方法<br>b. 结果存储在BotInstances.result字段中。<br>c. 将BotInstances.Status设置为S(Success)。<br>错误处理：<br>1. 将BotInstances的status字段设置为F(Failed)。 -->
+<!-- 1. 传入<br>a. Bound action自带参数<br>b. content: LargeString<br>2. 传出<br>a. LargeString -->
+<!-- 正常流程: a. 将BotInstances的status字段设置为R(Running)。<br> b. 判断是否第一次对话，第一次对话content字段 作为本次用户对话内容，取BotTypes.prompts作为system消息 组成消息发给AI模型。<br> c. 不是第一次对话，content字段 作为本次用户对话内容，再根据BotInstances.messages取到历史记录消息 组成消息发给AI模型。<br> d. 第一次对话，将system消息、user消息和assistant消息存入BotMessages表中。非第一次对话，将user消息和assistant消息存入BotMessages表中。<br> e. 返回assistant消息。<br> 错误处理: a. 将BotInstances的status字段设置为F(Failed)。 -->
 
-BotMessages/adopt
-1. 传入
-  1. Bound action自带参数
-2. 传出
-  1. array of ContextNodes
-1. 获取当前BotMessages条目。
-2. 根据BotMessages.botInstance获取到BotInstances条目。
-3. 根据BotInstances.type获取BotTypes条目。
-4. 将这条消息内容存储到ContextNodes条目中。
-  1. Path:  根据BotTypes设置的outputContextPath
-  2. label:
-  3. type: 根据BotTypes设置的contextType
-  4. Value: BotMessages.message/根据AI function call转成相应的格式。
-5. 将BotInstances的status字段设置为S(Success)。
-6. 返回ContextNodes条目。
-错误处理：
-1. 将BotInstances的status字段设置为F(Failed)。
+<!-- 1. 传入<br>a. Bound action自带参数<br>2. 传出<br>a. array of ContextNodes -->
+<!-- 1. 获取当前BotMessages条目。<br>2. 根据BotMessages.botInstance获取到BotInstances条目。<br>3. 根据BotInstances.type获取BotTypes条目。<br>4. 将这条消息内容存储到ContextNodes条目中。<br>a. Path: 根据BotTypes设置的outputContextPath<br>b. label:<br>c. type: 根据BotTypes设置的contextType<br>d. Value: BotMessages.message/根据AI function call转成相应的格式。<br>5. 将BotInstances的status字段设置为S(Success)。<br>6. 返回ContextNodes条目。<br>错误处理：<br>a. 将BotInstances的status字段设置为F(Failed)。 -->
 
-/api/chat/Streaming
-Restful协议SSE流式接口。
-传参
-1. 传入
-  1. botInstanceId
-  2. content
-2. 传出
-  1. SseEmitter对象
+<!-- /api/chat/Streaming
+Restful协议SSE流式接口。 -->
+<!-- 传参<br>1. 传入<br>a. botInstanceId<br>b. content<br>2. 传出<br>a. SseEmitter对象 -->
 
-1. 判断是否第一次对话，第一次对话content字段 作为本次用户对话内容，取BotTypes.prompts作为system消息 组成消息发给AI模型。
-2. 不是第一次对话，content字段 作为本次用户对话内容，再根据BotInstances.messages取到历史记录消息 组成消息发给AI模型。
-3. 启动异步线程接收AI返回的流式消息内容：
-  1. 每次AI返回消息段，立刻通过SseEmitter.send()返回消息给前端。
-  2. 在SseEmitter结束的时候启动存储消息的动作：第一次对话，将system消息、user消息和assistant消息存入BotMessages表中。非第一次对话，将user消息和assistant消息存入BotMessages表中。
-错误处理：
-1. 将BotInstances的status字段设置为F(Failed)。
+<!-- 1. 判断是否第一次对话，第一次对话content字段 作为本次用户对话内容，取BotTypes.prompts作为system消息 组成消息发给AI模型。<br>2. 不是第一次对话，content字段 作为本次用户对话内容，再根据BotInstances.messages取到历史记录消息 组成消息发给AI模型。<br>3. 启动异步线程接收AI返回的流式消息内容：<br>a. 每次AI返回消息段，立刻通过SseEmitter.send()返回消息给前端。<br>b. 在SseEmitter结束的时候启动存储消息的动作：第一次对话，将system消息、user消息和assistant消息存入BotMessages表中。非第一次对话，将user消息和assistant消息存入BotMessages表中。<br>错误处理：<br>1. 将BotInstances的status字段设置为F(Failed)。 -->
 
-自动执行
+## 自动执行
 考虑引入Spring-AI或Langchain4j。
 
 
-类定义
-Model
-AI Config Models:
-名称
-类型
-描述
-属性
-方法
-AIModel
+## 类定义
+### Model
+* AI Config Models:
 
-Interface
+| 名称| 类型| 描述| 属性| 方法|
+|----|----|----|----|----|
+| AIModel| Interface|| modelConfig: ModelConfigs类<br>Parameters : Map对象|public String getModelName()<br>public  Map<String,E extends Object> parseParameters() //string转到Map对象|
+| OpenAIGPT35Model| Class| OpenAI 3.5模型| 实现AIModel| 实现AIModel|
+| OpenAIGPT4OModel| Class| OpenAI 4O模型 | 实现AIModel| 实现AIModel|
+| ClaudeAI35SonnetModel| Class| Claude 3.5 sonnet| 实现AIModel| 实现AIModel|
+| ClaudeAI37SonnetModel| Class| Claude 3.7 sonnet| 实现AIModel| 实现AIModel|
+| StreamRequestVO| Class| Streaming传入的时候的payload类| botInstanceId: String<br>Content: String| 无|
 
-modelConfig: ModelConfigs类
-Parameters : Map对象
+* Bot & Task Model
 
-public String getModelName()
-public  Map<String,E extends Object> parseParameters() //string转到Map对象
-OpenAIGPT35Model
-Class
-OpenAI 3.5模型
-实现AIModel
-实现AIModel
-OpenAIGPT4OModel
-Class
-OpenAI 4O模型
-实现AIModel
-实现AIModel
-ClaudeAI35SonnetModel
-Class
-Claude 3.5 sonnet
-实现AIModel
-实现AIModel
-ClaudeAI37SonnetModel
-Class
-Claude 3.7 sonnet
-实现AIModel
-实现AIModel
-StreamRequestVO
-Class
-Streaming传入的时候的payload类
-botInstanceId: String
-Content: String
-无
-Bot & Task Model
-名称
-类型
-描述
-属性
-方法
-Bot
-
-Interface
-Bot接口
-ExecutorService executor;
-
-public BotInstancesExecuteContext.ReturnType execute();
-public Boolean executeAsync();
-public Boolean stop();
-public Boolean resume();
-Public Boolean cancel();
-
-ChatBot
-Class
-对话型Bot
-
-public String chat(String content);
-public SseEmitter chatInStreaming(String content);
-FunctionCallingBot
-Class
-FunctionCalling型Bot
+| 名称| 类型| 描述| 属性| 方法| 
+|----|----|----|----|----|
+| Bot| Interface| Bot接口| ExecutorService executor;| public BotInstancesExecuteContext.ReturnType execute();<br>public Boolean executeAsync();<br>public Boolean stop();<br>public Boolean resume();<br>Public Boolean cancel();|
+| ChatBot| Class| 对话型Bot| | public String chat(String content);<br>public SseEmitter chatInStreaming(String content);|
+| FunctionCallingBot| Class| FunctionCalling型Bot | | |
+| CodingBot| Class| 代码执行类型Bot| | |
+| Task| Interface| Task接口(暂时不用实现)| | |
 
 
-CodingBot
-Class
-代码执行类型Bot
+### Service
+* AI Service
+
+| 名称| 类型| 描述| 属性| 方法| 
+|----|----|----|----|----|
+| AIService| Interface| AI服务的接口| | public String chatWithAI(List<BotMessages> messages,List<PromptTexts> prompts,String content);<br>public SseEmitter chatWithAIStreaming(List<BotMessages> messages,List<PromptTexts> prompts,String content)<br>public <E extends BotExecution> String functionCalling(List<BotMessages> messages,List<PromptTexts> prompts,FunctionCallingBot bot ) |
+| SAPOpenAIServiceImpl| Class| SAP AICore OpenAI服务类 | | |
+| SAPClaudeAIServiceImpl| Class| SAP AICore ClaudeAI服务类 | | |
 
 
-Task
-Interface
-Task接口(暂时不用实现)
+* 通用Service
+
+| 名称| 类型| 描述| 属性| 方法| 
+|----|----|----|----|----|
+| BotService| Interface| Bot相关服务| |    public Bot getCurrentBot(String botInstanceId);<br>  public Bot getCurrentBot(String taskId, Integer sequence);<br>  public Boolean executeAsync(BotInstancesExecuteContext context);<br>  public Boolean executeAsync(String botInstanceId);<br>  public BotInstancesExecuteContext.ReturnType execute(BotInstancesExecuteContext context);<br>  public BotInstancesExecuteContext.ReturnType execute(String botInstanceId);|
+| TaskService| Interface| Task相关服务| |    public Task createTaskWithBots(String name, String description, String taskTypeId);<br>    public Task createTaskWithBots(String botInstanceId);<br>    public Task createTaskWithBots(String botInstanceId, String name);|
+| ContextService| Interface| Context相关服务| |    public List<Map<String, Object>> buildContextAsHierarchy(List<ContextNodes> contextNodes);<br>    public String getContextFullPath(String subPathPrefix, String subPath);<br>    public Result upsertContext(String botInstanceId,String taskId,String contextValue);|
+| PromptService| Interface| 提示词相关服务| | public String parse(PromptTexts prompt,ContextNodes contextNode,String contextPath);|
+| EntityService| Class| CqnService相关服务| |selectSingle(CqnService);<br>selectList(CqnService);<br>insert();<br>batchInsert();<br>update();<br>delete();|
 
 
 
 
 
 
-
-
-
-
-
-
-Service
-AI Service
-名称
-类型
-描述
-属性
-方法
-AIService
-
-Interface
-
-AI服务的接口
-
-
-public String chatWithAI(
-List<BotMessages> messages,
-List<PromptTexts> prompts,
-String content
-)
-public SseEmitter chatWithAIStreaming(
-List<BotMessages> messages,
-List<PromptTexts> prompts,
-String content
-)
-public <E extends BotExecution> String functionCalling(
-List<BotMessages> messages,
-List<PromptTexts> prompts,
-FunctionCallingBot bot 
-) 
-
-SAPOpenAIServiceImpl
-Class
-SAP AICore OpenAI服务类
-
-
-SAPClaudeAIServiceImpl
-Class
-SAP AICore ClaudeAI服务类
-
-
-通用Service
-名称
-类型
-描述
-属性
-方法
-BotService
-
-Interface
-
-Bot相关服务
-
-
-    public Bot getCurrentBot(String botInstanceId);
-
-    public Bot getCurrentBot(String taskId, Integer sequence);
-
-    public Boolean executeAsync(BotInstancesExecuteContext context);
-    public Boolean executeAsync(String botInstanceId);
-
-    public BotInstancesExecuteContext.ReturnType execute(BotInstancesExecuteContext context);
-    public BotInstancesExecuteContext.ReturnType execute(String botInstanceId);
-TaskService
-Interface
-
-Task相关服务
-
-    public Task createTaskWithBots(String name, String description, String taskTypeId);
-
-    public Task createTaskWithBots(String botInstanceId);
-
-    public Task createTaskWithBots(String botInstanceId, String name);
-ContextService
-Interface
-
-Context相关服务
+| 名称| 类型| 描述| 属性| 方法| 
+|----|----|----|----|----|
+| BotExecution| Interface| Bot对象执行接口| |<br>public String execute(Map<String, Object> parameters);|
+| CreateSubTaskExecutionImpl| Class| | | |
+| DeployCDSExectionImpl| Class| | | |
+| RAGExtractor| Interface| RAG提取对象| | public String extract(String RAGSource, int RAGTopK)|
  
 
-    public List<Map<String, Object>> buildContextAsHierarchy(List<ContextNodes> contextNodes);
-
-    public String getContextFullPath(String subPathPrefix, String subPath);
-
-    public Result upsertContext(
-            String botInstanceId,
-            String taskId,
-            // Integer sequence,
-            // String contextPath,
-            String contextValue);
-PromptService
-Interface
-提示词相关服务
-
-public String parse(PromptTexts prompt,ContextNodes contextNode,String contextPath);
-EntityService
-Class
-CqnService相关服务
-
-selectSingle(CqnService)
-selectList(CqnService)
-insert()
-batchInsert()
-update()
-delete()
 
 
 
 
-
-
-名称
-类型
-描述
-属性
-方法
-
-BotExecution
-
-Interface
-Bot对象执行接口
-
-public String execute(Map<String, Object> parameters);
-
-CreateSubTaskExecutionImpl
-Class
-
-
-
-
-DeployCDSExectionImpl
-Class
-
-
-
-
-RAGExtractor
-Interface
-RAG提取对象
- 
-
-public String extract(String RAGSource, int RAGTopK)
-
-
-
-前端开发步骤
+# 前端开发步骤
 1. 利用fiori elements开发config维护界面，均为list-object
   1. Task Type
     1. Bot Type

@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -43,6 +46,45 @@
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.sap.ai.sdk</groupId>
+			<artifactId>core</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sap.ai.sdk.foundationmodels</groupId>
+			<artifactId>openai</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sap.ai.sdk</groupId>
+			<artifactId>orchestration</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sap.cloud.sdk</groupId>
+			<artifactId>sdk-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -113,7 +155,8 @@
 						<configuration>
 							<commands>
 								<command>build --for java</command>
-								<command>deploy --to h2 --with-mocks --dry --out "${project.basedir}/src/main/resources/schema-h2.sql"</command>
+								<command>deploy --to h2 --with-mocks --dry --out
+									"${project.basedir}/src/main/resources/schema-h2.sql"</command>
 							</commands>
 						</configuration>
 					</execution>
@@ -125,6 +168,53 @@
 						</goals>
 						<configuration>
 							<basePackage>cds.gen</basePackage>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.sap.cloud.sdk.datamodel</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<configuration>
+					<outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+					<apiMaturity>beta</apiMaturity>
+					<enableOneOfAnyOfGeneration>true</enableOneOfAnyOfGeneration>
+					<compileScope>COMPILE</compileScope>
+					<deleteOutputDirectory>false</deleteOutputDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>claude</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<phase>generate-sources</phase>
+						<configuration>
+							<inputSpec>
+								${project.basedir}/src/main/resources/spec/claude-sonnet-3.7.yaml</inputSpec>
+							<apiPackage>customer.ai2code.service.SAPAICore.claude.generated.api</apiPackage>
+							<modelPackage>
+								customer.ai2code.service.SAPAICore.claude.generated.model</modelPackage>
+							<generateApis>false</generateApis>
+							<additionalProperties>
+								<enumUnknownDefaultCase>true</enumUnknownDefaultCase>
+								<useOneOfInterfaces>true</useOneOfInterfaces>
+								<useOneOfCreators>true</useOneOfCreators>
+								<useFloatArrays>true</useFloatArrays>
+
+								<!-- new exclude paths -->
+								<!-- <excludePaths>/deployments/{deployment-id}/completions
+											/deployments/{deployment-id}/audio/transcriptions
+											/deployments/{deployment-id}/audio/translations
+											/deployments/{deployment-id}/images/generations</excludePaths> -->
+
+								<!-- new exclude properties -->
+								<!-- <excludeProperties>chatCompletionResponseMessage.context
+											createChatCompletionRequest.data_sources</excludeProperties> -->
+
+								<!-- new: remove unassigned components -->
+								<removeUnusedComponents>true</removeUnusedComponents>
+							</additionalProperties>
 						</configuration>
 					</execution>
 				</executions>
