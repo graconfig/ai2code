@@ -1,6 +1,7 @@
 package customer.ai2code.model;
 
-import cds.gen.configservice.ModelConfigs;
+// import cds.gen.configservice.ModelConfigs;
+import customer.ai2code.model.config.AIServiceConfig;
 
 public interface AIModel {
     // private final ModelConfigs modelConfigs;
@@ -8,5 +9,5 @@ public interface AIModel {
     // private Map<String, E extends Object> modelParametersMap;
     public String getModelName();
     // public Map<String, Object> getModelParametersMap();
-    public void parseModelConfigs(ModelConfigs modelConfigs);
+    public AIServiceConfig parseModelConfigs();
 }
