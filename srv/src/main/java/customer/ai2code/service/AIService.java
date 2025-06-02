@@ -2,6 +2,7 @@ package customer.ai2code.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nonnull;
@@ -12,6 +13,7 @@ import cds.gen.configservice.FunctionCalls;
 import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotMessages;
 import customer.ai2code.model.AIModel;
+import customer.ai2code.service.execution.BotExecution;
 import customer.ai2code.service.processor.StreamingCompletedProcessor;
 
 public interface AIService {
@@ -29,10 +31,12 @@ public interface AIService {
                         ExecutorService executor,
                         StreamingCompletedProcessor streamingCompletionProcessor);
 
-        public String functionCalling(
+        public <T extends BotExecution> String functionCalling(
                         List<BotMessages> messages,
                         List<PromptTexts> prompts,
                         // FunctionCalls functionCall,
+                        Class<T> clazz,
+                        Map<String, ?> parameters,
                         AIModel model);
 
         /**

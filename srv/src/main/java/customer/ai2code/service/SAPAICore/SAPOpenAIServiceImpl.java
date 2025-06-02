@@ -28,6 +28,7 @@ import customer.ai2code.model.config.AIServiceConfig;
 import customer.ai2code.model.config.SAPAICoreConfig;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.constant.AIConstants;
+import customer.ai2code.service.execution.BotExecution;
 import customer.ai2code.service.handler.factory.AIResponseHandlerFactory;
 import customer.ai2code.service.model.AIResponse;
 import customer.ai2code.service.model.factory.SAPOpenAIChatMessageFactory;
@@ -168,10 +169,16 @@ public class SAPOpenAIServiceImpl implements AIService {
         }
 
         @Override
-        public String functionCalling(List<BotMessages> messages, List<PromptTexts> prompts, FunctionCalls functionCall,
+        public <T extends BotExecution> String functionCalling(List<BotMessages> messages, List<PromptTexts> prompts,
+                        Class<T> clazz, Map<String, ?> parameters,
                         AIModel model) {
                 // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'functionCalling'");
+                throw new UnsupportedOperationException("Unimplemented method 'functionCalling' for SAPOpenAIServiceImpl");
+                // parse functionCall parameers by clazz and parameters;
+                // OpenAiChatCompletionParameters params = new OpenAiChatCompletionParameters();
+                                
+                
+                // return "";
         }
 
 }
