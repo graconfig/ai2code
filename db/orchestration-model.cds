@@ -11,35 +11,34 @@ using {
 
 namespace ai.orchestration;
 
-/* 任务实体，支持多级子任务，记录在context中。 */
+/** Task entity, supports multi-level sub-tasks, recorded in context. */
 entity Task : cuid, managed {
 
     name         : String(100);
     description  : String;
-    contextPath  : String(1000); //Task需要指定的Context路径 例：datasource.children[3]
-    sequence     : Integer; // SubTask需要指定的执行顺序
-    isMain       : Boolean default true; //冗余存储
+    contextPath  : String(1000); // Context path for the task, e.g., datasource.children[3]
+    sequence     : Integer; // Execution order for sub-tasks
+    isMain       : Boolean default true; // Redundant flag to mark main tasks
     botInstance  : Association to BotInstance;
     type         : Association to TaskType;
     botInstances : Composition of many BotInstance
                     on botInstances.task = $self;
     contextNodes : Composition of many ContextNode
-                       on contextNodes.task = $self; //任务下所有context节点
+                       on contextNodes.task = $self; // All context nodes under this task
 }
 
-/* 单个context节点，采用扁平结构，支持树结构自动还原 */
+/** Single context node, flattened structure to support tree reconstruction */
 entity ContextNode : cuid, managed {
-    path  : String(1000); // 唯一路径，如 a.b.c[0].d
-    label : String(200); // 节点名称
-    type  : String(50); // 类型（text, markdown, code, object, array等）
-    value : LargeString; // 节点值/内容
-    task  : Association to Task; // 所属任务
-//readonly  : Boolean default false;     // 是否只读（可选）
-// 可扩展：排序、校验、元数据等
+    path  : String(1000); // Unique path, e.g., a.b.c[0].d
+    label : String(200); // Node label
+    type  : String(50); // Type (e.g., text, markdown, code, object, array)
+    value : LargeString; // Node value/content
+    task  : Association to Task; // Parent task
+    //readonly  : Boolean default false; // Optional: whether the node is read-only
+    // Extendable: sorting, validation, metadata, etc.
 }
 
-
-/* 单次Bot执行实例。 */
+/** Bot execution instance */
 entity BotInstance : cuid, managed {
     sequence : Integer;
     result   : LargeString;
@@ -47,15 +46,15 @@ entity BotInstance : cuid, managed {
     status   : Association to BotInstanceStatus default 'C';
     task     : Association to Task;
     tasks    : Composition of many Task
-                   on tasks.botInstance = $self; //下一级的
+                   on tasks.botInstance = $self; // Sub-tasks
     messages : Composition of many BotMessage
                 on messages.botInstance = $self;
 }
 
-/* Bot消息实体，记录人与AI/系统的对话消息。 */
+/** Bot message entity, records human-AI/system conversations */
 entity BotMessage : cuid, managed {
     role        : String(20); // 'user' | 'assistant' | 'system'
-    message : LargeString;
-    ragData     : LargeString; //??
+    message     : LargeString;
+    ragData     : LargeString; // RAG result data (optional)
     botInstance : Association to BotInstance;
 }
