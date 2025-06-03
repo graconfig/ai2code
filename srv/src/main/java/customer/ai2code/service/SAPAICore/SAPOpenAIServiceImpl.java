@@ -18,7 +18,7 @@ import com.sap.cloud.sdk.cloudplatform.connectivity.OAuth2DestinationBuilder;
 import com.sap.cloud.sdk.cloudplatform.connectivity.OnBehalfOf;
 import com.sap.cloud.sdk.cloudplatform.connectivity.Destination;
 import com.sap.cloud.security.config.ClientCredentials;
-import cds.gen.configservice.FunctionCalls;
+// import cds.gen.configservice.FunctionCalls;
 import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotMessages;
 import customer.ai2code.exception.BusinessException;

@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import cds.gen.configservice.FunctionCalls;
+// import cds.gen.configservice.FunctionCalls;
 import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotMessages;
 import customer.ai2code.model.AIModel;
