@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "rootDir": "./",
+    "baseUrl": "./",
+    "outDir": "./dist/srv/srv",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "composite": true,
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "allowJs": true,
+    "paths": {
+      "#cds-models/*": [
+        "./@cds-models/*"
+      ]
+    }
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/rag/*.js"
+  ],
+  "exclude": [
+    "dist/**/*",
+    "**/*.test.ts",
+    "node_modules/**/*"
+  ]
+}
