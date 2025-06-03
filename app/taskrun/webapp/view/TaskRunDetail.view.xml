@@ -1,0 +1,59 @@
+<mvc:View 
+    controllerName="ai.orchestration.taskrun.controller.TaskRunDetail"
+    xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.uxap"
+	xmlns:m="sap.m"
+	xmlns:task="ai.orchestration.taskrun.view.blocks"
+	height="100%">
+	<ObjectPageLayout id="ObjectPageLayout" upperCaseAnchorBar="false">
+		<headerTitle>
+			<ObjectPageHeader objectTitle="{name}">
+                <actions>
+					<m:Button text="Edit" type="Emphasized" press="onEdit"/>
+					<m:Button type="Transparent" text="Delete"/>
+				</actions>
+			</ObjectPageHeader>
+		</headerTitle>
+
+		<!-- <headerContent>
+			<m:ObjectAttribute title="" text="This example explains the rules for the rendering of sections"/>
+		</headerContent> -->
+
+		<sections>
+
+            <ObjectPageSection titleUppercase="false" title="Task Info">
+				<subSections>
+					<ObjectPageSubSection titleUppercase="false">
+						<blocks>
+							<task:TaskInfo id="taskInfo"/>
+						</blocks>
+					</ObjectPageSubSection>
+				</subSections>
+			</ObjectPageSection>
+
+			<ObjectPageSection titleUppercase="false" title="Bot Instances">
+				<subSections>
+					<ObjectPageSubSection titleUppercase="false">
+						<blocks>
+							<task:BotInstances id="botInstances"/>
+						</blocks>
+					</ObjectPageSubSection>
+				</subSections>
+			</ObjectPageSection>
+
+			<ObjectPageSection titleUppercase="false" title="Context Nodes">
+				<subSections>
+					<ObjectPageSubSection titleUppercase="false">
+						<blocks>
+							<task:ContextNodes id="contextNodes"/>
+						</blocks>
+					</ObjectPageSubSection>
+				</subSections>
+			</ObjectPageSection>
+
+
+		</sections>
+
+	</ObjectPageLayout>
+</mvc:View>
+
