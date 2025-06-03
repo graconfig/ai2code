@@ -11,7 +11,7 @@
     "@sap-cloud-sdk/http-client": "3.25.0",
     "@sap-cloud-sdk/resilience": "3.25.0",
     "@sap-cloud-sdk/connectivity": "^3",
-    "@sap/cds": "^8.9.3",
+    "@sap/cds": "^8.9.2",
     "@sap/xssec": "^4",
     "cap-llm-plugin": "^1.4.4",
     "express": "^4",
@@ -25,7 +25,7 @@
     "ai2code-cds": "file:"
   },
   "devDependencies": {
-    "@sap/cds-dk": "^8.9.3",
+    "@sap/cds-dk": "^8.9.2",
     "@cap-js/cds-typer": ">=0.1",
     "@cap-js/cds-types": "^0.9.0",
     "@cap-js/sqlite": "^1",
@@ -63,7 +63,7 @@
       "db": {
         "kind": "sqlite",
         "credentials": {
-          "url": "db/chat.sqlite"
+          "url": "db/ai2code.sqlite"
         }
       }
     },

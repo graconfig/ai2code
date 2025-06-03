@@ -13,6 +13,7 @@ default-env.json
 .classpath
 .project
 .settings
+@cds-models
 
 **/node/
 **/node_modules/
