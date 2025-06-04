@@ -102,6 +102,11 @@
           "name": "Tasks_contextNodesObjectPage",
           "pattern": "Tasks({key})/contextNodes({contextNodesKey}):?query:",
           "target": "Tasks_contextNodesObjectPage"
+        },
+        {
+          "name": "Tasks_botInstances_messagesObjectPage",
+          "pattern": "Tasks({key})/botInstances({key2})/messages({messagesKey}):?query:",
+          "target": "Tasks_botInstances_messagesObjectPage"
         }
       ],
       "targets": {
@@ -160,7 +165,14 @@
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/Tasks/botInstances"
+              "contextPath": "/Tasks/botInstances",
+              "navigation": {
+                "messages": {
+                  "detail": {
+                    "route": "Tasks_botInstances_messagesObjectPage"
+                  }
+                }
+              }
             }
           }
         },
@@ -172,6 +184,17 @@
             "settings": {
               "navigation": {},
               "contextPath": "/Tasks/contextNodes"
+            }
+          }
+        },
+        "Tasks_botInstances_messagesObjectPage": {
+          "type": "Component",
+          "id": "Tasks_botInstances_messagesObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "navigation": {},
+              "contextPath": "/Tasks/botInstances/messages"
             }
           }
         }

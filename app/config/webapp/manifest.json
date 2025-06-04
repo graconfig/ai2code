@@ -102,11 +102,6 @@
           "name": "TaskTypes_botTypes_promptsObjectPage",
           "pattern": "TaskTypes({key})/botTypes({key2})/prompts({promptsKey}):?query:",
           "target": "TaskTypes_botTypes_promptsObjectPage"
-        },
-        {
-          "name": "TaskTypes_botTypes_functionCallsObjectPage",
-          "pattern": "TaskTypes({key})/botTypes({key2})/functionCalls({functionCallsKey}):?query:",
-          "target": "TaskTypes_botTypes_functionCallsObjectPage"
         }
       ],
       "targets": {
@@ -166,11 +161,6 @@
                   "detail": {
                     "route": "TaskTypes_botTypes_promptsObjectPage"
                   }
-                },
-                "functionCalls": {
-                  "detail": {
-                    "route": "TaskTypes_botTypes_functionCallsObjectPage"
-                  }
                 }
               }
             }
@@ -182,19 +172,20 @@
           "name": "sap.fe.templates.ObjectPage",
           "options": {
             "settings": {
+              "editableHeaderContent": false,
               "navigation": {},
-              "contextPath": "/TaskTypes/botTypes/prompts"
-            }
-          }
-        },
-        "TaskTypes_botTypes_functionCallsObjectPage": {
-          "type": "Component",
-          "id": "TaskTypes_botTypes_functionCallsObjectPage",
-          "name": "sap.fe.templates.ObjectPage",
-          "options": {
-            "settings": {
-              "navigation": {},
-              "contextPath": "/TaskTypes/botTypes/functionCalls"
+              "contextPath": "/TaskTypes/botTypes/prompts",
+              "content": {
+                "body": {
+                  "sections": {
+                    "ValueInformationSection": {
+                      "type": "XMLFragment",
+                      "template": "config.ext.ValueInformationSection",
+                      "title": "{i18n>valueInformation}"
+                    }
+                  }
+                }
+              }
             }
           }
         }
