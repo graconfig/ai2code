@@ -1,4 +1,4 @@
-package customer.ai2code.service.SAPAICore;
+package customer.ai2code.service.impl;
 
 import java.util.List;
 import java.util.Map;
@@ -170,7 +170,7 @@ public class SAPOpenAIServiceImpl implements AIService {
 
         @Override
         public <T extends BotExecution> String functionCalling(List<BotMessages> messages, List<PromptTexts> prompts,
-                        Class<T> clazz, Map<String, ?> parameters,
+                        Class<T> botExecutionClazz, 
                         AIModel model) {
                 // TODO Auto-generated method stub
                 throw new UnsupportedOperationException("Unimplemented method 'functionCalling' for SAPOpenAIServiceImpl");
