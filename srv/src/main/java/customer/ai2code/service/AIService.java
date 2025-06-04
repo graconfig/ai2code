@@ -35,8 +35,7 @@ public interface AIService {
                         List<BotMessages> messages,
                         List<PromptTexts> prompts,
                         // FunctionCalls functionCall,
-                        Class<T> clazz,
-                        Map<String, ?> parameters,
+                        Class<T> botExecutClazz,
                         AIModel model);
 
         /**
