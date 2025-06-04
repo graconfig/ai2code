@@ -1,6 +1,6 @@
 using MainService as service from '../../srv/orchestration-service';
 
- @odata.draft.enabled
+//  @odata.draft.enabled
 annotate service.Tasks with @(
     UI.LineItem : [
         {
