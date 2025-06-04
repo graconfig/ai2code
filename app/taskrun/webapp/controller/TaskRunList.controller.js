@@ -93,9 +93,16 @@ sap.ui.define([
                         path: "/TaskType",
                         template: new sap.m.StandardListItem({
                             title: "{name}",
-                            description: "{description}"
+                            description: "{description}",
+                            highlightText: "{ID}" // ID placeholder
                         })
-                    }
+                    },
+                    confirm: function (oEvent) {
+                        const oSelectedItem = oEvent.getParameter("selectedItem");
+                        if (oSelectedItem) {
+                            Element.getElementById("taskTypeId").setValue(oSelectedItem.getHighlightText());
+                        }
+                    }.bind(this),
                 });
             },
 
@@ -122,8 +129,8 @@ sap.ui.define([
                             valueHelpOnly: true,
                             valueHelpRequest: function () {
                                 this.oSelectTypeDialog = this._createSelectTaskTypeDialog();
+                                this.oSelectTypeDialog.setModel(this.getOwnerComponent().getModel());
                                 this.oSelectTypeDialog.open();
-                                MessageToast.show("Value help requested");
                             }.bind(this)
                         }),
                     ]

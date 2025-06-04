@@ -1,27 +1,11 @@
-<!-- <mvc:View 
-    controllerName="ai.orchestration.taskrun.controller.TaskRunList"
-    displayBlock="true"
-    xmlns="sap.m"
-	xmlns:mvc="sap.ui.core.mvc"
-	xmlns:html="http://www.w3.org/1999/xhtml"
-    height="100%">
-    <Page id="page" title="{i18n>title}">
-        <content>
-            
-        </content>
-    </Page>
-</mvc:View> -->
 <mvc:View
     controllerName="ai.orchestration.taskrun.controller.TaskRunList"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.f"
-    xmlns:layout="sap.ui.layout"
-    xmlns:fb="sap.ui.comp.filterbar"
-    xmlns:l="sap.ui.layout.form"
     displayBlock="true"
     height="100%">
-    <f:DynamicPage id="dynamicPageId" headerExpanded="{/headerExpanded}" toggleHeaderOnTitleClick="{/titleClickable}">
+    <f:DynamicPage id="dynamicPageId">
         <!-- DynamicPage Title -->
         <f:title>
             <f:DynamicPageTitle>
