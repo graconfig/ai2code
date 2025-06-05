@@ -12,7 +12,7 @@ import cds.gen.mainservice.MainService;
 import cds.gen.configservice.ConfigService;
 import cds.gen.configservice.TaskTypes;
 import cds.gen.configservice.TaskTypes_;
-import cds.gen.ai.orchestration.config.TaskType;
+import cds.gen.mainservice.TaskType;
 import cds.gen.configservice.BotTypes;
 import cds.gen.configservice.BotTypes_;
 import customer.ai2code.model.Bot;
