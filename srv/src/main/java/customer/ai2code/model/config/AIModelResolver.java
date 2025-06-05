@@ -1,16 +1,21 @@
 package customer.ai2code.model.config;
 
+import org.springframework.stereotype.Service;
+
 import com.sap.ai.sdk.foundationmodels.openai.OpenAiModel;
+
+import customer.ai2code.model.AIModel;
 
 /**
  * AI模型解析器
  */
+@Service
 public class AIModelResolver {
     
     /**
      * 根据模型名称获取OpenAI模型
      */
-    public static OpenAiModel resolveOpenAiModel(String modelName) {
+    public  OpenAiModel resolveOpenAiModel(String modelName) {
         if (modelName == null || modelName.isEmpty()) {
             return OpenAiModel.GPT_35_TURBO; // 默认模型
         }
@@ -32,10 +37,17 @@ public class AIModelResolver {
         };
     }
     
+
+    public AIModel resolveAIModel(String modelConfigId){
+        // return new AIModel(resolveOpenAiModel(null))
+        // TODO: 这里可以根据需要返回一个默认的AIModel实例
+        return null;
+    }
+
     /**
      * 检查模型名称是否支持
      */
-    public static boolean isSupportedModel(String modelName) {
+    public boolean isSupportedModel(String modelName) {
         try {
             resolveOpenAiModel(modelName);
             return true;

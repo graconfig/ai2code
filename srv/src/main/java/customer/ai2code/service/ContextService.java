@@ -18,4 +18,6 @@ public interface ContextService {
             // Integer sequence,
             // String contextPath,
             String contextValue);
+    public ContextNodes getContextNode(
+            String contextNodeId);
 }
