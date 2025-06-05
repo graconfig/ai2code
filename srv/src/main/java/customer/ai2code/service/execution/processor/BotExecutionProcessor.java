@@ -177,23 +177,16 @@ public class BotExecutionProcessor extends AbstractProcessor {
             
             if (annotation != null) {
                 // 使用反射检查注解属性
-                java.lang.reflect.Method nameMethod = executeParameterAnnotation.getMethod("name");
+                // java.lang.reflect.Method nameMethod = executeParameterAnnotation.getMethod("name");
                 java.lang.reflect.Method requiredMethod = executeParameterAnnotation.getMethod("required");
                 java.lang.reflect.Method descriptionMethod = executeParameterAnnotation.getMethod("description");
                 
-                String name = (String) nameMethod.invoke(annotation);
+                // String name = (String) nameMethod.invoke(annotation);
                 boolean required = (Boolean) requiredMethod.invoke(annotation);
                 String description = (String) descriptionMethod.invoke(annotation);
                 
                 // 验证注解属性
-                if (name == null || name.trim().isEmpty()) {
-                    processingEnv.getMessager().printMessage(
-                        Diagnostic.Kind.ERROR,
-                        "❌ @ExecuteParameter 'name' attribute cannot be empty for parameter: " + elementParam.getSimpleName(),
-                        elementParam
-                    );
-                }
-                
+              
                 if (description == null || description.trim().isEmpty()) {
                     processingEnv.getMessager().printMessage(
                         Diagnostic.Kind.WARNING,
@@ -206,7 +199,7 @@ public class BotExecutionProcessor extends AbstractProcessor {
                 processingEnv.getMessager().printMessage(
                     Diagnostic.Kind.NOTE,
                     "✅ Parameter '" + elementParam.getSimpleName() + "' validation passed: " +
-                    "name='" + name + "', required=" + required + ", type=" + javaParam.getType().getSimpleName()
+                    "'required=" + required + ", type=" + javaParam.getType().getSimpleName()
                 );
             }
             
