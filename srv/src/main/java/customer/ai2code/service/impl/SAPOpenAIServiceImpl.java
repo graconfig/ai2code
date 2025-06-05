@@ -38,11 +38,14 @@ public class SAPOpenAIServiceImpl implements AIService {
 
         private final SAPOpenAIChatMessageFactory messageFactory;
         private final AIResponseHandlerFactory responseHandlerFactory;
+        private final AIModelResolver aiModelResolver;
 
         public SAPOpenAIServiceImpl(SAPOpenAIChatMessageFactory messageFactory,
-                        AIResponseHandlerFactory responseHandlerFactory) {
+                        AIResponseHandlerFactory responseHandlerFactory,
+                        AIModelResolver aiModelResolver) {
                 this.messageFactory = messageFactory;
                 this.responseHandlerFactory = responseHandlerFactory;
+                this.aiModelResolver = aiModelResolver;
         }
 
         public OpenAiClient getAiClientbyModelUsingBTPDestination(@Nonnull SAPAICoreConfig aiCoreServiceKeyConfig,
@@ -98,7 +101,7 @@ public class SAPOpenAIServiceImpl implements AIService {
 
                 OpenAiClient aiClient = getAiClientbyModelUsingBTPDestination(
                                 (SAPAICoreConfig) model.parseModelConfigs(),
-                                AIModelResolver.resolveOpenAiModel(model.getModelName()));
+                                aiModelResolver.resolveOpenAiModel(model.getModelName()));
                 OpenAiChatCompletionOutput rawResult = aiClient.chatCompletion(params);
                 // return
                 AIResponse aiResponse = responseHandlerFactory.getHandler(AIConstants.AIServiceType.SAPOPENAI)
@@ -141,7 +144,7 @@ public class SAPOpenAIServiceImpl implements AIService {
                 }
                 OpenAiClient aiClient = getAiClientbyModelUsingBTPDestination(
                                 (SAPAICoreConfig) model.parseModelConfigs(),
-                                AIModelResolver.resolveOpenAiModel(model.getModelName()));
+                                aiModelResolver.resolveOpenAiModel(model.getModelName()));
 
                 SseEmitter emitter = new SseEmitter(20 * 60 * 1000L); // 3 minutes timeout
                 final StringBuilder responseBuilder = new StringBuilder();

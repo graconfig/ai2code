@@ -1,13 +1,14 @@
 package customer.ai2code.model;
 
-import java.util.concurrent.Executor;
+// import java.util.concurrent.Executor;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 
 public interface Bot {
-    public final Executor executor = null;
+    // public final Executor executor = null;
 
     public BotInstancesExecuteContext.ReturnType execute();
 
@@ -22,4 +23,8 @@ public interface Bot {
     public SseEmitter chatInStreaming(String content);
 
     public String chat(String content);
+
+    public BotInstances getBotInstance();
+
+    public AIModel getAiModel();
 }
