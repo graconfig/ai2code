@@ -56,12 +56,8 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public Task createTaskWithBots(String name, String description, String taskTypeId) {
-        // 1. 查询TaskType及其botTypes
-        // var taskTypeSelect = Select.from(TaskTypes_.class).where(t ->
-        // t.ID().eq(taskTypeId));
-        // TaskTypes taskType = entityService.selectSingle(configService,
-        // taskTypeSelect, TaskTypes.class,
-        // "TaskType not found: " + taskTypeId);
+        // 1. 查询TaskType的botTypes
+
 
         var botTypesSelect = Select.from(BotTypes_.class)
                 .where(b -> b.taskType_ID().eq(taskTypeId))
@@ -98,10 +94,9 @@ public class TaskServiceImpl implements TaskService {
         // 5.新建Task对象
         GenericTask task = new GenericTask(newTask);
 
-        // 5. 放入缓存
+        // 6. 放入缓存
         taskCache.put(newTask.getId(), task);
-
-        // return newTask;
+        // 7. 返回新建的Task对象
         return task;
     }
 
@@ -141,7 +136,7 @@ public class TaskServiceImpl implements TaskService {
 
         entityService.insert(mainService, null, Tasks_.class, newTask, true);
 
-        // 3. 为每个BotType创建BotInstance
+        // 5. 为每个BotType创建BotInstance
         for (BotTypes botType : botTypes) {
             BotInstances botInstance = BotInstances.create();
             botInstance.setId(UUID.randomUUID().toString());
@@ -153,13 +148,13 @@ public class TaskServiceImpl implements TaskService {
             entityService.insert(mainService, null, BotInstances_.class, botInstance, true);
         }
 
-        // 5.新建Task对象
+        // 6.新建Task对象
         Task task = new GenericTask(newTask);
 
-        // 5. 放入缓存
+        // 7. 放入缓存
         taskCache.put(newTask.getId(), task);
 
-        // return newTask;
+        // 8.返回新建的Task对象
         return task;
         // return
 
@@ -194,7 +189,14 @@ public class TaskServiceImpl implements TaskService {
         // TODO Auto-generated method stub
         // throw new UnsupportedOperationException("Unimplemented method
         // 'createTaskWithBots'");
-        return createTaskWithBots(context.getName(), context.getDescription(), context.getTypeId());
+        // return createTaskWithBots(context.getName(), context.getDescription(), context.getTypeId());
+        
+        // 创建主任务
+        Task task = createTaskWithBots(context.getName(), context.getDescription(), context.getTypeId());
+
+        // 设置context
+        context.setResult(task.getTask());
+        return task;
     }
 
     @Override

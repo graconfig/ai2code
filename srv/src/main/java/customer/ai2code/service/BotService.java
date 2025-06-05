@@ -2,7 +2,6 @@ package customer.ai2code.service;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesChatCompletionContext;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 import cds.gen.mainservice.BotMessagesAdoptContext;

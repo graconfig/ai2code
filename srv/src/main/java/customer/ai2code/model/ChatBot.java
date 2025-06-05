@@ -5,7 +5,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import cds.gen.configservice.BotTypes;
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
-import cds.gen.mainservice.BotType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

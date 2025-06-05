@@ -27,24 +27,19 @@ import java.util.Map;
 @Service
 public class BotServiceImpl implements BotService {
 
-    private final MainService mainService;
-    private final ConfigService configService;
-    private final EntityService entityService;
     private final AIModelResolver aiModelResolver;
+    private final GenericCqnService genericCqnService;
     // private final AIService aiService;
 
     // 全局Bot缓存链表
     private final Map<String, Bot> botCache = new ConcurrentHashMap<>();
 
-    public BotServiceImpl(MainService mainService,
-            ConfigService configService,
-            EntityService entityService,
-            AIModelResolver aiModelResolver) {
+    public BotServiceImpl(
+            AIModelResolver aiModelResolver,
+            GenericCqnService genericCqnService) {
         // AIService aiService) {
-        this.mainService = mainService;
-        this.configService = configService;
-        this.entityService = entityService;
         this.aiModelResolver = aiModelResolver;
+        this.genericCqnService = genericCqnService;
         // this.aiService = aiService;
     }
 
@@ -57,14 +52,10 @@ public class BotServiceImpl implements BotService {
         }
 
         // 从数据库查询BotInstance
-        var select = Select.from(BotInstances_.class).where(b -> b.ID().eq(botInstanceId));
-        BotInstances botInstance = entityService.selectSingle(mainService, select, BotInstances.class,
-                "BotInstance not found: " + botInstanceId);
+        BotInstances botInstance = genericCqnService.getBotInstanceById(botInstanceId);
 
         // 查询关联的BotType
-        var botTypeSelect = Select.from(BotTypes_.class).where(b -> b.ID().eq(botInstance.getTypeId()));
-        BotTypes botType = entityService.selectSingle(configService, botTypeSelect, BotTypes.class,
-                "BotType not found: " + botInstance.getTypeId());
+        BotTypes botType = genericCqnService.getBotTypeById(botInstance.getTypeId());
 
         // 获取AI模型
         AIModel aiModel = aiModelResolver.resolveAIModel(botType.getModelId());
@@ -81,11 +72,7 @@ public class BotServiceImpl implements BotService {
     @Override
     public Bot getCurrentBot(String taskId, int sequence) {
         // 根据taskId和sequence查询BotInstance
-        var select = Select.from(BotInstances_.class)
-                .where(b -> b.task_ID().eq(taskId).and(b.sequence().eq(sequence)));
-        BotInstances botInstance = entityService.selectSingle(mainService, select, BotInstances.class,
-                "BotInstance not found for task: " + taskId + ", sequence: " + sequence);
-
+        BotInstances botInstance = genericCqnService.getBotInstanceByTaskAndSequence(taskId, sequence);
         return getCurrentBot(botInstance.getId());
     }
 
@@ -197,13 +184,13 @@ public class BotServiceImpl implements BotService {
     private void updateBotInstanceStatus(Bot bot, String status) {
         BotInstances botInstance = bot.getBotInstance();
         botInstance.setStatusCode(status);
-        entityService.update(mainService, null, BotInstances_.class, botInstance, true);
+        genericCqnService.updateBotInstance(botInstance);
     }
 
     private void updateBotInstanceResult(Bot bot, String result) {
         BotInstances botInstance = bot.getBotInstance();
         botInstance.setResult(result);
-        entityService.update(mainService, null, BotInstances_.class, botInstance, true);
+        genericCqnService.updateBotInstance(botInstance);
     }
 
     private String extractIdFromContext(BotInstancesChatCompletionContext context) {

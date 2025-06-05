@@ -22,7 +22,7 @@ flowchart TD
     J --> L
     K --> L
 
-    L --> L1[BotService.saveContext待完成：将结果保存到ContextNode表中]
+    L --> L1[BotService.saveContext：将结果保存到ContextNode表中(待完成)]
     
     L --> M[MainServiceBotInstancesExecuteHandler.after]
     M --> N[返回执行结果]
@@ -36,17 +36,20 @@ flowchart TD
     A[开始: chatCompletion action] --> B[MainServiceBotInstancesChatCompletionHandler.before]
     B --> C[获取 BotInstancesChatCompletionContext]
     C --> D[获取聊天内容]
+    C --> D1[获取历史聊天记录]
+    C --> D2[获取提示词]
         
     D --> G[BotService.chat]
-    
+    D1 --> G
+    D2 --> G
     
     G --> I[Bot.chat]
-    I --> I1[AIModelResolver.resolveAIService通过AIModel注入不同aiService待完成]
+    I --> I1[AIModelResolver.resolveAIService通过AIModel注入不同aiService(待完成)]
     I1 --> J[AIService.chatCompletion]
 
     J --> O[设置响应结果]
 
-    O --> P[BotService.saveMessage将用户消息和AI消息保存至表中待完成]
+    O --> P[BotService.saveMessage将用户消息和AI消息保存至表中(待完成)]
     P --> Q[返回响应]
     Q --> R[结束]
 ```
