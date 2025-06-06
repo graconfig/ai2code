@@ -1,7 +1,6 @@
 using {
   cuid,
   managed,
-  sap.common.Languages,
   sap.common.CodeList
 } from '@sap/cds/common';
 
@@ -23,7 +22,7 @@ entity BotType : cuid, managed {
   sequence            : Integer;
   name                : String(50);
   description         : String;
-  functionType        : Association to BotFunctionType default 'AICHAT';
+  functionType        : Association to BotFunctionType default 'AI_CHAT';
   autoRun             : Boolean default false;
   executionCondition  : String(1000);
   model               : Association to ModelConfig;
@@ -76,6 +75,16 @@ entity BotFunctionType : CodeList {
         FUNCTION_CALL = 'FUNCTION CALL';
         CODE          = 'CODE';
       //SUBTASK_GENERATOR = 'SUBTASK_GENERATOR'; replaced by FUNCTION_CALL
+      };
+}
+
+entity Languages : CodeList {
+  key code : String enum {
+        EN = 'English';
+        ZH = 'Chinese';
+        DE = 'German';
+        JA = 'Japanese';
+        ID = 'Indonesian';
       };
 }
 
