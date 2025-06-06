@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nonnull;
 
+import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.sap.ai.sdk.core.AiCoreService;
@@ -34,6 +35,7 @@ import customer.ai2code.service.model.AIResponse;
 import customer.ai2code.service.model.factory.SAPOpenAIChatMessageFactory;
 import customer.ai2code.service.processor.StreamingCompletedProcessor;
 
+@Service
 public class SAPOpenAIServiceImpl implements AIService {
 
         private final SAPOpenAIChatMessageFactory messageFactory;

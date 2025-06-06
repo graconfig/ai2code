@@ -16,6 +16,8 @@ import customer.ai2code.model.FunctionCallingBot;
 import customer.ai2code.model.config.AIModelResolver;
 import customer.ai2code.model.CodingBot;
 import customer.ai2code.service.BotService;
+import customer.ai2code.service.ContextService;
+
 // import customer.ai2code.service.AIService;
 import com.sap.cds.ql.Select;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
+
+import cds.gen.mainservice.BotMessages;
 
 @Service
 public class BotServiceImpl implements BotService {
@@ -80,17 +84,26 @@ public class BotServiceImpl implements BotService {
     public String chat(BotInstancesChatCompletionContext context) {
         // 从context的CQN中获取ID
         String botInstanceId = extractIdFromContext(context);
+
+        // context.setResult();
         return chat(botInstanceId, context.getContent());
     }
 
     @Override
     public String chat(String botInstanceId, String content) {
+
         Bot bot = getCurrentBot(botInstanceId);
 
         // 更新状态为RUNNING
         updateBotInstanceStatus(bot, "R");
 
         try {
+
+        // 2. 判断是否是第一次调用
+        // 2.1 第一次调用 获取Prompt
+        // 2.2 如果不是第一次调用，获取历史消息
+            
+
             String response;
             if (bot instanceof ChatBot) {
                 response = ((ChatBot) bot).chat(content);
@@ -100,6 +113,10 @@ public class BotServiceImpl implements BotService {
 
             // 更新状态为SUCCESS
             // updateBotInstanceStatus(bot, "S");
+
+
+                  // 3. 将用户和AI的聊天内容存储到表中
+        
 
             // 将content和response更新到BotMessages中
 
@@ -205,13 +222,31 @@ public class BotServiceImpl implements BotService {
 
     @Override
     public void adopt(BotMessagesAdoptContext context) {
+        // 通过上下文context获取 MessageId
+
+        // 再通过MessageId 获取BotInstanceId
+
+        // adopt(context.getBotInstanceId(), context.getCqn().ref().segments().get(0).id());
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'adopt'");
+
+        // context.setCompleted();
     }
 
     @Override
     public void adopt(String botInstanceId, String messageId) {
         // TODO Auto-generated method stub
+
+        // 根据MessageId , 获取 BotMessages表条目
+        
+        // Bot bot = getCurrentBot(botInstanceId);
+
+        // BotMessages message = bot.getMessageById(messageId);
+
+        // ContextService contextService = bot.getContextService();
+        // contextService.upsertContext(botInstanceId, botInstanceId, message.getMessage());
+
+        // 把当前Message 存到ContextNode表中
         throw new UnsupportedOperationException("Unimplemented method 'adopt'");
     }
 }
