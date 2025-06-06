@@ -12,7 +12,7 @@ service MainService @(path: 'MainService'){
                 result : String;
                 tasks  : array of UUID;
             };
-            action chatCompletion(content: LargeString) returns LargeString;
+            action chatCompletion(content: LargeString) returns BotMessages;
         }
 
     entity BotMessages  as projection on db.BotMessage
