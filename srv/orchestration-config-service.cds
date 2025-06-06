@@ -1,6 +1,6 @@
 using ai.orchestration.config as cfg from '../db/orchestration-config-model';
 
-service ConfigService {
+service ConfigService @(path: 'ConfigService'){
   entity TaskTypes            as projection on cfg.TaskType;
   //entity TaskBotSequences     as projection on cfg.TaskBotSequence;
   entity BotTypes             as projection on cfg.BotType;
