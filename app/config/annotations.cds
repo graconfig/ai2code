@@ -9,12 +9,12 @@ annotate service.TaskTypes with @(
         Data : [
             {
                 $Type : 'UI.DataField',
-                Label : '{i18n>TaskName}',
+                Label : '{i18n>TaskTypeName}',
                 Value : name,
             },
             {
                 $Type : 'UI.DataField',
-                Label : '{i18n>TaskDescription}',
+                Label : '{i18n>TaskTypeDescription}',
                 Value : description,
             },
             {
@@ -33,7 +33,7 @@ annotate service.TaskTypes with @(
         {
             $Type : 'UI.ReferenceFacet',
             ID : 'GeneratedFacet1',
-            Label : '{i18n>TaskInfo}',
+            Label : '{i18n>TaskTypeInfo}',
             Target : '@UI.FieldGroup#GeneratedGroup',
         },
         {
@@ -176,13 +176,7 @@ annotate service.BotTypes with @(
             Label : 'Prompts',
             ID : 'Prompts',
             Target : 'prompts/@UI.LineItem#Prompts',
-        },
-        {
-            $Type : 'UI.ReferenceFacet',
-            Label : 'FunctionCalls',
-            ID : 'FunctionCalls',
-            Target : 'functionCalls/@UI.LineItem#FunctionCalls',
-        },
+        }
     ],
     UI.FieldGroup #BotType : {
         $Type : 'UI.FieldGroupType',
@@ -354,12 +348,12 @@ annotate service.PromptTexts with @(
             $Type : 'UI.DataField',
             Value : name,
             Label : '{i18n>Name}',
-        },
-        {
-            $Type : 'UI.DataField',
-            Value : content,
-            Label : '{i18n>Content}',
-        },
+        }
+        // {
+        //     $Type : 'UI.DataField',
+        //     Value : content,
+        //     Label : '{i18n>Content}',
+        // },
     ],
     UI.HeaderInfo : {
         Title : {
@@ -389,77 +383,19 @@ annotate service.PromptTexts with @(
                 $Type : 'UI.DataField',
                 Value : name,
                 Label : '{i18n>Name}',
-            },
-            {
-                $Type : 'UI.DataField',
-                Value : content,
-                Label : '{i18n>Content}',
-            },
+            }
+            // {
+            //     $Type : 'UI.DataField',
+            //     Value : content,
+            //     Label : '{i18n>Content}',
+            // },
         ],
     },
 );
 
-annotate service.FunctionCall with @(
-    UI.LineItem #FunctionCalls : [
-        {
-            $Type : 'UI.DataField',
-            Value : name,
-            Label : '{i18n>Name}',
-        },
-        {
-            $Type : 'UI.DataField',
-            Value : description,
-            Label : '{i18n>Description}',
-        },
-        {
-            $Type : 'UI.DataField',
-            Value : parameters,
-            Label : '{i18n>Parameters}',
-        },
-    ],
-    UI.HeaderInfo : {
-        Title : {
-            $Type : 'UI.DataField',
-            Value : botType.description,
-        },
-        TypeName : '',
-        TypeNamePlural : '',
-    },
-    UI.Facets : [
-        {
-            $Type : 'UI.ReferenceFacet',
-            Label : 'Function Call',
-            ID : 'FunctionCall',
-            Target : '@UI.FieldGroup#FunctionCall',
-        },
-    ],
-    UI.FieldGroup #FunctionCall : {
-        $Type : 'UI.FieldGroupType',
-        Data : [
-            {
-                $Type : 'UI.DataField',
-                Value : name,
-                Label : '{i18n>Name}',
-            },
-            {
-                $Type : 'UI.DataField',
-                Value : description,
-                Label : '{i18n>Description}',
-            },
-            {
-                $Type : 'UI.DataField',
-                Value : parameters,
-                Label : '{i18n>Parameters}',
-            },
-        ],
-    },
-);
 
 annotate service.PromptTexts with {
     content @UI.MultiLineText : true
 };
 
-annotate service.FunctionCall with {
-    parameters @UI.MultiLineText : true
-};
 

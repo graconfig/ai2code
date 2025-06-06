@@ -1,8 +1,10 @@
 using ai.orchestration as db from '../db/orchestration-model';
+using ai.orchestration.config as config from '../db/orchestration-config-model';
 
 service MainService @(path: 'MainService'){
     entity Tasks        as projection on db.Task;
     entity ContextNodes as projection on db.ContextNode;
+    entity TaskType as projection on config.TaskType;
 
 
     //entity SubTasks      as projection on db.SubTask;

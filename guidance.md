@@ -383,8 +383,40 @@ Restful协议SSE流式接口。 -->
 | EntityService| Class| CqnService相关服务| |selectSingle(CqnService);<br>selectList(CqnService);<br>insert();<br>batchInsert();<br>update();<br>delete();|
 
 
+* Bot Service
+  - public Bot getCurrentBot(String botInstanceId);
+
+  - public Bot getCurrentBot(String taskId, int sequence);
+
+  - public String chat(BotInstancesChatCompletionContext context);
+  - public String chat(String botInstanceId, String content);
+
+  - public SseEmitter chatInStreaming(String botInstanceId, String content);
 
 
+  - public Boolean executeAsync(BotInstancesExecuteContext context);
+  - public Boolean executeAsync(String botInstanceId);
+
+  - public BotInstancesExecuteContext.ReturnType execute(BotInstancesExecuteContext context);
+  - public BotInstancesExecuteContext.ReturnType execute(String botInstanceId);
+
+
+* Task Service
+
+  - public Task createTaskWithBots(String name, String description, String taskTypeId);
+
+  - public Task createTaskWithBots(String botInstanceId, String description,String contextPath);
+
+  - public Task createTaskWithBots(String botInstanceId, String name, String description);
+
+  - public Task getCurrentTask(String taskId);
+  - public Task getCurrentTask(String botInstanceId, Integer sequence);
+
+
+* Lifecycle Managements 
+首先定义一个基于Spring Bean的Bot/Task的链式/树状全局链表。实现BotService/TaskService的以下方法：
+1. 从链表中查询Bot/Task(getCurrentBot/getCurrentTask)，如果没有则从存储的Bot/Task表中取到记录并实例化，再将Bot/Task放到链表中。
+2. CreateTaskWithBots方法新建的Task和Bots除了在表中记录，还需要将Task和Bot放到全局链表中，供所有用户查询和使用。
 
 
 | 名称| 类型| 描述| 属性| 方法| 

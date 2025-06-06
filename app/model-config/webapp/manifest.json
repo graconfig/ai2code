@@ -1,7 +1,7 @@
 {
   "_version": "1.65.0",
   "sap.app": {
-    "id": "config",
+    "id": "modelconfig",
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
@@ -13,7 +13,7 @@
     "sourceTemplate": {
       "id": "@sap/generator-fiori:lrop",
       "version": "1.16.1",
-      "toolsId": "5e9d1fc3-ddec-4f7f-875a-d5133f61e13a"
+      "toolsId": "ad052431-5763-4449-a50e-23f4657ec669"
     },
     "dataSources": {
       "mainService": {
@@ -60,7 +60,7 @@
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
-          "bundleName": "config.i18n.i18n"
+          "bundleName": "modelconfig.i18n.i18n"
         }
       },
       "": {
@@ -85,38 +85,28 @@
       "routes": [
         {
           "pattern": ":?query:",
-          "name": "TaskTypesList",
-          "target": "TaskTypesList"
+          "name": "ModelConfigsList",
+          "target": "ModelConfigsList"
         },
         {
-          "pattern": "TaskTypes({key}):?query:",
-          "name": "TaskTypesObjectPage",
-          "target": "TaskTypesObjectPage"
-        },
-        {
-          "pattern": "TaskTypes({key})/botTypes({key2}):?query:",
-          "name": "BotTypesObjectPage",
-          "target": "BotTypesObjectPage"
-        },
-        {
-          "name": "TaskTypes_botTypes_promptsObjectPage",
-          "pattern": "TaskTypes({key})/botTypes({key2})/prompts({promptsKey}):?query:",
-          "target": "TaskTypes_botTypes_promptsObjectPage"
+          "pattern": "ModelConfigs({key}):?query:",
+          "name": "ModelConfigsObjectPage",
+          "target": "ModelConfigsObjectPage"
         }
       ],
       "targets": {
-        "TaskTypesList": {
+        "ModelConfigsList": {
           "type": "Component",
-          "id": "TaskTypesList",
+          "id": "ModelConfigsList",
           "name": "sap.fe.templates.ListReport",
           "options": {
             "settings": {
-              "contextPath": "/TaskTypes",
+              "contextPath": "/ModelConfigs",
               "variantManagement": "Page",
               "navigation": {
-                "TaskTypes": {
+                "ModelConfigs": {
                   "detail": {
-                    "route": "TaskTypesObjectPage"
+                    "route": "ModelConfigsObjectPage"
                   }
                 }
               },
@@ -130,58 +120,25 @@
             }
           }
         },
-        "TaskTypesObjectPage": {
+        "ModelConfigsObjectPage": {
           "type": "Component",
-          "id": "TaskTypesObjectPage",
+          "id": "ModelConfigsObjectPage",
           "name": "sap.fe.templates.ObjectPage",
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/TaskTypes",
-              "navigation": {
-                "botTypes": {
-                  "detail": {
-                    "route": "BotTypesObjectPage"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "BotTypesObjectPage": {
-          "type": "Component",
-          "id": "BotTypesObjectPage",
-          "name": "sap.fe.templates.ObjectPage",
-          "options": {
-            "settings": {
-              "editableHeaderContent": false,
-              "contextPath": "/TaskTypes/botTypes",
-              "navigation": {
-                "prompts": {
-                  "detail": {
-                    "route": "TaskTypes_botTypes_promptsObjectPage"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "TaskTypes_botTypes_promptsObjectPage": {
-          "type": "Component",
-          "id": "TaskTypes_botTypes_promptsObjectPage",
-          "name": "sap.fe.templates.ObjectPage",
-          "options": {
-            "settings": {
-              "editableHeaderContent": false,
-              "navigation": {},
-              "contextPath": "/TaskTypes/botTypes/prompts",
+              "contextPath": "/ModelConfigs",
               "content": {
                 "body": {
                   "sections": {
-                    "ValueInformationSection": {
+                    "parametersSection": {
                       "type": "XMLFragment",
-                      "template": "config.ext.ValueInformationSection",
-                      "title": "{i18n>valueInformation}"
+                      "template": "modelconfig.ext.fragment.modelparameters",
+                      "title": "Parameters",
+                      "position": {
+                        "placement": "After",
+                        "anchor": "Parameters"
+                      }
                     }
                   }
                 }

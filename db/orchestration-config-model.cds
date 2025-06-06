@@ -57,13 +57,6 @@ entity PromptText : cuid, managed {
   content : LargeString;
 }
 
-entity FunctionCall : cuid, managed {
-  botType : Association to BotType;
-  name    : String(100);
-  description : String(500);
-  parameters : LargeString; // FunctionCall参数定义 parameters: { "type": "object", "properties": { "param1": { "type": "string" }, "param2": { "type": "integer" } } } / inputSchema: { "type": "object", "properties": { "param1": { "type": "string" }, "param2": { "type": "integer" } } }
-}
-
 /** Bot execution status enumeration */
 entity BotInstanceStatus : CodeList {
   key code : String enum {

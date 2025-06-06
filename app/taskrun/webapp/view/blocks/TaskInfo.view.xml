@@ -1,0 +1,16 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc" xmlns:forms="sap.ui.layout.form" xmlns="sap.m">
+	<forms:SimpleForm editable="true" layout="ColumnLayout">
+
+    <Label text="Name" />
+    <Input id="name" value="{name}" />
+    <Label text="Description" />
+    <Input value="{description}"></Input>
+    <Label text="Context Path" />
+    <Input value="{contextPath}"></Input>
+    <Label text="Sequence" />
+    <Input value="{sequence}" />
+    <Label text="isMain" />
+    <CheckBox selected="{isMain}" />
+
+	</forms:SimpleForm>
+</mvc:View>

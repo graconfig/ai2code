@@ -1,0 +1,37 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"  xmlns="sap.m">
+	<Table
+        items="{
+            path: 'botInstances'
+        }">
+        <headerToolbar>
+            <OverflowToolbar>
+                <Title text="BotInstances" level="H2"/>
+                <ToolbarSpacer/>
+                <Button text="Create" press="onCreateBotInstances"/>
+                <Button text="Execute"></Button>
+                <Button text="Chat Completion"></Button>
+            </OverflowToolbar>
+        </headerToolbar>
+        <columns>
+            <Column>
+                <Text text="Sequence" />
+            </Column>
+            <Column>
+                <Text text="Result" />
+            </Column>
+            <Column>
+                <Text text="Status code" />
+            </Column>
+        </columns>
+        <items>
+            <ColumnListItem 
+                vAlign="Middle">
+                <cells>
+                    <Text text="{sequence}" wrapping="false" />
+                    <Text text="{result}" wrapping="false"/>
+                    <Text text="{status_code}" />
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</mvc:View>

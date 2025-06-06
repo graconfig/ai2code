@@ -1,0 +1,39 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"  xmlns="sap.m">
+	<Table
+        items="{
+            path: 'contextNodes'
+        }">
+        <headerToolbar>
+            <OverflowToolbar>
+                <Title text="ContextNodes" level="H2"/>
+                <ToolbarSpacer/>
+                <Button text="Create" press="onCreateContextNodes"/>
+            </OverflowToolbar>
+        </headerToolbar>
+        <columns>
+            <Column>
+                <Text text="Path" />
+            </Column>
+            <Column>
+                <Text text="Label" />
+            </Column>
+            <Column>
+                <Text text="Type" />
+            </Column>
+            <Column>
+                <Text text="Value" />
+            </Column>
+        </columns>
+        <items>
+            <ColumnListItem 
+                vAlign="Middle">
+                <cells>
+                    <Text text="{path}" wrapping="false" />
+                    <Text text="{label}" wrapping="false"/>
+                    <Text text="{type}" />
+                    <Text text="{value}" />
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</mvc:View>
