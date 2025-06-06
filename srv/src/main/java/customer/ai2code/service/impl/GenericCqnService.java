@@ -161,6 +161,64 @@ public class GenericCqnService {
         updateBotInstance(botInstance);
     }
 
+    public ContextNodes getContextNodeById(String contextNodeId) {
+        var select = Select.from(ContextNodes_.class).where(c -> c.ID().eq(contextNodeId));
+        return entityService.selectSingle(mainService, select, ContextNodes.class,
+                "ContextNode not found: " + contextNodeId);
+    }
+
+    // 修改为根据taskId和contextPath查询
+    public ContextNodes getContextNodeByTaskAndPath(String taskId, String contextPath) {
+        var select = Select.from(ContextNodes_.class)
+                .where(c -> c.task_ID().eq(taskId).and(c.path().eq(contextPath)));
+        return entityService.selectSingle(mainService, select, ContextNodes.class,
+                "ContextNode not found for task: " + taskId + ", path: " + contextPath);
+    }
+
+
+
+    // 更新ContextNode的业务方法
+    public ContextNodes updateContextNodeValue(ContextNodes existingNode, String contextValue) {
+        existingNode.setValue(contextValue);
+        existingNode.setModifiedAt(java.time.Instant.now());
+        
+        entityService.update(mainService, null, ContextNodes_.class, existingNode, true);
+        return existingNode;
+    }
+
+    // 更新ContextNode的完整信息
+    public ContextNodes updateContextNode(ContextNodes existingNode, String label, String type, String contextValue) {
+        existingNode.setValue(contextValue);
+        existingNode.setLabel(label);
+        existingNode.setType(type);
+        existingNode.setModifiedAt(java.time.Instant.now());
+        
+        entityService.update(mainService, null, ContextNodes_.class, existingNode, true);
+        return existingNode;
+    }
+
+    // 根据path生成友好的label
+    public String generateLabelFromPath(String contextPath) {
+        if (contextPath == null || contextPath.isEmpty()) {
+            return "Context";
+        }
+        
+        // 将路径转换为友好的标签
+        String[] parts = contextPath.split("\\.");
+        String lastPart = parts[parts.length - 1];
+        
+        // 将驼峰命名转换为可读格式
+        return lastPart.replaceAll("([a-z])([A-Z])", "$1 $2")
+                      .replaceAll("_", " ")
+                      .replaceAll("-", " ")
+                      .toLowerCase()
+                      .replaceAll("\\b\\w", "");
+    }
+
+    // public void insertContextNode(ContextNodes contextNode) {
+    //     entityService.insert(mainService, null, ContextNodes_.class, contextNode, true);
+    // }
+
     // 原有的简单插入方法保留，但标记为内部使用
     private void insertTask(Tasks task) {
         entityService.insert(mainService, null, Tasks_.class, task, true);

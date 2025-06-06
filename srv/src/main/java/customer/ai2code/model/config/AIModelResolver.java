@@ -25,14 +25,14 @@ public class AIModelResolver {
     private final GenericCqnService genericCqnService;
 
     private final SAPOpenAIServiceImpl sapOpenAIService;
-    private final SAClaudeAIServiceImpl sapOpenAIClaudeService;
+    private final SAClaudeAIServiceImpl sapClaudeAIService;
 
     public AIModelResolver(GenericCqnService genericCqnService 
             , SAPOpenAIServiceImpl sapOpenAIService
-            , SAClaudeAIServiceImpl sapOpenAIClaudeService) {
+            , SAClaudeAIServiceImpl sapClaudeAIService) {
         this.genericCqnService = genericCqnService;
         this.sapOpenAIService = sapOpenAIService;
-        this.sapOpenAIClaudeService = sapOpenAIClaudeService;
+        this.sapClaudeAIService = sapClaudeAIService;
     }
 
 
@@ -97,7 +97,7 @@ public class AIModelResolver {
                 return sapOpenAIService;
                 // break;
             case "SAPAICore-Claude":
-                return sapOpenAIClaudeService;
+                return sapClaudeAIService;
                 // break;
             default:
                 return sapOpenAIService;
