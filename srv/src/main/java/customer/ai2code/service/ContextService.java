@@ -13,10 +13,10 @@ public interface ContextService {
     public String getContextFullPath(String subPathPrefix, String subPath);
 
     public Result upsertContext(
-            String botInstanceId,
+        //     String botInstanceId,
             String taskId,
             // Integer sequence,
-            // String contextPath,
+            String contextPath,
             String contextValue);
     public ContextNodes getContextNode(
             String contextNodeId);

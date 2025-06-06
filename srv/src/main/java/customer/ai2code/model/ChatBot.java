@@ -5,6 +5,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import cds.gen.configservice.BotTypes;
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
+import customer.ai2code.service.AIService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -55,6 +56,17 @@ public class ChatBot implements Bot {
 
     @Override
     public String chat(String content) {
+        //1. 根据AIModel类型，获取到不同AIService服务
+        // AIService aiService = aiModel.getAIService();
+
+
+        
+        // 真正调用chat服务
+        // aiService.chatWithAI(null, null, content, aiModel);
+
+        // 3. 将用户和AI的聊天内容存储到表中
+
+
         // 实现聊天逻辑
         return "Chat response for: " + content; // 返回聊天响应内容
     }
