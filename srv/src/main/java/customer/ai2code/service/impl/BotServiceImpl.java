@@ -199,15 +199,13 @@ public class BotServiceImpl implements BotService {
     }
 
     private void updateBotInstanceStatus(Bot bot, String status) {
-        BotInstances botInstance = bot.getBotInstance();
-        botInstance.setStatusCode(status);
-        genericCqnService.updateBotInstance(botInstance);
+        String botInstanceId = bot.getBotInstance().getId();
+        genericCqnService.updateBotInstanceStatus(botInstanceId, status);
     }
 
     private void updateBotInstanceResult(Bot bot, String result) {
-        BotInstances botInstance = bot.getBotInstance();
-        botInstance.setResult(result);
-        genericCqnService.updateBotInstance(botInstance);
+        String botInstanceId = bot.getBotInstance().getId();
+        genericCqnService.updateBotInstanceResult(botInstanceId, result);
     }
 
     private String extractIdFromContext(BotInstancesChatCompletionContext context) {
