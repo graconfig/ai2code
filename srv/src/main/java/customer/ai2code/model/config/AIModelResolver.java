@@ -12,6 +12,8 @@ import customer.ai2code.model.AIModel;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.impl.EntityService;
 import customer.ai2code.service.impl.GenericCqnService;
+import customer.ai2code.service.impl.SAClaudeAIServiceImpl;
+import customer.ai2code.service.impl.SAPOpenAIServiceImpl;
 
 /**
  * AI模型解析器
@@ -22,8 +24,15 @@ public class AIModelResolver {
 
     private final GenericCqnService genericCqnService;
 
-    public AIModelResolver(GenericCqnService genericCqnService) {
+    private final SAPOpenAIServiceImpl sapOpenAIService;
+    private final SAClaudeAIServiceImpl sapOpenAIClaudeService;
+
+    public AIModelResolver(GenericCqnService genericCqnService 
+            , SAPOpenAIServiceImpl sapOpenAIService
+            , SAClaudeAIServiceImpl sapOpenAIClaudeService) {
         this.genericCqnService = genericCqnService;
+        this.sapOpenAIService = sapOpenAIService;
+        this.sapOpenAIClaudeService = sapOpenAIClaudeService;
     }
 
 
@@ -74,10 +83,26 @@ public class AIModelResolver {
 
     }
 
+    /**
+     * 
+     * @param modelConfigId
+     * @return
+     */
     public AIService resolveAIService(String modelConfigId) {
         
         //TODO: 这里可以根据需要返回一个默认的AIService实例
-        return null;
+        // return null;
+        switch (modelConfigId) {
+            case "SAPAICore-OpenAI":
+                return sapOpenAIService;
+                // break;
+            case "SAPAICore-Claude":
+                return sapOpenAIClaudeService;
+                // break;
+            default:
+                return sapOpenAIService;
+                // break;
+        }
     }
     /**
      * 检查模型名称是否支持
