@@ -1,6 +1,7 @@
 package customer.ai2code.handlers;
 
 import cds.gen.mainservice.BotMessagesAdoptContext;
+import cds.gen.mainservice.BotMessages_;
 import cds.gen.mainservice.MainService_;
 import customer.ai2code.service.BotService;
 
@@ -20,8 +21,8 @@ public class MainServiceBotMessagesAdoptHandler implements EventHandler {
     this.botService = botService;
   }
 
-  @On
+  @On(entity = BotMessages_.CDS_NAME, event = BotMessagesAdoptContext.CDS_NAME)
   public void handleAdopt(BotMessagesAdoptContext context) {
-    botService.adopt(context);
+    context.setResult(botService.adopt(context));
   }
 }

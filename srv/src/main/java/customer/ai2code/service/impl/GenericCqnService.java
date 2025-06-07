@@ -215,6 +215,7 @@ public class GenericCqnService {
                       .replaceAll("\\b\\w", "");
     }
 
+
     // public void insertContextNode(ContextNodes contextNode) {
     //     entityService.insert(mainService, null, ContextNodes_.class, contextNode, true);
     // }
