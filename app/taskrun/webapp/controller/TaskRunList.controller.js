@@ -151,7 +151,7 @@ sap.ui.define([
                 const oContextBinding = oModel.bindContext(sPath);
                 oContextBinding.setParameter("name", oNewTask.name);
                 oContextBinding.setParameter("description", oNewTask.description);
-                oContextBinding.setParameter("type_ID", oNewTask.type_ID);
+                oContextBinding.setParameter("typeId", oNewTask.type_ID);
                 oContextBinding.invoke().then(function (oContext) {
                     MessageToast.show("Task created successfully");
                     this._navToTaskRunDetail(oContextBinding.getBoundContext().getProperty("ID"))
