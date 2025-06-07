@@ -17,6 +17,8 @@ import cds.gen.mainservice.Tasks_;
 import cds.gen.mainservice.ContextNodes;
 import cds.gen.mainservice.ContextNodes_;
 import cds.gen.mainservice.MainService;
+import cds.gen.configservice.PromptTexts;
+import cds.gen.configservice.PromptTexts_;
 
 import java.util.List;
 import java.util.UUID;
@@ -232,4 +234,25 @@ public class GenericCqnService {
     private void insertContextNode(ContextNodes contextNode) {
         entityService.insert(mainService, null, ContextNodes_.class, contextNode, true);
     }
+
+    /**
+     * 根据BotType ID查询所有PromptTexts
+     */
+    public List<PromptTexts> getPromptTextsByBotType(String botTypeId) {
+        var select = Select.from(PromptTexts_.class)
+                .where(p -> p.botType_ID().eq(botTypeId));
+                // .orderBy(p -> p.sequence().asc());
+        return entityService.selectList(configService, select, PromptTexts.class);
+    }
+
+    /**
+     * 根据path查询ContextNode（不指定taskId）
+     */
+    // public ContextNodes getContextNodeByPath(String contextPath) {
+    //     var select = Select.from(ContextNodes_.class)
+    //             .where(c -> c.path().eq(contextPath));
+    //     return entityService.selectSingle(mainService, select, ContextNodes.class,
+    //             "ContextNode not found for path: " + contextPath);
+    // }
+
 }
