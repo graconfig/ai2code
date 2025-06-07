@@ -106,7 +106,7 @@
         },
         {
           "name": "RouteTaskRunDetail",
-          "pattern": "Tasks({taskRunId}):?query:",
+          "pattern": "Tasks('{taskRunId}'):?query:",
           "target": [
             "TargetTaskRunDetail"
           ]

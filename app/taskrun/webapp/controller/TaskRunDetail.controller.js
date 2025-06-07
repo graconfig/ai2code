@@ -15,7 +15,7 @@ sap.ui.define([
                     const oArgs = oEvent.getParameter("arguments");
                     if (oArgs && oArgs.taskRunId) {
                         this.getView().bindElement({
-                            path: "/Tasks(" + oArgs.taskRunId + ")" 
+                            path: "/Tasks('" + oArgs.taskRunId + "')" 
                         })
                     }
                 }.bind(this));
