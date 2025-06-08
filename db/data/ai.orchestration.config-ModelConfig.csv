@@ -1,1 +1,9 @@
 ID,name,provider,modelName,parameters,createdAt,createdBy,modifiedAt,modifiedBy
+5e256932-15b9-4145-ba49-966216ea9cf6,chatGPT4o,SAPAICore-OpenAI,gpt-4o,,,,,
+63536bff-7cb8-46af-83c6-9129eba85937,chatGPT4.1,SAPAICore-OpenAI,gpt-4.1,,,,,
+9789e6f9-c9b9-4c08-bba6-1e28af4af69d,claude-3.7-sonnet,SAPAICore-Claude,claude-3.7-sonnet,,,,,
+2e421e12-b543-4cb4-866d-9dece4c570f2,claude-4-sonnet,SAPAICore-Claude,claude-4-sonnet,,,,,
+9cbce215-3fb1-41e7-b331-06c515835bf2,gemini-2.5-pro,SAPAICore-Google,gemini-2.5-pro,,,,,
+ed5eebb8-4d34-49ac-9810-563f6ee9790e,text-embedding-3-large,SAPAICore-OpenAI,text-embedding-3-large,,,,,
+cca919bf-3afa-481d-beb2-d546fd2dc748,text-embedding-3-small,SAPAICore-OpenAI,text-embedding-3-small,,,,,
+e5d6866c-4611-4413-9fc5-47179f688952,OpenRouter-GPT-4O,OpenRouter,GPT-4O,,,,,

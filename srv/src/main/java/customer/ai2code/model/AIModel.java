@@ -4,6 +4,7 @@ import cds.gen.configservice.ModelConfigs;
 // import cds.gen.configservice.ModelConfigs;
 // import cds.gen.configservice.ModelConfigs;
 import customer.ai2code.model.config.AIServiceConfig;
+import customer.ai2code.service.AIService;
 
 public interface AIModel {
     // public ModelConfigs modelConfigs;
@@ -14,4 +15,6 @@ public interface AIModel {
     public AIServiceConfig parseModelConfigs();
 
     public ModelConfigs getModelConfigs();
+
+    public AIService getAIService();
 }

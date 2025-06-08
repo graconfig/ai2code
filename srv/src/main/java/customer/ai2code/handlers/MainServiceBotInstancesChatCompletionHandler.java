@@ -20,7 +20,7 @@ public class MainServiceBotInstancesChatCompletionHandler implements EventHandle
       this.botService = botService;
   }
 
-  @On
+  @On(event="chatCompletion")
   public void handleChatCompletion(BotInstancesChatCompletionContext context) {
     // Your code goes here
     botService.chat(context);

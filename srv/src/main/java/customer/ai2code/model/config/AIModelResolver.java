@@ -67,8 +67,8 @@ public class AIModelResolver {
         // TODO: 这里可以根据需要返回一个默认的AIModel实例
         
         // 1. 从配置服务中获取模型配置
-        ModelConfigs modelConfig = 
-            genericCqnService.getModelConfig(modelConfigId);
+        // ModelConfigs modelConfig = 
+        //     genericCqnService.getModelConfig(modelConfigId);
 
         // switch (modelConfig.getProvider()) {
         //     case 'SAPAICore-OpenAI':

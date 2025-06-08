@@ -1,10 +1,14 @@
 package customer.ai2code.model;
 
+import java.util.List;
+
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import cds.gen.configservice.BotTypes;
+import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
+import cds.gen.mainservice.BotMessages;
 import customer.ai2code.service.AIService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +22,7 @@ public class ChatBot implements Bot {
     private BotInstances botInstance;
     private AIModel aiModel;
     private BotTypes botType;
+
     @Override
     public BotInstancesExecuteContext.ReturnType execute() {
         // 实现聊天机器人的执行逻辑
@@ -56,31 +61,33 @@ public class ChatBot implements Bot {
 
     @Override
     public String chat(String content) {
-        //1. 根据AIModel类型，获取到不同AIService服务
-        // AIService aiService = aiModel.getAIService();
+        String response;
 
+        AIService aiService = aiModel.getAIService();
+        List<BotMessages> botMessages = botInstance.getMessages();
+        List<PromptTexts> promptTexts = botType.getPrompts();
 
-        
-        // 真正调用chat服务
-        // aiService.chatWithAI(null, null, content, aiModel);
-
-        // 3. 将用户和AI的聊天内容存储到表中
-
+        // 若第一次对话，使用【提示词promptTexts+用户对话内容content】返回应答
+        if (botMessages == null || botMessages.size() == 0) {
+            response = aiService.chatWithAI(null, promptTexts, content, aiModel);
+        } else {
+            response = aiService.chatWithAI(botMessages, null, content, aiModel);
+        }
 
         // 实现聊天逻辑
-        return "Chat response for: " + content; // 返回聊天响应内容
+        return "Chat response for: " + response; // 返回聊天响应内容
     }
 
     // @Override
     // public BotInstances getBotInstance() {
-    //     // 返回当前Bot实例信息
-    //     return null; // 需要实现具体的返回逻辑
+    // // 返回当前Bot实例信息
+    // return null; // 需要实现具体的返回逻辑
     // }
 
     // @Override
     // public AIModel getAIModel() {
-    //     // TODO Auto-generated method stub
-    //     throw new UnsupportedOperationException("Unimplemented method 'getAIModel'");
+    // // TODO Auto-generated method stub
+    // throw new UnsupportedOperationException("Unimplemented method 'getAIModel'");
     // }
 
 }

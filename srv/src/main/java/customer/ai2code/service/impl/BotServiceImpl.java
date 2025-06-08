@@ -7,6 +7,7 @@ import cds.gen.mainservice.BotInstancesExecuteContext;
 import cds.gen.mainservice.BotInstancesChatCompletionContext;
 import cds.gen.mainservice.MainService;
 import cds.gen.configservice.ConfigService;
+import cds.gen.ai.orchestration.BotMessage;
 import cds.gen.configservice.BotTypes;
 import cds.gen.configservice.BotTypes_;
 import customer.ai2code.model.AIModel;
@@ -20,10 +21,16 @@ import customer.ai2code.service.ContextService;
 
 // import customer.ai2code.service.AIService;
 import com.sap.cds.ql.Select;
+import com.sap.cds.ql.cqn.AnalysisResult;
+import com.sap.cds.ql.cqn.CqnAnalyzer;
+import com.sap.cds.ql.cqn.CqnStatement;
+import com.sap.cds.ql.cqn.ResolvedRefItem;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 import java.util.Map;
 
 import cds.gen.mainservice.BotMessages;
@@ -55,11 +62,13 @@ public class BotServiceImpl implements BotService {
             return cachedBot;
         }
 
-        // 从数据库查询BotInstance
+        // 从数据库查询BotInstance及其所有BotMessage
         BotInstances botInstance = genericCqnService.getBotInstanceById(botInstanceId);
+        botInstance.setMessages(genericCqnService.getBotMessagesByBotInstance(botInstanceId));
 
-        // 查询关联的BotType
+        // 查询关联的BotType及其所有PromptText
         BotTypes botType = genericCqnService.getBotTypeById(botInstance.getTypeId());
+        botType.setPrompts(genericCqnService.getPromptTextsByBotType(botType.getId()));
 
         // 获取AI模型
         AIModel aiModel = aiModelResolver.resolveAIModel(botType.getModelId());
@@ -98,12 +107,6 @@ public class BotServiceImpl implements BotService {
         updateBotInstanceStatus(bot, "R");
 
         try {
-
-        // 2. 判断是否是第一次调用
-        // 2.1 第一次调用 获取Prompt
-        // 2.2 如果不是第一次调用，获取历史消息
-            
-
             String response;
             if (bot instanceof ChatBot) {
                 response = ((ChatBot) bot).chat(content);
@@ -112,13 +115,13 @@ public class BotServiceImpl implements BotService {
             }
 
             // 更新状态为SUCCESS
-            // updateBotInstanceStatus(bot, "S");
+            updateBotInstanceStatus(bot, "S");
 
-
-                  // 3. 将用户和AI的聊天内容存储到表中
-        
+            // 3. 将用户和AI的聊天内容存储到表中
 
             // 将content和response更新到BotMessages中
+            genericCqnService.createAndInsertBotMessage("assistant", content, null, botInstanceId);
+            genericCqnService.createAndInsertBotMessage("assistant", response, null, botInstanceId);
 
             return response;
 
@@ -209,8 +212,10 @@ public class BotServiceImpl implements BotService {
     }
 
     private String extractIdFromContext(BotInstancesChatCompletionContext context) {
-        // 从CQN查询中提取ID，需要解析CqnSelect
-        return context.getCqn().ref().segments().get(0).id();
+        // 使用CqnAnalyzer类，从CQN查询中提取ID，需要解析CqnSelect
+        CqnAnalyzer cqnAnalyzer = CqnAnalyzer.create(context.getModel());
+        AnalysisResult result = cqnAnalyzer.analyze(context.getCqn().ref());
+        return result.rootKeys().get("ID").toString();
     }
 
     private String extractIdFromContext(BotInstancesExecuteContext context) {
@@ -224,7 +229,8 @@ public class BotServiceImpl implements BotService {
 
         // 再通过MessageId 获取BotInstanceId
 
-        // adopt(context.getBotInstanceId(), context.getCqn().ref().segments().get(0).id());
+        // adopt(context.getBotInstanceId(),
+        // context.getCqn().ref().segments().get(0).id());
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'adopt'");
 
@@ -236,13 +242,14 @@ public class BotServiceImpl implements BotService {
         // TODO Auto-generated method stub
 
         // 根据MessageId , 获取 BotMessages表条目
-        
+
         // Bot bot = getCurrentBot(botInstanceId);
 
         // BotMessages message = bot.getMessageById(messageId);
 
         // ContextService contextService = bot.getContextService();
-        // contextService.upsertContext(botInstanceId, botInstanceId, message.getMessage());
+        // contextService.upsertContext(botInstanceId, botInstanceId,
+        // message.getMessage());
 
         // 把当前Message 存到ContextNode表中
         throw new UnsupportedOperationException("Unimplemented method 'adopt'");
