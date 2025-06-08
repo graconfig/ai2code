@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SAPAICoreOpenAIGPT4O implements AIModel {
+public class SAPAICoreOpenAIgpt4o implements AIModel {
 
     private ModelConfigs modelConfigs;
 

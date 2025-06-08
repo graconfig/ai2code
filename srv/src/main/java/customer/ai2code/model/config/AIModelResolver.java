@@ -3,7 +3,7 @@ package customer.ai2code.model.config;
 import org.springframework.stereotype.Service;
 import cds.gen.configservice.ModelConfigs;
 import customer.ai2code.model.AIModel;
-import customer.ai2code.model.SAPAICoreOpenAIGPT4O;
+import customer.ai2code.model.SAPAICoreOpenAIgpt4o;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.impl.GenericCqnService;
 import customer.ai2code.service.impl.SAClaudeAIServiceImpl;
@@ -72,7 +72,7 @@ public class AIModelResolver {
             case "SAPAICore-OpenAI":
                 switch (modelConfigs.getModelName()) {
                     case "gpt-4o":
-                        return new SAPAICoreOpenAIGPT4O(modelConfigs);
+                        return new SAPAICoreOpenAIgpt4o(modelConfigs);
                     default:
                         break;
                 }    
