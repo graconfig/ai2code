@@ -105,8 +105,8 @@ public class BotServiceImpl implements BotService {
         // updateBotInstanceStatus(bot, "R");
 
         try {
-
-            // 2. 判断是否是第一次调用
+            
+            // 2. 判断是否是第一次调用(ChatBot已经添加了这些逻辑)
             // 2.1 第一次调用 获取Prompt
             // 2.2 如果不是第一次调用，获取历史消息
             // Bot内部已经处理这些逻辑
@@ -123,7 +123,7 @@ public class BotServiceImpl implements BotService {
 
             // 3. 将用户和AI的聊天内容存储到表中
             BotMessages userMessage = genericCqnService.createAndInsertBotMessage(botInstanceId, content, "user");
-            BotMessages botMessage = genericCqnService.createAndInsertBotMessage(botInstanceId, response, "bot");
+            BotMessages botMessage = genericCqnService.createAndInsertBotMessage(botInstanceId, response, "assistant");
 
             return botMessage;
 
