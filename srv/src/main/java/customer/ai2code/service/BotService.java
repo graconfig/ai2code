@@ -33,13 +33,13 @@ public interface BotService {
     public ContextNodes adopt(String botInstanceId, String messageId);
 
 
-    /**
-     * 根据BotInstance ID获取主任务ID
-     * 通过任务层级关系向上查找，直到找到isMain=true的任务
-     * 
-     * @param botInstanceId Bot实例ID
-     * @return 主任务ID
-     * @throws IllegalStateException 如果找不到主任务或数据不一致
-     */
-    public String getMainTaskId(String botInstanceId);
+    // /**
+    //  * 根据BotInstance ID获取主任务ID
+    //  * 通过任务层级关系向上查找，直到找到isMain=true的任务
+    //  * 
+    //  * @param botInstanceId Bot实例ID
+    //  * @return 主任务ID
+    //  * @throws IllegalStateException 如果找不到主任务或数据不一致
+    //  */
+    // public String getMainTaskId(String botInstanceId);
 }
