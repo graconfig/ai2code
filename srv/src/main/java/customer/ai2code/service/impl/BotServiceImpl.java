@@ -18,6 +18,8 @@ import customer.ai2code.model.CodingBot;
 import customer.ai2code.service.BotService;
 import customer.ai2code.service.ContextService;
 
+import customer.ai2code.service.ContextService;
+
 // import customer.ai2code.service.AIService;
 import com.sap.cds.ql.Select;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
+
+import cds.gen.mainservice.BotMessages;
 
 import cds.gen.mainservice.BotMessages;
 
@@ -86,11 +90,14 @@ public class BotServiceImpl implements BotService {
         String botInstanceId = extractIdFromContext(context);
 
         // context.setResult();
+
+        // context.setResult();
         return chat(botInstanceId, context.getContent());
     }
 
     @Override
     public String chat(String botInstanceId, String content) {
+
 
         Bot bot = getCurrentBot(botInstanceId);
 
@@ -114,6 +121,14 @@ public class BotServiceImpl implements BotService {
             // updateBotInstanceStatus(bot, "S");
 
             // 3. 将用户和AI的聊天内容存储到表中
+
+
+                  // 3. 将用户和AI的聊天内容存储到表中
+        
+
+
+                  // 3. 将用户和AI的聊天内容存储到表中
+        
 
             // 将content和response更新到BotMessages中
 
@@ -249,6 +264,7 @@ public class BotServiceImpl implements BotService {
 
         // 4. 更新Bot实例(持久化变更)
         genericCqnService.updateBotInstance(botInstance);
+
 
     }
 
