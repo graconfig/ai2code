@@ -2,10 +2,13 @@ package customer.ai2code.service.impl;
 
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstances_;
+import cds.gen.mainservice.BotMessages;
 import cds.gen.mainservice.BotMessagesAdoptContext;
+import cds.gen.mainservice.ContextNodes;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 import cds.gen.mainservice.BotInstancesChatCompletionContext;
 import cds.gen.mainservice.MainService;
+import cds.gen.mainservice.Tasks;
 import cds.gen.configservice.ConfigService;
 import cds.gen.configservice.BotTypes;
 import cds.gen.configservice.BotTypes_;
@@ -15,18 +18,16 @@ import customer.ai2code.model.ChatBot;
 import customer.ai2code.model.FunctionCallingBot;
 import customer.ai2code.model.config.AIModelResolver;
 import customer.ai2code.model.CodingBot;
+import customer.ai2code.model.tree.TaskBotNode;
 import customer.ai2code.service.BotService;
 import customer.ai2code.service.ContextService;
 
 import customer.ai2code.service.ContextService;
 
-// import customer.ai2code.service.AIService;
-import com.sap.cds.ql.Select;
+import customer.ai2code.service.PromptService;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Map;
 
 import cds.gen.mainservice.BotMessages;
 
@@ -37,24 +38,27 @@ public class BotServiceImpl implements BotService {
 
     private final AIModelResolver aiModelResolver;
     private final GenericCqnService genericCqnService;
-    // private final AIService aiService;
+    private final TaskBotCacheManager cacheManager;
+    private final PromptService promptService;
 
-    // 全局Bot缓存链表
-    private final Map<String, Bot> botCache = new ConcurrentHashMap<>();
+    // 全局Bot缓存链表 - 保留作为备用，主要使用TaskBotCacheManager
+    // private final Map<String, Bot> botCache = new ConcurrentHashMap<>();
 
     public BotServiceImpl(
             AIModelResolver aiModelResolver,
-            GenericCqnService genericCqnService) {
-        // AIService aiService) {
+            GenericCqnService genericCqnService,
+            TaskBotCacheManager cacheManager,
+            PromptService promptService) {
         this.aiModelResolver = aiModelResolver;
         this.genericCqnService = genericCqnService;
-        // this.aiService = aiService;
+        this.cacheManager = cacheManager;
+        this.promptService = promptService;
     }
 
     @Override
     public Bot getCurrentBot(String botInstanceId) {
         // 先从缓存中查找
-        Bot cachedBot = botCache.get(botInstanceId);
+        Bot cachedBot = cacheManager.getCachedBot(botInstanceId);
         if (cachedBot != null) {
             return cachedBot;
         }
@@ -71,44 +75,53 @@ public class BotServiceImpl implements BotService {
         // 根据BotType的functionType创建相应的Bot实例
         Bot bot = createBotInstance(botInstance, botType, aiModel);
 
-        // 放入缓存
-        botCache.put(botInstanceId, bot);
+        // 放入缓存 - 使用新的缓存管理器
+        cacheManager.addBotInstanceNode(bot);
 
         return bot;
     }
 
     @Override
     public Bot getCurrentBot(String taskId, int sequence) {
+        // 使用缓存管理器查找
+        TaskBotNode botNode = cacheManager.getBotInstanceByTaskAndSequence(taskId, sequence);
+        if (botNode != null) {
+            return botNode.getBotObject();
+        }
+
         // 根据taskId和sequence查询BotInstance
         BotInstances botInstance = genericCqnService.getBotInstanceByTaskAndSequence(taskId, sequence);
         return getCurrentBot(botInstance.getId());
     }
 
     @Override
-    public String chat(BotInstancesChatCompletionContext context) {
+    public BotMessages chat(BotInstancesChatCompletionContext context) {
         // 从context的CQN中获取ID
         String botInstanceId = extractIdFromContext(context);
 
         // context.setResult();
 
         // context.setResult();
+
+        // context.setResult();
         return chat(botInstanceId, context.getContent());
+
     }
 
     @Override
-    public String chat(String botInstanceId, String content) {
-
+    public BotMessages chat(String botInstanceId, String content) {
 
         Bot bot = getCurrentBot(botInstanceId);
 
-        // 更新状态为RUNNING
-        updateBotInstanceStatus(bot, "R");
+        // // 更新状态为RUNNING
+        // updateBotInstanceStatus(bot, "R");
 
         try {
-
-            // 2. 判断是否是第一次调用
+            
+            // 2. 判断是否是第一次调用(ChatBot已经添加了这些逻辑)
             // 2.1 第一次调用 获取Prompt
             // 2.2 如果不是第一次调用，获取历史消息
+            // Bot内部已经处理这些逻辑
 
             String response;
             if (bot instanceof ChatBot) {
@@ -118,21 +131,13 @@ public class BotServiceImpl implements BotService {
             }
 
             // 更新状态为SUCCESS
-            // updateBotInstanceStatus(bot, "S");
+            updateBotInstanceStatus(bot, "S");
 
             // 3. 将用户和AI的聊天内容存储到表中
+            BotMessages userMessage = genericCqnService.createAndInsertBotMessage(botInstanceId, content, "user");
+            BotMessages botMessage = genericCqnService.createAndInsertBotMessage(botInstanceId, response, "assistant");
 
-
-                  // 3. 将用户和AI的聊天内容存储到表中
-        
-
-
-                  // 3. 将用户和AI的聊天内容存储到表中
-        
-
-            // 将content和response更新到BotMessages中
-
-            return response;
+            return botMessage;
 
         } catch (Exception e) {
             // 更新状态为FAILED
@@ -200,7 +205,7 @@ public class BotServiceImpl implements BotService {
 
         switch (functionTypeCode) {
             case "A": // AI Chat Bot
-                return new ChatBot(botInstance, aiModel, botType);
+                return new ChatBot(botInstance, aiModel, botType, genericCqnService, promptService, aiModelResolver);
             case "F": // Function Calling Bot
                 return new FunctionCallingBot(botInstance, aiModel, botType);
             case "C": // Coding Bot
@@ -211,15 +216,16 @@ public class BotServiceImpl implements BotService {
     }
 
     private void updateBotInstanceStatus(Bot bot, String status) {
-        BotInstances botInstance = bot.getBotInstance();
-        botInstance.setStatusCode(status);
-        genericCqnService.updateBotInstance(botInstance);
+        String botInstanceId = bot.getBotInstance().getId();
+        // 使用缓存管理器更新状态
+        cacheManager.updateBotStatus(botInstanceId, status);
+        // 同时更新数据库
+        genericCqnService.updateBotInstanceStatus(botInstanceId, status);
     }
 
     private void updateBotInstanceResult(Bot bot, String result) {
-        BotInstances botInstance = bot.getBotInstance();
-        botInstance.setResult(result);
-        genericCqnService.updateBotInstance(botInstance);
+        String botInstanceId = bot.getBotInstance().getId();
+        genericCqnService.updateBotInstanceResult(botInstanceId, result);
     }
 
     private String extractIdFromContext(BotInstancesChatCompletionContext context) {
@@ -272,4 +278,50 @@ public class BotServiceImpl implements BotService {
         // 从CQN查询中提取消息ID
         return context.getCqn().ref().segments().get(0).id();
     }
+
+    // @Override
+    // public String getMainTaskId(String botInstanceId) {
+    // // 使用缓存管理器获取主任务ID
+    // String mainTaskId = cacheManager.getMainTaskId(botInstanceId);
+    // if (mainTaskId != null) {
+    // return mainTaskId;
+    // }
+
+    // // 如果缓存中没有，执行原有逻辑
+    // // 1. 通过botInstanceId获取BotInstance
+    // BotInstances botInstance =
+    // genericCqnService.getBotInstanceById(botInstanceId);
+
+    // // 2. 获取当前任务ID
+    // String currentTaskId = botInstance.getTaskId();
+
+    // // 3. 循环查找，直到找到主任务
+    // while (currentTaskId != null) {
+    // Tasks currentTask = genericCqnService.getTaskById(currentTaskId);
+
+    // // 4. 如果是主任务，返回该任务ID
+    // if (currentTask.getIsMain() != null && currentTask.getIsMain()) {
+    // return currentTaskId;
+    // }
+
+    // // 5. 如果不是主任务，通过botInstanceId找到父任务
+    // String parentBotInstanceId = currentTask.getBotInstanceId();
+
+    // if (parentBotInstanceId == null || parentBotInstanceId.isEmpty()) {
+    // // 如果没有父BotInstance，说明这可能就是顶层任务
+    // // 但不是主任务，这种情况可能是数据错误
+    // throw new IllegalStateException("Found top-level task but it's not marked as
+    // main task: " + currentTaskId);
+    // }
+
+    // // 6. 获取父BotInstance的任务ID
+    // BotInstances parentBotInstance =
+    // genericCqnService.getBotInstanceById(parentBotInstanceId);
+    // currentTaskId = parentBotInstance.getTaskId();
+    // }
+
+    // // 如果遍历完还没找到主任务，抛出异常
+    // throw new IllegalStateException("Main task not found for botInstanceId: " +
+    // botInstanceId);
+    // }
 }

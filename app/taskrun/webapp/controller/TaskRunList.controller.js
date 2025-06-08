@@ -147,17 +147,18 @@ sap.ui.define([
                     type_ID: sTaskTypeId == "" ? null : sTaskTypeId,
                 };
                 const oModel = this.getOwnerComponent().getModel();
-                const oListBinding = oModel.bindList("/Tasks", oNewTask);
-                const oContext = oListBinding.create(oNewTask);
-                oContext.created().then(function () {
-                    // Task created successfully
-                    oModel.refresh();
-                    this._navToTaskRunDetail(oContext.getProperty("ID"));
+                const sPath = "/createTaskWithBots(...)";
+                const oContextBinding = oModel.bindContext(sPath);
+                oContextBinding.setParameter("name", oNewTask.name);
+                oContextBinding.setParameter("description", oNewTask.description);
+                oContextBinding.setParameter("typeId", oNewTask.type_ID);
+                oContextBinding.invoke().then(function (oContext) {
                     MessageToast.show("Task created successfully");
+                    this._navToTaskRunDetail(oContextBinding.getBoundContext().getProperty("ID"))
+                    oModel.refresh();
                 }.bind(this)).catch(function (oError) {
-                    // Handle error
                     MessageToast.show("Error creating task: " + oError.message);
-                });
+                }.bind(this));
             }
         });
     });

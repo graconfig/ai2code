@@ -11,6 +11,7 @@ service ConfigService {
   entity BotFunctionTypes     as projection on cfg.BotFunctionType;
   //entity RagFunctions         as projection on cfg.RagFunction;
   entity ContextTypes         as projection on cfg.ContextType;
+  entity Languages             as projection on cfg.Languages;
 }
 
 

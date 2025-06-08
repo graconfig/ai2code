@@ -24,8 +24,8 @@ import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotMessages;
 import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.AIModel;
-import customer.ai2code.model.config.AIModelResolver;
-import customer.ai2code.model.config.AIServiceConfig;
+// import customer.ai2code.model.config.AIModelResolver;
+// import customer.ai2code.model.config.AIServiceConfig;
 import customer.ai2code.model.config.SAPAICoreConfig;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.constant.AIConstants;
@@ -40,14 +40,15 @@ public class SAPOpenAIServiceImpl implements AIService {
 
         private final SAPOpenAIChatMessageFactory messageFactory;
         private final AIResponseHandlerFactory responseHandlerFactory;
-        private final AIModelResolver aiModelResolver;
+        // private final AIModelResolver aiModelResolver;
 
         public SAPOpenAIServiceImpl(SAPOpenAIChatMessageFactory messageFactory,
-                        AIResponseHandlerFactory responseHandlerFactory,
-                        AIModelResolver aiModelResolver) {
+                        AIResponseHandlerFactory responseHandlerFactory
+                        // AIModelResolver aiModelResolver
+                        ) {
                 this.messageFactory = messageFactory;
                 this.responseHandlerFactory = responseHandlerFactory;
-                this.aiModelResolver = aiModelResolver;
+                // this.aiModelResolver = aiModelResolver;
         }
 
         public OpenAiClient getAiClientbyModelUsingBTPDestination(@Nonnull SAPAICoreConfig aiCoreServiceKeyConfig,
@@ -103,7 +104,7 @@ public class SAPOpenAIServiceImpl implements AIService {
 
                 OpenAiClient aiClient = getAiClientbyModelUsingBTPDestination(
                                 (SAPAICoreConfig) model.parseModelConfigs(),
-                                aiModelResolver.resolveOpenAiModel(model.getModelName()));
+                                resolveOpenAiModel(model.getModelName()));
                 OpenAiChatCompletionOutput rawResult = aiClient.chatCompletion(params);
                 // return
                 AIResponse aiResponse = responseHandlerFactory.getHandler(AIConstants.AIServiceType.SAPOPENAI)
@@ -146,7 +147,7 @@ public class SAPOpenAIServiceImpl implements AIService {
                 }
                 OpenAiClient aiClient = getAiClientbyModelUsingBTPDestination(
                                 (SAPAICoreConfig) model.parseModelConfigs(),
-                                aiModelResolver.resolveOpenAiModel(model.getModelName()));
+                                resolveOpenAiModel(model.getModelName()));
 
                 SseEmitter emitter = new SseEmitter(20 * 60 * 1000L); // 3 minutes timeout
                 final StringBuilder responseBuilder = new StringBuilder();
@@ -175,15 +176,37 @@ public class SAPOpenAIServiceImpl implements AIService {
 
         @Override
         public <T extends BotExecution> String functionCalling(List<BotMessages> messages, List<PromptTexts> prompts,
-                        Class<T> botExecutionClazz, 
+                        Class<T> botExecutionClazz,
                         AIModel model) {
                 // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'functionCalling' for SAPOpenAIServiceImpl");
+                throw new UnsupportedOperationException(
+                                "Unimplemented method 'functionCalling' for SAPOpenAIServiceImpl");
                 // parse functionCall parameers by clazz and parameters;
                 // OpenAiChatCompletionParameters params = new OpenAiChatCompletionParameters();
-                                
-                
+
                 // return "";
+        }
+
+        // 将模型解析逻辑内联到这里
+        private OpenAiModel resolveOpenAiModel(String modelName) {
+                if (modelName == null || modelName.isEmpty()) {
+                        return OpenAiModel.GPT_35_TURBO;
+                }
+
+                return switch (modelName.toLowerCase()) {
+                        case "gpt-3.5-turbo", "gpt35turbo" -> OpenAiModel.GPT_35_TURBO;
+                        case "gpt-4", "gpt4" -> OpenAiModel.GPT_4;
+                        case "gpt-4o", "gpt4o" -> OpenAiModel.GPT_4O;
+                        case "gpt-4o-mini", "gpt4omini" -> OpenAiModel.GPT_4O_MINI;
+                        case "text-embedding-ada-002" -> OpenAiModel.TEXT_EMBEDDING_ADA_002;
+                        case "text-embedding-3-small" -> OpenAiModel.TEXT_EMBEDDING_3_SMALL;
+                        case "text-embedding-3-large" -> OpenAiModel.TEXT_EMBEDDING_3_LARGE;
+                        default -> {
+                                System.out.println(
+                                                "Unknown model name: " + modelName + ", using default GPT-3.5-turbo");
+                                yield OpenAiModel.GPT_35_TURBO;
+                        }
+                };
         }
 
 }

@@ -20,10 +20,9 @@ public class MainServiceCreateTaskWithBotsHandler implements EventHandler {
     this.taskService = taskService;
   }
 
-  @On
+  @On(event = CreateTaskWithBotsContext.CDS_NAME)
   public void handleCreateTaskWithBots(CreateTaskWithBotsContext context) {
     // Your code goes here
-    // context.setCompleted();
-    taskService.createTaskWithBots(context);
+    context.setResult(taskService.createTaskWithBots(context).getTask());
   }
 }

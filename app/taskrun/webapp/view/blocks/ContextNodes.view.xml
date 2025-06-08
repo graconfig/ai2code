@@ -7,7 +7,7 @@
             <OverflowToolbar>
                 <Title text="ContextNodes" level="H2"/>
                 <ToolbarSpacer/>
-                <Button text="Create" press="onCreateContextNodes"/>
+                <!-- <Button text="Create" press="onCreateContextNodes"/> -->
             </OverflowToolbar>
         </headerToolbar>
         <columns>
