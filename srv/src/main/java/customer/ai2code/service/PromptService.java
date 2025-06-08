@@ -3,10 +3,21 @@ package customer.ai2code.service;
 import java.util.List;
 
 import cds.gen.configservice.PromptTexts;
-import cds.gen.mainservice.ContextNodes;
 
 public interface PromptService {
-    public String parse(PromptTexts prompt,ContextNodes contextNode,String contextPath);
+    /**
+     * 
+     * @param prompt     提示词
+     * @param mainTaskId 主任务ID
+     * @return
+     */
+    public String parse(PromptTexts prompt,String mainTaskId);
     
-    public List<PromptTexts> getPrompts(String botTypeId);
+    /**
+     * 
+     * @param botTypeId 
+     * @param mainTaskId
+     * @return
+     */
+    public List<PromptTexts> getPrompts(String botTypeId,String mainTaskId);
 }

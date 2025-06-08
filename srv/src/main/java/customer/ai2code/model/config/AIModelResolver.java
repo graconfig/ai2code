@@ -1,16 +1,10 @@
 package customer.ai2code.model.config;
 
 import org.springframework.stereotype.Service;
-
-import com.sap.ai.sdk.foundationmodels.openai.OpenAiModel;
-import com.sap.cds.ql.Select;
-import com.sap.cds.ql.cqn.CqnSelect;
-
 import cds.gen.configservice.ModelConfigs;
-import cds.gen.configservice.ModelConfigs_;
 import customer.ai2code.model.AIModel;
+import customer.ai2code.model.SAPAICoreOpenAIgpt4o;
 import customer.ai2code.service.AIService;
-import customer.ai2code.service.impl.EntityService;
 import customer.ai2code.service.impl.GenericCqnService;
 import customer.ai2code.service.impl.SAClaudeAIServiceImpl;
 import customer.ai2code.service.impl.SAPOpenAIServiceImpl;
@@ -63,25 +57,32 @@ public class AIModelResolver {
     
 
     public AIModel resolveAIModel(String modelConfigId){
-        // return new AIModel(resolveOpenAiModel(null))
-        // TODO: 这里可以根据需要返回一个默认的AIModel实例
-        
         // 1. 从配置服务中获取模型配置
-        // ModelConfigs modelConfig = 
-        //     genericCqnService.getModelConfig(modelConfigId);
+        ModelConfigs modelConfig = 
+            genericCqnService.getModelConfig(modelConfigId);
+        
+        return resolveAIModel(modelConfig);
+    }
 
-        // switch (modelConfig.getProvider()) {
-        //     case 'SAPAICore-OpenAI':
-                 
+    public AIModel resolveAIModel(ModelConfigs modelConfigs){
+        // 2. 根据模型配置的提供者和模型名称创建对应的AIModel实例
+        switch (modelConfigs.getProvider()) {
+            case "SAPAICore-OpenAI":
+                switch (modelConfigs.getModelName()) {
+                    case "gpt-4o":
+                        return new SAPAICoreOpenAIgpt4o(modelConfigs);
+                    default:
+                        break;
+                }    
+                break;
+            default:
+                break;
+        }
 
-        //         break;
-        //     default:
-        //         break;
-        // }
 
         return null;
-
     }
+
 
     /**
      * 
@@ -90,20 +91,24 @@ public class AIModelResolver {
      */
     public AIService resolveAIService(String modelConfigId) {
         
-        //TODO: 这里可以根据需要返回一个默认的AIService实例
-        // return null;
-        switch (modelConfigId) {
+        // 1. 从配置服务中获取模型配置
+        ModelConfigs modelConfigs = 
+            genericCqnService.getModelConfig(modelConfigId);
+        return resolveAIService(modelConfigs);
+    }
+
+    public AIService resolveAIService(ModelConfigs modelConfigs) {
+        // 2. 根据模型配置的提供者和模型名称创建对应的AIService实例
+        switch (modelConfigs.getProvider()) {
             case "SAPAICore-OpenAI":
                 return sapOpenAIService;
-                // break;
             case "SAPAICore-Claude":
                 return sapClaudeAIService;
-                // break;
             default:
-                return sapOpenAIService;
-                // break;
+                return sapOpenAIService; // 默认返回OpenAI服务
         }
     }
+
     // /**
     //  * 检查模型名称是否支持
     //  */

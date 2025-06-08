@@ -1,6 +1,7 @@
 package customer.ai2code.handlers;
 
 import cds.gen.mainservice.BotInstancesChatCompletionContext;
+import cds.gen.mainservice.BotInstances_;
 import cds.gen.mainservice.MainService_;
 import customer.ai2code.service.BotService;
 
@@ -17,13 +18,13 @@ public class MainServiceBotInstancesChatCompletionHandler implements EventHandle
 
   public MainServiceBotInstancesChatCompletionHandler(BotService botService) {
     // Constructor can be used for dependency injection if needed
-      this.botService = botService;
+    this.botService = botService;
   }
 
-  @On(event="chatCompletion")
+  @On(entity = BotInstances_.CDS_NAME, event = BotInstancesChatCompletionContext.CDS_NAME)
   public void handleChatCompletion(BotInstancesChatCompletionContext context) {
     // Your code goes here
-    botService.chat(context);
+    context.setResult(botService.chat(context));
     // context.setCompleted();
     // context.setResult();
   }

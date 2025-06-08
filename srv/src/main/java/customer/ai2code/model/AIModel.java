@@ -15,6 +15,4 @@ public interface AIModel {
     public AIServiceConfig parseModelConfigs();
 
     public ModelConfigs getModelConfigs();
-
-    public AIService getAIService();
 }

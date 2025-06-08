@@ -1,1 +1,123 @@
 /* Enter your custom styles here */
+.sapUiSizeCompact .sapFDynamicPage.chatPage .sapFDynamicPageFooter .sapFDynamicPageActualFooterControl {
+    height: 6rem;
+}
+
+.chatPage .sapMInputBaseContentWrapper,
+.chatPage .sapMFeedIn:not(.sapMFeedInDisabled) .sapMFeedInContainer,
+.chatPage .sapMFeedIn {
+    background: transparent !important;
+}
+
+.sapMMessageListItem {
+    overflow: hidden;
+}
+
+.sapMMessageListItem .sapMMessageListItemInfo .sapMText {
+    font-size: .75rem;
+    line-height: 2.5rem;
+    color: #cdcdcd !important;
+    margin-right: 0.5rem !important;
+}
+
+.sapMMessageListItem .customMessageListItemRightAlign {
+    float: right;
+}
+
+.sapMMessageListItem .sapFAvatar {
+    float: left;
+    height: 2.5rem;
+    width: 1.2rem;
+    margin-right: 0.5rem !important;
+    overflow: visible;
+    margin: 0rem;
+    color: #cdcdcd !important;
+}
+
+.chatPage .sapMOTB.sapMIBar {
+    height: auto !important;
+    min-height: 6rem;
+}
+
+.dialogToRight{
+    right: 0 !important;
+    left: auto !important;
+}
+
+
+
+/** * CSS for Markdown */
+
+.markdownDialog .sapMMessageListItemText {
+    font-family: var(--sapFontFamily);
+    line-height: 1.4;
+}
+
+/***   CSS for Markdown Code Preview Section
+*/
+/* .markdownDialog .sapMMessageListItemText pre {
+    background-color: var(--sapList_Background);
+    padding: 1rem;
+    border-radius: 0.25rem;
+    overflow-x: auto;
+} */
+
+/***   CSS for Markdown Code Preview Content
+*/
+/* .markdownDialog .sapMMessageListItemText code {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: var(--sapList_Background);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+} */
+
+.markdownDialog .sapMMessageListItemText p {
+    margin: 0.5rem 0;
+}
+
+.markdownDialog .sapMMessageListItemText ul,
+.markdownDialog .sapMMessageListItemText ol {
+    padding-left: 2rem;
+    margin: 0.5rem 0;
+}
+
+
+/* .chatPage .sapMFeedIn {
+    padding: 0.5rem;
+    width: 100%;
+} */
+.customMessageListItem .sapMBusyIndicator {
+    margin: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.customMessageListItem .sapMBusyIndicator .sapMBusyIndicatorTextContainer {
+    margin-left: 0.5rem;
+    font-style: italic;
+    color: var(--sapContent_LabelColor);
+}
+
+
+/**
+*   Css for chat page message list item 
+*/
+.customMessageListItem {
+    border-radius: 0.75rem;
+    background-color: var(--sapList_Background);
+    box-shadow: var(--sapContent_Shadow0);
+}
+
+/* 区分用户和AI消息的样式 */
+.customMessageListItem[data-sender="user"] {
+    margin-right: 0rem !important;
+    background-color: var(--sapButton_Selected_Background);
+    width: 70%;
+    justify-self: right;
+}
+
+.customMessageListItem[data-sender="assistant"] {
+    margin-left: 0rem !important;
+    background-color: var(--sapList_Background);
+}
+

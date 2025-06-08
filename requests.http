@@ -1,5 +1,5 @@
 ### 与机器人聊天
-POST http://localhost:8080/odata/v4/MainService/BotInstances(ID=19ed1a3d-2054-4345-bc73-42502aedc648,IsActiveEntity=true)/MainService.chatCompletion
+POST http://localhost:8080/odata/v4/MainService/BotInstances(19ed1a3d-2054-4345-bc73-42502aedc648)/MainService.chatCompletion
 Content-Type: application/json
 
 {

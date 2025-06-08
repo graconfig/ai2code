@@ -19,7 +19,7 @@ service MainService {
 
     entity BotMessages  as projection on db.BotMessage
         actions {
-            action adopt() returns array of ContextNodes;
+            action adopt() returns ContextNodes;
         }
 
     // Unbound actions
