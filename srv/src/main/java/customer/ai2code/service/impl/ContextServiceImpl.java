@@ -5,12 +5,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.sap.cds.ql.Select;
-import com.sap.cds.ql.Update;
-import com.sap.cds.ql.Insert;
 
 import cds.gen.mainservice.ContextNodes;
-import cds.gen.mainservice.ContextNodes_;
 import customer.ai2code.service.ContextService;
 
 @Service
@@ -30,13 +26,14 @@ public class ContextServiceImpl implements ContextService {
 
     @Override
     public String getContextFullPath(String subPathPrefix, String subPath) {
-        if (subPathPrefix == null || subPathPrefix.isEmpty()) {
-            return subPath;
-        }
-        if (subPath == null || subPath.isEmpty()) {
-            return subPathPrefix;
-        }
-        return subPathPrefix + "." + subPath;
+        // if (subPathPrefix == null || subPathPrefix.isEmpty()) {
+        //     return subPath;
+        // }
+        // if (subPath == null || subPath.isEmpty()) {
+        //     return subPathPrefix;
+        // }
+        // return subPathPrefix + "." + subPath;
+        throw new UnsupportedOperationException("No need to implement 'getContextFullPath' in this service");
     }
 
     @Override
