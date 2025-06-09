@@ -49,7 +49,8 @@ public class GenericCqnService {
     public ModelConfigs getModelConfig(String modelConfigId) {
         CqnSelect select = Select.from(ModelConfigs_.class)
                 .where(m -> m.ID().eq(modelConfigId));
-        return entityService.selectSingle(null, select, null, modelConfigId);
+        return entityService.selectSingle(configService, select, ModelConfigs.class,
+                "ModelConfig not found: " + modelConfigId);
     }
 
     public BotInstances getBotInstanceById(String botInstanceId) {
@@ -378,6 +379,69 @@ public class GenericCqnService {
                 .where(b -> b.botInstance_ID().eq(botInstanceId))
                 .orderBy(b -> b.createdAt().asc());
         return entityService.selectList(mainService, select, BotMessages.class);
+    }
+
+    /**
+     * 根据MessageID查询关联的BotInstance ID
+     */
+    public String getBotInstanceIdByMessageId(String messageId) {
+        CqnSelect select = Select.from(BotMessages_.class)
+                .columns(m -> m.botInstance_ID())
+                .where(m -> m.ID().eq(messageId));
+
+        BotMessages message = entityService.selectSingle(
+                mainService,
+                select,
+                BotMessages.class,
+                "Message not found: " + messageId // 添加错误消息参数
+        );
+
+        return message != null ? message.getBotInstanceId() : null;
+    }
+
+    /**
+     * 根据BotInstance ID和MessageID获取Message
+     */
+    public BotMessages getMessageById(String botInstanceId, String messageId) {
+        CqnSelect select = Select.from(BotMessages_.class)
+                .where(m -> m.ID().eq(messageId)
+                        .and(m.botInstance_ID().eq(botInstanceId)));
+        return entityService.selectSingle(
+                mainService,
+                select,
+                BotMessages.class,
+                String.format("Message %s not found in bot instance %s", messageId, botInstanceId));
+    }
+
+    /**
+     * 根据BotInstance ID获取输出上下文路径
+     */
+    public String getOutputContextPathByBotInstanceId(String botInstanceId) {
+        // 1. 获取BotInstance
+        BotInstances botInstance = getBotInstanceById(botInstanceId);
+
+        // 2. 获取关联的BotType
+        BotTypes botType = getBotTypeById(botInstance.getTypeId());
+
+        // 3. 返回配置的输出路径
+        return botType.getOutputContextPath();
+    }
+
+    public String getTaskIdByBotInstanceId(String botInstanceId) {
+        // 构建查询语句
+        CqnSelect select = Select.from(BotInstances_.class)
+                .columns(b -> b.task_ID())
+                .where(b -> b.ID().eq(botInstanceId));
+
+        // 查询结果列表
+        List<BotInstances> instances = entityService.selectList(mainService, select, BotInstances.class);
+
+        // 检查并返回结果
+        if (instances.isEmpty() || instances.get(0).getTaskId() == null) {
+            throw new IllegalStateException("No taskId found for botInstanceId: " + botInstanceId);
+        }
+
+        return instances.get(0).getTaskId();
     }
 
 }

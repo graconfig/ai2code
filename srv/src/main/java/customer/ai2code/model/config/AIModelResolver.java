@@ -8,6 +8,8 @@ import customer.ai2code.service.AIService;
 import customer.ai2code.service.impl.GenericCqnService;
 import customer.ai2code.service.impl.SAClaudeAIServiceImpl;
 import customer.ai2code.service.impl.SAPOpenAIServiceImpl;
+import customer.ai2code.service.impl.SAClaudeAIServiceImpl;
+import customer.ai2code.service.impl.SAPOpenAIServiceImpl;
 
 /**
  * AI模型解析器
@@ -57,13 +59,11 @@ public class AIModelResolver {
     
 
     public AIModel resolveAIModel(String modelConfigId){
-        
         // 1. 从配置服务中获取模型配置
         ModelConfigs modelConfig = 
             genericCqnService.getModelConfig(modelConfigId);
         
         return resolveAIModel(modelConfig);
-
     }
 
     public AIModel resolveAIModel(ModelConfigs modelConfigs){

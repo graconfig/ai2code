@@ -10,6 +10,7 @@ import cds.gen.mainservice.BotInstancesChatCompletionContext;
 import cds.gen.mainservice.MainService;
 import cds.gen.mainservice.Tasks;
 import cds.gen.configservice.ConfigService;
+import cds.gen.ai.orchestration.BotMessage;
 import cds.gen.configservice.BotTypes;
 import cds.gen.configservice.BotTypes_;
 import customer.ai2code.model.AIModel;
@@ -20,10 +21,39 @@ import customer.ai2code.model.config.AIModelResolver;
 import customer.ai2code.model.CodingBot;
 import customer.ai2code.model.tree.TaskBotNode;
 import customer.ai2code.service.BotService;
+import customer.ai2code.service.ContextService;
+
+import customer.ai2code.service.ContextService;
+
 import customer.ai2code.service.PromptService;
+
+// import customer.ai2code.service.AIService;
+import com.sap.cds.ql.Select;
+import com.sap.cds.ql.cqn.AnalysisResult;
+import com.sap.cds.ql.cqn.CqnAnalyzer;
+import com.sap.cds.ql.cqn.CqnStatement;
+import com.sap.cds.ql.cqn.ResolvedRefItem;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.util.Map;
+
+import cds.gen.mainservice.BotMessages;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import cds.gen.mainservice.BotMessages;
+
+import cds.gen.mainservice.BotMessages;
 
 @Service
 public class BotServiceImpl implements BotService {
@@ -32,7 +62,7 @@ public class BotServiceImpl implements BotService {
     private final GenericCqnService genericCqnService;
     private final TaskBotCacheManager cacheManager;
     private final PromptService promptService;
-
+    private final ContextService contextService;
     // 全局Bot缓存链表 - 保留作为备用，主要使用TaskBotCacheManager
     // private final Map<String, Bot> botCache = new ConcurrentHashMap<>();
 
@@ -40,11 +70,13 @@ public class BotServiceImpl implements BotService {
             AIModelResolver aiModelResolver,
             GenericCqnService genericCqnService,
             TaskBotCacheManager cacheManager,
-            PromptService promptService) {
+            PromptService promptService,
+            ContextService contextService) {
         this.aiModelResolver = aiModelResolver;
         this.genericCqnService = genericCqnService;
         this.cacheManager = cacheManager;
         this.promptService = promptService;
+        this.contextService = contextService;
     }
 
     @Override
@@ -92,6 +124,10 @@ public class BotServiceImpl implements BotService {
         String botInstanceId = extractIdFromContext(context);
 
         // context.setResult();
+
+        // context.setResult();
+
+        // context.setResult();
         return chat(botInstanceId, context.getContent());
 
     }
@@ -101,16 +137,10 @@ public class BotServiceImpl implements BotService {
 
         Bot bot = getCurrentBot(botInstanceId);
 
-        // // 更新状态为RUNNING
+        // 更新状态为RUNNING
         // updateBotInstanceStatus(bot, "R");
 
         try {
-            
-            // 2. 判断是否是第一次调用(ChatBot已经添加了这些逻辑)
-            // 2.1 第一次调用 获取Prompt
-            // 2.2 如果不是第一次调用，获取历史消息
-            // Bot内部已经处理这些逻辑
-
             String response;
             if (bot instanceof ChatBot) {
                 response = ((ChatBot) bot).chat(content);
@@ -217,8 +247,10 @@ public class BotServiceImpl implements BotService {
     }
 
     private String extractIdFromContext(BotInstancesChatCompletionContext context) {
-        // 从CQN查询中提取ID，需要解析CqnSelect
-        return context.getCqn().ref().segments().get(0).id();
+        // 使用CqnAnalyzer类，从CQN查询中提取ID，需要解析CqnSelect
+        CqnAnalyzer cqnAnalyzer = CqnAnalyzer.create(context.getModel());
+        AnalysisResult result = cqnAnalyzer.analyze(context.getCqn().ref());
+        return result.rootKeys().get("ID").toString();
     }
 
     private String extractIdFromContext(BotInstancesExecuteContext context) {
@@ -228,34 +260,58 @@ public class BotServiceImpl implements BotService {
 
     @Override
     public ContextNodes adopt(BotMessagesAdoptContext context) {
-        // 通过上下文context获取 MessageId
 
-        // 再通过MessageId 获取BotInstanceId
+        // 1.通过上下文context获取 MessageId,botInstanceId
+        String messageId = extractMessageIdFromContext(context);
 
-        // adopt(context.getBotInstanceId(),
-        // context.getCqn().ref().segments().get(0).id());
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'adopt'");
+        // 2. 查询关联的BotInstance ID
+        String botInstanceId = genericCqnService.getBotInstanceIdByMessageId(messageId);
+        if (botInstanceId == null) {
+            throw new IllegalStateException("No bot instance associated with message: " + messageId);
+        }
 
-        // context.setCompleted();
+        return adopt(botInstanceId, messageId);
+
     }
 
     @Override
     public ContextNodes adopt(String botInstanceId, String messageId) {
-        // TODO Auto-generated method stub
+        // 1. 获取 botInstance 对应的所有 messages
+        List<BotMessages> messages = genericCqnService.getBotMessagesByBotInstanceId(botInstanceId);
+        if (messages == null || messages.isEmpty()) {
+            throw new IllegalStateException("No messages found for botInstance: " + botInstanceId);
+        }
 
-        // 根据MessageId , 获取 BotMessages表条目
+        // 2. 找到指定 messageId 的 message
+        BotMessages botMessage = messages.stream()
+                .filter(msg -> messageId.equals(msg.getId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Message not found: " + messageId));
 
-        // Bot bot = getCurrentBot(botInstanceId);
+        String messageText = botMessage.getMessage();
 
-        // BotMessages message = bot.getMessageById(messageId);
+        // 3. 查询 outputContextPath
+        String outputContextPath = genericCqnService.getOutputContextPathByBotInstanceId(botInstanceId);
+        if (outputContextPath == null || outputContextPath.isBlank()) {
+            throw new IllegalStateException("No outputContextPath configured for botInstance: " + botInstanceId);
+        }
 
-        // ContextService contextService = bot.getContextService();
-        // contextService.upsertContext(botInstanceId, botInstanceId,
-        // message.getMessage());
+        // 4. 查询 taskId
+        String taskId = genericCqnService.getTaskIdByBotInstanceId(botInstanceId);
+        if (taskId == null) {
+            throw new IllegalStateException("No taskId associated with botInstance: " + botInstanceId);
+        }
 
-        // 把当前Message 存到ContextNode表中
-        throw new UnsupportedOperationException("Unimplemented method 'adopt'");
+        // 5. 调用 ContextService 的 upsertContext 方法存储并返回 ContextNodes
+        ContextNodes node = contextService.upsertContext(taskId, outputContextPath, messageText);
+
+        return node;
+
+    }
+
+    private String extractMessageIdFromContext(BotMessagesAdoptContext context) {
+        // 从CQN查询中提取消息ID
+        return context.getCqn().ref().segments().get(0).id();
     }
 
     // @Override
