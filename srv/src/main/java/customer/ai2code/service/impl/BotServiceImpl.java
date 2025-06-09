@@ -82,10 +82,10 @@ public class BotServiceImpl implements BotService {
     @Override
     public Bot getCurrentBot(String botInstanceId) {
         // 先从缓存中查找
-        Bot cachedBot = cacheManager.getCachedBot(botInstanceId);
-        if (cachedBot != null) {
-            return cachedBot;
-        }
+        // Bot cachedBot = cacheManager.getCachedBot(botInstanceId);
+        // if (cachedBot != null) {
+        //     return cachedBot;
+        // }
 
         // 从数据库查询BotInstance
         BotInstances botInstance = genericCqnService.getBotInstanceById(botInstanceId);
@@ -250,7 +250,8 @@ public class BotServiceImpl implements BotService {
         // 使用CqnAnalyzer类，从CQN查询中提取ID，需要解析CqnSelect
         CqnAnalyzer cqnAnalyzer = CqnAnalyzer.create(context.getModel());
         AnalysisResult result = cqnAnalyzer.analyze(context.getCqn().ref());
-        return result.rootKeys().get("ID").toString();
+        // return result.rootKeys().get("ID").toString();
+        return result.targetKeys().get("ID").toString();
     }
 
     private String extractIdFromContext(BotInstancesExecuteContext context) {
@@ -323,7 +324,8 @@ public class BotServiceImpl implements BotService {
         // 使用CqnAnalyzer类，从CQN查询中提取ID，需要解析CqnSelect
         CqnAnalyzer cqnAnalyzer = CqnAnalyzer.create(context.getModel());
         AnalysisResult result = cqnAnalyzer.analyze(context.getCqn().ref());
-        return result.rootKeys().get("message_ID").toString();
+        // return result.rootKeys().get("message_ID").toString();
+        return result.targetKeys().get("ID").toString();
 
         // return context.getCqn().ref().segments().get(0).id();
     }
