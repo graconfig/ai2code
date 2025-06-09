@@ -31,6 +31,8 @@ sap.ui.define(
         onBotInstancePress: function (oEvent) {
           // 这里可以获取被点击行的数据
           const oContext = oEvent.getSource().getBindingContext();
+          this.bindingmodel  = oContext;
+          this.servicemodel = this.getOwnerComponent().getModel();
           if (oContext) {
             const oData = oContext.getObject(); // 你可以在这里处理点击事件，比如弹窗、跳转等
             //MessageToast.show("点击了BotInstance");
@@ -63,17 +65,19 @@ sap.ui.define(
                     return;
                 }
                 const message = event.getParameter("value");
-                const report = this.getView().getBindingContext();
+                const botInstance = this.bindingmodel;
                 const messageList = this._dialog.getContent()[0].getContent()[0].getItems()[0];
                 const binding = messageList.getBinding("items");
 
                 const userModel = this.getView().getModel("user");
 
                 const messageHandler = new NewMessageHandler({
-                    report: report,
+                    botInstance: botInstance,
                     binding: binding,
                     message: message,
-                    sender: "user"
+                    sender: "user",
+                    bindingmodel:this.bindingmodel,
+                    servicemodel:this.servicemodel
                 });
 
                 messageHandler.createMessageAndCompletion();
@@ -82,10 +86,10 @@ sap.ui.define(
             this.onBtnAdoptPress = function (event) {
                 event.getSource().setBusy(true);
                 var context = event.getSource().getBindingContext();
-                var contextBinding = this.getView().getModel().bindContext("ChatService.adopt(...)", context, { $$inheritExpandSelect: true });
+                var contextBinding = this.getView().getModel().bindContext("MainService.adopt(...)", context, { $$inheritExpandSelect: true });
                 contextBinding.invoke().finally(() => {
                     event.getSource().setBusy(false);
-                    // refresh Reports Context
+                    // refresh botInstance
                     this.getView().getBindingContext().refresh();
                 });
             };
@@ -96,7 +100,7 @@ sap.ui.define(
                     // { $$inheritExpandSelect: true }
                 );
                 binding.invoke().then(() => {
-                    // refresh Reports Context
+                    // refresh botInstance 
                     this.getView().getBindingContext().refresh();
                 });
             };
