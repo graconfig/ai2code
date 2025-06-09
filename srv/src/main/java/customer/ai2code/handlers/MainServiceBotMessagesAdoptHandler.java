@@ -10,7 +10,6 @@ import com.sap.cds.services.handler.EventHandler;
 import com.sap.cds.services.handler.annotations.On;
 import com.sap.cds.services.handler.annotations.ServiceName;
 
-import java.util.Collections;
 
 import org.springframework.stereotype.Component;
 
@@ -28,6 +27,6 @@ public class MainServiceBotMessagesAdoptHandler implements EventHandler {
   @On(entity = BotMessages_.CDS_NAME, event = BotMessagesAdoptContext.CDS_NAME)
   public void handleAdopt(BotMessagesAdoptContext context) {
     ContextNodes node = botService.adopt(context);
-    context.setResult(Collections.singletonList(node));
+    context.setResult(node);
   }
 }
