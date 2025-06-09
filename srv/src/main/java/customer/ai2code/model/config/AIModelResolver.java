@@ -3,11 +3,12 @@ package customer.ai2code.model.config;
 import org.springframework.stereotype.Service;
 import cds.gen.configservice.ModelConfigs;
 import customer.ai2code.model.AIModel;
+import customer.ai2code.model.SAPAICoreClaudeAI35Sonnet;
+import customer.ai2code.model.SAPAICoreClaudeAI37Sonnet;
+import customer.ai2code.model.SAPAICoreOpenAIGPT35;
 import customer.ai2code.model.SAPAICoreOpenAIgpt4o;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.impl.GenericCqnService;
-import customer.ai2code.service.impl.SAClaudeAIServiceImpl;
-import customer.ai2code.service.impl.SAPOpenAIServiceImpl;
 import customer.ai2code.service.impl.SAClaudeAIServiceImpl;
 import customer.ai2code.service.impl.SAPOpenAIServiceImpl;
 
@@ -59,23 +60,42 @@ public class AIModelResolver {
     
 
     public AIModel resolveAIModel(String modelConfigId){
+        
         // 1. 从配置服务中获取模型配置
         ModelConfigs modelConfig = 
             genericCqnService.getModelConfig(modelConfigId);
         
         return resolveAIModel(modelConfig);
+
     }
 
     public AIModel resolveAIModel(ModelConfigs modelConfigs){
         // 2. 根据模型配置的提供者和模型名称创建对应的AIModel实例
         switch (modelConfigs.getProvider()) {
-            case "SAPAICore-OpenAI":
+            // case "SAPAICore-OpenAI":
+            //     switch (modelConfigs.getModelName()) {
+            //         case "gpt-4o":
+            //             return new SAPAICoreOpenAIgpt4o(modelConfigs);
+            //         default:
+            //             break;
+            //     }    
+            //     break;
+            case "SAPAICore-OpenAI": // OpenAI系列模型
                 switch (modelConfigs.getModelName()) {
                     case "gpt-4o":
                         return new SAPAICoreOpenAIgpt4o(modelConfigs);
-                    default:
-                        break;
-                }    
+                    case "gpt-3.5-turbo": // 新增GPT-3.5支持
+                        return new SAPAICoreOpenAIGPT35(modelConfigs);
+                }
+                break;
+            case "SAPAICore-Claude": // Claude系列模型
+                switch (modelConfigs.getModelName()) {
+                    case "claude-3.5-sonnet": // 新增Claude 3.5支持
+                        return new SAPAICoreClaudeAI35Sonnet(modelConfigs);
+                    case "claude-3.7-sonnet": // 新增Claude 3.7支持
+                        return new SAPAICoreClaudeAI37Sonnet(modelConfigs);
+                    // 其他Claude模型...
+                }
                 break;
             default:
                 break;
