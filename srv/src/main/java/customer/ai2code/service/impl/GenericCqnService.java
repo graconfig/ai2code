@@ -429,7 +429,7 @@ public class GenericCqnService {
 
     public String getTaskIdByBotInstanceId(String botInstanceId) {
         // 构建查询语句
-        Select select = Select.from(BotInstances_.class)
+        CqnSelect select = Select.from(BotInstances_.class)
                 .columns(b -> b.task_ID())
                 .where(b -> b.ID().eq(botInstanceId));
 
