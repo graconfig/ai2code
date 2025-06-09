@@ -31,6 +31,7 @@ sap.ui.define(
         onBotInstancePress: function (oEvent) {
           // 这里可以获取被点击行的数据
           const oContext = oEvent.getSource().getBindingContext();
+          this.oContext = oContext;
           this.bindingmodel  = oContext;
           this.servicemodel = this.getOwnerComponent().getModel();
           if (oContext) {
@@ -47,8 +48,8 @@ sap.ui.define(
             const that = this;
 
             this.pDialog.then((oDialog) => {
+                oDialog.setBindingContext(that.oContext);
                 that._dialog = oDialog;
-
                 oDialog.open();
                 // 添加列表数据加载完成的事件处理
                 const messageList = oDialog.getContent()[0].getContent()[0].getItems()[0];

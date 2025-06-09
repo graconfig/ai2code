@@ -39,8 +39,8 @@ sap.ui.define([
                 entity: {
                     role:this.sender ,
                     message: this.message.trim(),
-                    ragData: this.message.trim(),
-                    botInstance_ID: this.bindingmodel.getObject().ID
+                    ragData: this.message.trim()
+                    //botInstance_ID: this.bindingmodel.getObject().ID
                 },
                 atEnd: true,
                 submitBatch: false

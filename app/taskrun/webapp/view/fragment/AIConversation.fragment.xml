@@ -30,11 +30,14 @@
                         showNoData="false"
                         showSeparators="Inner"
                         items="{ 
-                            path: '/BotMessages', 
+                            path: 'messages', 
                             filters: {
                                 path: 'role',
                                 operator: 'NE',
                                 value1: 'system'
+                            },
+                            parameters: {
+                                $$updateGroupId: 'changes'
                             }
                         }"
                     >
