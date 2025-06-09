@@ -92,6 +92,14 @@ public class GenericCqnService {
                 "Task not found for botInstance: " + botInstanceId + ", sequence: " + sequence);
     }
 
+    // 根据BotInstance ID获取任务详情（33160）
+    public Tasks getTaskByBotInstance(String botInstanceId) {
+        var select = Select.from(Tasks_.class)
+                .where(t -> t.botInstance_ID().eq(botInstanceId));
+        return entityService.selectSingle(mainService, select, Tasks.class,
+                "Task not found for botInstance: " + botInstanceId);
+    }
+
     // 创建和插入方法 - 包含业务逻辑
     public Tasks createAndInsertMainTask(String name, String description, String taskTypeId) {
         Tasks newTask = Tasks.create();
