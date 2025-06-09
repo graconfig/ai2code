@@ -1,5 +1,2 @@
 
-
-export const adoptHandler = async function (this: any, req: any) {
-
-};
+export const adoptHandler = async function (this: any, req: any) {};
