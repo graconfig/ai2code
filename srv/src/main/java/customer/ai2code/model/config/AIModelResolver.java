@@ -3,6 +3,9 @@ package customer.ai2code.model.config;
 import org.springframework.stereotype.Service;
 import cds.gen.configservice.ModelConfigs;
 import customer.ai2code.model.AIModel;
+import customer.ai2code.model.SAPAICoreClaudeAI35Sonnet;
+import customer.ai2code.model.SAPAICoreClaudeAI37Sonnet;
+import customer.ai2code.model.SAPAICoreOpenAIGPT35;
 import customer.ai2code.model.SAPAICoreOpenAIgpt4o;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.impl.GenericCqnService;
@@ -82,15 +85,15 @@ public class AIModelResolver {
                     case "gpt-4o":
                         return new SAPAICoreOpenAIgpt4o(modelConfigs);
                     case "gpt-3.5-turbo": // 新增GPT-3.5支持
-                        return new OpenAIGPT35Model(modelConfigs);
+                        return new SAPAICoreOpenAIGPT35(modelConfigs);
                 }
                 break;
             case "SAPAICore-Claude": // Claude系列模型
                 switch (modelConfigs.getModelName()) {
                     case "claude-3.5-sonnet": // 新增Claude 3.5支持
-                        return new ClaudeAI35SonnetModel(modelConfigs);
+                        return new SAPAICoreClaudeAI35Sonnet(modelConfigs);
                     case "claude-3.7-sonnet": // 新增Claude 3.7支持
-                        return new ClaudeAI37SonnetModel(modelConfigs);
+                        return new SAPAICoreClaudeAI37Sonnet(modelConfigs);
                     // 其他Claude模型...
                 }
                 break;

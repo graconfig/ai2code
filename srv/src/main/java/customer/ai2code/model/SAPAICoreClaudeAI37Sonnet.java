@@ -1,4 +1,4 @@
-package main.java.customer.ai2code.model;
+package customer.ai2code.model;
 
 import cds.gen.configservice.ModelConfigs;
 import customer.ai2code.model.AIModel;
@@ -25,7 +25,7 @@ public class SAPAICoreClaudeAI37Sonnet implements AIModel {
         ObjectMapper mapper = getDefaultObjectMapper();
         SAPAICoreClaudeConfig claudeConfig = 
             mapper.convertValue(modelConfigs.getParameters(), SAPAICoreClaudeConfig.class);
-        return SAPAICoreClaudeConfig;
+        return claudeConfig;
     }
 
 }

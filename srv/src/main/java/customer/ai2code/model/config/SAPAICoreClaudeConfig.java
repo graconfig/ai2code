@@ -1,4 +1,4 @@
-package main.java.customer.ai2code.model.config;
+package customer.ai2code.model.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
