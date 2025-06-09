@@ -276,19 +276,27 @@ public class BotServiceImpl implements BotService {
 
     @Override
     public ContextNodes adopt(String botInstanceId, String messageId) {
-        // 1. 获取 botInstance 对应的所有 messages
-        List<BotMessages> messages = genericCqnService.getBotMessagesByBotInstanceId(botInstanceId);
-        if (messages == null || messages.isEmpty()) {
-            throw new IllegalStateException("No messages found for botInstance: " + botInstanceId);
+        // // 1. 获取 botInstance 对应的所有 messages
+        // List<BotMessages> messages = genericCqnService.getBotMessagesByBotInstanceId(botInstanceId);
+        // if (messages == null || messages.isEmpty()) {
+        //     throw new IllegalStateException("No messages found for botInstance: " + botInstanceId);
+        // }
+
+        // // 2. 找到指定 messageId 的 message
+        // BotMessages botMessage = messages.stream()
+        //         .filter(msg -> messageId.equals(msg.getId()))
+        //         .findFirst()
+        //         .orElseThrow(() -> new IllegalStateException("Message not found: " + messageId));
+
+        // 1. 直接通过 messageId 获取对应的 message
+        BotMessages botMessage = genericCqnService.getMessageById(botInstanceId,messageId);
+        if (botMessage == null) {
+            throw new IllegalStateException("Message not found: " + messageId);
         }
 
-        // 2. 找到指定 messageId 的 message
-        BotMessages botMessage = messages.stream()
-                .filter(msg -> messageId.equals(msg.getId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Message not found: " + messageId));
-
         String messageText = botMessage.getMessage();
+
+
 
         // 3. 查询 outputContextPath
         String outputContextPath = genericCqnService.getOutputContextPathByBotInstanceId(botInstanceId);
@@ -297,7 +305,8 @@ public class BotServiceImpl implements BotService {
         }
 
         // 4. 查询 taskId
-        String taskId = genericCqnService.getTaskIdByBotInstanceId(botInstanceId);
+        // String taskId = genericCqnService.getTaskIdByBotInstanceId(botInstanceId);
+        String taskId = genericCqnService.getMainTaskId(botInstanceId);
         if (taskId == null) {
             throw new IllegalStateException("No taskId associated with botInstance: " + botInstanceId);
         }
@@ -311,7 +320,12 @@ public class BotServiceImpl implements BotService {
 
     private String extractMessageIdFromContext(BotMessagesAdoptContext context) {
         // 从CQN查询中提取消息ID
-        return context.getCqn().ref().segments().get(0).id();
+        // 使用CqnAnalyzer类，从CQN查询中提取ID，需要解析CqnSelect
+        CqnAnalyzer cqnAnalyzer = CqnAnalyzer.create(context.getModel());
+        AnalysisResult result = cqnAnalyzer.analyze(context.getCqn().ref());
+        return result.rootKeys().get("message_ID").toString();
+
+        // return context.getCqn().ref().segments().get(0).id();
     }
 
     // @Override

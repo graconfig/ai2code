@@ -33,18 +33,18 @@ sap.ui.define(
           const oContext = oEvent.getSource().getBindingContext();
           if (oContext) {
             const oData = oContext.getObject(); // 你可以在这里处理点击事件，比如弹窗、跳转等
-            MessageToast.show("点击了BotInstance");
+            //MessageToast.show("点击了BotInstance");
               
-            console.log("BotInstances.onChatCompletion triggered");
+            //console.log("BotInstances.onChatCompletion triggered");
             // 在这里执行你的逻辑
             // 使用正确的 Fragment 路径加载对话框
-            this.PDialog ??= this.loadFragment({
+            this.pDialog ??= this.loadFragment({
               name: "ai.orchestration.taskrun.view.fragment.AIConversation"
             });
 
             const that = this;
 
-            this.PDialog.then((oDialog) => {
+            this.pDialog.then((oDialog) => {
                 that._dialog = oDialog;
 
                 oDialog.open();
