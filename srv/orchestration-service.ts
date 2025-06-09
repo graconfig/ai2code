@@ -16,6 +16,6 @@ export default class MainService extends cds.ApplicationService {
     return super.init();
   }
   async createTaskWithBots(req: any) {
-    createTaskWithBotsHandler(req)
+    createTaskWithBotsHandler.call(this, req)
   }
 }
