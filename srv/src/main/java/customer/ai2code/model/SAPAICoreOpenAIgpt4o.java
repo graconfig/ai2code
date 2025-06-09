@@ -3,6 +3,7 @@ package customer.ai2code.model;
 import cds.gen.configservice.ModelConfigs;
 import customer.ai2code.model.config.AIServiceConfig;
 import customer.ai2code.model.config.SAPAICoreConfig;
+import customer.ai2code.service.AIService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,7 +31,4 @@ public class SAPAICoreOpenAIgpt4o implements AIModel {
         SAPAICoreConfig sapAICoreConfig = mapper.convertValue(modelConfigs.getParameters(), SAPAICoreConfig.class);
         return sapAICoreConfig;
     }
-
-
-    
 }
