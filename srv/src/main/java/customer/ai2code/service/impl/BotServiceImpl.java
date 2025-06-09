@@ -10,6 +10,7 @@ import cds.gen.mainservice.BotInstancesChatCompletionContext;
 import cds.gen.mainservice.MainService;
 import cds.gen.mainservice.Tasks;
 import cds.gen.configservice.ConfigService;
+import cds.gen.ai.orchestration.BotMessage;
 import cds.gen.configservice.BotTypes;
 import cds.gen.configservice.BotTypes_;
 import customer.ai2code.model.AIModel;
@@ -25,6 +26,22 @@ import customer.ai2code.service.ContextService;
 import customer.ai2code.service.ContextService;
 
 import customer.ai2code.service.PromptService;
+
+// import customer.ai2code.service.AIService;
+import com.sap.cds.ql.Select;
+import com.sap.cds.ql.cqn.AnalysisResult;
+import com.sap.cds.ql.cqn.CqnAnalyzer;
+import com.sap.cds.ql.cqn.CqnStatement;
+import com.sap.cds.ql.cqn.ResolvedRefItem;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.util.Map;
+
+import cds.gen.mainservice.BotMessages;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -120,16 +137,10 @@ public class BotServiceImpl implements BotService {
 
         Bot bot = getCurrentBot(botInstanceId);
 
-        // // 更新状态为RUNNING
+        // 更新状态为RUNNING
         // updateBotInstanceStatus(bot, "R");
 
         try {
-
-            // 2. 判断是否是第一次调用(ChatBot已经添加了这些逻辑)
-            // 2.1 第一次调用 获取Prompt
-            // 2.2 如果不是第一次调用，获取历史消息
-            // Bot内部已经处理这些逻辑
-
             String response;
             if (bot instanceof ChatBot) {
                 response = ((ChatBot) bot).chat(content);
@@ -236,8 +247,10 @@ public class BotServiceImpl implements BotService {
     }
 
     private String extractIdFromContext(BotInstancesChatCompletionContext context) {
-        // 从CQN查询中提取ID，需要解析CqnSelect
-        return context.getCqn().ref().segments().get(0).id();
+        // 使用CqnAnalyzer类，从CQN查询中提取ID，需要解析CqnSelect
+        CqnAnalyzer cqnAnalyzer = CqnAnalyzer.create(context.getModel());
+        AnalysisResult result = cqnAnalyzer.analyze(context.getCqn().ref());
+        return result.rootKeys().get("ID").toString();
     }
 
     private String extractIdFromContext(BotInstancesExecuteContext context) {

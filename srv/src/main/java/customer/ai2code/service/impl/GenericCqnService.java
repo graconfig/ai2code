@@ -49,7 +49,8 @@ public class GenericCqnService {
     public ModelConfigs getModelConfig(String modelConfigId) {
         CqnSelect select = Select.from(ModelConfigs_.class)
                 .where(m -> m.ID().eq(modelConfigId));
-        return entityService.selectSingle(null, select, null, modelConfigId);
+        return entityService.selectSingle(configService, select, ModelConfigs.class,
+                "ModelConfig not found: " + modelConfigId);
     }
 
     public BotInstances getBotInstanceById(String botInstanceId) {

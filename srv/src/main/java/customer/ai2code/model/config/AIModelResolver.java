@@ -59,13 +59,11 @@ public class AIModelResolver {
     
 
     public AIModel resolveAIModel(String modelConfigId){
-        
         // 1. 从配置服务中获取模型配置
         ModelConfigs modelConfig = 
             genericCqnService.getModelConfig(modelConfigId);
         
         return resolveAIModel(modelConfig);
-
     }
 
     public AIModel resolveAIModel(ModelConfigs modelConfigs){

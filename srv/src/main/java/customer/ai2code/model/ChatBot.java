@@ -1,5 +1,7 @@
 package customer.ai2code.model;
 
+import java.util.List;
+
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import cds.gen.configservice.BotTypes;
@@ -25,7 +27,7 @@ public class ChatBot implements Bot {
     private BotInstances botInstance;
     private AIModel aiModel;
     private BotTypes botType;
-    
+
     // 服务依赖（通过构造函数注入）
     private GenericCqnService genericCqnService;
     private PromptService promptService;
@@ -106,6 +108,7 @@ public class ChatBot implements Bot {
         }
     }
 
+
     @Override
     public BotInstancesExecuteContext.ReturnType execute() {
         // 实现聊天机器人的执行逻辑
@@ -141,8 +144,21 @@ public class ChatBot implements Bot {
         return botInstance;
     }
 
-    @Override
+    // @Override
+    // public BotInstances getBotInstance() {
+    // // 返回当前Bot实例信息
+    // return null; // 需要实现具体的返回逻辑
+    // }
+
+    // @Override
+    // public AIModel getAIModel() {
+    // // TODO Auto-generated method stub
+    // throw new UnsupportedOperationException("Unimplemented method 'getAIModel'");
+    // }
+
+
     public AIModel getAiModel() {
         return aiModel;
     }
+
 }
