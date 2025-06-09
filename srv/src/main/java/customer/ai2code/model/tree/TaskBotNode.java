@@ -103,7 +103,8 @@ public class TaskBotNode {
                 return root.id;
             }
         }
-        throw new IllegalStateException("Root node is not a main task");
+        // throw new IllegalStateException("Root node is not a main task");
+        return null;
     }
     
     // 查找指定序列的Bot实例

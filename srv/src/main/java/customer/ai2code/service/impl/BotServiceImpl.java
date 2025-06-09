@@ -82,10 +82,10 @@ public class BotServiceImpl implements BotService {
     @Override
     public Bot getCurrentBot(String botInstanceId) {
         // 先从缓存中查找
-        // Bot cachedBot = cacheManager.getCachedBot(botInstanceId);
-        // if (cachedBot != null) {
-        //     return cachedBot;
-        // }
+        Bot cachedBot = cacheManager.getCachedBot(botInstanceId);
+        if (cachedBot != null) {
+            return cachedBot;
+        }
 
         // 从数据库查询BotInstance
         BotInstances botInstance = genericCqnService.getBotInstanceById(botInstanceId);
