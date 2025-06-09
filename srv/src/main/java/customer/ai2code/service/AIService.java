@@ -44,7 +44,7 @@ public interface AIService {
          * @param emitter The emitter to send the chunk to
          * @param chunk   The chunk to send
          */
-        public static void send2(@Nonnull final SseEmitter emitter, @Nonnull final String chunk) {
+        public static void send1(@Nonnull final SseEmitter emitter, @Nonnull final String chunk) {
                 try {
                         emitter.send(chunk);
                 } catch (final IOException e) {
