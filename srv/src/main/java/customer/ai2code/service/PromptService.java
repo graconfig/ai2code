@@ -11,13 +11,13 @@ public interface PromptService {
      * @param mainTaskId 主任务ID
      * @return
      */
-    public String parse(PromptTexts prompt,String mainTaskId);
-    
+    public String parse(PromptTexts prompt, String mainTaskId, String botInstanceId);
+
     /**
      * 
-     * @param botTypeId 
+     * @param botTypeId
      * @param mainTaskId
      * @return
      */
-    public List<PromptTexts> getPrompts(String botTypeId,String mainTaskId);
+    public List<PromptTexts> getPrompts(String botTypeId, String mainTaskId, String botInstanceId);
 }
