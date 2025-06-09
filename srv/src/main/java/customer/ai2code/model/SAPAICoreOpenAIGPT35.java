@@ -25,9 +25,18 @@ public class SAPAICoreOpenAIGPT35 implements AIModel {
 
     @Override
     public AIServiceConfig parseModelConfigs() {
-        ObjectMapper mapper = getDefaultObjectMapper();
-        SAPAICoreConfig sapAICoreConfig = mapper.convertValue(modelConfigs.getParameters(), SAPAICoreConfig.class);
-        return sapAICoreConfig;
+        try {
+            ObjectMapper mapper = getDefaultObjectMapper();
+            
+            Object parameters = modelConfigs.getParameters();
+            if (parameters instanceof String) {
+                return mapper.readValue((String) parameters, SAPAICoreConfig.class);
+            } else {
+                return mapper.convertValue(parameters, SAPAICoreConfig.class);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse model configuration", e);
+        }
     }
     // @Override
     // public ModelConfigs getModelConfigs() {

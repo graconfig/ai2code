@@ -442,14 +442,43 @@ public class GenericCqnService {
                 .where(b -> b.ID().eq(botInstanceId));
 
         // 查询结果列表
-        List<BotInstances> instances = entityService.selectList(mainService, select, BotInstances.class);
+        BotInstances instance = entityService.selectSingle(mainService, select, BotInstances.class,String.format("Parent task not found for bot instance %s", botInstanceId));
 
         // 检查并返回结果
-        if (instances.isEmpty() || instances.get(0).getTaskId() == null) {
-            throw new IllegalStateException("No taskId found for botInstanceId: " + botInstanceId);
-        }
+        // if (instance.isEmpty() || instances.get(0).getTaskId() == null) {
+        //     throw new IllegalStateException("No taskId found for botInstanceId: " + botInstanceId);
+        // }
 
-        return instances.get(0).getTaskId();
+        return instance.getTaskId();
+    }
+
+    /**
+     * 根据BotInstance ID获取父任务详情
+     * 这个方法用于获取创建当前BotInstance的父任务（即包含该BotInstance的任务）
+     */
+    public Tasks getParentTaskByBotInstance(String botInstanceId) {
+        try {
+            // 1. 先获取当前BotInstance
+            // BotInstances botInstance = getBotInstanceById(botInstanceId);
+
+            // 2. 获取BotInstance所属的任务
+            String taskId = getTaskIdByBotInstanceId(botInstanceId);
+
+            // 3. 获取该任务
+            Tasks currentTask = getTaskById(taskId);
+
+            // 4. 如果当前任务有父任务ID，则获取父任务
+            // if (currentTask.getParentTaskId() != null && !currentTask.getParentTaskId().isEmpty()) {
+            //     return getTaskById(currentTask.getParentTaskId());
+            // } else {
+            //     // 5. 如果没有父任务，返回当前任务本身
+            //     return currentTask;
+            // }
+            return currentTask;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get parent task for botInstance: " + botInstanceId, e);
+        }
     }
 
 }

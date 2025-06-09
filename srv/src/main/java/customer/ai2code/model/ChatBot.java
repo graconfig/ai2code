@@ -35,28 +35,31 @@ public class ChatBot implements Bot {
 
     @Override
     public String chat(String content) {
+        List<PromptTexts> prompts = null;
         try {
             // 1. 根据AIModel类型，获取到不同AIService服务
             AIService aiService = aiModelResolver.resolveAIService(aiModel.getModelConfigs());
-            
-            // 2. 使用genericCqnService.getMainTaskId，再获取Prompt
-            String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
-            List<PromptTexts> prompts = promptService.getPrompts(botType.getId(), mainTaskId);
-            
+
             // 3. 第一次chat需要保存prompt消息
             boolean isFirstCall = genericCqnService.isFirstCall(botInstance.getId());
-            if (isFirstCall && prompts != null && !prompts.isEmpty()) {
-                savePromptMessages(prompts);
+            if (isFirstCall) {
+                // 2. 使用genericCqnService.getMainTaskId，再获取Prompt
+                String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
+                prompts = promptService.getPrompts(botType.getId(), mainTaskId, botInstance.getId());
+                if (prompts != null && !prompts.isEmpty()) {
+                    savePromptMessages(prompts);
+                }
+
             }
-            
+
             // 4. 获取历史消息
             List<BotMessages> historyMessages = genericCqnService.getBotMessagesByBotInstanceId(botInstance.getId());
-            
+
             // 5. 真正调用chat服务
             String response = aiService.chatWithAI(historyMessages, prompts, content, aiModel);
-            
+
             return response;
-            
+
         } catch (Exception e) {
             System.err.println("Chat failed for bot: " + botInstance.getId() + ", error: " + e.getMessage());
             throw new RuntimeException("Chat failed", e);
@@ -68,26 +71,26 @@ public class ChatBot implements Bot {
         try {
             // 1. 根据AIModel类型，获取到不同AIService服务
             AIService aiService = aiModelResolver.resolveAIService(aiModel.getModelConfigs());
-            
+
             // 2. 获取主任务ID和Prompt
             String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
-            List<PromptTexts> prompts = promptService.getPrompts(botType.getId(), mainTaskId);
-            
+            List<PromptTexts> prompts = promptService.getPrompts(botType.getId(), mainTaskId, botInstance.getId());
+
             // 3. 第一次调用需要保存prompt消息
             boolean isFirstCall = genericCqnService.isFirstCall(botInstance.getId());
             if (isFirstCall && prompts != null && !prompts.isEmpty()) {
                 savePromptMessages(prompts);
             }
-            
+
             // 4. 获取历史消息
             List<BotMessages> historyMessages = genericCqnService.getBotMessagesByBotInstanceId(botInstance.getId());
-            
+
             // 5. 调用流式聊天服务
-            return aiService.chatWithAIStreaming(historyMessages, prompts, content, aiModel, 
+            return aiService.chatWithAIStreaming(historyMessages, prompts, content, aiModel,
                     null, // executor - 可以后续添加
-                    null  // streamingCompletionProcessor - 可以后续添加
+                    null // streamingCompletionProcessor - 可以后续添加
             );
-            
+
         } catch (Exception e) {
             System.err.println("Streaming chat failed for bot: " + botInstance.getId() + ", error: " + e.getMessage());
             SseEmitter emitter = new SseEmitter();
@@ -107,7 +110,6 @@ public class ChatBot implements Bot {
             }
         }
     }
-
 
     @Override
     public BotInstancesExecuteContext.ReturnType execute() {
@@ -155,7 +157,6 @@ public class ChatBot implements Bot {
     // // TODO Auto-generated method stub
     // throw new UnsupportedOperationException("Unimplemented method 'getAIModel'");
     // }
-
 
     public AIModel getAiModel() {
         return aiModel;

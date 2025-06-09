@@ -26,21 +26,32 @@ public class ContextServiceImpl implements ContextService {
 
     @Override
     public String getContextFullPath(String botInstanceId, String subPath) {
-        if (!subPath.contains("SubConext:") || subPath.contains("Context:")) {
-            return subPath; // 如果不包含"SubContext:"或者包含"Context:"，直接返回原路径
+        if (subPath.contains("SubContext:")) {
+            // 处理SubContext:的情况，需要获取任务的上下文路径并拼接
+            //获取上级任务的上下文路径
+            Tasks task = genericCqnService.getParentTaskByBotInstance(botInstanceId);
+            // Tasks task = genericCqnService.getTaskByBotInstance(botInstanceId);
+            String taskContextPath = task.getContextPath();
+            String relativePath = subPath.replace("SubContext:", "");
+
+            // 如果任务上下文路径为空或null，直接返回相对路径
+            if (taskContextPath == null || taskContextPath.isEmpty()) {
+                return relativePath;
+            }
+
+            // 拼接路径，避免重复的点号
+            if (taskContextPath.endsWith(".") || relativePath.startsWith(".")) {
+                return taskContextPath + relativePath;
+            } else {
+                return taskContextPath + "." + relativePath;
+            }
+        } else if (subPath.contains("Context:")) {
+            // 处理Context:的情况，直接去掉Context:前缀
+            return subPath.replace("Context:", "");
         } else {
-            Tasks task = genericCqnService.getTaskByBotInstance(botInstanceId);
-            return task.getContextPath() + subPath.replaceAll("SubConext:", "");
+            // 如果都不包含，直接返回原路径
+            return subPath;
         }
-        // if (subPathPrefix == null || subPathPrefix.isEmpty()) {
-        // return subPath;
-        // }
-        // if (subPath == null || subPath.isEmpty()) {
-        // return subPathPrefix;
-        // }
-        // return subPathPrefix + "." + subPath;
-        // throw new UnsupportedOperationException("No need to implement
-        // 'getContextFullPath' in this service");
     }
 
     @Override
