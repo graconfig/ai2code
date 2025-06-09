@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-
 import cds.gen.mainservice.ContextNodes;
+import cds.gen.mainservice.Tasks;
 import customer.ai2code.service.ContextService;
 
 @Service
@@ -25,15 +25,22 @@ public class ContextServiceImpl implements ContextService {
     }
 
     @Override
-    public String getContextFullPath(String subPathPrefix, String subPath) {
+    public String getContextFullPath(String botInstanceId, String subPath) {
+        if (!subPath.contains("SubConext:") || subPath.contains("Context:")) {
+            return subPath; // 如果不包含"SubContext:"或者包含"Context:"，直接返回原路径
+        } else {
+            Tasks task = genericCqnService.getTaskByBotInstance(botInstanceId);
+            return task.getContextPath() + subPath.replaceAll("SubConext:", "");
+        }
         // if (subPathPrefix == null || subPathPrefix.isEmpty()) {
-        //     return subPath;
+        // return subPath;
         // }
         // if (subPath == null || subPath.isEmpty()) {
-        //     return subPathPrefix;
+        // return subPathPrefix;
         // }
         // return subPathPrefix + "." + subPath;
-        throw new UnsupportedOperationException("No need to implement 'getContextFullPath' in this service");
+        // throw new UnsupportedOperationException("No need to implement
+        // 'getContextFullPath' in this service");
     }
 
     @Override
