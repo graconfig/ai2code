@@ -1,7 +1,8 @@
 <mvc:View xmlns:mvc="sap.ui.core.mvc"  xmlns="sap.m" controllerName="ai.orchestration.taskrun.controller.TaskRunDetail">
 	<Table
         items="{
-            path: 'botInstances'
+            path: 'botInstances',
+            sorter: { path: 'sequence', descending: false }
         }">
         <headerToolbar>
             <OverflowToolbar>
