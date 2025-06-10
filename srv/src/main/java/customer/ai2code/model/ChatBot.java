@@ -10,6 +10,7 @@ import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 import cds.gen.mainservice.BotMessages;
+import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.config.AIModelResolver;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.PromptService;
@@ -63,7 +64,7 @@ public class ChatBot implements Bot {
 
         } catch (Exception e) {
             System.err.println("Chat failed for bot: " + botInstance.getId() + ", error: " + e.getMessage());
-            throw new RuntimeException("Chat failed", e);
+            throw new BusinessException("Chat failed", e);
         }
     }
 

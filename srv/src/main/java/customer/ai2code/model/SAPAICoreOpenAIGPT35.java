@@ -1,6 +1,7 @@
 package customer.ai2code.model;
 
 import cds.gen.configservice.ModelConfigs;
+import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.AIModel;
 import customer.ai2code.model.config.AIServiceConfig;
 import customer.ai2code.model.config.SAPAICoreConfig;
@@ -35,7 +36,7 @@ public class SAPAICoreOpenAIGPT35 implements AIModel {
                 return mapper.convertValue(parameters, SAPAICoreConfig.class);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse model configuration", e);
+            throw new BusinessException("Failed to parse model configuration", e);
         }
     }
     // @Override
