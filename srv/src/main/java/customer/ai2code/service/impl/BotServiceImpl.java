@@ -312,8 +312,10 @@ public class BotServiceImpl implements BotService {
             throw new IllegalStateException("No taskId associated with botInstance: " + botInstanceId);
         }
 
-        // 5. 调用 ContextService 的 upsertContext 方法存储并返回 ContextNodes
-        ContextNodes node = contextService.upsertContext(taskId, outputContextPath, messageText);
+        // 5. 获取绝对的 outputContextPath
+        String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, outputContextPath);
+        // 6. 调用 ContextService 的 upsertContext 方法存储并返回 ContextNodes
+        ContextNodes node = contextService.upsertContext(taskId, absoluteOutputContextPath, messageText);
 
         return node;
 
