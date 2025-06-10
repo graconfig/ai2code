@@ -16,16 +16,16 @@ sap.ui.define([
      * @param {typeof sap.ui.core.mvc.Controller} Controller
      */
     function (
-        Controller, 
-        Dialog, 
+        Controller,
+        Dialog,
         SelectDialog,
-        SimpleForm, 
-        Button, 
-        ButtonType, 
-        MessageToast, 
-        Label, 
-        Input, 
-        TextArea, 
+        SimpleForm,
+        Button,
+        ButtonType,
+        MessageToast,
+        Label,
+        Input,
+        TextArea,
         DialogType,
         Element) {
         "use strict";
@@ -64,7 +64,7 @@ sap.ui.define([
                         })
                     });
                 }
-    
+
                 this.oSubmitDialog.open();
             },
 
@@ -93,13 +93,14 @@ sap.ui.define([
                         path: "/TaskType",
                         template: new sap.m.StandardListItem({
                             title: "{name}",
-                            description: "{description}",
+                            //description: "{description}",
                             highlightText: "{ID}" // ID placeholder
                         })
                     },
                     confirm: function (oEvent) {
                         const oSelectedItem = oEvent.getParameter("selectedItem");
                         if (oSelectedItem) {
+                            Element.getElementById("taskTypeName").setValue(oSelectedItem.getTitle());
                             Element.getElementById("taskTypeId").setValue(oSelectedItem.getHighlightText());
                         }
                     }.bind(this),
@@ -108,7 +109,22 @@ sap.ui.define([
 
             _createTaskForm: function () {
                 return new SimpleForm({
+                    width: "1000px",
                     content: [
+                        new Label({ text: "Type name" }),
+                        new Input("taskTypeName", {
+                            showValueHelp: true,
+                            valueHelpOnly: true,
+                            valueHelpRequest: function () {
+                                this.oSelectTypeDialog = this._createSelectTaskTypeDialog();
+                                this.oSelectTypeDialog.setModel(this.getOwnerComponent().getModel());
+                                this.oSelectTypeDialog.open();
+                            }.bind(this)
+                        }),
+                        new Label({ text: "Type id" }),
+                        new Input("taskTypeId", {
+                            editable: false,
+                        }),
                         new Label({ text: "Task name" }),
                         new Input("taskName", {
                             placeholder: "Enter task name",
@@ -122,16 +138,6 @@ sap.ui.define([
                         new TextArea("taskDescription", {
                             placeholder: "Enter task description",
                             rows: 3
-                        }),
-                        new Label({ text: "Type id" }),
-                        new Input("taskTypeId", {
-                            showValueHelp: true,
-                            valueHelpOnly: true,
-                            valueHelpRequest: function () {
-                                this.oSelectTypeDialog = this._createSelectTaskTypeDialog();
-                                this.oSelectTypeDialog.setModel(this.getOwnerComponent().getModel());
-                                this.oSelectTypeDialog.open();
-                            }.bind(this)
                         }),
                     ]
                 })
