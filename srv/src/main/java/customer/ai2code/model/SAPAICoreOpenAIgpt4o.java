@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import static com.sap.ai.sdk.core.JacksonConfiguration.getDefaultObjectMapper;
-// import static com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -22,13 +21,24 @@ public class SAPAICoreOpenAIgpt4o implements AIModel {
     @Override
     public String getModelName() {
         return modelConfigs.getModelName();
-
     }
 
     @Override
     public AIServiceConfig parseModelConfigs() {
-        ObjectMapper mapper = getDefaultObjectMapper();
-        SAPAICoreConfig sapAICoreConfig = mapper.convertValue(modelConfigs.getParameters(), SAPAICoreConfig.class);
-        return sapAICoreConfig;
+        try {
+            ObjectMapper mapper = getDefaultObjectMapper();
+            
+            // Check if parameters is a String (JSON) or already an Object
+            Object parameters = modelConfigs.getParameters();
+            if (parameters instanceof String) {
+                // Parse JSON string to SAPAICoreConfig
+                return mapper.readValue((String) parameters, SAPAICoreConfig.class);
+            } else {
+                // Convert Object to SAPAICoreConfig
+                return mapper.convertValue(parameters, SAPAICoreConfig.class);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse model configuration", e);
+        }
     }
 }

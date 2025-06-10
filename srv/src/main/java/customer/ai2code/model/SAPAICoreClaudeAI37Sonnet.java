@@ -1,4 +1,5 @@
 package customer.ai2code.model;
+package customer.ai2code.model;
 
 import cds.gen.configservice.ModelConfigs;
 import customer.ai2code.model.config.AIServiceConfig;

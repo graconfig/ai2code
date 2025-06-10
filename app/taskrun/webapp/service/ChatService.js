@@ -64,31 +64,35 @@ sap.ui.define([
         },
         // 获取完成内容的异步方法
         getCompletion: function (params) {
-            // return new Promise((resolve, reject) => {
-            //     const binding = params.model.bindContext("ChatService.newRecord(...)", params.report);
-            //     binding.setParameter("content", params.message)
-            //     const dialog = new BusyDialog({ text: "Thinking..." });
-            //     dialog.open();
-            //     binding.invoke().then(() => {
-            //         dialog.close();
-            //         resolve(
-            //             {
-            //                 actionContext: binding.getBoundContext(),
-            //                 tempUserContext: params.tempUserContext
-            //             }
-            //         );
-            //     }).catch((error) => {
-            //         dialog.close();
-            //         MessageBox.alert(error.message, {
-            //             title: "Error"
-            //         });
-            //         reject(error);
-            //     });
-            // });
-            var result = {
-                    actionContext: "AI说的没错！",
-                    tempUserContext: params.tempUserContext
-            };
+            return new Promise((resolve, reject) => {
+                //const botInstanceId = params.bindingmodel.getObject().ID;
+                //const path =  "BotInstances("+ botInstanceId +")/chatCompletion(...)";
+                //const path  = "/BotInstances/chatCompletion(...)";
+                const path  = "MainService.chatCompletion(...)";
+                const binding = params.servicemodel.bindContext(path, params.botInstance);
+                binding.setParameter("content", params.message)
+                const dialog = new BusyDialog({ text: "Thinking..." });
+                dialog.open();
+                binding.invoke().then(() => {
+                    dialog.close();
+                    resolve(
+                        {
+                            //actionContext: binding.getBoundContext(),
+                            tempUserContext: params.tempUserContext
+                        }
+                    );
+                }).catch((error) => {
+                    dialog.close();
+                    MessageBox.alert(error.message, {
+                        title: "Error"
+                    });
+                    reject(error);
+                });
+            });
+            // var result = {
+            //         actionContext: "AI说的没错！",
+            //         tempUserContext: params.tempUserContext
+            // };
             return result;
             
         },
@@ -97,8 +101,8 @@ sap.ui.define([
             return new Promise(async (resolve, reject) => {
                 // 准备请求参数
                 const requestData = {
-                    id: params.report.getProperty("ID"),
-                    isActiveEntity: params.report.getProperty("IsActiveEntity"),
+                    id: params.botInstance.getProperty("ID"),
+                    isActiveEntity: params.botInstance.getProperty("IsActiveEntity"),
                     content: params.message,
                     locale: sap.ui.getCore().getConfiguration().getLanguage()
                 };

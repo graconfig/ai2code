@@ -14,11 +14,12 @@ sap.ui.define([
     // }
     return Object.extend("ai.orchestration.taskrun.service.NewMessageHandler", {
         constructor: function (settings) {
-            this.report = settings.report;
+            this.botInstance = settings.botInstance;
             this.message = settings.message;
             this.binding = settings.binding;
             this.sender = settings.sender;
-            this.model  = settings.model;
+            this.bindingmodel  = settings.bindingmodel;
+            this.servicemodel = settings.servicemodel;
             this.onCreatedEmptyAssistantMessage = settings.onCreatedEmptyAssistantMessage;
             this.streamingCallback = settings.streamingCallback;
             this.onComplete = settings.onComplete;
@@ -36,8 +37,10 @@ sap.ui.define([
             chatService.createEntity({
                 binding: this.binding,
                 entity: {
+                    role:this.sender ,
                     message: this.message.trim(),
-                    createdBy: this.sender
+                    ragData: this.message.trim()
+                    //botInstance_ID: this.bindingmodel.getObject().ID
                 },
                 atEnd: true,
                 submitBatch: false
@@ -54,7 +57,7 @@ sap.ui.define([
                     return chatService.submitChanges("changes");
                 } else {
                     // delete the temporary chat record context for user
-                    // return result.tempUserContext.delete();
+                    return result.tempUserContext.delete();
                 }
 
             }).then((a) => {
@@ -62,7 +65,7 @@ sap.ui.define([
                  * 非流式调用执行的是后端newRecord的操作，不会自动刷新
                  * */
                 if (!streaming) {
-                    this.report.refresh();
+                    this.botInstance.refresh();
                 }
             }).catch(function (error) {
                 console.error("Error posting message:", error);
@@ -76,10 +79,11 @@ sap.ui.define([
         handleCompletion: function (createdUserContext) {
             var chatService = ChatService.getInstance();
             return chatService.getCompletion({
-                report: this.report,
+                botInstance: this.botInstance,
                 message: this.message.trim(),
                 binding: this.binding,
-                model: this.model,
+                servicemodel: this.servicemodel,
+                bindingmodel: this.bindingmodel,
                 tempUserContext: createdUserContext
             });
         },
@@ -102,7 +106,7 @@ sap.ui.define([
                 this.onCreatedEmptyAssistantMessage?.(createdAIContext);
 
                 return chatService.getCompletionAsStream({
-                    report: this.report,
+                    botInstance: this.botInstance,
                     message: this.message.trim(),
                     tempUserContext: createdUserContext,
                     streamingUrl: streamingUrl

@@ -250,7 +250,8 @@ public class BotServiceImpl implements BotService {
         // 使用CqnAnalyzer类，从CQN查询中提取ID，需要解析CqnSelect
         CqnAnalyzer cqnAnalyzer = CqnAnalyzer.create(context.getModel());
         AnalysisResult result = cqnAnalyzer.analyze(context.getCqn().ref());
-        return result.rootKeys().get("ID").toString();
+        // return result.rootKeys().get("ID").toString();
+        return result.targetKeys().get("ID").toString();
     }
 
     private String extractIdFromContext(BotInstancesExecuteContext context) {
@@ -323,7 +324,8 @@ public class BotServiceImpl implements BotService {
         // 使用CqnAnalyzer类，从CQN查询中提取ID，需要解析CqnSelect
         CqnAnalyzer cqnAnalyzer = CqnAnalyzer.create(context.getModel());
         AnalysisResult result = cqnAnalyzer.analyze(context.getCqn().ref());
-        return result.rootKeys().get("message_ID").toString();
+        // return result.rootKeys().get("message_ID").toString();
+        return result.targetKeys().get("ID").toString();
 
         // return context.getCqn().ref().segments().get(0).id();
     }
