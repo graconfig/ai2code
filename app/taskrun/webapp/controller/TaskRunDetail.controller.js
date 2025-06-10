@@ -95,7 +95,7 @@ sap.ui.define(
             this.onBtnAdoptPress = function (event) {
               event.getSource().setBusy(true);
               var context = event.getSource().getBindingContext();
-              var contextBinding = this.getView().getModel().bindContext("MainService.adopt(...)", context, { $$inheritExpandSelect: true });
+              var contextBinding = this.getView().getModel().bindContext("MainService.adopt(...)", context);
               contextBinding.invoke().finally(() => {
                 event.getSource().setBusy(false);
                 // refresh botInstance
