@@ -8,7 +8,7 @@ import cds.gen.mainservice.ContextNodes;
 public interface ContextService {
     public List<Map<String, Object>> buildContextAsHierarchy(List<ContextNodes> contextNodes);
 
-    public String getContextFullPath(String subPathPrefix, String subPath);
+    public String getContextFullPath(String botInstanceId, String subPath);
 
     public ContextNodes upsertContext(
         //     String botInstanceId,
