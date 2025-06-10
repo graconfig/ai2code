@@ -1,5 +1,6 @@
 package customer.ai2code.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -35,7 +36,7 @@ public class ChatBot implements Bot {
 
     @Override
     public String chat(String content) {
-        List<PromptTexts> prompts = null;
+        List<PromptTexts> prompts = new ArrayList<>();;
         try {
             // 1. 根据AIModel类型，获取到不同AIService服务
             AIService aiService = aiModelResolver.resolveAIService(aiModel.getModelConfigs());
