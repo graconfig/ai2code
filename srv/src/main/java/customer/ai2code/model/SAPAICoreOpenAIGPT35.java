@@ -25,7 +25,7 @@ public class SAPAICoreOpenAIGPT35 implements AIModel {
     public AIServiceConfig parseModelConfigs() {
         try {
             ObjectMapper mapper = getDefaultObjectMapper();
-            
+
             Object parameters = modelConfigs.getParameters();
             if (parameters instanceof String) {
                 return mapper.readValue((String) parameters, SAPAICoreConfig.class);
