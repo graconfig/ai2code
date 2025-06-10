@@ -13,6 +13,7 @@ import cds.gen.configservice.ConfigService;
 import cds.gen.ai.orchestration.BotMessage;
 import cds.gen.configservice.BotTypes;
 import cds.gen.configservice.BotTypes_;
+import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.AIModel;
 import customer.ai2code.model.Bot;
 import customer.ai2code.model.ChatBot;
@@ -26,6 +27,7 @@ import customer.ai2code.service.ContextService;
 import customer.ai2code.service.ContextService;
 
 import customer.ai2code.service.PromptService;
+import customer.ai2code.service.constant.AIConstants;
 
 // import customer.ai2code.service.AIService;
 import com.sap.cds.ql.Select;
@@ -145,7 +147,7 @@ public class BotServiceImpl implements BotService {
             if (bot instanceof ChatBot) {
                 response = ((ChatBot) bot).chat(content);
             } else {
-                throw new IllegalStateException("Bot is not a ChatBot: " + botInstanceId);
+                throw new BusinessException("Bot is not a ChatBot: " + botInstanceId);
             }
 
             // 更新状态为SUCCESS
@@ -153,6 +155,15 @@ public class BotServiceImpl implements BotService {
 
             // 3. 将用户和AI的聊天内容存储到表中
             BotMessages userMessage = genericCqnService.createAndInsertBotMessage(botInstanceId, content, "user");
+
+            // 3.1 停顿0.5 秒，确保用户消息先插入
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // 恢复中断状态
+                throw new BusinessException(AIConstants.Messages.THREAD_INTERRUPTED, e);
+            }
+
             BotMessages botMessage = genericCqnService.createAndInsertBotMessage(botInstanceId, response, "assistant");
 
             return botMessage;
@@ -160,7 +171,7 @@ public class BotServiceImpl implements BotService {
         } catch (Exception e) {
             // 更新状态为FAILED
             updateBotInstanceStatus(bot, "F");
-            throw new RuntimeException("Chat failed for bot: " + botInstanceId, e);
+            throw new BusinessException("Chat failed for bot: " + botInstanceId, e);
         }
     }
 
@@ -171,7 +182,7 @@ public class BotServiceImpl implements BotService {
         if (bot instanceof ChatBot) {
             return ((ChatBot) bot).chatInStreaming(content);
         } else {
-            throw new IllegalStateException("Bot is not a ChatBot: " + botInstanceId);
+            throw new BusinessException("Bot is not a ChatBot: " + botInstanceId);
         }
     }
 
@@ -214,7 +225,7 @@ public class BotServiceImpl implements BotService {
         } catch (Exception e) {
             // 更新状态为FAILED
             updateBotInstanceStatus(bot, "F");
-            throw new RuntimeException("Execution failed for bot: " + botInstanceId, e);
+            throw new BusinessException("Execution failed for bot: " + botInstanceId, e);
         }
     }
 
@@ -229,7 +240,7 @@ public class BotServiceImpl implements BotService {
             case "C": // Coding Bot
                 return new CodingBot(botInstance, aiModel, botType);
             default:
-                throw new IllegalArgumentException("Unsupported bot function type: " + functionTypeCode);
+                throw new BusinessException("Unsupported bot function type: " + functionTypeCode);
         }
     }
 
@@ -268,7 +279,7 @@ public class BotServiceImpl implements BotService {
         // 2. 查询关联的BotInstance ID
         String botInstanceId = genericCqnService.getBotInstanceIdByMessageId(messageId);
         if (botInstanceId == null) {
-            throw new IllegalStateException("No bot instance associated with message: " + messageId);
+            throw new BusinessException("No bot instance associated with message: " + messageId);
         }
 
         return adopt(botInstanceId, messageId);
@@ -280,19 +291,19 @@ public class BotServiceImpl implements BotService {
         // // 1. 获取 botInstance 对应的所有 messages
         // List<BotMessages> messages = genericCqnService.getBotMessagesByBotInstanceId(botInstanceId);
         // if (messages == null || messages.isEmpty()) {
-        //     throw new IllegalStateException("No messages found for botInstance: " + botInstanceId);
+        //     throw new BusinessException("No messages found for botInstance: " + botInstanceId);
         // }
 
         // // 2. 找到指定 messageId 的 message
         // BotMessages botMessage = messages.stream()
         //         .filter(msg -> messageId.equals(msg.getId()))
         //         .findFirst()
-        //         .orElseThrow(() -> new IllegalStateException("Message not found: " + messageId));
+        //         .orElseThrow(() -> new BusinessException("Message not found: " + messageId));
 
         // 1. 直接通过 messageId 获取对应的 message
         BotMessages botMessage = genericCqnService.getMessageById(botInstanceId,messageId);
         if (botMessage == null) {
-            throw new IllegalStateException("Message not found: " + messageId);
+            throw new BusinessException("Message not found: " + messageId);
         }
 
         String messageText = botMessage.getMessage();
@@ -302,14 +313,14 @@ public class BotServiceImpl implements BotService {
         // 3. 查询 outputContextPath
         String outputContextPath = genericCqnService.getOutputContextPathByBotInstanceId(botInstanceId);
         if (outputContextPath == null || outputContextPath.isBlank()) {
-            throw new IllegalStateException("No outputContextPath configured for botInstance: " + botInstanceId);
+            throw new BusinessException("No outputContextPath configured for botInstance: " + botInstanceId);
         }
 
         // 4. 查询 taskId
         // String taskId = genericCqnService.getTaskIdByBotInstanceId(botInstanceId);
         String taskId = genericCqnService.getMainTaskId(botInstanceId);
         if (taskId == null) {
-            throw new IllegalStateException("No taskId associated with botInstance: " + botInstanceId);
+            throw new BusinessException("No taskId associated with botInstance: " + botInstanceId);
         }
 
         // 5. 获取绝对的 outputContextPath
@@ -363,7 +374,7 @@ public class BotServiceImpl implements BotService {
     // if (parentBotInstanceId == null || parentBotInstanceId.isEmpty()) {
     // // 如果没有父BotInstance，说明这可能就是顶层任务
     // // 但不是主任务，这种情况可能是数据错误
-    // throw new IllegalStateException("Found top-level task but it's not marked as
+    // throw new BusinessException("Found top-level task but it's not marked as
     // main task: " + currentTaskId);
     // }
 
@@ -374,7 +385,7 @@ public class BotServiceImpl implements BotService {
     // }
 
     // // 如果遍历完还没找到主任务，抛出异常
-    // throw new IllegalStateException("Main task not found for botInstanceId: " +
+    // throw new BusinessException("Main task not found for botInstanceId: " +
     // botInstanceId);
     // }
 }

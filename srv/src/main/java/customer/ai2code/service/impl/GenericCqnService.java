@@ -1,7 +1,6 @@
 package customer.ai2code.service.impl;
 
 import org.springframework.stereotype.Service;
-
 import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnSelect;
 
@@ -24,6 +23,8 @@ import cds.gen.configservice.PromptTexts_;
 
 import java.util.List;
 import java.util.UUID;
+
+import customer.ai2code.exception.BusinessException;
 
 @Service
 public class GenericCqnService {
@@ -303,7 +304,7 @@ public class GenericCqnService {
             if (parentBotInstanceId == null || parentBotInstanceId.isEmpty()) {
                 // 如果没有父BotInstance，说明这可能就是顶层任务
                 // 但不是主任务，这种情况可能是数据错误
-                throw new IllegalStateException(
+                throw new BusinessException(
                         "Found top-level task but it's not marked as main task: " + currentTaskId);
             }
 
@@ -313,43 +314,8 @@ public class GenericCqnService {
         }
 
         // 如果遍历完还没找到主任务，抛出异常
-        throw new IllegalStateException("Main task not found for botInstanceId: " + botInstanceId);
+        throw new BusinessException("Main task not found for botInstanceId: " + botInstanceId);
     }
-
-    // /**
-    // * 创建并插入BotMessage
-    // */
-    // public BotMessages createAndInsertBotMessage(String botInstanceId, String
-    // userMessage, String assistantMessage) {
-    // BotMessages botMessage = BotMessages.create();
-    // botMessage.setId(UUID.randomUUID().toString());
-    // botMessage.setBotInstanceId(botInstanceId);
-    // botMessage.setRole("user"); // 设置角色
-    // botMessage.setMessage(userMessage); // 设置通用message字段
-
-    // // 插入用户消息
-    // entityService.insert(mainService, null, BotMessages_.class, botMessage,
-    // true);
-
-    // // 如果有AI回复，创建另一条记录
-    // if (assistantMessage != null && !assistantMessage.isEmpty()) {
-    // BotMessages assistantBotMessage = BotMessages.create();
-    // assistantBotMessage.setId(UUID.randomUUID().toString());
-    // assistantBotMessage.setBotInstanceId(botInstanceId);
-    // assistantBotMessage.setRole("assistant");
-    // assistantBotMessage.setMessage(assistantMessage);
-
-    // // 插入AI回复消息
-    // entityService.insert(mainService, null, BotMessages_.class,
-    // assistantBotMessage, true);
-
-    // // 返回AI回复的消息记录
-    // return assistantBotMessage;
-    // }
-
-    // // 如果没有AI回复，返回用户消息记录
-    // return botMessage;
-    // }
 
     /**
      * 创建并插入单条BotMessage（指定角色）
@@ -477,7 +443,7 @@ public class GenericCqnService {
             return currentTask;
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to get parent task for botInstance: " + botInstanceId, e);
+            throw new BusinessException("Failed to get parent task for botInstance: " + botInstanceId, e);
         }
     }
 
