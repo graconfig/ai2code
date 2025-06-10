@@ -31,6 +31,7 @@
                         showSeparators="Inner"
                         items="{ 
                             path: 'messages', 
+                            sorter: { path: 'modifiedAt', descending: false },
                             filters: {
                                 path: 'role',
                                 operator: 'NE',
