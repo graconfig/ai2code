@@ -82,9 +82,7 @@ public class AIModelResolver {
                 switch (modelConfigs.getModelName()) {
                     case "claude-3.5-sonnet": // 新增Claude 3.5支持
                         return new SAPAICoreClaudeAI35Sonnet(modelConfigs);
-                        return new SAPAICoreClaudeAI35Sonnet(modelConfigs);
                     case "claude-3.7-sonnet": // 新增Claude 3.7支持
-                        return new SAPAICoreClaudeAI37Sonnet(modelConfigs);
                         return new SAPAICoreClaudeAI37Sonnet(modelConfigs);
                     // 其他Claude模型...
                 }
