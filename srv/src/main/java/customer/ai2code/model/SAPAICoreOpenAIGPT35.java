@@ -1,4 +1,4 @@
-package main.java.customer.ai2code.model;
+package customer.ai2code.model;
 
 import cds.gen.configservice.ModelConfigs;
 import customer.ai2code.model.AIModel;
@@ -10,17 +10,15 @@ import lombok.NoArgsConstructor;
 import static com.sap.ai.sdk.core.JacksonConfiguration.getDefaultObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class SAPAICoreOpenAIGPT35 implements AIModel {
-    private ModelConfigs modelConfigs; 
+    private ModelConfigs modelConfigs;
 
     @Override
     public String getModelName() {
-        return modelConfigs.getModelName(); 
+        return modelConfigs.getModelName();
     }
 
     @Override
@@ -29,8 +27,5 @@ public class SAPAICoreOpenAIGPT35 implements AIModel {
         SAPAICoreConfig sapAICoreConfig = mapper.convertValue(modelConfigs.getParameters(), SAPAICoreConfig.class);
         return sapAICoreConfig;
     }
-    // @Override
-    // public ModelConfigs getModelConfigs() {
-    //     return modelConfigs;
-    // }
+
 }

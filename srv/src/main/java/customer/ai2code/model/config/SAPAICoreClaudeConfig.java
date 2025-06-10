@@ -1,4 +1,4 @@
-package main.java.customer.ai2code.model.config;
+package customer.ai2code.model.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -7,18 +7,17 @@ import lombok.AllArgsConstructor;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class SAPAICoreClaudeConfig implements AIServiceConfig {
-    
+
     @JsonProperty("api_url")
     private String apiUrl;
-    
+
     @JsonProperty("api_key")
     private String apiKey;
-    
+
     @Override
     public String getServiceType() {
         return "SAP_AI_CORE_CLAUDE";
@@ -37,7 +36,7 @@ public class SAPAICoreClaudeConfig implements AIServiceConfig {
     @Override
     public boolean isValid() {
         return apiKey != null && !apiKey.isEmpty() &&
-               apiUrl != null && !apiUrl.isEmpty();
+                apiUrl != null && !apiUrl.isEmpty();
     }
 
     /**

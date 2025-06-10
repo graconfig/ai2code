@@ -1,7 +1,6 @@
-package main.java.customer.ai2code.model;
+package customer.ai2code.model;
 
 import cds.gen.configservice.ModelConfigs;
-import customer.ai2code.model.AIModel;
 import customer.ai2code.model.config.AIServiceConfig;
 import customer.ai2code.model.config.SAPAICoreClaudeConfig;
 import lombok.AllArgsConstructor;
@@ -15,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AllArgsConstructor
 public class SAPAICoreClaudeAI37Sonnet implements AIModel {
     private ModelConfigs modelConfigs;
+
     @Override
     public String getModelName() {
         return modelConfigs.getModelName();
@@ -23,9 +23,9 @@ public class SAPAICoreClaudeAI37Sonnet implements AIModel {
     @Override
     public AIServiceConfig parseModelConfigs() {
         ObjectMapper mapper = getDefaultObjectMapper();
-        SAPAICoreClaudeConfig claudeConfig = 
-            mapper.convertValue(modelConfigs.getParameters(), SAPAICoreClaudeConfig.class);
-        return SAPAICoreClaudeConfig;
+        SAPAICoreClaudeConfig sapAiCoreclaudeConfig = mapper.convertValue(modelConfigs.getParameters(),
+                SAPAICoreClaudeConfig.class);
+        return sapAiCoreclaudeConfig;
     }
 
 }
