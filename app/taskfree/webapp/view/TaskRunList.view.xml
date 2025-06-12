@@ -1,0 +1,121 @@
+<mvc:View
+    controllerName="ai.orchestration.taskfree.controller.TaskRunList"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core"
+    displayBlock="true"
+    height="100%">
+    
+    <f:DynamicPage id="dynamicPageId">
+        <!-- DynamicPage Title -->
+        <f:title>
+            <f:DynamicPageTitle id="dynamicPageTitle">
+                <f:heading>
+                    <Title id="pageTitle" text="Task Management" level="H1"/>
+                </f:heading>
+            </f:DynamicPageTitle>
+        </f:title>
+        
+        <!-- DynamicPage Header -->
+        <f:header>
+            <f:DynamicPageHeader id="dynamicPageHeader" pinnable="true">
+                <f:content>
+                    <VBox id="headerContent">
+                        <!-- Search and Filter Bar -->
+                        <HBox id="searchFilterBar" class="sapUiMediumMarginBottom" alignItems="Center" justifyContent="SpaceBetween">
+                            <HBox id="leftControls" alignItems="Center">
+                                <SearchField 
+                                    id="searchField"
+                                    width="300px" 
+                                    placeholder="Search tasks..."
+                                    search="onSearch"
+                                    class="sapUiMediumMarginEnd"/>
+                            </HBox>
+                            <HBox id="rightControls" alignItems="Center">
+                                <Text id="taskCounter" text="Tasks: {/Tasks/$count}" class="sapUiMediumMarginEnd"/>
+                            </HBox>
+                        </HBox>
+                    </VBox>
+                </f:content>
+            </f:DynamicPageHeader>
+        </f:header>
+        
+        <f:content>
+            <!-- Table View -->
+            <Table
+                id="taskTable"
+                items="{
+                    path: '/Tasks',
+                    sorter: {
+                        path: 'modifiedAt',
+                        descending: true
+                    },
+                    filters: {
+                        path: 'isMain',
+                        operator: 'NE',
+                        value1: false
+                    }
+                }"
+                growing="true"
+                growingThreshold="20"
+                mode="SingleSelect">
+                
+                <headerToolbar>
+                    <OverflowToolbar id="tableToolbar">
+                        <Title id="tableTitle" text="Tasks ({/Tasks/$count})" level="H2"/>
+                        <ToolbarSpacer id="toolbarSpacer"/>
+                        <Button 
+                            id="toolbarCreateButton"
+                            text="Create Task"
+                            type="Emphasized"
+                            press="onCreate"/>
+                        <Button 
+                            id="toolbarRefreshButton"
+                            icon="sap-icon://refresh" 
+                            tooltip="Refresh"
+                            press="onRefresh"
+                            type="Transparent"/>
+                    </OverflowToolbar>
+                </headerToolbar>
+                
+                <columns>
+                    <Column id="nameColumn">
+                        <Text id="nameHeader" text="Name"/>
+                    </Column>
+                    <Column id="descriptionColumn" width="25%">
+                        <Text id="descriptionHeader" text="Description"/>
+                    </Column>
+                </columns>
+                
+                <items>
+                    <ColumnListItem 
+                        id="taskTableItem"
+                        press="onItemPress"
+                        type="Navigation">
+                        <cells>
+                            <VBox id="nameCell">
+                                <Text id="nameText" text="{name}" wrapping="false" class="sapUiTinyMarginBottom"/>
+                                <ObjectStatus 
+                                    id="isMainStatus"
+                                    text="{= ${isMain} ? 'Main Task' : 'Sub Task' }"
+                                    state="{= ${isMain} ? 'Success' : 'Information' }"/>
+                            </VBox>
+                            <Text id="descriptionText" text="{description}" wrapping="true" maxLines="3"/>
+                            <Text id="typeText" text="{= ${type} ? ${type/name} : 'No Type' }" wrapping="false"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </f:content>
+        
+        <!-- DynamicPage Footer -->
+        <f:footer>
+            <OverflowToolbar id="footerToolbar">
+                <ToolbarSpacer id="footerSpacer"/>
+                <Button id="exportButton" text="Export" icon="sap-icon://excel-attachment" press="onExport"/>
+                <Button id="settingsButton" text="Settings" icon="sap-icon://action-settings" press="onSettings"/>
+            </OverflowToolbar>
+        </f:footer>
+    </f:DynamicPage>
+</mvc:View>
