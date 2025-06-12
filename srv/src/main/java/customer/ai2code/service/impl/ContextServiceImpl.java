@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import cds.gen.mainservice.ContextNodes;
 import cds.gen.mainservice.Tasks;
+import customer.ai2code.exception.BusinessException;
 import customer.ai2code.service.ContextService;
 
 @Service
@@ -21,7 +22,7 @@ public class ContextServiceImpl implements ContextService {
     @Override
     public List<Map<String, Object>> buildContextAsHierarchy(List<ContextNodes> contextNodes) {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'buildContextAsHierarchy'");
+        throw new BusinessException("Unimplemented method 'buildContextAsHierarchy'");
     }
 
     @Override
@@ -78,7 +79,7 @@ public class ContextServiceImpl implements ContextService {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to upsert context node for taskId: " + taskId +
+            throw new BusinessException("Failed to upsert context node for taskId: " + taskId +
                     ", contextPath: " + contextPath, e);
         }
     }
@@ -111,7 +112,7 @@ public class ContextServiceImpl implements ContextService {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to upsert context node for taskId: " + taskId +
+            throw new BusinessException("Failed to upsert context node for taskId: " + taskId +
                     ", contextPath: " + contextPath, e);
         }
     }

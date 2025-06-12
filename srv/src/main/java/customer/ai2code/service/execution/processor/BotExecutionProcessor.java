@@ -4,10 +4,14 @@ import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.tools.Diagnostic;
+
+import com.google.auto.service.AutoService;
+
 import java.util.Set;
 
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
+@AutoService(Processor.class)
 public class BotExecutionProcessor extends AbstractProcessor {
 
     @Override

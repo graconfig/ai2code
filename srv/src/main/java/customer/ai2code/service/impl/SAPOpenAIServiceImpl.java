@@ -179,7 +179,7 @@ public class SAPOpenAIServiceImpl implements AIService {
                         Class<T> botExecutionClazz,
                         AIModel model) {
                 // TODO Auto-generated method stub
-                throw new UnsupportedOperationException(
+                throw new BusinessException(
                                 "Unimplemented method 'functionCalling' for SAPOpenAIServiceImpl");
                 // parse functionCall parameers by clazz and parameters;
                 // OpenAiChatCompletionParameters params = new OpenAiChatCompletionParameters();

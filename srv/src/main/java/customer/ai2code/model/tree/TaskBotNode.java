@@ -1,5 +1,6 @@
 package customer.ai2code.model.tree;
 
+import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.Bot;
 import customer.ai2code.model.Task;
 
@@ -103,7 +104,7 @@ public class TaskBotNode {
                 return root.id;
             }
         }
-        // throw new IllegalStateException("Root node is not a main task");
+        // throw new BusinessException("Root node is not a main task");
         return null;
     }
     
@@ -181,13 +182,13 @@ public class TaskBotNode {
     public void setParent(TaskBotNode parent) { this.parent = parent; }
     public void setTaskObject(Task taskObject) { 
         if (type != NodeType.TASK) {
-            throw new IllegalStateException("Cannot set task object on non-task node");
+            throw new BusinessException("Cannot set task object on non-task node");
         }
         this.taskObject = taskObject; 
     }
     public void setBotObject(Bot botObject) { 
         if (type != NodeType.BOT_INSTANCE) {
-            throw new IllegalStateException("Cannot set bot object on non-bot node");
+            throw new BusinessException("Cannot set bot object on non-bot node");
         }
         this.botObject = botObject; 
     }
@@ -195,14 +196,14 @@ public class TaskBotNode {
     // 类型安全的数据访问
     public Task getTask() {
         if (type != NodeType.TASK) {
-            throw new IllegalStateException("Node is not a task node");
+            throw new BusinessException("Node is not a task node");
         }
         return taskObject;
     }
     
     public Bot getBot() {
         if (type != NodeType.BOT_INSTANCE) {
-            throw new IllegalStateException("Node is not a bot instance node");
+            throw new BusinessException("Node is not a bot instance node");
         }
         return botObject;
     }
