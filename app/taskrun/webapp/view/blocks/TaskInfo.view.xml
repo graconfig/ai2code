@@ -2,15 +2,15 @@
 	<forms:SimpleForm editable="true" layout="ColumnLayout">
 
     <Label text="Name" />
-    <Input id="name" value="{name}" />
+    <Input id="name" value="{name}" editable="false"/>
     <Label text="Description" />
-    <Input value="{description}"></Input>
+    <Input value="{description}" editable="false"></Input>
     <Label text="Context Path" />
-    <Input value="{contextPath}"></Input>
+    <Input value="{contextPath}" editable="false"></Input>
     <Label text="Sequence" />
-    <Input value="{sequence}" />
+    <Input value="{sequence}" editable="false"/>
     <Label text="isMain" />
-    <CheckBox selected="{isMain}" />
+    <CheckBox selected="{isMain}" editable="false"/>
 
 	</forms:SimpleForm>
 </mvc:View>

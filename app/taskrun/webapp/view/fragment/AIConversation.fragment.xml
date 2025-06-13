@@ -1,0 +1,114 @@
+<core:FragmentDefinition
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    displayBlock="true"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:webc="sap.ui.webc.main"
+    xmlns:f="sap.f"
+    xmlns:custom="ai.orchestration.taskrun.control"
+    core:require="{
+        LayoutManager: 'ai/orchestration/taskrun/util/LayoutManager',
+		ChatFormatter: 'ai/orchestration/taskrun/formatter/ChatFormatter'
+	}"
+    xmlns:layout="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    height="100%"
+>
+    <Dialog id="_IDGenDialog1" title="{i18n>AIConversationTitle}" contentHeight="100%"
+        contentWidth="200%"
+        verticalScrolling="true"
+        resizable="true"
+        class="dialogToRight"
+    >
+        <Page id="chatPage" class="sapUiContentPadding chatPage" showFooter="true"
+            floatingFooter="false" showHeader="false">
+            
+            <content>
+                <VBox id="_IDGenVBox" class="sapUiMediumMarginBottom">
+                    <List
+                        id="messageList"
+                        showNoData="false"
+                        showSeparators="Inner"
+                        items="{ 
+                            path: 'messages', 
+                            sorter: { path: 'modifiedAt', descending: false },
+                            filters: {
+                                path: 'role',
+                                operator: 'NE',
+                                value1: 'system'
+                            },
+                            parameters: {
+                                $$updateGroupId: 'changes'
+                            }
+                        }"
+                    >
+                        <custom:ChatMessageListItem id="_IDGenChatMessageListItem"
+                            message="{message}"
+                            sender="{createdBy}"
+                            date="{createdAt}"
+                        >
+                            <custom:avatar>
+                                <Avatar id="_IDGenAvatar"
+                                    displaySize="S"
+                                    src="{ path: 'role', formatter: 'ChatFormatter.senderIcon' }"
+                                    displayShape="Square"
+                                    backgroundColor="Transparent"
+                                />
+                            </custom:avatar>
+
+                            <custom:adopt>
+                                <Button id="_IDGenButton3"
+                                    class="sapUiTinyMarginBegin"
+                                    type="Emphasized"
+                                    icon="sap-icon://thumb-up"
+                                    text="{i18n>Button03}"
+                                    press="onBtnAdoptPress"
+                                    busyIndicatorDelay="0"
+                                    visible="{= %{role} === 'assistant' }"
+                                />
+                                <!-- ${isAdopted} === false &amp;&amp; -->
+                            </custom:adopt>
+                            <custom:display>
+                                <!-- <Button id="_IDGenButton4"
+                                    class="sapUiTinyMarginBegin"
+                                    type="Emphasized"
+                                    icon="sap-icon://display"
+                                    text="{i18n>Button04}"
+                                    press="onBtnDisplayPress"
+                                    busyIndicatorDelay="0"
+                                    visible="{= ${isAdopted} === true &amp;&amp; %{role} === 'assistant' }"
+                                /> -->
+                            </custom:display>
+                        </custom:ChatMessageListItem>
+                    </List>
+                    <Text
+                        id="listEndMarker"
+                        text=""
+                        visible="true"
+                    />
+                </VBox>
+
+
+            </content>
+            <footer>
+                <OverflowToolbar id="_IDGenOverflowToolbar">
+                    <FeedInput
+                        id="newMessageInput"
+                        post="onPostMessage"
+                        showIcon="false"
+                        growing="true"
+                    />
+                </OverflowToolbar>
+            </footer>
+        </Page>
+        <buttons>
+            <!-- <Button id="_IDGenButton2" text="Sync changes to chat list"
+                press="onPressSyncChangesToChatList"></Button> -->
+            <Button id="_IDGenButton4" text="Close"
+                press="onAIConversationClose"></Button>
+        </buttons>
+        <endButton>
+
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

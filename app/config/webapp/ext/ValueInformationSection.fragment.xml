@@ -15,17 +15,12 @@
 			<f:formContainers>
 				<f:FormContainer>
 					<f:formElements>
-						<f:FormElement label="{i18n>lang}">
+						<!-- <f:FormElement label="{i18n>lang}">
 						<f:fields>
 								<Text text="{lang}"></Text>
 						
-								<!-- <TextArea rows="1" 
-                          value="{language}"
-                          editable="false">
-                    
-                </TextArea> -->
 							</f:fields>						
-						</f:FormElement>					
+						</f:FormElement>					 -->
 						<f:FormElement label="{i18n>content}">					
 							<f:fields>
 								<TextArea rows="28" 

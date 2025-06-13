@@ -1,15 +1,16 @@
-<mvc:View xmlns:mvc="sap.ui.core.mvc"  xmlns="sap.m">
+<mvc:View xmlns:mvc="sap.ui.core.mvc"  xmlns="sap.m" controllerName="ai.orchestration.taskrun.controller.TaskRunDetail">
 	<Table
         items="{
-            path: 'botInstances'
+            path: 'botInstances',
+            sorter: { path: 'sequence', descending: false }
         }">
         <headerToolbar>
             <OverflowToolbar>
                 <Title text="BotInstances" level="H2"/>
                 <ToolbarSpacer/>
-                <Button text="Create" press="onCreateBotInstances"/>
+                <!-- <Button text="Create" press="onCreateBotInstances"/>
                 <Button text="Execute"></Button>
-                <Button text="Chat Completion"></Button>
+                <Button text="Chat Completion"></Button> -->
             </OverflowToolbar>
         </headerToolbar>
         <columns>
@@ -25,7 +26,9 @@
         </columns>
         <items>
             <ColumnListItem 
-                vAlign="Middle">
+                vAlign="Middle"
+                type="Active"
+                press="onBotInstancePress">
                 <cells>
                     <Text text="{sequence}" wrapping="false" />
                     <Text text="{result}" wrapping="false"/>
