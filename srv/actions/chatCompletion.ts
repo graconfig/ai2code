@@ -1,37 +1,40 @@
-import { AuthenticationType } from "@sap-cloud-sdk/connectivity";
-import { transformServiceBindingToDestination } from '@sap-cloud-sdk/connectivity';
-import { __LargeString, array } from "@sap/cds";
 import { DeploymentApi } from "@sap-ai-sdk/ai-api";
-import { error } from "console";
+import { __LargeString } from "@sap/cds";
+import axios from "axios";
 
-export const chatCompletionHandler = async function (
-  this: any,
-  req: any
-) {
-  const { Tasks, BotInstances, ContextNodes, BotMessages, BotType, PromptText, ModelConfigs } = this.entities;
-  let insertResult, updateResult, firstChatFlag, functionResponse
+export const chatCompletionHandler = async function (this: any, req: any) {
+  const {
+    Tasks,
+    BotInstances,
+    ContextNodes,
+    BotMessages,
+    BotType,
+    PromptText,
+    ModelConfigs,
+  } = this.entities;
+  let insertResult, updateResult, firstChatFlag, functionResponse;
 
   /**
    * step1:  设置BotInstances的status为`RUNNING`
    */
 
   //获取当前Tasks
-  const currentTasks = await SELECT.one.from(Tasks)
+  const currentTasks = await SELECT.one
+    .from(Tasks)
     .where({ ID: req.params[0] });
 
   //获取当前BotInstance
-  const currentBotInstance = await SELECT.one.from(BotInstances)
+  const currentBotInstance = await SELECT.one
+    .from(BotInstances)
     .where({ ID: req.params[1] });
 
   //更新状态为RUNNING
-  updateResult = await batchDynamicUpdate(
-    this,
-    'BotInstances',
-    [{
+  updateResult = await batchDynamicUpdate(this, "BotInstances", [
+    {
       keys: { ID: currentBotInstance.ID },
-      fields: { status_code: 'RUNNING' }
-    }]
-  );
+      fields: { status_code: "RUNNING" },
+    },
+  ]);
 
   /**
    * step2:  根据BotMessages中是否存在记录判定是否为首次调用：
@@ -40,80 +43,82 @@ export const chatCompletionHandler = async function (
    */
 
   //获取当前BotMessages历史记录列表
-  const currentBotMessages = await SELECT.from(BotMessages)
-    .where({ botInstance_ID: currentBotInstance.ID })
+  const currentBotMessages = await SELECT.from(BotMessages).where({
+    botInstance_ID: currentBotInstance.ID,
+  });
 
-  let currentBotTypes, currentSystemPrompt, currentUserContent
+  let currentBotTypes, currentSystemPrompt, currentUserContent;
 
   const userLanguage = getCurrentLanguage(req);
 
-  currentBotTypes = await SELECT.one.from(BotType)
-    .where({ ID: currentBotInstance.type_ID })
+  currentBotTypes = await SELECT.one
+    .from(BotType)
+    .where({ ID: currentBotInstance.type_ID });
 
   //判定是否为首次调用
   if (currentBotMessages.length == 0) {
-    firstChatFlag = true
+    firstChatFlag = true;
 
-    currentSystemPrompt = await SELECT.one.from(PromptText)
-      .where({
-        botType_ID: currentBotTypes.ID,
-        lang_code: userLanguage
-      })
+    currentSystemPrompt = await SELECT.one.from(PromptText).where({
+      botType_ID: currentBotTypes.ID,
+      lang_code: userLanguage,
+    });
 
     if (currentSystemPrompt) {
       //替换当前系统提示词中的占位符
-      currentSystemPrompt.content = await replacePlaceHolder(currentSystemPrompt.content, ContextNodes, currentTasks)
+      currentSystemPrompt.content = await replacePlaceHolder(
+        currentSystemPrompt.content,
+        ContextNodes,
+        currentTasks
+      );
     } else {
       throw new Error(`System prompt not find`);
     }
   }
 
   //当前用户输入消息
-  currentUserContent = req.data.content
+  currentUserContent = req.data.content;
 
-  let insertData = []
+  let insertData = [];
 
   if (firstChatFlag) {
     insertData.push({
-      role: 'system',
+      role: "system",
       message: currentSystemPrompt.content,
-      ragData: '',
+      ragData: "",
       botInstance_ID: currentBotInstance.ID,
-    })
+    });
   }
 
-  insertData.push(
-    {
-      role: 'user',
-      message: currentUserContent,
-      ragData: '',
-      botInstance_ID: currentBotInstance.ID,
-    })
+  insertData.push({
+    role: "user",
+    message: currentUserContent,
+    ragData: "",
+    botInstance_ID: currentBotInstance.ID,
+  });
 
-  insertResult = await batchDynamicInsert(
-    this,
-    'BotMessages',
-    insertData
-  );
+  insertResult = await batchDynamicInsert(this, "BotMessages", insertData);
 
   /**
    * step3:  根据BotTypes.model判定使用哪种AI模型，并调用对应AI模型的Completion
    */
   switch (currentBotTypes.functionType_code) {
     //AI_CHAT
-    case 'A':
-      functionResponse = await chatWithAI(currentBotMessages, currentBotTypes)
+    case "A":
+      functionResponse = await chatWithAI(currentBotMessages, currentBotTypes);
       break;
     //FUNCTION CALL
-    case 'F':
-      functionResponse = '';
+    case "F":
+      functionResponse = "";
       break;
     //CODE
-    case 'C':
-      functionResponse = '';
+    case "C":
+      functionResponse = "";
       break;
     default:
-      throw new Error(`Unkonw functionType: ${currentBotTypes.functionType_code}`);
+      throw new Error(
+        `Unkonw functionType: ${currentBotTypes.functionType_code}`
+      );
   }
 
   /**
@@ -122,32 +127,24 @@ export const chatCompletionHandler = async function (
    *           非首次对话：更新user、assistant
    *         调用失败：返回错误消息，更新状态为`FAILED`
    */
-  insertData = []
+  insertData = [];
 
-  insertData.push(
-    {
-      role: 'assistant',
-      message: functionResponse,
-      ragData: '',
-      botInstance_ID: currentBotInstance.ID,
-    }
-  )
+  insertData.push({
+    role: "assistant",
+    message: functionResponse,
+    ragData: "",
+    botInstance_ID: currentBotInstance.ID,
+  });
 
-  insertResult = await batchDynamicInsert(
-    this,
-    'BotMessages',
-    insertData
-  );
+  insertResult = await batchDynamicInsert(this, "BotMessages", insertData);
 
   //更新状态为SUCCESS
-  updateResult = await batchDynamicUpdate(
-    this,
-    'BotInstances',
-    [{
+  updateResult = await batchDynamicUpdate(this, "BotInstances", [
+    {
       keys: { ID: currentBotInstance.ID },
-      fields: { status_code: 'SUCCESS' }
-    }]
-  );
+      fields: { status_code: "SUCCESS" },
+    },
+  ]);
 };
 /**
  * 批量动态插入
@@ -156,7 +153,11 @@ export const chatCompletionHandler = async function (
  * @param   {Array}  entries    - 插入数据数组，每个元素为要插入的记录对象
  * @returns                     - 插入结果数组
  */
-async function batchDynamicInsert(srv: any, entityName: string, entries: any[]) {
+async function batchDynamicInsert(
+  srv: any,
+  entityName: string,
+  entries: any[]
+) {
   try {
     const entity = srv.entities[entityName];
     if (!entity) {
@@ -165,7 +166,7 @@ async function batchDynamicInsert(srv: any, entityName: string, entries: any[]) 
 
     // 验证插入数据不为空
     if (!entries || entries.length === 0) {
-      throw new Error('No entries provided for insertion');
+      throw new Error("No entries provided for insertion");
     }
 
     const results = [];
@@ -176,12 +177,9 @@ async function batchDynamicInsert(srv: any, entityName: string, entries: any[]) 
         const entry = entries[i];
 
         // 单条插入
-        const result = await srv.run(
-          INSERT.into(entity).entries(entry)
-        );
+        const result = await srv.run(INSERT.into(entity).entries(entry));
 
         results.push(result);
-
       } catch (error) {
         throw error;
       }
@@ -190,9 +188,8 @@ async function batchDynamicInsert(srv: any, entityName: string, entries: any[]) 
     return {
       success: true,
       result: results,
-      count: entries.length
+      count: entries.length,
     };
-
   } catch (error) {
     console.error(` ${entityName} insert error:`, error);
     throw error;
@@ -217,9 +214,7 @@ async function batchDynamicUpdate(srv: any, entityName: any, updates: any) {
     try {
       for (const update of updates) {
         const result = await srv.run(
-          UPDATE(entity)
-            .set(update.fields)
-            .where(update.keys)
+          UPDATE(entity).set(update.fields).where(update.keys)
         );
         results.push(result);
       }
@@ -228,7 +223,7 @@ async function batchDynamicUpdate(srv: any, entityName: any, updates: any) {
       throw error;
     }
   } catch (error) {
-    console.error('Batch dynamic update error:', error);
+    console.error("Batch dynamic update error:", error);
     throw error;
   }
 }
@@ -238,7 +233,7 @@ async function batchDynamicUpdate(srv: any, entityName: any, updates: any) {
  * @returns              - 当前语言
  */
 function getCurrentLanguage(req: any) {
-  const userLanguage = req.user?.locale || 'EN';
+  const userLanguage = req.user?.locale || "EN";
   return userLanguage;
 }
 /**
@@ -249,20 +244,26 @@ function getCurrentLanguage(req: any) {
  * @param   {object} currentTasks  - currentTasks实体
  * @returns                        - 提示词
  */
-async function replacePlaceHolder(PromptContent: any, ContextNodes: any, currentTasks: any) {
+async function replacePlaceHolder(
+  PromptContent: any,
+  ContextNodes: any,
+  currentTasks: any
+) {
   const markers = extractTemplateMarkers(PromptContent);
 
-  let contextNodeValue
+  let contextNodeValue;
   for (const marker of markers) {
-    contextNodeValue = await SELECT.one.from(ContextNodes)
-      .where({ task_ID: currentTasks.ID }).columns('value')
+    contextNodeValue = await SELECT.one
+      .from(ContextNodes)
+      .where({ task_ID: currentTasks.ID })
+      .columns("value");
 
     if (contextNodeValue) {
-      PromptContent = PromptContent.replace(marker, contextNodeValue.value)
+      PromptContent = PromptContent.replace(marker, contextNodeValue.value);
     }
   }
 
-  return PromptContent
+  return PromptContent;
 }
 
 /**
@@ -287,10 +288,14 @@ function extractTemplateMarkers(content: any): string[] {
  * @param currentBotType     - 对话Bot信息
  * @returns                  - AI返回的内容
  */
-async function chatWithAI(currentBotMessages: any, currentBotType: any): Promise<any> {
-  let response
-  const currentModelConfig = await SELECT.one.from('ModelConfig')
-    .where({ ID: currentBotType.model_ID })
+async function chatWithAI(
+  currentBotMessages: any,
+  currentBotType: any
+): Promise<any> {
+  let response;
+  const currentModelConfig = await SELECT.one
+    .from("ModelConfig")
+    .where({ ID: currentBotType.model_ID });
 
   if (!currentModelConfig) {
     throw new Error(`AI Config not exits.`);
@@ -298,16 +303,29 @@ async function chatWithAI(currentBotMessages: any, currentBotType: any): Promise
 
   // const aiAPI = await import("@sap-ai-sdk/ai-api");
 
-  const parameters_JSON = JSON.parse(currentModelConfig.parameters)
+  const parameters_JSON = JSON.parse(currentModelConfig.parameters);
 
-  const destination_JSON = {
+  const tokenResponse = await axios.post(
+    parameters_JSON.url + "/oauth/token",
+    new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: parameters_JSON.clientid,
+      client_secret: parameters_JSON.clientsecret,
+    }),
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+
+  const accessToken = tokenResponse.data.access_token;
+
+  const destination: any = {
     url: parameters_JSON.serviceurls.AI_API_URL,
-    authentication: 'OAuth2ClientCredentials' as AuthenticationType,
-    clientId: parameters_JSON.clientid,
-    clientSecret: parameters_JSON.clientsecret,
-    tokenServiceUrl: parameters_JSON.url + '/oauth/token',
-    // tokenServiceUser: parameters_JSON.clientid,
-    // tokenServicePassword: parameters_JSON.clientsecret
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   };
 
   const { resources } = await DeploymentApi.deploymentQuery(
@@ -317,22 +335,24 @@ async function chatWithAI(currentBotMessages: any, currentBotType: any): Promise
       scenarioId: "foundation-models",
     },
     { "AI-Resource-Group": "default" }
-  ).execute(destination_JSON);
+  ).execute(destination);
+
+  console.log("resources", resources);
 
   switch (currentModelConfig.modelName) {
-    case 'gpt-4o':
+    case "gpt-4o":
       break;
-    case 'gpt-4.1':
+    case "gpt-4.1":
       break;
-    case 'claude-3.7-sonnet':
+    case "claude-3.7-sonnet":
       break;
-    case 'claude-4-sonnet':
+    case "claude-4-sonnet":
       break;
-    case 'gemini-2.5-pro':
+    case "gemini-2.5-pro":
       break;
-    case 'text-embedding-3-large':
+    case "text-embedding-3-large":
       break;
-    case 'text-embedding-3-small':
+    case "text-embedding-3-small":
       break;
     default:
       throw new Error(`This LLM model not support yet.`);
