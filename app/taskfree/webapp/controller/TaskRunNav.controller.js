@@ -67,6 +67,9 @@ sap.ui.define(
         },
 
         onRouteChange: function (oEvent) {
+          //set the nav level to 1
+          this.byId("idItemsNavigationTree").expandToLevel(1);
+
           var sRouteName = oEvent.getParameter('name');
           var oArguments = oEvent.getParameter('arguments');
           
@@ -334,8 +337,10 @@ sap.ui.define(
         },
 
         onNavigationItemSelect: function(oEvent) {
-          var oItem = oEvent.getParameter("item");
-          var sKey = oItem.getKey();
+          //var oItem = oEvent.getParameter("item");
+          //var sKey = oItem.getKey();
+          var oItem = oEvent.getParameters().listItem;
+          var sKey = oItem.getBindingContext("side").getProperty().key;
           var oContext = oItem.getBindingContext("side");
           var oData = oContext.getObject();
           
@@ -518,7 +523,15 @@ sap.ui.define(
           // Navigate back to the task list page
           var oRouter = this.getOwnerComponent().getRouter();
           oRouter.navTo("RouteTaskRunList");
-        }
+        },
+        onStandardTreeItemPress: function(oEvent) {
+          console.log("Button pressed");
+        },
+        onNavigationTreeStandardItemPress: function (oEvent) {
+          // 处理 TreeItem 点击逻辑
+          console.log("Button pressed");
+          // 可以在这里添加跳转、数据加载等操作
+      }
       }
     );
   }
