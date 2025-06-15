@@ -1,6 +1,12 @@
-import { DeploymentApi } from "@sap-ai-sdk/ai-api";
+import { AiDeploymentList, DeploymentApi } from "@sap-ai-sdk/ai-api";
 import { __LargeString } from "@sap/cds";
+import { AzureOpenAiChatClient } from "@sap-ai-sdk/foundation-models";
 import axios from "axios";
+import { HttpDestination } from "@sap-cloud-sdk/connectivity";
+let tokenCache: { token: any, expiry: any } = {
+  token: undefined,
+  expiry: undefined
+}
 
 export const chatCompletionHandler = async function (this: any, req: any) {
   const {
@@ -10,9 +16,9 @@ export const chatCompletionHandler = async function (this: any, req: any) {
     BotMessages,
     BotType,
     PromptText,
-    ModelConfigs,
   } = this.entities;
-  let insertResult, updateResult, firstChatFlag, functionResponse;
+
+  let functionResponse;
 
   /**
    * step1:  设置BotInstances的status为`RUNNING`
@@ -29,10 +35,15 @@ export const chatCompletionHandler = async function (this: any, req: any) {
     .where({ ID: req.params[1] });
 
   //更新状态为RUNNING
-  updateResult = await batchDynamicUpdate(this, "BotInstances", [
+  await batchDynamicUpdate(this, "BotInstances", [
     {
-      keys: { ID: currentBotInstance.ID },
-      fields: { status_code: "RUNNING" },
+      keys: {
+        ID: currentBotInstance.ID
+      },
+      fields: {
+        status_code: "RUNNING",
+        modifiedAt: new Date().toISOString(),
+      },
     },
   ]);
 
@@ -45,35 +56,33 @@ export const chatCompletionHandler = async function (this: any, req: any) {
   //获取当前BotMessages历史记录列表
   const currentBotMessages = await SELECT.from(BotMessages).where({
     botInstance_ID: currentBotInstance.ID,
+    role: { '!=': 'system' }
   });
 
   let currentBotTypes, currentSystemPrompt, currentUserContent;
 
   const userLanguage = getCurrentLanguage(req);
 
+  //获取当前BotType信息
   currentBotTypes = await SELECT.one
     .from(BotType)
     .where({ ID: currentBotInstance.type_ID });
 
-  //判定是否为首次调用
-  if (currentBotMessages.length == 0) {
-    firstChatFlag = true;
+  //根据当前BotType获取对应的系统提示词
+  currentSystemPrompt = await SELECT.one.from(PromptText).where({
+    botType_ID: currentBotTypes.ID,
+    lang_code: userLanguage,
+  });
 
-    currentSystemPrompt = await SELECT.one.from(PromptText).where({
-      botType_ID: currentBotTypes.ID,
-      lang_code: userLanguage,
-    });
-
-    if (currentSystemPrompt) {
-      //替换当前系统提示词中的占位符
-      currentSystemPrompt.content = await replacePlaceHolder(
-        currentSystemPrompt.content,
-        ContextNodes,
-        currentTasks
-      );
-    } else {
-      throw new Error(`System prompt not find`);
-    }
+  if (currentSystemPrompt) {
+    //替换当前系统提示词中的占位符
+    currentSystemPrompt.content = await replacePlaceHolder(
+      currentSystemPrompt.content,
+      ContextNodes,
+      currentTasks
+    );
+  } else {
+    throw new Error(`System prompt not find`);
   }
 
   //当前用户输入消息
@@ -81,12 +90,15 @@ export const chatCompletionHandler = async function (this: any, req: any) {
 
   let insertData = [];
 
-  if (firstChatFlag) {
+  //首次调用时追加更新System消息
+  if (currentBotMessages.length == 0) {
     insertData.push({
       role: "system",
       message: currentSystemPrompt.content,
       ragData: "",
       botInstance_ID: currentBotInstance.ID,
+      createdAt: new Date().toISOString(),
+      modifiedAt: new Date().toISOString(),
     });
   }
 
@@ -95,9 +107,11 @@ export const chatCompletionHandler = async function (this: any, req: any) {
     message: currentUserContent,
     ragData: "",
     botInstance_ID: currentBotInstance.ID,
+    createdAt: new Date().toISOString(),
+    modifiedAt: new Date().toISOString(),
   });
 
-  insertResult = await batchDynamicInsert(this, "BotMessages", insertData);
+  await batchDynamicInsert(this, "BotMessages", insertData);
 
   /**
    * step3:  根据BotTypes.model判定使用哪种AI模型，并调用对应AI模型的Completion
@@ -105,7 +119,7 @@ export const chatCompletionHandler = async function (this: any, req: any) {
   switch (currentBotTypes.functionType_code) {
     //AI_CHAT
     case "A":
-      functionResponse = await chatWithAI(currentBotMessages, currentBotTypes);
+      functionResponse = await chatWithAI(currentSystemPrompt, currentBotMessages, currentUserContent, currentBotTypes);
       break;
     //FUNCTION CALL
     case "F":
@@ -134,15 +148,23 @@ export const chatCompletionHandler = async function (this: any, req: any) {
     message: functionResponse,
     ragData: "",
     botInstance_ID: currentBotInstance.ID,
+    createdAt: new Date().toISOString(),
+    modifiedAt: new Date().toISOString(),
   });
 
-  insertResult = await batchDynamicInsert(this, "BotMessages", insertData);
+  //更新AI返回消息
+  await batchDynamicInsert(this, "BotMessages", insertData);
 
   //更新状态为SUCCESS
-  updateResult = await batchDynamicUpdate(this, "BotInstances", [
+  await batchDynamicUpdate(this, "BotInstances", [
     {
-      keys: { ID: currentBotInstance.ID },
-      fields: { status_code: "SUCCESS" },
+      keys: {
+        ID: currentBotInstance.ID
+      },
+      fields: {
+        status_code: "SUCCESS",
+        modifiedAt: new Date().toISOString(),
+      },
     },
   ]);
 };
@@ -170,7 +192,6 @@ async function batchDynamicInsert(
     }
 
     const results = [];
-
     // 循环单条插入
     for (let i = 0; i < entries.length; i++) {
       try {
@@ -218,6 +239,7 @@ async function batchDynamicUpdate(srv: any, entityName: any, updates: any) {
         );
         results.push(result);
       }
+
       return { success: true, results };
     } catch (error) {
       throw error;
@@ -284,15 +306,26 @@ function extractTemplateMarkers(content: any): string[] {
 }
 /**
  * 根据BotType的Model类型，调用对应的LLM
- * @param currentBotMessages - 对话上下文（历史记录）
- * @param currentBotType     - 对话Bot信息
- * @returns                  - AI返回的内容
+ * @param currentSystemPrompt - system提示词
+ * @param currentBotMessages  - 对话上下文（历史记录）
+ * @param currentUserContent  - 当前用户输入内容
+ * @param currentBotType      - 对话Bot信息
+ * @returns                   - AI返回的内容
  */
 async function chatWithAI(
+  currentSystemPrompt: any,
   currentBotMessages: any,
+  currentUserContent: any,
   currentBotType: any
 ): Promise<any> {
-  let response;
+
+  let
+    // systemMessages_GPT: AzureOpenAiChatCompletionRequestSystemMessage[],
+    // userMessages_GPT: AzureOpenAiChatCompletionRequestMessage[],
+    // tools_GPT: AzureOpenAiChatCompletionTool[],
+    response;
+
+  //获取对话模型配置
   const currentModelConfig = await SELECT.one
     .from("ModelConfig")
     .where({ ID: currentBotType.model_ID });
@@ -301,46 +334,63 @@ async function chatWithAI(
     throw new Error(`AI Config not exits.`);
   }
 
-  // const aiAPI = await import("@sap-ai-sdk/ai-api");
-
+  //JSON化配置信息
   const parameters_JSON = JSON.parse(currentModelConfig.parameters);
 
-  const tokenResponse = await axios.post(
-    parameters_JSON.url + "/oauth/token",
-    new URLSearchParams({
-      grant_type: "client_credentials",
-      client_id: parameters_JSON.clientid,
-      client_secret: parameters_JSON.clientsecret,
-    }),
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    }
-  );
+  //获取Destination
+  const aiDestination = await getAICoreDestination(parameters_JSON);
 
-  const accessToken = tokenResponse.data.access_token;
-
-  const destination: any = {
-    url: parameters_JSON.serviceurls.AI_API_URL,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  };
-
-  const { resources } = await DeploymentApi.deploymentQuery(
+  //获取可执行模型列表
+  const resources: AiDeploymentList = await DeploymentApi.deploymentQuery(
     {
       status: "RUNNING",
       executableIds: ["azure-openai", "aws-bedrock"],
       scenarioId: "foundation-models",
     },
     { "AI-Resource-Group": "default" }
-  ).execute(destination);
+  ).execute(aiDestination);
 
-  console.log("resources", resources);
+  //根据配置模型名称获取对应的模型ID
+  const DeploymentID = resources.resources.find(res => res.configurationName === currentModelConfig.modelName)?.id
+  if (!DeploymentID) {
+    throw new Error(`Model ${currentModelConfig.modelName} is unavailable in BTP`);
+  }
+
+  //设置系统消息
+  const Messages_GPT = [{
+    role: "system",
+    content: [{
+      type: "text",
+      text: currentSystemPrompt.content
+    }]
+  }]
+
+  //设置历史消息上下文
+  for (const botMessage of currentBotMessages) {
+    Messages_GPT.push({
+      role: botMessage.role,
+      content: [{
+        type: "text",
+        text: botMessage.message.trim().replace(/\n/g, " ")
+      }]
+    })
+  }
+
+  //追加本次用户消息
+  Messages_GPT.push({
+    role: 'user',
+    content: [{
+      type: "text",
+      text: currentUserContent.trim().replace(/\n/g, " ")
+    }]
+  })
+
+  //暂时没有tools的逻辑，后续应该会有
+  const tools_GPT = [{}]
 
   switch (currentModelConfig.modelName) {
     case "gpt-4o":
+      response = await invokeGPTModel(aiDestination, DeploymentID, Messages_GPT, tools_GPT)
       break;
     case "gpt-4.1":
       break;
@@ -359,4 +409,76 @@ async function chatWithAI(
   }
 
   return response;
+}
+/**
+ * 
+ * @param parameters_JSON AI服务连接信息
+ * @returns 
+ */
+async function getAICoreDestination(parameters_JSON: any) {
+  let accessToken
+
+  if (tokenCache.token && tokenCache.expiry > Date.now()) {
+    accessToken = tokenCache.token
+  } else {
+    const tokenResponse = await axios.post(
+      parameters_JSON.url + "/oauth/token",
+      new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: parameters_JSON.clientid,
+        client_secret: parameters_JSON.clientsecret,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    accessToken = tokenResponse.data.access_token;
+
+    //暂存tokenCache，避免每次获取token
+    tokenCache = {
+      token: tokenResponse.data.access_token,
+      expiry: Date.now() + (tokenResponse.data.expires_in - 3600) * 1000
+    };
+  }
+
+  const destination: any = {
+    url: parameters_JSON.serviceurls.AI_API_URL,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  };
+
+  return destination
+}
+/**
+ * 调用GPT大模型
+ * @param aiDestination   - AI Core连接目标
+ * @param DeploymentID    - AI DeplotmentID
+ * @param Messages_GPT    - 完整消息内容
+ * @param tools           - tools
+ */
+async function invokeGPTModel(
+  aiDestination: HttpDestination,
+  DeploymentID: string,
+  Messages_GPT: any,
+  tools: any) {
+
+  const response = await new AzureOpenAiChatClient(
+    {
+      deploymentId: DeploymentID
+    },
+    aiDestination,
+  ).run({
+    messages: Messages_GPT
+    // tools: tools
+  });
+
+  if (!response) {
+    throw new Error("AI Model invoke failed");
+  }
+
+  return response.data.choices[0].message.content;
 }
