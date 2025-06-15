@@ -22,7 +22,7 @@ entity Task : cuid, managed {
     botInstance  : Association to BotInstance;
     type         : Association to TaskType;
     botInstances : Composition of many BotInstance
-                    on botInstances.task = $self;
+                       on botInstances.task = $self;
     contextNodes : Composition of many ContextNode
                        on contextNodes.task = $self; // All context nodes under this task
 }
@@ -34,8 +34,8 @@ entity ContextNode : cuid, managed {
     type  : String(50); // Type (e.g., text, markdown, code, object, array)
     value : LargeString; // Node value/content
     task  : Association to Task; // Parent task
-    //readonly  : Boolean default false; // Optional: whether the node is read-only
-    // Extendable: sorting, validation, metadata, etc.
+//readonly  : Boolean default false; // Optional: whether the node is read-only
+// Extendable: sorting, validation, metadata, etc.
 }
 
 /** Bot execution instance */
@@ -48,7 +48,7 @@ entity BotInstance : cuid, managed {
     tasks    : Composition of many Task
                    on tasks.botInstance = $self; // Sub-tasks
     messages : Composition of many BotMessage
-                on messages.botInstance = $self;
+                   on messages.botInstance = $self;
 }
 
 /** Bot message entity, records human-AI/system conversations */
@@ -57,4 +57,24 @@ entity BotMessage : cuid, managed {
     message     : LargeString;
     ragData     : LargeString; // RAG result data (optional)
     botInstance : Association to BotInstance;
+}
+
+view TaskHierarchyView as
+        select from Task as a {
+            key a.ID,
+                'TASK'        as nodeType : String(10),
+                a.name,
+                a.botInstance as parent,
+        }
+    union all
+        select from BotInstance as a {
+            key a.ID,
+                'BOT'  as nodeType : String(10),
+                null   as name,
+                a.task as parent,
+        }
+
+entity Users : cuid, managed {
+    name   : String;
+    parent : Association to Users;
 }

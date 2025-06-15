@@ -1,5 +1,13 @@
 {
-    "sql": {
-        "native_hana_associations" : false
+  "sql": {
+    "native_hana_associations": false
+  },
+  "requires": {
+    "[hybrid]": {
+      "db": "hana"
     }
+  },
+  "hana": {
+    "deploy-format": "hdbtable"
+  }
 }

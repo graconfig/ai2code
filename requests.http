@@ -5,3 +5,19 @@ Content-Type: application/json
 {
   "content": "Test chatCompletion action"
 }
+
+### 测试TaskHierarchyView
+GET  http://localhost:8080/odata/v4/MainService/TaskHierarchyView?$apply=descendants($root/TaskHierarchyView,TaskHierarchyView,ID,filter(contains(name,'FirstRAPReport')),keep start)
+Authorization: Basic system:
+
+### 获取TaskHierarchyView数据
+GET  http://localhost:8080/odata/v4/MainService/TaskHierarchyView
+Authorization: Basic system:
+
+### 测试Users
+GET  http://localhost:8080/odata/v4/MainService/Users?$apply=descendants($root/Users,Users,ID,filter(name eq 'lbwang'),keep start)
+Authorization: Basic system:
+
+### 获取Users数据
+GET  http://localhost:8080/odata/v4/MainService/Users
+Authorization: Basic system:

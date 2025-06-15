@@ -1,5 +1,0 @@
-code,name,descr
-string,String,Plain text string
-markdown,Markdown,Formatted Markdown document
-code,Code,Code snippet or script
-json,JSON,JSON structured content
