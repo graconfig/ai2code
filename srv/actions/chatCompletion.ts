@@ -7,6 +7,7 @@ let tokenCache: { token: any, expiry: any } = {
   token: undefined,
   expiry: undefined
 }
+let aiModelIDCache: { modelName: any, ID: any }[] = [];
 
 export const chatCompletionHandler = async function (this: any, req: any) {
   const {
@@ -341,17 +342,10 @@ async function chatWithAI(
   const aiDestination = await getAICoreDestination(parameters_JSON);
 
   //获取可执行模型列表
-  const resources: AiDeploymentList = await DeploymentApi.deploymentQuery(
-    {
-      status: "RUNNING",
-      executableIds: ["azure-openai", "aws-bedrock"],
-      scenarioId: "foundation-models",
-    },
-    { "AI-Resource-Group": "default" }
-  ).execute(aiDestination);
+  const resourceList = await getAiDeploymentList(aiDestination);
 
-  //根据配置模型名称获取对应的模型ID
-  const DeploymentID = resources.resources.find(res => res.configurationName === currentModelConfig.modelName)?.id
+  //获取当前配置模型对应的DeploymentID
+  const DeploymentID = resourceList.find(res => res.modelName === currentModelConfig.modelName)?.ID
   if (!DeploymentID) {
     throw new Error(`Model ${currentModelConfig.modelName} is unavailable in BTP`);
   }
@@ -386,7 +380,7 @@ async function chatWithAI(
   })
 
   //暂时没有tools的逻辑，后续应该会有
-  const tools_GPT = [{}]
+  let tools_GPT
 
   switch (currentModelConfig.modelName) {
     case "gpt-4o":
@@ -466,19 +460,52 @@ async function invokeGPTModel(
   Messages_GPT: any,
   tools: any) {
 
+  const requestPara = {
+    messages: Messages_GPT,
+    ...(tools != null && { tools })
+  };
+
   const response = await new AzureOpenAiChatClient(
     {
       deploymentId: DeploymentID
     },
     aiDestination,
-  ).run({
-    messages: Messages_GPT
-    // tools: tools
-  });
+  ).run(requestPara);
 
   if (!response) {
     throw new Error("AI Model invoke failed");
   }
 
   return response.data.choices[0].message.content;
+}
+/**
+ * 
+ * @param aiDestination AI连接参数
+ */
+async function getAiDeploymentList(aiDestination: any) {
+  if (aiModelIDCache.length > 0) {
+    return aiModelIDCache
+  } else {
+    try {
+      const resources: AiDeploymentList = await DeploymentApi.deploymentQuery(
+        {
+          status: "RUNNING",
+          executableIds: ["azure-openai", "aws-bedrock"],
+          scenarioId: "foundation-models",
+        },
+        { "AI-Resource-Group": "default" }
+      ).execute(aiDestination);
+
+      for (const resource of resources.resources) {
+        aiModelIDCache.push({
+          modelName: resource.configurationName,
+          ID: resource.id
+        })
+      }
+
+      return aiModelIDCache
+    } catch (error) {
+      throw error
+    }
+  }
 }
