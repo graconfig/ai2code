@@ -134,6 +134,8 @@ sap.ui.define(
             });
           }
 
+          // Clear all input fields before opening
+          this._clearFormFields();
           this.oSubmitDialog.open();
         },
 
@@ -171,12 +173,15 @@ sap.ui.define(
                 confirm: function (oEvent) {
                   const oSelectedItem = oEvent.getParameter("selectedItem");
                   if (oSelectedItem) {
-                    Element.getElementById("taskTypeName").setValue(
-                      oSelectedItem.getTitle()
-                    );
+                    const sTaskTypeName = oSelectedItem.getTitle();
+                    Element.getElementById("taskTypeName").setValue(sTaskTypeName);
                     Element.getElementById("taskTypeId").setValue(
                       oSelectedItem.getHighlightText()
                     );
+                    // Auto-fill task name with task type name
+                    Element.getElementById("taskName").setValue(sTaskTypeName);
+                    // Enable the Create button if task name is now filled
+                    this.oSubmitDialog.getBeginButton().setEnabled(sTaskTypeName.length > 0);
                   }
                 }.bind(this),
               });
@@ -185,7 +190,7 @@ sap.ui.define(
         _createTaskForm: function () {
           return new SimpleForm({
             content: [
-              new Label({ text: "Type name" }),
+              new Label({ text: "Task Type" }),
               new Input("taskTypeName", {
                 showValueHelp: true,
                 valueHelpOnly: true,
@@ -202,7 +207,7 @@ sap.ui.define(
                 editable: false,
                 visible: false,
               }),
-              new Label({ text: "Task name" }),
+              new Label({ text: "Task Type name" }),
               new Input("taskName", {
                 placeholder: "Enter task name",
                 required: true,
@@ -254,6 +259,24 @@ sap.ui.define(
                 MessageToast.show("Error creating task: " + oError.message);
               }.bind(this)
             );
+        },
+
+        _clearFormFields: function () {
+          // Clear all form fields
+          var oTaskTypeNameField = Element.getElementById("taskTypeName");
+          var oTaskTypeIdField = Element.getElementById("taskTypeId");
+          var oTaskNameField = Element.getElementById("taskName");
+          var oTaskDescriptionField = Element.getElementById("taskDescription");
+          
+          if (oTaskTypeNameField) oTaskTypeNameField.setValue("");
+          if (oTaskTypeIdField) oTaskTypeIdField.setValue("");
+          if (oTaskNameField) oTaskNameField.setValue("");
+          if (oTaskDescriptionField) oTaskDescriptionField.setValue("");
+          
+          // Disable the Create button
+          if (this.oSubmitDialog) {
+            this.oSubmitDialog.getBeginButton().setEnabled(false);
+          }
         },
       }
     );
