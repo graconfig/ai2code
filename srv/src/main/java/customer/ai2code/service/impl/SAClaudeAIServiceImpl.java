@@ -30,8 +30,8 @@ public class SAClaudeAIServiceImpl implements AIService{
     }
 
     @Override
-    public <T extends BotExecution> String functionCalling(List<BotMessages> messages, List<PromptTexts> prompts,
-            Class<T> botExecutClazz, AIModel model) {
+    public <T extends BotExecution> Object functionCalling(List<BotMessages> messages, List<PromptTexts> prompts,
+            T botExecutionInstance, AIModel model) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'functionCalling'");
     }

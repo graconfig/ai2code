@@ -31,11 +31,10 @@ public interface AIService {
                         ExecutorService executor,
                         StreamingCompletedProcessor streamingCompletionProcessor);
 
-        public <T extends BotExecution> String functionCalling(
+        public <T extends BotExecution> Object functionCalling(
                         List<BotMessages> messages,
                         List<PromptTexts> prompts,
-                        // FunctionCalls functionCall,
-                        Class<T> botExecutClazz,
+                        T botExecutionInstance,  // 改为实例参数
                         AIModel model);
 
         /**

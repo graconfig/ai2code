@@ -9,7 +9,18 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExecuteParameter {
-    // String name();
+      /**
+     * 参数名称（必须与实际参数名一致）
+     */
+    String name();
+    
+    /**
+     * 是否必需参数
+     */
     boolean required() default false;
-    String description() ;
+    
+    /**
+     * 参数描述
+     */
+    String description();
 }
