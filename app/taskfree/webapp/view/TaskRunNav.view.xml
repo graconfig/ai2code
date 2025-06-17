@@ -102,8 +102,11 @@
 					<Tree
 						id="idItemsNavigationTree"
 						itemPress=".onNavigationItemSelect"
-						items="{path: 'side>/navigation',parameters: {arrayNames:['items']}}">
-						<StandardTreeItem id="idGenStandardTreeItem" title="{side>text}" type="Navigation"/>
+						items="{path: 'side>/navigation', parameters: {arrayNames:['items']}}">
+						<StandardTreeItem 
+							id="idGenStandardTreeItem" 
+							title="{side>text}" 
+							type="Navigation"/>
 					</Tree>
 					</ScrollContainer>
 				</l:fixContent>

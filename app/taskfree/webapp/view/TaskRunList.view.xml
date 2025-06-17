@@ -54,7 +54,7 @@
                     filters: {
                         path: 'isMain',
                         operator: 'NE',
-                        value1: false
+                        value1: null
                     }
                 }"
                 growing="true"

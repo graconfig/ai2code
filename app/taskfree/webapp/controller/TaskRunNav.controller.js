@@ -116,6 +116,30 @@ sap.ui.define(
               }
             }
             
+            // Smart routing: check if it's a subTask of current hierarchy
+            if (sExtractedTaskId) {
+              if (this._dataCache.isLoaded) {
+                var sRootTaskId = this._findRootTaskId(sExtractedTaskId);
+                if (sRootTaskId === this._dataCache.currentTask?.ID) {
+                  // It's a subTask of current hierarchy, just update selection
+                  console.log("SubTask navigation - updating selection only:", sExtractedTaskId);
+                  this._restoreNavigationState();
+                  this._updateNavigationSelection(sExtractedTaskId);
+                  return;
+                } else if (sRootTaskId && sRootTaskId !== sExtractedTaskId) {
+                  // It's a subTask but not of current hierarchy, load the root task
+                  console.log("SubTask of different hierarchy, loading root task:", sRootTaskId);
+                  this._preloadTaskData(sRootTaskId);
+                  return;
+                }
+              } else {
+                // No data loaded yet, check if it might be a subTask by looking for root task
+                console.log("No data loaded, checking if subTask needs root task:", sExtractedTaskId);
+                this._loadRootTaskForSubTask(sExtractedTaskId);
+                return;
+              }
+            }
+            
             // If we found a task ID and don't have navigation data, load it
             if (sExtractedTaskId && (!this._dataCache.isLoaded || this._dataCache.currentTask?.ID !== sExtractedTaskId)) {
               console.log("Loading task data for detail route:", sExtractedTaskId);
@@ -176,7 +200,7 @@ sap.ui.define(
           
           // Create binding with comprehensive $expand to get all related data in one request
           var oBinding = oModel.bindContext("/Tasks(" + sTaskId + ")", null, {
-            $expand: "botInstances($expand=type,messages),contextNodes"
+            $expand: "botInstances($expand=type,messages,tasks($expand=botInstances($expand=type))),contextNodes"
           });
           
           oBinding.attachDataReceived(function() {
@@ -208,21 +232,19 @@ sap.ui.define(
           this._dataCache.contextNodes.clear();
           this._dataCache.botMessages.clear();
           
+          // Initialize sub-tasks cache if not exists
+          if (!this._dataCache.subTasks) {
+            this._dataCache.subTasks = new Map();
+          } else {
+            this._dataCache.subTasks.clear();
+          }
+          
           // Cache task data
           this._dataCache.currentTask = oTaskData;
           
           // Cache bot instances and their messages
           if (oTaskData.botInstances && Array.isArray(oTaskData.botInstances)) {
-            oTaskData.botInstances.forEach(function(oBotInstance) {
-              this._dataCache.botInstances.set(oBotInstance.ID, oBotInstance);
-              
-              // Cache messages for this bot instance
-              if (oBotInstance.messages && Array.isArray(oBotInstance.messages)) {
-                oBotInstance.messages.forEach(function(oMessage) {
-                  this._dataCache.botMessages.set(oMessage.ID, oMessage);
-                }.bind(this));
-              }
-            }.bind(this));
+            this._cacheBotInstancesRecursively(oTaskData.botInstances);
           }
           
           // Cache context nodes
@@ -232,13 +254,42 @@ sap.ui.define(
             }.bind(this));
           }
           
+          // Build task hierarchy mapping
+          this._buildTaskHierarchyMap();
+          
           this._dataCache.isLoaded = true;
           console.log("Data cached successfully:", {
             task: oTaskData.name,
             botInstances: this._dataCache.botInstances.size,
             contextNodes: this._dataCache.contextNodes.size,
-            messages: this._dataCache.botMessages.size
+            messages: this._dataCache.botMessages.size,
+            subTasks: this._dataCache.subTasks.size
           });
+        },
+        
+        _cacheBotInstancesRecursively: function(aBotInstances) {
+          aBotInstances.forEach(function(oBotInstance) {
+            this._dataCache.botInstances.set(oBotInstance.ID, oBotInstance);
+            
+            // Cache messages for this bot instance
+            if (oBotInstance.messages && Array.isArray(oBotInstance.messages)) {
+              oBotInstance.messages.forEach(function(oMessage) {
+                this._dataCache.botMessages.set(oMessage.ID, oMessage);
+              }.bind(this));
+            }
+            
+            // Cache sub-tasks and their bot instances recursively
+            if (oBotInstance.tasks && Array.isArray(oBotInstance.tasks)) {
+              oBotInstance.tasks.forEach(function(oSubTask) {
+                this._dataCache.subTasks.set(oSubTask.ID, oSubTask);
+                
+                // Recursively cache bot instances of sub-tasks
+                if (oSubTask.botInstances && Array.isArray(oSubTask.botInstances)) {
+                  this._cacheBotInstancesRecursively(oSubTask.botInstances);
+                }
+              }.bind(this));
+            }
+          }.bind(this));
         },
         
         _buildNavigationFromCache: function() {
@@ -260,32 +311,53 @@ sap.ui.define(
           var oTask = this._dataCache.currentTask;
           var aNavigationData = [];
           
+          var oTaskItem = this._buildTaskItemRecursively(oTask);
+          aNavigationData.push(oTaskItem);
+          this.getView().getModel("side").setProperty("/navigation", aNavigationData);
+        },
+        
+        _buildTaskItemRecursively: function(oTask) {
           var oTaskItem = {
             text: oTask.name || "Unnamed Task",
-            icon: "sap-icon://task",
             key: "task_" + oTask.ID,
             type: "Task",
             data: oTask,
-            expanded: true,
             items: []
           };
           
-          // Add BotInstances as child items from cache
-          this._dataCache.botInstances.forEach(function(oBotInstance) {
-            var sDisplayName = oBotInstance.type && oBotInstance.type.name ? 
-              oBotInstance.type.name : 
-              ("Bot Instance " + oBotInstance.sequence);
-            oTaskItem.items.push({
-              text: sDisplayName,
-              icon: "sap-icon://robot",
-              key: "botinstance_" + oBotInstance.ID,
-              type: "BotInstance",
-              data: oBotInstance
-            });
-          });
+          // Add BotInstances as child items
+          if (oTask.botInstances && Array.isArray(oTask.botInstances)) {
+            oTask.botInstances.forEach(function(oBotInstance) {
+              var oBotInstanceItem = this._buildBotInstanceItem(oBotInstance);
+              oTaskItem.items.push(oBotInstanceItem);
+            }.bind(this));
+          }
           
-          aNavigationData.push(oTaskItem);
-          this.getView().getModel("side").setProperty("/navigation", aNavigationData);
+          return oTaskItem;
+        },
+        
+        _buildBotInstanceItem: function(oBotInstance) {
+          var sDisplayName = oBotInstance.type && oBotInstance.type.name ? 
+            oBotInstance.type.name : 
+            ("Bot Instance " + oBotInstance.sequence);
+            
+          var oBotInstanceItem = {
+            text: sDisplayName,
+            key: "botinstance_" + oBotInstance.ID,
+            type: "BotInstance",
+            data: oBotInstance,
+            items: []
+          };
+          
+          // Add sub-tasks recursively
+          if (oBotInstance.tasks && Array.isArray(oBotInstance.tasks)) {
+            oBotInstance.tasks.forEach(function(oSubTask) {
+              var oSubTaskItem = this._buildTaskItemRecursively(oSubTask);
+              oBotInstanceItem.items.push(oSubTaskItem);
+            }.bind(this));
+          }
+          
+          return oBotInstanceItem;
         },
         
         _buildContextNodesNavigationFromCache: function() {
@@ -295,11 +367,9 @@ sap.ui.define(
           if (this._dataCache.contextNodes.size > 0) {
             var oTaskItem = {
               text: oTask.name || "Unnamed Task",
-              icon: "sap-icon://task",
               key: "task_" + oTask.ID,
               type: "Task",
               data: oTask,
-              expanded: true,
               items: []
             };
             
@@ -307,10 +377,10 @@ sap.ui.define(
             this._dataCache.contextNodes.forEach(function(oContextNode) {
               oTaskItem.items.push({
                 text: oContextNode.label || "Context Node",
-                icon: "sap-icon://detail-view",
                 key: "contextnode_" + oContextNode.ID,
                 type: "ContextNode",
-                data: oContextNode
+                data: oContextNode,
+                items: []
               });
             });
             
@@ -337,12 +407,10 @@ sap.ui.define(
         },
 
         onNavigationItemSelect: function(oEvent) {
-          //var oItem = oEvent.getParameter("item");
-          //var sKey = oItem.getKey();
-          var oItem = oEvent.getParameters().listItem;
-          var sKey = oItem.getBindingContext("side").getProperty().key;
+          var oItem = oEvent.getParameter("listItem");
           var oContext = oItem.getBindingContext("side");
           var oData = oContext.getObject();
+          var sKey = oData.key;
           
           this.getView().getModel("side").setProperty("/selectedKey", sKey);
           
@@ -448,8 +516,11 @@ sap.ui.define(
           return this._dataCache.contextNodes.get(sContextNodeId);
         },
         
-        getCachedTask: function() {
-          return this._dataCache.currentTask;
+        getCachedTask: function(sTaskId) {
+          if (!sTaskId) {
+            return this._dataCache.currentTask;
+          }
+          return this._dataCache.subTasks ? this._dataCache.subTasks.get(sTaskId) : null;
         },
         
         getCachedBotMessages: function(sBotInstanceId) {
@@ -524,14 +595,84 @@ sap.ui.define(
           var oRouter = this.getOwnerComponent().getRouter();
           oRouter.navTo("RouteTaskRunList");
         },
-        onStandardTreeItemPress: function(oEvent) {
-          console.log("Button pressed");
+
+        _buildTaskHierarchyMap: function() {
+          if (!this._taskHierarchyMap) {
+            this._taskHierarchyMap = new Map();
+          } else {
+            this._taskHierarchyMap.clear();
+          }
+          
+          if (this._dataCache.currentTask) {
+            this._mapTaskRecursively(this._dataCache.currentTask, this._dataCache.currentTask.ID);
+          }
         },
-        onNavigationTreeStandardItemPress: function (oEvent) {
-          // 处理 TreeItem 点击逻辑
-          console.log("Button pressed");
-          // 可以在这里添加跳转、数据加载等操作
-      }
+        
+        _mapTaskRecursively: function(oTask, sRootTaskId) {
+          this._taskHierarchyMap.set(oTask.ID, sRootTaskId);
+          
+          if (oTask.botInstances && Array.isArray(oTask.botInstances)) {
+            oTask.botInstances.forEach(function(oBotInstance) {
+              if (oBotInstance.tasks && Array.isArray(oBotInstance.tasks)) {
+                oBotInstance.tasks.forEach(function(oSubTask) {
+                  this._mapTaskRecursively(oSubTask, sRootTaskId);
+                }.bind(this));
+              }
+            }.bind(this));
+          }
+        },
+
+        _findRootTaskId: function(sTaskId) {
+          if (!this._taskHierarchyMap) {
+            console.warn("Task hierarchy map not built yet");
+            return null;
+          }
+          
+          var sRootTaskId = this._taskHierarchyMap.get(sTaskId);
+          console.log("Finding root task for:", sTaskId, "-> Found:", sRootTaskId);
+          return sRootTaskId || null;
+        },
+
+        _updateNavigationSelection: function(sTaskId) {
+          var sNodeKey = "task_" + sTaskId;
+          this.getView().getModel("side").setProperty("/selectedKey", sNodeKey);
+        },
+
+        _loadRootTaskForSubTask: function(sTaskId) {
+          var oModel = this.getOwnerComponent().getModel();
+          var that = this;
+          
+          // Try to load the task and check if it has a botInstance (indicating it's a subTask)
+          var oBinding = oModel.bindContext("/Tasks(" + sTaskId + ")", null, {
+            $expand: "botInstance/task($expand=botInstances($expand=type,messages,tasks($expand=botInstances($expand=type))),contextNodes)"
+          });
+          
+          oBinding.attachDataReceived(function() {
+            var oContext = oBinding.getBoundContext();
+            if (oContext) {
+              var oTaskData = oContext.getObject();
+              if (oTaskData && oTaskData.botInstance && oTaskData.botInstance.task) {
+                // This is a subTask, load the root task
+                var oRootTask = oTaskData.botInstance.task;
+                console.log("Found root task for subTask:", oRootTask.ID);
+                that._cacheTaskData(oRootTask);
+                that._buildNavigationFromCache();
+                that._updateNavigationSelection(sTaskId);
+              } else {
+                // This is likely a root task, load it directly
+                console.log("Task appears to be root task, loading directly:", sTaskId);
+                that._preloadTaskData(sTaskId);
+              }
+            }
+          });
+          
+          oBinding.requestObject().catch(function(oError) {
+            console.error("Failed to load task for hierarchy check:", oError);
+            // Fallback: try loading as root task
+            that._preloadTaskData(sTaskId);
+          });
+        },
+
       }
     );
   }
