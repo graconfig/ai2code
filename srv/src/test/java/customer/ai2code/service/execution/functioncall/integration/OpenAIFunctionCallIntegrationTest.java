@@ -81,7 +81,7 @@ public class OpenAIFunctionCallIntegrationTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> properties = (Map<String, Object>) parameters.get("properties");
         assertTrue(properties.containsKey("botInstanceId"));
-        assertTrue(properties.containsKey("taskCreationParam"));
+        assertTrue(properties.containsKey("taskCreationParams"));
         
         System.out.println("Final OpenAI Function Configuration:");
         System.out.println("- Function Name: " + function.get("name"));
@@ -127,7 +127,7 @@ public class OpenAIFunctionCallIntegrationTest {
         
         // Validate specific parameters
         assertTrue(properties.containsKey("botInstanceId"), "Must have botInstanceId parameter");
-        assertTrue(properties.containsKey("taskCreationParam"), "Must have taskCreationParam parameter");
+        assertTrue(properties.containsKey("taskCreationParams"), "Must have taskCreationParams parameter");
         
         // Validate botInstanceId parameter structure
         @SuppressWarnings("unchecked")
@@ -137,7 +137,7 @@ public class OpenAIFunctionCallIntegrationTest {
         
         // Validate taskCreationParam parameter structure
         @SuppressWarnings("unchecked")
-        Map<String, Object> taskCreationParamParam = (Map<String, Object>) properties.get("taskCreationParam");
+        Map<String, Object> taskCreationParamParam = (Map<String, Object>) properties.get("taskCreationParams");
         assertEquals("array", taskCreationParamParam.get("type"));
         assertNotNull(taskCreationParamParam.get("description"));
         
