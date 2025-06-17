@@ -2,8 +2,8 @@ package customer.ai2code.service.execution.functioncall.adapter;
 
 import org.springframework.stereotype.Component;
 
-import customer.ai2code.service.execution.functioncall.FunctionInfo;
-import customer.ai2code.service.execution.functioncall.ParameterInfo;
+import customer.ai2code.model.execution.functioncall.FunctionInfo;
+import customer.ai2code.model.execution.functioncall.ParameterInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;

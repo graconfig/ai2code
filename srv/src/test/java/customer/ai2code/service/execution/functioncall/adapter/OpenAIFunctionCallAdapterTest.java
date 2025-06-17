@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import customer.ai2code.service.execution.functioncall.FunctionInfo;
-import customer.ai2code.service.execution.functioncall.ParameterInfo;
+import customer.ai2code.model.execution.functioncall.FunctionInfo;
+import customer.ai2code.model.execution.functioncall.ParameterInfo;
 
 public class OpenAIFunctionCallAdapterTest {
 

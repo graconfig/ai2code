@@ -203,9 +203,9 @@
 						<configuration>
 							<inputSpec>
 								${project.basedir}/src/main/resources/spec/claude-sonnet-3.7.yaml</inputSpec>
-							<apiPackage>customer.ai2code.service.SAPAICore.claude.generated.api</apiPackage>
+							<apiPackage>customer.ai2code.model.aicore.claude.api</apiPackage>
 							<modelPackage>
-								customer.ai2code.service.SAPAICore.claude.generated.model</modelPackage>
+								customer.ai2code.model.aicore.claude</modelPackage>
 							<generateApis>false</generateApis>
 							<additionalProperties>
 								<enumUnknownDefaultCase>true</enumUnknownDefaultCase>

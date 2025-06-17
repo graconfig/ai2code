@@ -1,9 +1,12 @@
 package customer.ai2code.service.execution.functioncall;
 
-import customer.ai2code.service.execution.annotation.BotExecutor;
-import customer.ai2code.service.execution.annotation.ExecuteMethod;
-import customer.ai2code.service.execution.annotation.ExecuteParameter;
 import customer.ai2code.exception.BusinessException;
+import customer.ai2code.model.execution.annotation.BotExecutor;
+import customer.ai2code.model.execution.annotation.ExecuteMethod;
+import customer.ai2code.model.execution.annotation.ExecuteParameter;
+import customer.ai2code.model.execution.functioncall.FunctionInfo;
+import customer.ai2code.model.execution.functioncall.ParameterInfo;
+import customer.ai2code.model.execution.functioncall.ParameterTypeInfo;
 import customer.ai2code.service.execution.BotExecution;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

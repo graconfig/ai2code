@@ -15,11 +15,10 @@ import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
-import customer.ai2code.model.TaskCreationParam;
+import customer.ai2code.model.execution.TaskCreationParam;
+import customer.ai2code.model.execution.functioncall.FunctionInfo;
 import customer.ai2code.service.TaskService;
 import customer.ai2code.service.execution.functioncall.FunctionCallProcessor;
-import customer.ai2code.service.execution.functioncall.FunctionInfo;
 import customer.ai2code.service.execution.functioncall.adapter.OpenAIFunctionCallAdapter;
 import customer.ai2code.service.impl.CreateTasksBotExecution;
 

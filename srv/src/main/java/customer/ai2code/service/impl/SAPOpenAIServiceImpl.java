@@ -28,17 +28,17 @@ import com.sap.cloud.security.config.ClientCredentials;
 import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotMessages;
 import customer.ai2code.exception.BusinessException;
-import customer.ai2code.model.AIModel;
+import customer.ai2code.model.ai.response.AIResponse;
+import customer.ai2code.model.config.AIModel;
 import customer.ai2code.model.config.SAPAICoreConfig;
+import customer.ai2code.model.execution.functioncall.FunctionInfo;
+import customer.ai2code.model.factory.SAPOpenAIChatMessageFactory;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.constant.AIConstants;
 import customer.ai2code.service.execution.BotExecution;
 import customer.ai2code.service.execution.functioncall.FunctionCallProcessor;
-import customer.ai2code.service.execution.functioncall.FunctionInfo;
 import customer.ai2code.service.execution.functioncall.adapter.OpenAIFunctionCallAdapter;
 import customer.ai2code.service.handler.factory.AIResponseHandlerFactory;
-import customer.ai2code.service.model.AIResponse;
-import customer.ai2code.service.model.factory.SAPOpenAIChatMessageFactory;
 import customer.ai2code.service.processor.StreamingCompletedProcessor;
 
 @Service

@@ -1,16 +1,16 @@
 package customer.ai2code.service.impl;
 
 import customer.ai2code.service.execution.BotExecution;
-import customer.ai2code.service.execution.annotation.BotExecutor;
-import customer.ai2code.service.execution.annotation.ExecuteMethod;
-import customer.ai2code.service.execution.annotation.ExecuteParameter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import customer.ai2code.exception.BusinessException;
-import customer.ai2code.model.Task;
-import customer.ai2code.model.TaskCreationParam;
+import customer.ai2code.model.execution.TaskCreationParam;
+import customer.ai2code.model.execution.annotation.BotExecutor;
+import customer.ai2code.model.execution.annotation.ExecuteMethod;
+import customer.ai2code.model.execution.annotation.ExecuteParameter;
+import customer.ai2code.model.task.Task;
 import customer.ai2code.service.TaskService;
 
 @BotExecutor(name = "Create Tasks Bot Execution", description = "Implementation for creating tasks in the bot execution framework", version = "1.0", enabled = true)

@@ -7,7 +7,7 @@ import cds.gen.mainservice.BotInstancesExecuteContext;
 import cds.gen.mainservice.BotMessages;
 import cds.gen.mainservice.BotMessagesAdoptContext;
 import cds.gen.mainservice.ContextNodes;
-import customer.ai2code.model.Bot;
+import customer.ai2code.model.bot.Bot;
 
 public interface BotService {
 
