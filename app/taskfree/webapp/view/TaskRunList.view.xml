@@ -53,8 +53,8 @@
                     },
                     filters: {
                         path: 'isMain',
-                        operator: 'NE',
-                        value1: null
+                        operator: 'EQ',
+                        value1: true
                     }
                 }"
                 growing="true"
