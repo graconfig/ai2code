@@ -8,11 +8,11 @@
         },
         {
             "type": "java",
-            "name": "Spring Boot-Application<batchimportcat>",
+            "name": "Spring Boot-Application<ai2code>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "mainClass": "customer.batchimportcat.Application",
-            "projectName": "batchimportcat",
+            "mainClass": "customer.ai2code.Application",
+            "projectName": "ai2code",
             "preLaunchTask": "cds_bind"
         }
     ]
