@@ -56,7 +56,6 @@ sap.ui.define(
           }
           
           var sPath = "/BotInstances(" + sBotInstanceId + ")";
-          console.log("Loading Bot Instance:", sPath);
           
           var oBinding = oModel.bindContext(sPath, null, {
             $expand: "messages,type"
@@ -67,7 +66,6 @@ sap.ui.define(
             if (oBoundContext) {
               var oData = oBoundContext.getObject();
               if (oData) {
-                console.log("BotInstance data loaded successfully");
                 
                 // Update page title
                 var sTitle = (oData.type && oData.type.name) ? 
@@ -93,7 +91,6 @@ sap.ui.define(
           });
           
           oBinding.requestObject().catch(function(oError) {
-            console.error("Failed to load Bot Instance data:", oError);
             MessageToast.show("Failed to load Bot Instance data: " + (oError.message || oError.toString()));
           });
         },
@@ -157,7 +154,7 @@ sap.ui.define(
             return;
           }
 
-          console.log("Found", aContexts.length, "messages to delete");
+
 
           if (oMessageList) {
             oMessageList.setBusy(true);
@@ -169,24 +166,20 @@ sap.ui.define(
             try {
               if (oContext && typeof oContext.getPath === 'function') {
                 var sPath = oContext.getPath();
-                console.log("Deleting message at path:", sPath);
                 
                 var oDeletePromise = oContext.delete("$auto").then(function() {
-                  console.log("Successfully deleted message:", sPath);
                 }).catch(function(oError) {
-                  console.error("Failed to delete message:", sPath, oError);
                   throw oError;
                 });
                 
                 aPromises.push(oDeletePromise);
               }
             } catch (error) {
-              console.error("Error setting up delete for context:", oContext, error);
+              // Silent error handling
             }
           });
 
           Promise.all(aPromises).then(function(aResults) {
-            console.log("All messages deleted successfully", aResults);
             var oResourceBundle = that.getView().getModel("i18n").getResourceBundle();
             MessageToast.show(oResourceBundle.getText("messagesClearedSuccess") || "All messages cleared successfully");
             
@@ -197,7 +190,6 @@ sap.ui.define(
             }
             
           }).catch(function(oError) {
-            console.error("Error clearing messages:", oError);
             MessageToast.show("Error clearing messages: " + (oError.message || oError.toString()));
             
           }).finally(function() {
@@ -241,12 +233,9 @@ sap.ui.define(
 
             messageHandler.createMessageAndCompletion();
             
-            console.log("Message handler created successfully");
-            
             this._scheduleScrollToBottom();
             
           } catch (error) {
-            console.error("Error creating message handler:", error);
             MessageToast.show("Error sending message: " + error.message);
           }
         },
@@ -261,13 +250,10 @@ sap.ui.define(
             return;
           }
           
-          console.log("Adopting message, context path:", context.getPath());
-          
           var contextBinding = this.getView().getModel().bindContext("MainService.adopt(...)", context);
           var that = this;
           
           contextBinding.invoke().then(function(result) {
-            console.log("Adopt operation successful:", result);
             MessageToast.show("Message adopted successfully");
             
             var oBotInstanceContext = that.getView().getBindingContext();
@@ -276,7 +262,6 @@ sap.ui.define(
             }
             
           }).catch(function(error) {
-            console.error("Adopt operation failed:", error);
             MessageToast.show("Error adopting message: " + (error.message || error.toString()));
             
           }).finally(function() {
@@ -302,8 +287,8 @@ sap.ui.define(
                 });
               }
             }
-          } catch (error) {
-            console.warn("Scroll to bottom failed:", error);
+                      } catch (error) {
+            // Silent error handling
           }
         },
 

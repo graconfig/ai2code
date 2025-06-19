@@ -88,10 +88,8 @@ sap.ui.define(
             
             // Check if we need to load data for a new task
             if (!this._dataCache.currentTask || this._dataCache.currentTask.ID !== sTaskId) {
-              console.log("Loading new task data with preload:", sTaskId);
               this._preloadTaskData(sTaskId);
             } else {
-              console.log("Task data already cached, using cached data");
               this._buildNavigationFromCache();
             }
             
@@ -122,19 +120,16 @@ sap.ui.define(
                 var sRootTaskId = this._findRootTaskId(sExtractedTaskId);
                 if (sRootTaskId === this._dataCache.currentTask?.ID) {
                   // It's a subTask of current hierarchy, just update selection
-                  console.log("SubTask navigation - updating selection only:", sExtractedTaskId);
                   this._restoreNavigationState();
                   this._updateNavigationSelection(sExtractedTaskId);
                   return;
                 } else if (sRootTaskId && sRootTaskId !== sExtractedTaskId) {
                   // It's a subTask but not of current hierarchy, load the root task
-                  console.log("SubTask of different hierarchy, loading root task:", sRootTaskId);
                   this._preloadTaskData(sRootTaskId);
                   return;
                 }
               } else {
                 // No data loaded yet, check if it might be a subTask by looking for root task
-                console.log("No data loaded, checking if subTask needs root task:", sExtractedTaskId);
                 this._loadRootTaskForSubTask(sExtractedTaskId);
                 return;
               }
@@ -142,7 +137,6 @@ sap.ui.define(
             
             // If we found a task ID and don't have navigation data, load it
             if (sExtractedTaskId && (!this._dataCache.isLoaded || this._dataCache.currentTask?.ID !== sExtractedTaskId)) {
-              console.log("Loading task data for detail route:", sExtractedTaskId);
               this._preloadTaskData(sExtractedTaskId);
             }
           }
@@ -196,7 +190,7 @@ sap.ui.define(
           var oModel = this.getOwnerComponent().getModel();
           var that = this;
           
-          console.log("Preloading task data for:", sTaskId);
+
           
           // Create binding with comprehensive $expand to get all related data in one request
           var oBinding = oModel.bindContext("/Tasks(" + sTaskId + ")", null, {
@@ -208,20 +202,14 @@ sap.ui.define(
             if (oContext) {
               var oTaskData = oContext.getObject();
               if (oTaskData) {
-                console.log("Task data preloaded successfully:", oTaskData);
                 that._cacheTaskData(oTaskData);
                 that._buildNavigationFromCache();
-              } else {
-                console.error("No task data received");
               }
-            } else {
-              console.error("No bound context received");
             }
           });
           
           // Request the data
           oBinding.requestObject().catch(function(oError) {
-            console.error("Failed to preload task data:", oError);
             MessageToast.show("Failed to load task data: " + (oError.message || oError.toString()));
           });
         },
@@ -258,13 +246,6 @@ sap.ui.define(
           this._buildTaskHierarchyMap();
           
           this._dataCache.isLoaded = true;
-          console.log("Data cached successfully:", {
-            task: oTaskData.name,
-            botInstances: this._dataCache.botInstances.size,
-            contextNodes: this._dataCache.contextNodes.size,
-            messages: this._dataCache.botMessages.size,
-            subTasks: this._dataCache.subTasks.size
-          });
         },
         
         _cacheBotInstancesRecursively: function(aBotInstances) {
@@ -294,7 +275,6 @@ sap.ui.define(
         
         _buildNavigationFromCache: function() {
           if (!this._dataCache.isLoaded || !this._dataCache.currentTask) {
-            console.warn("No cached data available for navigation");
             return;
           }
           
@@ -399,10 +379,7 @@ sap.ui.define(
           
           // Use cached data to build navigation
           if (this._dataCache.isLoaded) {
-            console.log("Using cached data for navigation view:", sKey);
             this._buildNavigationFromCache();
-          } else {
-            console.log("No cached data available, navigation will be built after data loads");
           }
         },
 
@@ -444,7 +421,6 @@ sap.ui.define(
           var aCurrentNavigation = oSideModel.getProperty("/navigation");
           
           if ((!aCurrentNavigation || aCurrentNavigation.length === 0) && this._lastNavigationState) {
-            console.log("Restoring navigation state");
             oSideModel.setProperty("/navigation", this._lastNavigationState.navigation);
             oSideModel.setProperty("/currentView", this._lastNavigationState.currentView);
             oSideModel.setProperty("/hasNavigationData", true);
@@ -462,7 +438,6 @@ sap.ui.define(
               // Navigate to task detail with task ID
               var sTaskId = oItemData.data.ID;
               if (sTaskId) {
-                console.log("Navigating to Task detail:", sTaskId);
                 oRouter.navTo("RouteTaskDetail", {
                   taskId: sTaskId
                 });
@@ -473,7 +448,6 @@ sap.ui.define(
               // Navigate to bot instance detail or AI conversation based on type
               var sBotInstanceId = oItemData.data.ID;
               if (sBotInstanceId) {
-                console.log("Navigating to BotInstance:", sBotInstanceId);
                 
                 // Check if this is a Chat BotInstance
                 var sBotTypeName = oItemData.data.type && oItemData.data.type.name;
@@ -496,7 +470,6 @@ sap.ui.define(
               // Navigate to context node detail
               var sContextNodeId = oItemData.data.ID;
               if (sContextNodeId) {
-                console.log("Navigating to ContextNode detail:", sContextNodeId);
                 oRouter.navTo("RouteContextNodeDetail", {
                   contextNodeId: sContextNodeId
                 });
@@ -624,12 +597,10 @@ sap.ui.define(
 
         _findRootTaskId: function(sTaskId) {
           if (!this._taskHierarchyMap) {
-            console.warn("Task hierarchy map not built yet");
             return null;
           }
           
           var sRootTaskId = this._taskHierarchyMap.get(sTaskId);
-          console.log("Finding root task for:", sTaskId, "-> Found:", sRootTaskId);
           return sRootTaskId || null;
         },
 
@@ -654,20 +625,17 @@ sap.ui.define(
               if (oTaskData && oTaskData.botInstance && oTaskData.botInstance.task) {
                 // This is a subTask, load the root task
                 var oRootTask = oTaskData.botInstance.task;
-                console.log("Found root task for subTask:", oRootTask.ID);
                 that._cacheTaskData(oRootTask);
                 that._buildNavigationFromCache();
                 that._updateNavigationSelection(sTaskId);
               } else {
                 // This is likely a root task, load it directly
-                console.log("Task appears to be root task, loading directly:", sTaskId);
                 that._preloadTaskData(sTaskId);
               }
             }
           });
           
           oBinding.requestObject().catch(function(oError) {
-            console.error("Failed to load task for hierarchy check:", oError);
             // Fallback: try loading as root task
             that._preloadTaskData(sTaskId);
           });

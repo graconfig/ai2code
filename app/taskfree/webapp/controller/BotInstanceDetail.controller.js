@@ -55,7 +55,7 @@ sap.ui.define(
           // For cuid (GUID) primary keys in OData V4, don't use quotes
           var sPath = "/BotInstances(" + sBotInstanceId + ")";
           
-          console.log("Loading BotInstance detail with path:", sPath);
+
           
           var oBinding = oModel.bindContext(sPath, null, {
             $expand: "type,messages"
@@ -67,7 +67,7 @@ sap.ui.define(
               if (oBoundContext) {
                 var oData = oBoundContext.getObject();
                 if (oData) {
-                  console.log("BotInstance data loaded successfully:", oData);
+
                   
                   // Bind the view to the context
                   that.getView().setBindingContext(oBoundContext);
@@ -82,35 +82,26 @@ sap.ui.define(
                   that.bindingmodel = that.oContext;
                   that.servicemodel = that.getOwnerComponent().getModel();
                 } else {
-                  console.error("No data found in bound context");
                   MessageToast.show("No data found for Bot Instance");
                 }
               } else {
-                console.error("Failed to get bound context");
                 MessageToast.show("Failed to load Bot Instance data");
               }
             } catch (error) {
-              console.error("Error processing BotInstance data:", error);
               MessageToast.show("Error processing Bot Instance data: " + error.message);
             }
-          });
-          
-          oBinding.attachDataRequested(function() {
-            console.log("BotInstance data requested");
           });
           
           // Enhanced error handling
           oBinding.attachEvent("dataReceived", function(oEvent) {
             var oParameters = oEvent.getParameters();
             if (oParameters && oParameters.error) {
-              console.error("OData error loading BotInstance:", oParameters.error);
               MessageToast.show("Error loading Bot Instance: " + oParameters.error.message);
             }
           });
           
           // Request data with proper error handling
           oBinding.requestObject().catch(function(oError) {
-            console.error("Failed to request BotInstance data:", oError);
             MessageToast.show("Failed to load Bot Instance data: " + (oError.message || oError.toString()));
           });
         },
@@ -212,13 +203,11 @@ sap.ui.define(
                   messageList.getBinding("items").refresh();
                 }
               }).catch((error) => {
-                console.error("Adopt error:", error);
                 MessageToast.show("Error adopting message: " + error.message);
               }).finally(() => {
                 event.getSource().setBusy(false);
               });
             } catch (error) {
-              console.error("Adopt error (setup):", error);
               MessageToast.show("Error setting up adopt operation: " + error.message);
               event.getSource().setBusy(false);
             }

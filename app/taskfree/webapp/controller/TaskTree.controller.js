@@ -35,7 +35,7 @@ sap.ui.define([
                     this._loadTasksForNavigation().then(() => {
                         this._showDefaultTaskDetails();
                     }).catch(error => {
-                        console.error("Failed to load initial tasks:", error);
+                        // Silent error handling
                     });
                 }
             }, 100);
@@ -55,7 +55,7 @@ sap.ui.define([
             aFormsToCheck.forEach(sFormId => {
                 const oForm = this.byId(sFormId);
                 if (!oForm) {
-                    console.warn(`Form ${sFormId} not found`);
+                    // Silent warning
                 }
             });
         },
@@ -146,7 +146,6 @@ sap.ui.define([
                     }
                 }
             } catch (error) {
-                console.error("Error loading tasks for navigation:", error);
                 this._oNavigationModel.setProperty("/navigation", []);
                 MessageToast.show("Failed to load tasks");
             } finally {
@@ -197,7 +196,6 @@ sap.ui.define([
                     this._oNavigationModel.setProperty("/navigation", []);
                 }
             } catch (error) {
-                console.error("Error loading context nodes for navigation:", error);
                 this._oNavigationModel.setProperty("/navigation", []);
                 MessageToast.show("Failed to load context nodes");
             } finally {
@@ -316,8 +314,6 @@ sap.ui.define([
             const sKey = oListItem.getKey();
             const oViewModel = this.getView().getModel("viewModel");
 
-            console.log("Navigation item selected:", sKey);
-
             // Handle fixed navigation items
             if (this._isFixedNavigationItem(sKey)) {
                 this._handleFixedNavigationItem(sKey);
@@ -330,14 +326,11 @@ sap.ui.define([
             // Parse the key to determine item type and ID
             const aParts = sKey.split("_");
             if (aParts.length < 2) {
-                console.warn("Invalid key format:", sKey);
                 return;
             }
 
             const sType = aParts[0];
             const sId = aParts.slice(1).join("_");
-
-            console.log("Parsed type:", sType, "ID:", sId);
 
             // Set layout to show detail column
             oViewModel.setProperty("/layout", fioriLibrary.LayoutType.TwoColumnsMidExpanded);
@@ -361,7 +354,6 @@ sap.ui.define([
                     if (sNodeId && sNodeId.trim() !== "") {
                         this._loadItemDetails("ContextNodes", sNodeId, "contextNode");
                     } else {
-                        console.error("Invalid ContextNode ID:", sNodeId);
                         MessageToast.show("Invalid ContextNode ID");
                     }
                 }
@@ -412,7 +404,6 @@ sap.ui.define([
 
                 return aFilteredBotInstances;
             } catch (error) {
-                console.error("Error loading bot instances for task:", error);
                 throw error;
             }
         },
@@ -480,7 +471,6 @@ sap.ui.define([
 
                 this._updateDetailPanel(oData, sItemType);
             } catch (error) {
-                console.error(`Failed to load ${sItemType} details:`, error);
 
                 // Try alternative UUID formats
                 try {
@@ -513,7 +503,6 @@ sap.ui.define([
                             // Try to find ContextNode through search
                             this._findContextNodeById(sId);
                         } else {
-                            console.error(`Failed to load ${sItemType} details with ID: ${sId}`);
                             MessageToast.show(`Failed to load ${sItemType} details`);
                         }
                     }
@@ -547,7 +536,6 @@ sap.ui.define([
                     MessageToast.show(`ContextNode with ID '${sId}' not found`);
                 }
             } catch (error) {
-                console.error("Failed to search for ContextNode:", error);
                 MessageToast.show("Failed to search for ContextNode");
             }
         },
@@ -702,7 +690,7 @@ sap.ui.define([
                     // Show the task details
                     this._selectAndExpandTask(sTaskId);
                 }).catch(error => {
-                    console.error("Failed to load task for navigation:", error);
+                    // Silent error handling
                 });
 
                 if (this._currentMode !== "tasks") {
@@ -1259,8 +1247,6 @@ sap.ui.define([
             const oListItem = oEvent.getParameter("item");
             const sKey = oListItem.getKey();
             const oViewModel = this.getView().getModel("viewModel");
-
-            console.log("Navigation item selected:", sKey);
 
             // Handle fixed navigation items
             if (this._isFixedNavigationItem(sKey)) {
