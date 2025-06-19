@@ -256,6 +256,9 @@ sap.ui.define(
           contextBinding.invoke().then(function(result) {
             MessageToast.show("Message adopted successfully");
             
+            // Notify navigation controller that ContextNode data has changed
+            sap.ui.getCore().getEventBus().publish("DataUpdate", "ContextNodeChanged");
+            
             var oBotInstanceContext = that.getView().getBindingContext();
             if (oBotInstanceContext) {
               oBotInstanceContext.refresh();
@@ -287,7 +290,7 @@ sap.ui.define(
                 });
               }
             }
-                      } catch (error) {
+          } catch (error) {
             // Silent error handling
           }
         },

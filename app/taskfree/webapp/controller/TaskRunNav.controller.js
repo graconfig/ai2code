@@ -58,12 +58,20 @@ sap.ui.define(
             botInstances: new Map(),
             contextNodes: new Map(),
             botMessages: new Map(),
-            isLoaded: false
+            isLoaded: false,
+            invalidated: false
           };
+          
+          // Listen for data update events
+          sap.ui.getCore().getEventBus().subscribe("DataUpdate", "ContextNodeChanged", this._onDataUpdated, this);
+          sap.ui.getCore().getEventBus().subscribe("DataUpdate", "TaskChanged", this._onDataUpdated, this);
         },
 
         onExit: function() {
           Device.media.detachHandler(this._handleWindowResize, this);
+          // Unsubscribe from events
+          sap.ui.getCore().getEventBus().unsubscribe("DataUpdate", "ContextNodeChanged", this._onDataUpdated, this);
+          sap.ui.getCore().getEventBus().unsubscribe("DataUpdate", "TaskChanged", this._onDataUpdated, this);
         },
 
         onRouteChange: function (oEvent) {
@@ -246,6 +254,7 @@ sap.ui.define(
           this._buildTaskHierarchyMap();
           
           this._dataCache.isLoaded = true;
+          this._dataCache.invalidated = false;
         },
         
         _cacheBotInstancesRecursively: function(aBotInstances) {
@@ -377,8 +386,10 @@ sap.ui.define(
           oSideModel.setProperty("/currentView", sKey);
           oSideModel.setProperty("/selectedKey", sKey);
           
-          // Use cached data to build navigation
-          if (this._dataCache.isLoaded) {
+          // Check if cache is invalidated and refresh if needed
+          if (this._dataCache.invalidated && this._dataCache.isLoaded && this._dataCache.currentTask) {
+            this._preloadTaskData(this._dataCache.currentTask.ID);
+          } else if (this._dataCache.isLoaded) {
             this._buildNavigationFromCache();
           }
         },
@@ -567,6 +578,11 @@ sap.ui.define(
           // Navigate back to the task list page
           var oRouter = this.getOwnerComponent().getRouter();
           oRouter.navTo("RouteTaskRunList");
+        },
+        
+        _onDataUpdated: function() {
+          // Mark cache as invalidated when data is updated
+          this._dataCache.invalidated = true;
         },
 
         _buildTaskHierarchyMap: function() {

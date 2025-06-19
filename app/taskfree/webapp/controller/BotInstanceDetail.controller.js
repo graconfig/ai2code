@@ -197,6 +197,10 @@ sap.ui.define(
               
               contextBinding.invoke().then(() => {
                 MessageToast.show("Message adopted successfully");
+                
+                // Notify navigation controller that ContextNode data has changed
+                sap.ui.getCore().getEventBus().publish("DataUpdate", "ContextNodeChanged");
+                
                 // Refresh the messages list to reflect changes
                 var messageList = this._dialog.getContent()[0].getContent()[0].getItems()[0];
                 if (messageList && messageList.getBinding("items")) {
@@ -236,6 +240,21 @@ sap.ui.define(
               setTimeout(() => this.scrollToListEnd(), 100);
             }
           };
+        },
+        
+        // Reserved method for execute functionality - to be implemented later
+        onExecutePress: function() {
+          var oContext = this.getView().getBindingContext();
+          if (!oContext) {
+            MessageToast.show("No bot instance context available");
+            return;
+          }
+          
+          // TODO: Implement execute functionality
+          // When implemented, add this after successful execution:
+          // sap.ui.getCore().getEventBus().publish("DataUpdate", "TaskChanged");
+          
+          MessageToast.show("Execute functionality not yet implemented");
         }
       }
     );

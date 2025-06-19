@@ -45,7 +45,7 @@ sap.ui.define(
               oModel.refresh();
             }.bind(this)
           );
-
+          
           // Initialize view model for UI state
           this._initializeViewModel();
         },
@@ -63,7 +63,7 @@ sap.ui.define(
           var sQuery = oEvent.getParameter("query") || oEvent.getParameter("newValue");
           var oTable = this.byId("taskTable");
           var oBinding = oTable.getBinding("items");
-
+          
           if (sQuery && sQuery.length > 0) {
             var oFilter = new sap.ui.model.Filter([
               new sap.ui.model.Filter("name", sap.ui.model.FilterOperator.Contains, sQuery),
@@ -80,7 +80,7 @@ sap.ui.define(
           var oTable = this.byId("taskTable");
           var oBinding = oTable.getBinding("items");
           var aFilters = [];
-
+          
           switch (sKey) {
             case "main":
               aFilters.push(new sap.ui.model.Filter("isMain", sap.ui.model.FilterOperator.EQ, true));
@@ -92,7 +92,7 @@ sap.ui.define(
               // Show all tasks
               break;
           }
-
+          
           oBinding.filter(aFilters);
         },
 
@@ -109,7 +109,7 @@ sap.ui.define(
             this.oSubmitDialog = new Dialog({
               type: DialogType.Message,
               title: "Create",
-              contentWidth: "600px",
+              contentWidth: "600px", 
               contentHeight: "600px",
               content: [this._createTaskForm()],
               beginButton: new Button({
@@ -142,7 +142,7 @@ sap.ui.define(
 
           if (aSelectedItems.length === 0) {
             MessageToast.show("No items selected for deletion");
-            return;
+            return;   
           }
 
           // Show confirmation dialog
@@ -220,31 +220,31 @@ sap.ui.define(
           return this.oSelectTypeDialog
             ? this.oSelectTypeDialog
             : new SelectDialog({
-              noDataText: "No task types found",
-              title: "Select Task Type",
-              items: {
-                path: "/TaskType",
-                template: new sap.m.StandardListItem({
-                  title: "{name}",
-                  description: "{description}",
+                noDataText: "No task types found",
+                title: "Select Task Type",
+                items: {
+                  path: "/TaskType",
+                  template: new sap.m.StandardListItem({
+                    title: "{name}",
+                    description: "{description}",
                   highlightText: "{ID}",
-                }),
-              },
-              confirm: function (oEvent) {
-                const oSelectedItem = oEvent.getParameter("selectedItem");
-                if (oSelectedItem) {
-                  const sTaskTypeName = oSelectedItem.getTitle();
-                  Element.getElementById("taskTypeName").setValue(sTaskTypeName);
-                  Element.getElementById("taskTypeId").setValue(
-                    oSelectedItem.getHighlightText()
-                  );
-                  // Auto-fill task name with task type name
-                  Element.getElementById("taskName").setValue(sTaskTypeName);
-                  // Enable the Create button if task name is now filled
-                  this.oSubmitDialog.getBeginButton().setEnabled(sTaskTypeName.length > 0);
-                }
-              }.bind(this),
-            });
+                  }),
+                },
+                confirm: function (oEvent) {
+                  const oSelectedItem = oEvent.getParameter("selectedItem");
+                  if (oSelectedItem) {
+                    const sTaskTypeName = oSelectedItem.getTitle();
+                    Element.getElementById("taskTypeName").setValue(sTaskTypeName);
+                    Element.getElementById("taskTypeId").setValue(
+                      oSelectedItem.getHighlightText()
+                    );
+                    // Auto-fill task name with task type name
+                    Element.getElementById("taskName").setValue(sTaskTypeName);
+                    // Enable the Create button if task name is now filled
+                    this.oSubmitDialog.getBeginButton().setEnabled(sTaskTypeName.length > 0);
+                  }
+                }.bind(this),
+              });
         },
 
         _createTaskForm: function () {
@@ -326,12 +326,12 @@ sap.ui.define(
           var oTaskTypeIdField = Element.getElementById("taskTypeId");
           var oTaskNameField = Element.getElementById("taskName");
           var oTaskDescriptionField = Element.getElementById("taskDescription");
-
+          
           if (oTaskTypeNameField) oTaskTypeNameField.setValue("");
           if (oTaskTypeIdField) oTaskTypeIdField.setValue("");
           if (oTaskNameField) oTaskNameField.setValue("");
           if (oTaskDescriptionField) oTaskDescriptionField.setValue("");
-
+          
           // Disable the Create button
           if (this.oSubmitDialog) {
             this.oSubmitDialog.getBeginButton().setEnabled(false);
