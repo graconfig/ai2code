@@ -16,9 +16,9 @@ export default class MainService extends cds.ApplicationService {
 
     this.on(adopt, (req) => adoptHandler.call(this, req));
 
+    this.on("createTaskWithBots", (req) =>
+      createTaskWithBotsHandler.call(this, req)
+    );
     return super.init();
-  }
-  async createTaskWithBots(name: any, description: any,typeId: any) {
-    createTaskWithBotsHandler.call(this,name, description, typeId);
   }
 }
