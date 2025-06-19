@@ -15,18 +15,17 @@
         </headerContent>
         
         <content>
-            <Page id="chatPage" class="sapUiContentPadding chatPage" showFooter="true"
-            floatingFooter="false" showHeader="false">
-            
-            <Toolbar id="conversationPanelToolbar">
-                <Title id="conversationPanelTitle" text="Conversation"/>
-                <ToolbarSpacer id="conversationPanelSpacer"/>
-                <Button id="clearButton" icon="sap-icon://delete" press="onClearPress" tooltip="{i18n>clearButtonTooltip}" type="Transparent"/>
-            </Toolbar>
-                    
-            <content>
-                <VBox id="_IDGenVBox" class="sapUiMediumMarginBottom">
-                    <List
+            <VBox id="conversationContainer" height="100%">
+                <Panel id="conversationPanel" class="conversationPanelFullWidth">
+                    <headerToolbar>
+                        <Toolbar id="conversationPanelToolbar">
+                            <Title id="conversationPanelTitle" text="Conversation"/>
+                            <ToolbarSpacer id="conversationPanelSpacer"/>
+                            <Button id="clearButton" icon="sap-icon://delete" press="onClearPress" tooltip="{i18n>clearButtonTooltip}" type="Transparent"/>
+                        </Toolbar>
+                    </headerToolbar>
+                    <content>
+                        <List
                             id="aiPageMessageList"
                             showNoData="true"
                             noDataText="No messages yet. Start a conversation below."
@@ -72,12 +71,14 @@
                                 </custom:adopt>
                             </custom:ChatMessageListItem>
                         </List>
-                    <Text id="aiPageListEndMarker" text="" visible="false"/>
-                </VBox>
-            </content>
-            <footer class="sapMPageFooter">
-                <OverflowToolbar id="_IDGenOverflowToolbar">
-                    <FeedInput
+                        <Text id="aiPageListEndMarker" text="" visible="false"/>
+                    </content>
+                </Panel>
+                
+                <Panel id="inputPanel" headerText="Send Message" class="inputPanelFullWidth">
+                    <content>
+                        <VBox id="inputVBox">
+                            <FeedInput
                                 id="aiPageMessageInput"
                                 post="onPostMessage"
                                 showIcon="false"
@@ -85,9 +86,10 @@
                                 placeholder="Type your message here..."
                                 maxLength="2000"
                             />
-                </OverflowToolbar>
-            </footer>
-        </Page>
+                        </VBox>
+                    </content>
+                </Panel>
+            </VBox>
         </content>
     </Page>
 </mvc:View> 
