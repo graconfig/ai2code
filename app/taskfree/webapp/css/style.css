@@ -1,0 +1,392 @@
+/* Enter your custom styles here */
+.sapUiSizeCompact .sapFDynamicPage.chatPage .sapFDynamicPageFooter .sapFDynamicPageActualFooterControl {
+    height: 6rem;
+}
+
+.chatPage .sapMInputBaseContentWrapper,
+.chatPage .sapMFeedIn:not(.sapMFeedInDisabled) .sapMFeedInContainer,
+.chatPage .sapMFeedIn {
+    background: transparent !important;
+}
+
+.sapMMessageListItem {
+    overflow: hidden;
+}
+
+.sapMMessageListItem .sapMMessageListItemInfo .sapMText {
+    font-size: .75rem;
+    line-height: 2.5rem;
+    margin-right: 0.5rem !important;
+}
+
+.sapMMessageListItem .customMessageListItemRightAlign {
+    float: right;
+}
+
+.sapMMessageListItem .sapFAvatar {
+    float: left;
+    height: 2.5rem;
+    width: 1.2rem;
+    margin-right: 0.5rem !important;
+    overflow: visible;
+    margin: 0rem;
+}
+
+.chatPage .sapMOTB.sapMIBar {
+    height: auto !important;
+    min-height: 6rem;
+}
+
+.dialogToRight{
+    right: 0 !important;
+    left: auto !important;
+}
+
+
+
+/** * CSS for Markdown */
+
+.markdownDialog .sapMMessageListItemText {
+    font-family: var(--sapFontFamily);
+    font-size: 0.87rem;
+    line-height: 1.4;
+}
+
+/* AI对话页面消息文本大小 */
+.sapMMessageListItemText {
+    font-size: 0.87rem !important;
+    line-height: 1.4 !important;
+}
+
+.sapMMessageListItemText * {
+    font-size: inherit !important;
+}
+
+/***   CSS for Markdown Code Preview Section
+*/
+/* .markdownDialog .sapMMessageListItemText pre {
+    background-color: var(--sapList_Background);
+    padding: 1rem;
+    border-radius: 0.25rem;
+    overflow-x: auto;
+} */
+
+/***   CSS for Markdown Code Preview Content
+*/
+/* .markdownDialog .sapMMessageListItemText code {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: var(--sapList_Background);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+} */
+
+.markdownDialog .sapMMessageListItemText p {
+    margin: 0.5rem 0;
+}
+
+.markdownDialog .sapMMessageListItemText ul,
+.markdownDialog .sapMMessageListItemText ol {
+    padding-left: 2rem;
+    margin: 0.5rem 0;
+}
+
+
+/* .chatPage .sapMFeedIn {
+    padding: 0.5rem;
+    width: 100%;
+} */
+.customMessageListItem .sapMBusyIndicator {
+    margin: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.customMessageListItem .sapMBusyIndicator .sapMBusyIndicatorTextContainer {
+    margin-left: 0.5rem;
+    font-style: italic;
+}
+
+
+/**
+*   Css for chat page message list item 
+*/
+.customMessageListItem {
+    border-radius: 0.75rem;
+    box-shadow: var(--sapContent_Shadow0);
+}
+
+/* 区分用户和AI消息的样式 */
+.customMessageListItem[data-sender="user"] {
+    margin-right: 0rem !important;
+    background-color: var(--sapButton_Selected_Background);
+    width: 70%;
+    justify-self: right;
+}
+
+.customMessageListItem[data-sender="assistant"] {
+    margin-left: 0rem !important;
+    background-color: var(--sapList_Background);
+}
+
+/* AI对话页面样式 */
+.aiConversationPage {
+    background-color: var(--sapBackgroundColor);
+}
+
+.aiConversationPage .sapMPanel {
+    margin-bottom: 1rem;
+}
+
+.aiConversationPage #conversationPanel {
+    min-height: 400px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.aiConversationPage #inputPanel {
+    position: sticky;
+    bottom: 0;
+    background-color: var(--sapGroup_ContentBackground);
+    border-top: 1px solid var(--sapGroup_BorderColor);
+}
+
+/* 完整宽度Panel样式 - 去除左侧空白 */
+.conversationPanelFullWidth,
+.inputPanelFullWidth {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+}
+
+.conversationPanelFullWidth .sapMPanelContent,
+.inputPanelFullWidth .sapMPanelContent {
+    padding: 1rem !important;
+}
+
+/* 确保VBox容器也没有边距 */
+.aiConversationPage #conversationContainer {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* 确保Page内容区域没有边距 */
+.aiConversationFullWidth .sapMPageContentInner {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.aiConversationFullWidth .sapMPageContent {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Panel toolbar样式 */
+.conversationPanelFullWidth .sapMPanelHeaderToolbar {
+    background-color: var(--sapPageHeader_Background);
+    border-bottom: 1px solid var(--sapGroup_BorderColor);
+}
+
+.conversationPanelFullWidth .sapMPanelHeaderToolbar .sapMTitle {
+    font-weight: bold;
+    color: var(--sapPageHeader_TextColor);
+}
+
+.conversationPanelFullWidth .sapMPanelHeaderToolbar .sapMBtn {
+    height: 2rem;
+}
+
+/* TaskRunList现代化样式 */
+.taskCard {
+    width: 300px;
+    height: 180px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.taskCard:hover {
+    box-shadow: var(--sapContent_Shadow1);
+    transform: translateY(-2px);
+}
+
+.taskListMetrics {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 16px;
+}
+
+.metricItem {
+    text-align: center;
+    min-width: 100px;
+}
+
+.metricNumber {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--sapAccentColor1);
+}
+
+.metricLabel {
+    font-size: 12px;
+    color: var(--sapContent_LabelColor);
+    margin-top: 4px;
+}
+
+/* 现代化列表项样式 */
+.sapMOLI {
+    border-bottom: 1px solid var(--sapList_BorderColor);
+    transition: background-color 0.15s ease-in-out;
+}
+
+.sapMOLI:hover {
+    background-color: var(--sapList_Hover_Background);
+}
+
+.sapMOLITitle {
+    font-weight: 600;
+    color: var(--sapList_TextColor);
+}
+
+.sapMOLINumber {
+    font-weight: 600;
+    color: var(--sapAccentColor1);
+}
+
+/* 状态颜色 */
+.sapMObjectStatus.sapMObjectStatusSuccess {
+    color: var(--sapPositiveColor);
+    background-color: var(--sapPositiveElementColor);
+}
+
+.sapMObjectStatus.sapMObjectStatusInformation {
+    color: var(--sapInformationColor);
+    background-color: var(--sapInformationElementColor);
+}
+
+/* 动态页面标题样式 - 去除背景色 */
+.sapFDynamicPageTitle {
+    background: transparent;
+    color: var(--sapContent_LabelColor);
+}
+
+.sapFDynamicPageTitle .sapMTitle {
+    color: var(--sapPageHeader_TextColor);
+}
+
+/* 动态页面头部样式 - 去除背景色 */
+.sapFDynamicPageHeader {
+    background-color: transparent;
+    border-bottom: 1px solid var(--sapList_BorderColor);
+}
+
+/* 搜索和筛选栏样式 */
+.sapMComboBox,
+.sapMSearchField {
+    border-radius: var(--sapButton_BorderCornerRadius);
+}
+
+/* Table specific styles */
+.sapMTableTBody .sapMListTblCell {
+    vertical-align: top;
+    padding: 0.75rem 1rem;
+}
+
+.sapMTableTHead .sapMListTblHeaderCell {
+    background-color: var(--sapList_HeaderBackground);
+    font-weight: 600;
+    color: var(--sapList_HeaderTextColor);
+}
+
+/* Table row hover effect */
+.sapMListTblRow:hover {
+    background-color: var(--sapList_Hover_Background);
+}
+
+/* Enhanced table styling - 简化边框 */
+#taskTable {
+    border: none;
+    border-radius: 0;
+}
+
+#taskTable .sapMListTblHeader {
+    background: transparent;
+}
+
+/* Name cell with status styling */
+#nameCell {
+    min-width: 200px;
+}
+
+#nameText {
+    font-weight: 600;
+    color: var(--sapList_TextColor);
+}
+
+/* Status indicators in table */
+.sapMObjectStatus {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+/* Bot count styling */
+#botCountNumber {
+    font-weight: 600;
+}
+
+/* Table toolbar styling - 去除背景色 */
+#tableToolbar {
+    background-color: transparent;
+    border-bottom: 1px solid var(--sapList_BorderColor);
+}
+
+#tableToolbar .sapMTitle {
+    color: var(--sapPageHeader_TextColor);
+    font-weight: 600;
+}
+
+.sapMPageFooter {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .taskCard {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .taskListMetrics {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .metricItem {
+        min-width: auto;
+    }
+    
+    /* Hide less important columns on mobile */
+    #typeColumn,
+    #modifiedColumn {
+        display: none;
+    }
+    
+    /* Adjust column widths for mobile */
+    #descriptionColumn {
+        width: 40% !important;
+    }
+    
+    #sequenceColumn {
+        width: 15% !important;
+    }
+    
+    #botCountColumn {
+        width: 20% !important;
+    }
+}
+
