@@ -2,7 +2,7 @@ import { AiDeploymentList, DeploymentApi } from "@sap-ai-sdk/ai-api";
 import { __LargeString } from "@sap/cds";
 import { AzureOpenAiChatClient } from "@sap-ai-sdk/foundation-models";
 import axios from "axios";
-import { HttpDestination } from "@sap-cloud-sdk/connectivity";
+
 let tokenCache: { token: any, expiry: any } = {
   token: undefined,
   expiry: undefined
@@ -455,7 +455,7 @@ async function getAICoreDestination(parameters_JSON: any) {
  * @param tools           - tools
  */
 async function invokeGPTModel(
-  aiDestination: HttpDestination,
+  aiDestination: any,
   DeploymentID: string,
   Messages_GPT: any,
   tools: any) {

@@ -7,7 +7,7 @@ import { executeHandler } from "./actions/execute";
 
 export default class MainService extends cds.ApplicationService {
   init() {
-    const { chatCompletion,execute} = BotInstance.actions;
+    const { chatCompletion, execute } = BotInstance.actions;
     const { adopt } = BotMessage.actions;
 
     this.on(execute, (req) => executeHandler.call(this, req));
@@ -18,7 +18,7 @@ export default class MainService extends cds.ApplicationService {
 
     return super.init();
   }
-  async createTaskWithBots(req: any) {
-    createTaskWithBotsHandler.call(this, req)
+  async createTaskWithBots(name: any, description: any,typeId: any) {
+    createTaskWithBotsHandler.call(this,name, description, typeId);
   }
 }
