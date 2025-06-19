@@ -345,15 +345,6 @@
     color: var(--sapPageHeader_TextColor);
     font-weight: 600;
 }
-
-.sapMPageFooter {
-    position: absolute;
-    bottom: 20px;
-    left: 0;
-    z-index: 2;
-    width: 100%;
-}
-
 /* 响应式设计 */
 @media (max-width: 768px) {
     .taskCard {

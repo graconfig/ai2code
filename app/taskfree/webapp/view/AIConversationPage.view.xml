@@ -1,15 +1,17 @@
 <mvc:View
     controllerName="ai.orchestration.taskfree.controller.AIConversationPage"
+    displayBlock="true"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:custom="ai.orchestration.taskfree.control"
     xmlns:core="sap.ui.core"
     core:require="{
+        LayoutManager: 'ai/orchestration/taskfree/util/LayoutManager',
         ChatFormatter: 'ai/orchestration/taskfree/formatter/ChatFormatter'
     }"
-    height="100%">
+    height="98%">
     
-    <Page id="aiConversationPage" showHeader="false" title="AI Conversation" class="aiConversationPage aiConversationFullWidth">
+    <Page id="aiConversationPage" showHeader="false" ztitle="AI Conversation" class="aiConversationPage aiConversationFullWidth">
         <headerContent>
             <Button id="refreshButton" icon="sap-icon://refresh" press="onRefreshPress" tooltip="{i18n>refreshButtonTooltip}"/>
         </headerContent>
@@ -75,7 +77,7 @@
                     <Text id="aiPageListEndMarker" text="" visible="false"/>
                 </VBox>
             </content>
-            <footer class="sapMPageFooter">
+            <footer>
                 <OverflowToolbar id="_IDGenOverflowToolbar">
                     <FeedInput
                                 id="aiPageMessageInput"
