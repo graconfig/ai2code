@@ -32,16 +32,16 @@ sap.ui.define(
       "ai.orchestration.taskfree.controller.TaskRunNav",
       {
         _bExpanded: true,
-        
+
         onInit: function () {
           this.getView().addStyleClass(this.getOwnerComponent().getContentDensityClass());
-          
+
           // Initialize navigation model
           this._initNavigationModel();
-          
+
           // Initialize data cache
           this._initDataCache();
-          
+
           // if the app starts on desktop devices with small or medium screen size, collapse the side navigation
           if (Device.resize.width <= 1024) {
             this.onSideNavButtonPress();
@@ -50,8 +50,8 @@ sap.ui.define(
           Device.media.attachHandler(this._handleWindowResize, this);
           this.getOwnerComponent().getRouter().attachRouteMatched(this.onRouteChange.bind(this));
         },
-        
-        _initDataCache: function() {
+
+        _initDataCache: function () {
           // Initialize data cache for storing preloaded task data
           this._dataCache = {
             currentTask: null,
@@ -61,13 +61,13 @@ sap.ui.define(
             isLoaded: false,
             invalidated: false
           };
-          
+
           // Listen for data update events
           sap.ui.getCore().getEventBus().subscribe("DataUpdate", "ContextNodeChanged", this._onDataUpdated, this);
           sap.ui.getCore().getEventBus().subscribe("DataUpdate", "TaskChanged", this._onDataUpdated, this);
         },
 
-        onExit: function() {
+        onExit: function () {
           Device.media.detachHandler(this._handleWindowResize, this);
           // Unsubscribe from events
           sap.ui.getCore().getEventBus().unsubscribe("DataUpdate", "ContextNodeChanged", this._onDataUpdated, this);
@@ -80,7 +80,7 @@ sap.ui.define(
 
           var sRouteName = oEvent.getParameter('name');
           var oArguments = oEvent.getParameter('arguments');
-          
+
           // Only update selectedKey for routes that match our navigation structure
           if (sRouteName === "RouteTaskRunNav") {
             this.getView().getModel('side').setProperty('/selectedKey', sRouteName);
@@ -89,22 +89,22 @@ sap.ui.define(
           if (Device.system.phone) {
             this.onSideNavButtonPress();
           }
-          
+
           // Handle RouteTaskRunNav navigation from TaskRunList
           if (sRouteName === "RouteTaskRunNav" && oArguments && oArguments.taskRunId) {
             var sTaskId = oArguments.taskRunId;
-            
+
             // Check if we need to load data for a new task
             if (!this._dataCache.currentTask || this._dataCache.currentTask.ID !== sTaskId) {
               this._preloadTaskData(sTaskId);
             } else {
               this._buildNavigationFromCache();
             }
-            
+
             // Store the task ID for reference, but don't bind the entire view to avoid context inheritance issues
             this._currentTaskId = sTaskId;
           }
-          
+
           // Handle cases where we need to extract task ID from detail routes
           var sExtractedTaskId = null;
           if (sRouteName.indexOf("RouteTask") === 0 || sRouteName.indexOf("RouteBotInstance") === 0 || sRouteName.indexOf("RouteContextNode") === 0 || sRouteName.indexOf("RouteAI") === 0) {
@@ -121,7 +121,7 @@ sap.ui.define(
                 sExtractedTaskId = aMatches[1].replace(/'/g, '');
               }
             }
-            
+
             // Smart routing: check if it's a subTask of current hierarchy
             if (sExtractedTaskId) {
               if (this._dataCache.isLoaded) {
@@ -142,13 +142,13 @@ sap.ui.define(
                 return;
               }
             }
-            
+
             // If we found a task ID and don't have navigation data, load it
             if (sExtractedTaskId && (!this._dataCache.isLoaded || this._dataCache.currentTask?.ID !== sExtractedTaskId)) {
               this._preloadTaskData(sExtractedTaskId);
             }
           }
-          
+
           // For detail routes, maintain navigation state but update selection
           if (sRouteName === "RouteTaskDetail" && oArguments && oArguments.taskId) {
             this._restoreNavigationState();
@@ -173,7 +173,7 @@ sap.ui.define(
           }
         },
 
-        _initNavigationModel: function() {
+        _initNavigationModel: function () {
           var oNavigationModel = new JSONModel({
             selectedKey: "",
             currentView: "tasks", // "tasks" or "contextNodes"
@@ -185,7 +185,7 @@ sap.ui.define(
                 key: "tasks"
               },
               {
-                text: "Context Nodes", 
+                text: "Context Nodes",
                 icon: "sap-icon://tree",
                 key: "contextNodes"
               }
@@ -194,18 +194,18 @@ sap.ui.define(
           this.getView().setModel(oNavigationModel, "side");
         },
 
-        _preloadTaskData: function(sTaskId) {
+        _preloadTaskData: function (sTaskId) {
           var oModel = this.getOwnerComponent().getModel();
           var that = this;
-          
 
-          
+
+
           // Create binding with comprehensive $expand to get all related data in one request
           var oBinding = oModel.bindContext("/Tasks(" + sTaskId + ")", null, {
             $expand: "botInstances($expand=type,messages,tasks($expand=botInstances($expand=type))),contextNodes"
           });
-          
-          oBinding.attachDataReceived(function() {
+
+          oBinding.attachDataReceived(function () {
             var oContext = oBinding.getBoundContext();
             if (oContext) {
               var oTaskData = oContext.getObject();
@@ -215,64 +215,64 @@ sap.ui.define(
               }
             }
           });
-          
+
           // Request the data
-          oBinding.requestObject().catch(function(oError) {
+          oBinding.requestObject().catch(function (oError) {
             MessageToast.show("Failed to load task data: " + (oError.message || oError.toString()));
           });
         },
-        
-        _cacheTaskData: function(oTaskData) {
+
+        _cacheTaskData: function (oTaskData) {
           // Clear previous cache
           this._dataCache.botInstances.clear();
           this._dataCache.contextNodes.clear();
           this._dataCache.botMessages.clear();
-          
+
           // Initialize sub-tasks cache if not exists
           if (!this._dataCache.subTasks) {
             this._dataCache.subTasks = new Map();
           } else {
             this._dataCache.subTasks.clear();
           }
-          
+
           // Cache task data
           this._dataCache.currentTask = oTaskData;
-          
+
           // Cache bot instances and their messages
           if (oTaskData.botInstances && Array.isArray(oTaskData.botInstances)) {
             this._cacheBotInstancesRecursively(oTaskData.botInstances);
           }
-          
+
           // Cache context nodes
           if (oTaskData.contextNodes && Array.isArray(oTaskData.contextNodes)) {
-            oTaskData.contextNodes.forEach(function(oContextNode) {
+            oTaskData.contextNodes.forEach(function (oContextNode) {
               this._dataCache.contextNodes.set(oContextNode.ID, oContextNode);
             }.bind(this));
           }
-          
+
           // Build task hierarchy mapping
           this._buildTaskHierarchyMap();
-          
+
           this._dataCache.isLoaded = true;
           this._dataCache.invalidated = false;
         },
-        
-        _cacheBotInstancesRecursively: function(aBotInstances) {
-          aBotInstances.forEach(function(oBotInstance) {
+
+        _cacheBotInstancesRecursively: function (aBotInstances) {
+          aBotInstances.forEach(function (oBotInstance) {
             this._dataCache.botInstances.set(oBotInstance.ID, oBotInstance);
-            
+
             // Cache messages for this bot instance
             if (oBotInstance.messages && Array.isArray(oBotInstance.messages)) {
-              oBotInstance.messages.forEach(function(oMessage) {
+              oBotInstance.messages.forEach(function (oMessage) {
                 this._dataCache.botMessages.set(oMessage.ID, oMessage);
               }.bind(this));
             }
-            
+
             // Cache sub-tasks and their bot instances recursively
             if (oBotInstance.tasks && Array.isArray(oBotInstance.tasks)) {
-              oBotInstance.tasks.forEach(function(oSubTask) {
+              oBotInstance.tasks.forEach(function (oSubTask) {
                 this._dataCache.subTasks.set(oSubTask.ID, oSubTask);
-                
+
                 // Recursively cache bot instances of sub-tasks
                 if (oSubTask.botInstances && Array.isArray(oSubTask.botInstances)) {
                   this._cacheBotInstancesRecursively(oSubTask.botInstances);
@@ -281,31 +281,31 @@ sap.ui.define(
             }
           }.bind(this));
         },
-        
-        _buildNavigationFromCache: function() {
+
+        _buildNavigationFromCache: function () {
           if (!this._dataCache.isLoaded || !this._dataCache.currentTask) {
             return;
           }
-          
+
           var sCurrentView = this.getView().getModel("side").getProperty("/currentView") || "tasks";
-          
+
           if (sCurrentView === "tasks") {
             this._buildTasksNavigationFromCache();
           } else if (sCurrentView === "contextNodes") {
             this._buildContextNodesNavigationFromCache();
           }
         },
-        
-        _buildTasksNavigationFromCache: function() {
+
+        _buildTasksNavigationFromCache: function () {
           var oTask = this._dataCache.currentTask;
           var aNavigationData = [];
-          
+
           var oTaskItem = this._buildTaskItemRecursively(oTask);
           aNavigationData.push(oTaskItem);
           this.getView().getModel("side").setProperty("/navigation", aNavigationData);
         },
-        
-        _buildTaskItemRecursively: function(oTask) {
+
+        _buildTaskItemRecursively: function (oTask) {
           var oTaskItem = {
             text: oTask.name || "Unnamed Task",
             key: "task_" + oTask.ID,
@@ -313,23 +313,23 @@ sap.ui.define(
             data: oTask,
             items: []
           };
-          
+
           // Add BotInstances as child items
           if (oTask.botInstances && Array.isArray(oTask.botInstances)) {
-            oTask.botInstances.forEach(function(oBotInstance) {
+            oTask.botInstances.forEach(function (oBotInstance) {
               var oBotInstanceItem = this._buildBotInstanceItem(oBotInstance);
               oTaskItem.items.push(oBotInstanceItem);
             }.bind(this));
           }
-          
+
           return oTaskItem;
         },
-        
-        _buildBotInstanceItem: function(oBotInstance) {
-          var sDisplayName = oBotInstance.type && oBotInstance.type.name ? 
-            oBotInstance.type.name : 
+
+        _buildBotInstanceItem: function (oBotInstance) {
+          var sDisplayName = oBotInstance.type && oBotInstance.type.name ?
+            oBotInstance.type.name :
             ("Bot Instance " + oBotInstance.sequence);
-            
+
           var oBotInstanceItem = {
             text: sDisplayName,
             key: "botinstance_" + oBotInstance.ID,
@@ -337,22 +337,22 @@ sap.ui.define(
             data: oBotInstance,
             items: []
           };
-          
+
           // Add sub-tasks recursively
           if (oBotInstance.tasks && Array.isArray(oBotInstance.tasks)) {
-            oBotInstance.tasks.forEach(function(oSubTask) {
+            oBotInstance.tasks.forEach(function (oSubTask) {
               var oSubTaskItem = this._buildTaskItemRecursively(oSubTask);
               oBotInstanceItem.items.push(oSubTaskItem);
             }.bind(this));
           }
-          
+
           return oBotInstanceItem;
         },
-        
-        _buildContextNodesNavigationFromCache: function() {
+
+        _buildContextNodesNavigationFromCache: function () {
           var oTask = this._dataCache.currentTask;
           var aNavigationData = [];
-          
+
           if (this._dataCache.contextNodes.size > 0) {
             var oTaskItem = {
               text: oTask.name || "Unnamed Task",
@@ -361,9 +361,9 @@ sap.ui.define(
               data: oTask,
               items: []
             };
-            
+
             // Add ContextNodes as child items from cache
-            this._dataCache.contextNodes.forEach(function(oContextNode) {
+            this._dataCache.contextNodes.forEach(function (oContextNode) {
               oTaskItem.items.push({
                 text: oContextNode.label || "Context Node",
                 key: "contextnode_" + oContextNode.ID,
@@ -372,20 +372,20 @@ sap.ui.define(
                 items: []
               });
             });
-            
+
             aNavigationData.push(oTaskItem);
           }
-          
+
           this.getView().getModel("side").setProperty("/navigation", aNavigationData);
         },
 
-        onFixedNavigationItemSelect: function(oEvent) {
+        onFixedNavigationItemSelect: function (oEvent) {
           var sKey = oEvent.getParameter("item").getKey();
           var oSideModel = this.getView().getModel("side");
-          
+
           oSideModel.setProperty("/currentView", sKey);
           oSideModel.setProperty("/selectedKey", sKey);
-          
+
           // Check if cache is invalidated and refresh if needed
           if (this._dataCache.invalidated && this._dataCache.isLoaded && this._dataCache.currentTask) {
             this._preloadTaskData(this._dataCache.currentTask.ID);
@@ -394,43 +394,43 @@ sap.ui.define(
           }
         },
 
-        onNavigationItemSelect: function(oEvent) {
+        onNavigationItemSelect: function (oEvent) {
           var oItem = oEvent.getParameter("listItem");
           var oContext = oItem.getBindingContext("side");
           var oData = oContext.getObject();
           var sKey = oData.key;
-          
+
           this.getView().getModel("side").setProperty("/selectedKey", sKey);
-          
+
           // Ensure navigation data remains available after route change
           this._maintainNavigationState();
-          
+
           // Navigate to appropriate view based on item type and data
           this._navigateToItem(oData);
         },
-        
-        _maintainNavigationState: function() {
+
+        _maintainNavigationState: function () {
           // Store current navigation state to prevent loss during route changes
           var oSideModel = this.getView().getModel("side");
           var aCurrentNavigation = oSideModel.getProperty("/navigation");
-          
+
           if (aCurrentNavigation && aCurrentNavigation.length > 0) {
             // Store in a more permanent location
             this._lastNavigationState = {
               navigation: aCurrentNavigation,
               currentView: oSideModel.getProperty("/currentView")
             };
-            
+
             // Set a flag to indicate we have valid navigation data
             oSideModel.setProperty("/hasNavigationData", true);
           }
         },
-        
-        _restoreNavigationState: function() {
+
+        _restoreNavigationState: function () {
           // Restore navigation state if it was lost
           var oSideModel = this.getView().getModel("side");
           var aCurrentNavigation = oSideModel.getProperty("/navigation");
-          
+
           if ((!aCurrentNavigation || aCurrentNavigation.length === 0) && this._lastNavigationState) {
             oSideModel.setProperty("/navigation", this._lastNavigationState.navigation);
             oSideModel.setProperty("/currentView", this._lastNavigationState.currentView);
@@ -438,12 +438,12 @@ sap.ui.define(
           }
         },
 
-        _navigateToItem: function(oItemData) {
+        _navigateToItem: function (oItemData) {
           var oRouter = this.getOwnerComponent().getRouter();
           var that = this;
-          
+
           // Add delay to prevent request collision and improve navigation reliability
-          setTimeout(function() {
+          setTimeout(function () {
             // Navigate directly using entity IDs, no need for taskRunId dependency
             if (oItemData.type === "Task") {
               // Navigate to task detail with task ID
@@ -459,7 +459,7 @@ sap.ui.define(
               // Navigate to bot instance detail or AI conversation based on type
               var sBotInstanceId = oItemData.data.ID;
               if (sBotInstanceId) {
-                
+
                 // Check if this is a Chat BotInstance
                 var sBotTypeName = oItemData.data.type && oItemData.data.type.name;
                 if (sBotTypeName && sBotTypeName.startsWith("Chat")) {
@@ -478,78 +478,85 @@ sap.ui.define(
                 MessageToast.show("Bot Instance ID not available");
               }
             } else if (oItemData.type === "ContextNode") {
-              // Navigate to context node detail
               var sContextNodeId = oItemData.data.ID;
+              var sNodeType = oItemData.data.type;
               if (sContextNodeId) {
-                oRouter.navTo("RouteContextNodeDetail", {
-                  contextNodeId: sContextNodeId
-                });
+                if (sNodeType === "text" ){
+                   oRouter.navTo("RouteTextNodePage", { contextNodeId: sContextNodeId });
+                }else if(sNodeType === "markdown"){
+                   oRouter.navTo("RouteMarkDownNodePage", { contextNodeId: sContextNodeId });
+                } else if( sNodeType === "codeEditor") {
+                  oRouter.navTo("RouteTextAreaNodePage", { contextNodeId: sContextNodeId });
+                } else {
+                  // 默认跳转
+                  oRouter.navTo("RouteContextNodeDetail", { contextNodeId: sContextNodeId });
+                }
               } else {
                 MessageToast.show("Context Node ID not available");
               }
             }
           }, 100);
         },
-        
+
         // Public methods for other controllers to access cached data
-        getCachedBotInstance: function(sBotInstanceId) {
+        getCachedBotInstance: function (sBotInstanceId) {
           return this._dataCache.botInstances.get(sBotInstanceId);
         },
-        
-        getCachedContextNode: function(sContextNodeId) {
+
+        getCachedContextNode: function (sContextNodeId) {
           return this._dataCache.contextNodes.get(sContextNodeId);
         },
-        
-        getCachedTask: function(sTaskId) {
+
+        getCachedTask: function (sTaskId) {
           if (!sTaskId) {
             return this._dataCache.currentTask;
           }
           return this._dataCache.subTasks ? this._dataCache.subTasks.get(sTaskId) : null;
         },
-        
-        getCachedBotMessages: function(sBotInstanceId) {
+
+        getCachedBotMessages: function (sBotInstanceId) {
           var oBotInstance = this._dataCache.botInstances.get(sBotInstanceId);
           return oBotInstance ? oBotInstance.messages : [];
         },
-        
-        isCacheLoaded: function() {
+
+        isCacheLoaded: function () {
           return this._dataCache.isLoaded;
         },
 
-        _getCurrentTaskRunId: function() {
+        _getCurrentTaskRunId: function () {
           // First try to get from stored current task ID
           if (this._currentTaskId) {
             return this._currentTaskId;
           }
-          
+
           // Fallback: get from route hash
           var oRouter = this.getOwnerComponent().getRouter();
           var oHashChanger = oRouter.getHashChanger();
           var sHash = oHashChanger.getHash();
-          
+
           // Extract taskRunId from hash pattern like "Tasks(guid)"
           var aMatches = sHash.match(/Tasks\(([^)]+)\)/);
           if (aMatches && aMatches[1]) {
             // Remove quotes if present (for backward compatibility)
             return aMatches[1].replace(/'/g, '');
           }
-          
+
           // If we have cached data, use that
           if (this._dataCache.currentTask && this._dataCache.currentTask.ID) {
             return this._dataCache.currentTask.ID;
           }
-          
+
           return null;
         },
 
-        onSideNavButtonPress: function() {
+        onSideNavButtonPress: function () {
           var oToolPage = this.byId("navToolPage");
           var bSideExpanded = oToolPage.getSideExpanded();
           this._setToggleButtonTooltip(bSideExpanded);
           oToolPage.setSideExpanded(!oToolPage.getSideExpanded());
         },
 
-        _setToggleButtonTooltip: function(bSideExpanded) {
+        _setToggleButtonTooltip: function (bSideExpanded) {
           var oToggleButton = this.byId('navSideNavigationToggleButton');
           if (bSideExpanded) {
             oToggleButton.setTooltip('Large Size Navigation Menu');
@@ -558,52 +565,52 @@ sap.ui.define(
           }
         },
 
-        _handleWindowResize: function() {
+        _handleWindowResize: function () {
           // Handle window resize events
         },
 
-        onMessagePopoverPress: function(oEvent) {
+        onMessagePopoverPress: function (oEvent) {
           // Handle message popover
         },
 
-        onNotificationPress: function(oEvent) {
+        onNotificationPress: function (oEvent) {
           // Handle notification press
         },
 
-        onUserNamePress: function(oEvent) {
+        onUserNamePress: function (oEvent) {
           // Handle user name press
         },
 
-        onHomeButtonPress: function() {
+        onHomeButtonPress: function () {
           // Navigate back to the task list page
           var oRouter = this.getOwnerComponent().getRouter();
           oRouter.navTo("RouteTaskRunList");
         },
-        
-        _onDataUpdated: function() {
+
+        _onDataUpdated: function () {
           // Mark cache as invalidated when data is updated
           this._dataCache.invalidated = true;
         },
 
-        _buildTaskHierarchyMap: function() {
+        _buildTaskHierarchyMap: function () {
           if (!this._taskHierarchyMap) {
             this._taskHierarchyMap = new Map();
           } else {
             this._taskHierarchyMap.clear();
           }
-          
+
           if (this._dataCache.currentTask) {
             this._mapTaskRecursively(this._dataCache.currentTask, this._dataCache.currentTask.ID);
           }
         },
-        
-        _mapTaskRecursively: function(oTask, sRootTaskId) {
+
+        _mapTaskRecursively: function (oTask, sRootTaskId) {
           this._taskHierarchyMap.set(oTask.ID, sRootTaskId);
-          
+
           if (oTask.botInstances && Array.isArray(oTask.botInstances)) {
-            oTask.botInstances.forEach(function(oBotInstance) {
+            oTask.botInstances.forEach(function (oBotInstance) {
               if (oBotInstance.tasks && Array.isArray(oBotInstance.tasks)) {
-                oBotInstance.tasks.forEach(function(oSubTask) {
+                oBotInstance.tasks.forEach(function (oSubTask) {
                   this._mapTaskRecursively(oSubTask, sRootTaskId);
                 }.bind(this));
               }
@@ -611,30 +618,30 @@ sap.ui.define(
           }
         },
 
-        _findRootTaskId: function(sTaskId) {
+        _findRootTaskId: function (sTaskId) {
           if (!this._taskHierarchyMap) {
             return null;
           }
-          
+
           var sRootTaskId = this._taskHierarchyMap.get(sTaskId);
           return sRootTaskId || null;
         },
 
-        _updateNavigationSelection: function(sTaskId) {
+        _updateNavigationSelection: function (sTaskId) {
           var sNodeKey = "task_" + sTaskId;
           this.getView().getModel("side").setProperty("/selectedKey", sNodeKey);
         },
 
-        _loadRootTaskForSubTask: function(sTaskId) {
+        _loadRootTaskForSubTask: function (sTaskId) {
           var oModel = this.getOwnerComponent().getModel();
           var that = this;
-          
+
           // Try to load the task and check if it has a botInstance (indicating it's a subTask)
           var oBinding = oModel.bindContext("/Tasks(" + sTaskId + ")", null, {
             $expand: "botInstance/task($expand=botInstances($expand=type,messages,tasks($expand=botInstances($expand=type))),contextNodes)"
           });
-          
-          oBinding.attachDataReceived(function() {
+
+          oBinding.attachDataReceived(function () {
             var oContext = oBinding.getBoundContext();
             if (oContext) {
               var oTaskData = oContext.getObject();
@@ -650,8 +657,8 @@ sap.ui.define(
               }
             }
           });
-          
-          oBinding.requestObject().catch(function(oError) {
+
+          oBinding.requestObject().catch(function (oError) {
             // Fallback: try loading as root task
             that._preloadTaskData(sTaskId);
           });

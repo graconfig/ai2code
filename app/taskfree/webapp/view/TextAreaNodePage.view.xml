@@ -1,0 +1,17 @@
+<mvc:View
+  controllerName="ai.orchestration.taskfree.controller.TextAreaNodePage"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:c="sap.ui.core">
+  <Page id="textAreaNodePage" title="{viewModel>/title}">
+    <content>
+      <TextArea
+        visible="{= ${viewModel>/type} === 'codeEditor'}"
+        value="{viewModel>/value}"
+        rows="20"
+        width="100%"
+        editable="false"
+        class="sapUiSmallMargin"/>
+    </content>
+  </Page>
+</mvc:View>
