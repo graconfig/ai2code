@@ -15,12 +15,13 @@ sap.ui.define(
     "sap/ui/core/CustomData",
     "sap/ui/Device",
     "sap/ui/core/syncStyleClass",
-    "sap/m/library"
+    "sap/m/library",
+    "sap/ui/core/IconPool"
   ],
   /**
    * @param {typeof sap.ui.core.mvc.Controller} Controller
    */
-  function (Controller, MessageToast, Helper, ChatService, NewMessageHandler, UIHelper, JSONModel, ResponsivePopover, MessagePopover, ActionSheet, Button, Link, NotificationListItem, MessageItem, CustomData, Device, syncStyleClass, mobileLibrary) {
+  function (Controller, MessageToast, Helper, ChatService, NewMessageHandler, UIHelper, JSONModel, ResponsivePopover, MessagePopover, ActionSheet, Button, Link, NotificationListItem, MessageItem, CustomData, Device, syncStyleClass, mobileLibrary,IconPool) {
     "use strict";
 
     // shortcuts for sap.m library types
@@ -42,6 +43,8 @@ sap.ui.define(
           // Initialize data cache
           this._initDataCache();
 
+          this._initIcon();
+
           // if the app starts on desktop devices with small or medium screen size, collapse the side navigation
           if (Device.resize.width <= 1024) {
             this.onSideNavButtonPress();
@@ -49,6 +52,29 @@ sap.ui.define(
 
           Device.media.attachHandler(this._handleWindowResize, this);
           this.getOwnerComponent().getRouter().attachRouteMatched(this.onRouteChange.bind(this));
+        },
+
+        _initIcon:function() {
+            var b = [];
+            var c = {};
+            //Fiori Theme font family and URI
+            var t = {
+              fontFamily: "SAP-icons-TNT",
+              fontURI: sap.ui.require.toUrl("sap/tnt/themes/base/fonts/")
+            };
+            //Registering to the icon pool
+            IconPool.registerFont(t);
+            b.push(IconPool.fontLoaded("SAP-icons-TNT"));
+            c["SAP-icons-TNT"] = t;
+            //SAP Business Suite Theme font family and URI
+            var B = {
+              fontFamily: "BusinessSuiteInAppSymbols",
+              fontURI: sap.ui.require.toUrl("sap/ushell/themes/base/fonts/")
+            };
+            //Registering to the icon pool
+            IconPool.registerFont(B);
+            b.push(IconPool.fontLoaded("BusinessSuiteInAppSymbols"));
+            c["BusinessSuiteInAppSymbols"] = B;
         },
 
         _initDataCache: function () {
@@ -306,11 +332,20 @@ sap.ui.define(
         },
 
         _buildTaskItemRecursively: function (oTask) {
+            
+          var icon = "";
+          if(oTask.isMain === true){
+              icon = "sap-icon://menu2";
+          }else{
+              icon = "sap-icon://task";
+          }
+
           var oTaskItem = {
             text: oTask.name || "Unnamed Task",
             key: "task_" + oTask.ID,
             type: "Task",
             data: oTask,
+            icon: icon,
             items: []
           };
 
@@ -326,6 +361,15 @@ sap.ui.define(
         },
 
         _buildBotInstanceItem: function (oBotInstance) {
+          var icon = "";
+
+          if( oBotInstance.type.name && oBotInstance.type.name.startsWith("Chat"))
+          {
+             icon = "sap-icon://SAP-icons-TNT/robot";
+          }else{
+             icon = "sap-icon://activities";
+          }
+
           var sDisplayName = oBotInstance.type && oBotInstance.type.name ?
             oBotInstance.type.name :
             ("Bot Instance " + oBotInstance.sequence);
@@ -335,6 +379,7 @@ sap.ui.define(
             key: "botinstance_" + oBotInstance.ID,
             type: "BotInstance",
             data: oBotInstance,
+            icon: icon,
             items: []
           };
 
@@ -353,12 +398,22 @@ sap.ui.define(
           var oTask = this._dataCache.currentTask;
           var aNavigationData = [];
 
+          var Taskicon = "";
+          if(oTask.isMain === true){
+              Taskicon = "sap-icon://menu2";
+          }else{
+              Taskicon = "sap-icon://task";
+          }
+
+          var contextNodeIcon = "sap-icon://document-text";
+
           if (this._dataCache.contextNodes.size > 0) {
             var oTaskItem = {
               text: oTask.name || "Unnamed Task",
               key: "task_" + oTask.ID,
               type: "Task",
               data: oTask,
+              icon: Taskicon,
               items: []
             };
 
@@ -369,6 +424,7 @@ sap.ui.define(
                 key: "contextnode_" + oContextNode.ID,
                 type: "ContextNode",
                 data: oContextNode,
+                icon: contextNodeIcon,  
                 items: []
               });
             });

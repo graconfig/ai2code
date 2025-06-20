@@ -50,6 +50,7 @@ sap.ui.define([
             // 如果 contextNodeId 是字符串主键，需要加引号
             var sPath = "/ContextNodes(" + contextNodeId + ")";
             oModel.bindContext(sPath).requestObject().then(function (oData) {
+                oData.type = "markdown" ;
                 oViewModel.setProperty("/type", oData.type);
                 oViewModel.setProperty("/value", oData.value);
                 oViewModel.setProperty("/title", oData.title);
@@ -79,7 +80,7 @@ sap.ui.define([
         _setMarkdownContent: function (markdownText) {
             var oViewModel = this.getView().getModel("viewModel");
             var htmlContent = window.marked ? window.marked.parse(markdownText || "") : (markdownText || "");
-            console.log("setMarkdownContent called. markdownText:", markdownText, "htmlContent:", htmlContent);
+            //console.log("setMarkdownContent called. markdownText:", markdownText, "htmlContent:", htmlContent);
             oViewModel.setProperty("/htmlValue", htmlContent);
         },
         onExit: function () {

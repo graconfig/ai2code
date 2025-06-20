@@ -71,7 +71,7 @@ sap.ui.define([
         _setMarkdownContent: function (markdownText) {
             var oViewModel = this.getView().getModel("viewModel");
             var htmlContent = window.marked ? window.marked.parse(markdownText || "") : (markdownText || "");
-            console.log("setMarkdownContent called. markdownText:", markdownText, "htmlContent:", htmlContent);
+            //console.log("setMarkdownContent called. markdownText:", markdownText, "htmlContent:", htmlContent);
             oViewModel.setProperty("/htmlValue", htmlContent);
         },
         onExit: function () {
