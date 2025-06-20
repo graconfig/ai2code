@@ -89,8 +89,10 @@ public class TaskServiceImpl implements TaskService {
         // 3.1 获取下属BotType
         List<BotTypes> botTypes = genericCqnService.getBotTypesByTaskType(taskType.getId());
 
+        // 3.2 获取绝对路径
+        String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, contextPath);
         // 4. 创建Task
-        Tasks newTask = genericCqnService.createAndInsertSubTask(name, description, contextPath, 
+        Tasks newTask = genericCqnService.createAndInsertSubTask(name, description, absoluteOutputContextPath, 
                                                                 sequence, botInstanceId, taskType.getId());
 
         // 5. 为每个BotType创建BotInstance

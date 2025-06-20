@@ -47,8 +47,8 @@ public class ChatBot implements Bot {
             boolean isFirstCall = genericCqnService.isFirstCall(botInstance.getId());
             if (isFirstCall) {
                 // 2. 使用genericCqnService.getMainTaskId，再获取Prompt
-                String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
-                prompts = promptService.getPrompts(botType.getId(), mainTaskId, botInstance.getId());
+                // String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
+                prompts = promptService.getPrompts(botType.getId(), botInstance.getId());
                 if (prompts != null && !prompts.isEmpty()) {
                     savePromptMessages(prompts);
                 }
@@ -76,8 +76,8 @@ public class ChatBot implements Bot {
             AIService aiService = aiModelResolver.resolveAIService(aiModel.getModelConfigs());
 
             // 2. 获取主任务ID和Prompt
-            String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
-            List<PromptTexts> prompts = promptService.getPrompts(botType.getId(), mainTaskId, botInstance.getId());
+            // String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
+            List<PromptTexts> prompts = promptService.getPrompts(botType.getId(), botInstance.getId());
 
             // 3. 第一次调用需要保存prompt消息
             boolean isFirstCall = genericCqnService.isFirstCall(botInstance.getId());
