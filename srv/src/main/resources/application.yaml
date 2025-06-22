@@ -1,9 +1,23 @@
+---
 spring:
   config.activate.on-profile: default
+cds:
+  sql.hana.search:
+    fuzzy: true
+    fuzzinessThreshold: 0.9
+  messaging.services:
+    bupa-messaging:
+      kind: enterprise-messaging
+      format: cloudevents
+      subscribe-prefix: sap/S4HANAOD/java/ce/
+---
+spring:
+  config.activate.on-profile: dev
   sql.init.platform: h2
   web.resources.static-locations: file:./app/
 cds:
   data-source.auto-config.enabled: false
+
 ---
 management:
   endpoint:
@@ -18,3 +32,5 @@ management:
     defaults.enabled: false
     ping.enabled: true
     db.enabled: true
+
+
