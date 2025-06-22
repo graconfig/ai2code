@@ -17,6 +17,7 @@
         <spring.boot.version>3.4.5</spring.boot.version>
         <cds.install-node.downloadUrl>https://nodejs.org/dist/</cds.install-node.downloadUrl>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <lombok.version>1.18.38</lombok.version>
     </properties>
     <modules>
         <module>srv</module>

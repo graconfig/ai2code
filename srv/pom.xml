@@ -1,17 +1,14 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
 	<parent>
 		<artifactId>ai2code-parent</artifactId>
 		<groupId>customer</groupId>
 		<version>${revision}</version>
 	</parent>
-
 	<artifactId>ai2code</artifactId>
 	<packaging>jar</packaging>
-
 	<name>ai2code</name>
-
 	<!-- ACTUAL DEPENDENCIES -->
 	<dependencies>
 		<!-- CDS SPRING BOOT STARTER -->
@@ -19,31 +16,26 @@
 			<groupId>com.sap.cds</groupId>
 			<artifactId>cds-starter-spring-boot</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>com.sap.cds</groupId>
 			<artifactId>cds-adapter-odata-v4</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>com.sap.ai.sdk</groupId>
 			<artifactId>core</artifactId>
@@ -59,19 +51,15 @@
 			<artifactId>orchestration</artifactId>
 			<version>1.6.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
+			<version>${lombok.version}</version>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>com.sap.cloud.sdk</groupId>
 			<artifactId>sdk-core</artifactId>
@@ -93,15 +81,12 @@
 			<version>1.13.1</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>com.sap.cds</groupId>
 			<artifactId>cds-starter-cloudfoundry</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-
 	</dependencies>
-
 	<build>
 		<finalName>${project.artifactId}</finalName>
 		<plugins>
@@ -125,7 +110,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<!-- STEPS TO BUILD CDS MODEL AND GENERATE POJOs -->
 			<plugin>
 				<groupId>com.sap.cds</groupId>
@@ -137,14 +121,12 @@
 							<goal>clean</goal>
 						</goals>
 					</execution>
-
 					<execution>
 						<id>cds.install-node</id>
 						<goals>
 							<goal>install-node</goal>
 						</goals>
 					</execution>
-
 					<execution>
 						<id>cds.npm-ci</id>
 						<goals>
@@ -154,14 +136,12 @@
 							<arguments>ci</arguments>
 						</configuration>
 					</execution>
-
 					<execution>
 						<id>cds.resolve</id>
 						<goals>
 							<goal>resolve</goal>
 						</goals>
 					</execution>
-
 					<execution>
 						<id>cds.build</id>
 						<goals>
@@ -175,7 +155,6 @@
 							</commands>
 						</configuration>
 					</execution>
-
 					<execution>
 						<id>cds.generate</id>
 						<goals>
@@ -216,17 +195,14 @@
 								<useOneOfInterfaces>true</useOneOfInterfaces>
 								<useOneOfCreators>true</useOneOfCreators>
 								<useFloatArrays>true</useFloatArrays>
-
 								<!-- new exclude paths -->
 								<!-- <excludePaths>/deployments/{deployment-id}/completions
 											/deployments/{deployment-id}/audio/transcriptions
 											/deployments/{deployment-id}/audio/translations
 											/deployments/{deployment-id}/images/generations</excludePaths> -->
-
 								<!-- new exclude properties -->
 								<!-- <excludeProperties>chatCompletionResponseMessage.context
 											createChatCompletionRequest.data_sources</excludeProperties> -->
-
 								<!-- new: remove unassigned components -->
 								<removeUnusedComponents>true</removeUnusedComponents>
 							</additionalProperties>
@@ -234,7 +210,21 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.14.0</version>
+				<configuration>
+					<!--确保`maven-compiler-plugin`正确配置了 Lombok 注解处理器-->
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-
 </project>

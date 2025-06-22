@@ -62,18 +62,26 @@ entity BotMessage : cuid, managed {
 view TaskHierarchyView as
         select from Task as a {
             key a.ID,
-                'TASK'           as nodeType : String(10),
+                'TASK'           as nodeType               : String(10),
                 a.name,
                 a.botInstance.ID as parent_ID,
-                parent                       : Association to TaskHierarchyView
-                                                   on parent.ID = $self.parent_ID
+                parent                                     : Association to TaskHierarchyView
+                                                                 on parent.ID = $self.parent_ID,
+                null             as LimitedDescendantCount : Integer64,
+                null             as DistanceFromRoot       : Integer64,
+                null             as DrillState             : String,
+                null             as LimitedRank            : Integer64,
             }
         union all
             select from BotInstance as a {
                 key a.ID,
-                    'BOT'     as nodeType : String(10),
+                    'BOT'     as nodeType               : String(10),
                     null      as name,
                     a.task.ID as parent_ID,
-                    parent                : Association to TaskHierarchyView
-                                                on parent.ID = $self.parent_ID
+                    parent                              : Association to TaskHierarchyView
+                                                              on parent.ID = $self.parent_ID,
+                    null      as LimitedDescendantCount : Integer64,
+                    null      as DistanceFromRoot       : Integer64,
+                    null      as DrillState             : String,
+                    null      as LimitedRank            : Integer64,
                 }
