@@ -34,6 +34,7 @@ OData:BotInstances('bot-123')/task
 ```
 OData:BotInstances('bot-123')/task/name
 OData:Tasks('task-456')/botInstances/messages
+OData:BotInstances/b631b9de-24ba-439c-afb3-f6a8002ddc9c/type/outputContextPath
 ```
 
 #### 1.6 复合键实体
@@ -54,11 +55,6 @@ OData:ContextNodes(taskId='task-123',path='context.result')
   OData:Tasks?$filter=isMain eq true and sequence gt 5
   ```
 
-- **$orderby**: 排序
-  ```
-  OData:BotInstances?$orderby=sequence asc,createdAt desc
-  ```
-
 - **$top**: 限制返回记录数
   ```
   OData:BotInstances?$top=10
@@ -69,10 +65,6 @@ OData:ContextNodes(taskId='task-123',path='context.result')
   OData:BotInstances?$skip=20
   ```
 
-- **$expand**: 展开导航属性
-  ```
-  OData:BotInstances?$expand=messages,task
-  ```
 
 ### 3. 组合查询示例
 

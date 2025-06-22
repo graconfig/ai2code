@@ -24,6 +24,7 @@ import com.sap.cds.ql.Selectable;
 import com.sap.cds.ql.StructuredType;
 import com.sap.cds.ql.cqn.CqnPredicate;
 import com.sap.cds.ql.cqn.CqnSelect;
+import com.sap.cds.reflect.CdsAssociationType;
 import com.sap.cds.reflect.CdsElement;
 
 /**
@@ -102,11 +103,13 @@ public class ODataUrlParserEnhanced {
 
         private PathSegmentInfo fromSegment;
 
-        private PathSegmentInfo keySegment;
+        // private PathSegmentInfo keySegment;
+        private PathSegmentInfo emptyKeyTargetSegment;
 
         private List<CqnPredicate> whereConditions = new ArrayList<>();
 
-        private List<String> selectColumns = new ArrayList<>();
+        // private List<String> selectColumns = new ArrayList<>();
+        private Map<String, List<String>> selectColumns = new HashMap<>();
 
         private Integer top;
 
@@ -118,9 +121,9 @@ public class ODataUrlParserEnhanced {
             return fromSegment != null;
         }
 
-        public Boolean hasKeySegment() {
+        public Boolean hasEmptyKeyTargetSegment() {
             // return keySegment != null;
-            return keySegment != null;
+            return emptyKeyTargetSegment != null;
         }
 
         public Boolean hasWhereConditions() {
@@ -139,9 +142,10 @@ public class ODataUrlParserEnhanced {
             return skip != null;
         }
 
-        public void addSelectColumn(String column) {
+        public void addSelectColumn(String column, List<String> navigationChain) {
             if (column != null && !column.trim().isEmpty()) {
-                selectColumns.add(column);
+                // selectColumns.add(column);
+                selectColumns.put(column, navigationChain);
             }
         }
 
@@ -151,18 +155,20 @@ public class ODataUrlParserEnhanced {
             }
         }
 
-        public ODataRequestType getRequestType() {
-            if (hasFromSegment() && !hasKeySegment()) {
-                return ODataRequestType.ENTITY_SET; // 查询整个实体集
-            } else if (hasFromSegment() && hasKeySegment() && selectColumns.size() == 0) {
-                return ODataRequestType.SINGLE_ENTITY; // 查询单个实体
-            } else if (hasFromSegment() && hasKeySegment() && selectColumns.size() > 1) {
-                return ODataRequestType.ENTITY_PROERTIES; // 查询实体属性
-            } else if (hasFromSegment() && hasKeySegment() && selectColumns.size() == 1) {
-                return ODataRequestType.ENTITY_PROPERTY; // 查询实体属性
-            }
-            return null; // 未知请求类型
-        }
+        // public ODataRequestType getRequestType() {
+        // if (hasFromSegment() && !hasKeySegment()) {
+        // return ODataRequestType.ENTITY_SET; // 查询整个实体集
+        // } else if (hasFromSegment() && hasKeySegment() && selectColumns.size() == 0)
+        // {
+        // return ODataRequestType.SINGLE_ENTITY; // 查询单个实体
+        // } else if (hasFromSegment() && hasKeySegment() && selectColumns.size() > 1) {
+        // return ODataRequestType.ENTITY_PROERTIES; // 查询实体属性
+        // } else if (hasFromSegment() && hasKeySegment() && selectColumns.size() == 1)
+        // {
+        // return ODataRequestType.ENTITY_PROPERTY; // 查询实体属性
+        // }
+        // return null; // 未知请求类型
+        // }
     }
 
     /**
@@ -222,39 +228,51 @@ public class ODataUrlParserEnhanced {
         parsePathLefttoRight(pathPart, cdsModel);
 
         // 从右到左解析路径部分
-        parsePathRightToLeft();
+        // parsePathRightToLeft();
         // 解析查询参数
         parseQueryParameters(queryPart);
 
         // 根据解析结果构建 Select 对象
         buildCql();
 
+        System.out.println(select.toJson());
         // return builder.build();
         return select;
     }
 
     private void buildCql() {
         // CqnBuilder builder = CQL.select();
-        Select<?> builder = Select.from(buildingCql.getFromSegment().getEntityModel().getQualifiedName());
+        select = Select.from(buildingCql.getFromSegment().getEntityModel().getQualifiedName());
 
         // if (buildingCql.has)
         if (buildingCql.hasSelectColumns()) {
             // 添加 select 列
-            buildingCql.getSelectColumns().forEach(col -> {
-                builder.columns(col);
+            // 这里使用了 CQL 的 Selectable 接口来处理选择的列
+            buildingCql.getSelectColumns().forEach((column, navigationChain) -> {
+                // 如果没有导航链，则直接添加列
+                if (navigationChain.isEmpty()) {
+                    select.columns(column);
+                } else {
+                    // 如果有导航链，则使用 CQL.to() 方法
+                    StructuredType<?> target = CQL.to(navigationChain.get(0));
+                    for (int j = 1; j < navigationChain.size(); j++) {
+                        target = target.to(navigationChain.get(j));
+                    }
+                    select.columns(target.get(column));
+                }
             });
         }
         if (buildingCql.hasWhereConditions()) {
             // 添加 where 条件
             // buildingCql.getWhereConditions().forEach(builder::where);
-            builder.where(CQL.and(buildingCql.getWhereConditions()));
+            select.where(CQL.and(buildingCql.getWhereConditions()));
         }
         if (buildingCql.hasTop() && buildingCql.hasSkip()) {
             // builder.top(buildingCql.getTop().longValue());
-            builder.limit(buildingCql.getTop(), buildingCql.getSkip());
+            select.limit(buildingCql.getTop(), buildingCql.getSkip());
         } else if (buildingCql.hasTop()) {
             // builder.top(buildingCql.getTop().longValue());
-            builder.limit(buildingCql.getTop());
+            select.limit(buildingCql.getTop());
         }
 
         // // 设置 from 段
@@ -307,78 +325,156 @@ public class ODataUrlParserEnhanced {
                     .or(() -> resolveProperty(segments, i, cdsModel))
                     .or(() -> resolveKey(segments, i, cdsModel));
 
+            segmentInfo.ifPresent(info -> {
+                // 设置位置
+                // 解析当前段
+                switch (info.getSegmentType()) {
+                    case ENTITY_SET:
+                        buildingCql.setFromSegment(info);
+                        buildingCql.setEmptyKeyTargetSegment(info);
+                        break;
+                    case ENTITY_SET_WITH_KEYS:
+                        buildingCql.setFromSegment(info);
+                        buildWhereCondition(info).forEach(buildingCql::addWhereCondition);
+
+                        break;
+
+                    case NAVIGATION_PROPERTY:
+                        // case ENTITY_SET:
+                        // if (!buildingCql.hasFromSegment()) {
+                        // buildingCql.setFromSegment(info);
+                        // }
+                        buildingCql.setEmptyKeyTargetSegment(info);
+                        if (i == segments.length - 1) {
+                            // 如果是最后一个Navigation Property段，则设置为column
+                            // buildingCql.addSelectColumn(buildSelectColumn(info));
+                            buildSelectColumn(info);
+                        }
+
+                        break;
+
+                    case NAVIGATION_PROPERTY_WITH_KEYS:
+                        buildWhereCondition(info).forEach(buildingCql::addWhereCondition);
+                        if (i == segments.length - 1) {
+                            // 如果是最后一个Navigation Property段，则设置为column
+                            // buildingCql.addSelectColumn(buildSelectColumn(info));
+                            buildSelectColumn(info);
+                        }
+                        break;
+
+                    case PROPERTY:
+                        // buildingCql.addSelectColumn(buildSelectColumn(info));
+                        // buildingCql.addSelectColumn(segmentInfo.getSegment());
+                        buildSelectColumn(info);
+                        break;
+                    case KEY:
+                        if (buildingCql.hasEmptyKeyTargetSegment()) {
+                            buildWhereCondition(info).forEach(buildingCql::addWhereCondition);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            });
+
             // 只有当解析成功时才添加
             segmentInfo.ifPresent(pathSegments::add);
         }
     }
 
-    /**
-     * 从右到左解析路径 - 核心方法
-     * 按照设计文档的要求：
-     * 1. 通过问号将path和query分开
-     * 2. 将path通过/符号分割成若干段，从最右侧开始往左侧依次解析
-     */
-    private void parsePathRightToLeft() {
+    // /**
+    // * 从右到左解析路径 - 核心方法
+    // * 按照设计文档的要求：
+    // * 1. 通过问号将path和query分开
+    // * 2. 将path通过/符号分割成若干段，从最右侧开始往左侧依次解析
+    // */
+    // private void parsePathRightToLeft() {
 
-        Boolean stop = false;
+    // Boolean stop = false;
 
-        // 从右到左解析
-        // 如果找到Where条件，或者解析结束
-        Integer i = pathSegments.size() - 1;
-        while (!stop && i >= 0) {
+    // // 从右到左解析
+    // // 如果找到Where条件，或者解析结束
+    // Integer i = pathSegments.size() - 1;
+    // while (!stop && i >= 0) {
 
-            PathSegmentInfo segmentInfo = pathSegments.get(i);
+    // PathSegmentInfo segmentInfo = pathSegments.get(i);
 
-            // 解析当前段
-            switch (segmentInfo.getSegmentType()) {
-                case NAVIGATION_PROPERTY:
-                case ENTITY_SET:
-                    if (!buildingCql.hasFromSegment()) {
-                        buildingCql.setFromSegment(segmentInfo);
-                    }
-                    if (buildingCql.hasKeySegment()) {
-                        buildWhereCondition(segmentInfo).forEach(buildingCql::addWhereCondition);
-                        stop = true; // 如果上一段是键值,构建完whereCondition就结束
-                        break;
-                    }
+    // // 解析当前段
+    // switch (segmentInfo.getSegmentType()) {
+    // case NAVIGATION_PROPERTY:
+    // case ENTITY_SET:
+    // if (!buildingCql.hasFromSegment()) {
+    // buildingCql.setFromSegment(segmentInfo);
+    // }
+    // if (buildingCql.hasKeySegment()) {
+    // buildWhereCondition(segmentInfo).forEach(buildingCql::addWhereCondition);
+    // stop = true; // 如果上一段是键值,构建完whereCondition就结束
+    // break;
+    // }
 
-                    break;
+    // break;
 
-                case NAVIGATION_PROPERTY_WITH_KEYS:
-                case ENTITY_SET_WITH_KEYS:
-                    if (!buildingCql.hasFromSegment()) {
-                        // 没有from segment，则设置当前段为fromSegment
-                        buildingCql.setFromSegment(segmentInfo);
-                        buildWhereCondition(segmentInfo).forEach(buildingCql::addWhereCondition);
-                    }
-                    stop = true; // 找到带键值导航属性/EntitySet，结束解析
-                    break;
+    // case NAVIGATION_PROPERTY_WITH_KEYS:
+    // case ENTITY_SET_WITH_KEYS:
+    // if (!buildingCql.hasFromSegment()) {
+    // // 没有from segment，则设置当前段为fromSegment
+    // buildingCql.setFromSegment(segmentInfo);
 
-                case PROPERTY:
-                    buildingCql.addSelectColumn(segmentInfo.getSegment());
-                    break;
-                case KEY:
-                    buildingCql.setKeySegment(segmentInfo);
-                    break;
-                default:
-                    break;
-            }
+    // }
+    // buildWhereCondition(segmentInfo).forEach(buildingCql::addWhereCondition);
+    // stop = true; // 找到带键值导航属性/EntitySet，结束解析
+    // break;
 
+    // case PROPERTY:
+    // buildingCql.addSelectColumn(segmentInfo.getSegment());
+    // break;
+    // case KEY:
+    // buildingCql.setKeySegment(segmentInfo);
+    // break;
+    // default:
+    // break;
+    // }
+    // i--;
+
+    // }
+    // }
+
+    private void buildSelectColumn(PathSegmentInfo segmentInfo) {
+        List<String> navigationChain = new ArrayList<>();
+        navigationChain = buildingNavigationChain(segmentInfo);
+
+        if (segmentInfo.getSegmentType() == SegmentType.NAVIGATION_PROPERTY
+                || segmentInfo.getSegmentType() == SegmentType.NAVIGATION_PROPERTY_WITH_KEYS) {
+            // 如果是导航属性或带键的导航属性，则删除链最后一行
+            navigationChain.removeLast();
         }
+
+        
+
+
+        buildingCql.addSelectColumn(segmentInfo.getSegment(), navigationChain);
+        // Map
+        // Integer position = 0;
+
+        // TODO Auto-generated method stub
+        // throw new UnsupportedOperationException("Unimplemented method
+        // 'buildSelectColumn'");
     }
 
     private List<CqnPredicate> buildWhereCondition(PathSegmentInfo segmentInfo) {
-        List<String> navigationChain = buildingNavigationChain(segmentInfo);
+        List<String> navigationChain = new ArrayList<>();
         Map<String, String> keys;
         List<CqnPredicate> conditions = new ArrayList<>();
+        keys = segmentInfo.getKeys();
         switch (segmentInfo.getSegmentType()) {
             case NAVIGATION_PROPERTY_WITH_KEYS:
             case ENTITY_SET_WITH_KEYS:
-                keys = segmentInfo.getKeys();
+                // keys = segmentInfo.getKeys();
+                navigationChain = buildingNavigationChain(segmentInfo);
                 break;
-            case NAVIGATION_PROPERTY:
-            case ENTITY_SET:
-                keys = buildingCql.getKeySegment().getKeys();
+            case KEY:
+                navigationChain = buildingNavigationChain(buildingCql.getEmptyKeyTargetSegment());
+                // keys = buildingCql.getKeySegment().getKeys();
                 break;
             default:
                 keys = segmentInfo.getKeys();
@@ -415,43 +511,32 @@ public class ODataUrlParserEnhanced {
     private List<String> buildingNavigationChain(PathSegmentInfo segmentInfo) {
         List<String> chain = new ArrayList<>();
         // segmentInfo.
-        Integer position = segmentInfo.getPosition();
-        Integer positionBehind = position + 1;
+        Integer position = 0;
+        // Integer positionBehind = position + 1;
         // chain
-        while (positionBehind <= buildingCql.getFromSegment().getPosition()) {
+        while (position < segmentInfo.getPosition()) {
             PathSegmentInfo info = pathSegments.get(position);
-            PathSegmentInfo infoBehind = pathSegments.get(positionBehind);
-            // 先简单用反射方式
-
-            if (infoBehind.getEntityModel() != null) {
-                infoBehind.getEntityModel().associations()
-                        .filter(asso -> asso.getType().as(CdsEntity.class).getName()
-                                .equals(info.getEntityModel().getName()))
-                        .findFirst()
-                        .ifPresent(asso -> chain.add(asso.getName()));
-                position = positionBehind;
+            if (info.getSegmentType() == SegmentType.NAVIGATION_PROPERTY
+                    || info.getSegmentType() == SegmentType.NAVIGATION_PROPERTY_WITH_KEYS) {
+                // 如果是导航属性或实体集，则添加到链中
+                chain.add(info.getSegment());
             }
-
-            // info.getEntityModel().associations().forEach( asso -> {
-            // if (asso.getType().as(CdsEntity.class).getName().equals(info.getSegment())) )
-            // {
-            // chain.add(asso.getName());
+            // if (infoBehind.getEntityModel() != null) {
+            // infoBehind.getEntityModel().associations()
+            // .filter(asso ->
+            // asso.getType().as(CdsAssociationType.class).getTarget().getName()
+            // .equals(info.getEntityModel().getName()))
+            // .findFirst()
+            // .ifPresent(asso -> chain.add(asso.getName()));
             // }
-            // });
-
-            // if (info.getSegmentType() == SegmentType.NAVIGATION_PROPERTY
-            // || info.getSegmentType() == SegmentType.NAVIGATION_PROPERTY_WITH_KEYS) {
-            // chain.add(info.getSegment());
-            // } else {
-            // break; // 遇到非导航属性的段，停止
-            // }
-            positionBehind++;
+            position++;
 
         }
         // 倒序排一下
-        return chain.stream()
-                .sorted(Comparator.reverseOrder())
-                .toList();
+        // return chain.stream()
+        // .sorted(Comparator.reverseOrder())
+        // .toList();
+        return chain;
     }
 
     /**
@@ -470,7 +555,7 @@ public class ODataUrlParserEnhanced {
             }
 
             String entitySetName = matcher.group(1);
-            return cdsModel.findEntity(entitySetName)
+            return cdsModel.findEntity("MainService." + entitySetName)
                     .map(entity -> {
                         String keyPart = matcher.group(2);
 
@@ -516,7 +601,7 @@ public class ODataUrlParserEnhanced {
         if (matcher.matches()) {
             if (matcher.groupCount() >= 1) {
                 String entitySetName = matcher.group(1);
-                return cdsModel.findEntity(entitySetName)
+                return cdsModel.findEntity("MainService." + entitySetName)
                         .map(entity -> PathSegmentInfo.builder()
                                 .segment(segment)
                                 .position(position)
@@ -537,19 +622,23 @@ public class ODataUrlParserEnhanced {
         // 解析路径段，提取键、实体集等信息
         Matcher matcher = ENTITY_SET_HAS_KEY_PATTERN.matcher(segment);
 
-        if (matcher.matches() && matcher.groupCount() >= 2) {
+        if (matcher.matches() && matcher.group(2) != null && !matcher.group(2).isEmpty()) {
             String navigationPropertyName = matcher.group(1);
 
             // 检查是否为导航属性
             if (cdsModel != null) {
-                return cdsModel.entities()
+                return cdsModel.getService("MainService").entities()
                         .map(entity -> entity.findAssociation(navigationPropertyName))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .findFirst()
                         .map(element -> {
-                            CdsEntity targetEntity = element.getType().as(CdsEntity.class);
+                            // CdsEntity targetEntity = element.getType().as(CdsEntity.class);
+                            CdsAssociationType associationType = element.getType();
+                            CdsEntity targetEntity = associationType.getTarget();
+                            // StructuredType<?> targetType = associationType.getTargetAspect();
 
+                            // element
                             // 再通过逗号分隔key
                             String keyPart = matcher.group(2);
                             List<String> keys = keyPart != null ? Arrays.asList(keyPart.split(","))
@@ -591,13 +680,15 @@ public class ODataUrlParserEnhanced {
 
         // 解析路径段，提取导航属性信息
         if (cdsModel != null) {
-            return cdsModel.entities()
+            return cdsModel.getService("MainService").entities()
                     .map(entity -> entity.findAssociation(segment))
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .findFirst()
                     .map(element -> {
-                        CdsEntity targetEntity = element.getType().as(CdsEntity.class);
+                        // CdsEntity targetEntity = element.getType().as(CdsEntity.class);
+                        CdsAssociationType associationType = element.getType();
+                        CdsEntity targetEntity = associationType.getTarget();
                         return PathSegmentInfo.builder()
                                 .segment(segment)
                                 .position(position)
@@ -618,7 +709,7 @@ public class ODataUrlParserEnhanced {
 
         // 解析路径段，提取属性信息
         if (cdsModel != null) {
-            return cdsModel.entities()
+            return cdsModel.getService("MainService").entities()
                     .map(entity -> entity.findElement(segment))
                     .filter(Optional::isPresent)
                     .map(Optional::get)
@@ -703,7 +794,8 @@ public class ODataUrlParserEnhanced {
                         // urlInfoBuilder.selectColumns(Arrays.asList(value.split(",")));
                         // buildingCql.
                         Arrays.asList(value.split(",")).forEach(col -> {
-                            buildingCql.addSelectColumn(col.trim());
+                            // buildingCql.addSelectColumn(col.trim());
+
                         });
 
                         break;

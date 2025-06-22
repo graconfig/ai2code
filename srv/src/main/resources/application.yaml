@@ -4,3 +4,12 @@ spring:
   web.resources.static-locations: file:./app/
 cds:
   data-source.auto-config.enabled: false
+
+
+---
+# logging:
+#   level:
+    # '[com.sap.cds.adapter.odata]': TRACE
+    # '[com.sap.cds.odata.v4]': TRACE
+    # '[com.sap.cds.persistence.sql]': TRACE
+    # '[com.sap.cds.persistence.sql-tx]': TRACE

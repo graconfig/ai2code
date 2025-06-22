@@ -84,7 +84,8 @@ public class ODataVariableResolverNew implements VariableResolver {
 
         // 根据请求类型处理结果
         if (buildingCql != null) {
-            return processResultByRequestType(result, buildingCql);
+            // return processResultByRequestType(result, buildingCql);
+            return processDefault(result);
         }
         return null;
     }
@@ -92,29 +93,30 @@ public class ODataVariableResolverNew implements VariableResolver {
     /**
      * 根据请求类型处理结果
      */
-    private String processResultByRequestType(Result result, ODataUrlParserEnhanced.BuildingCql buildingCql) {
-        switch (buildingCql.getRequestType()) {
-            case SINGLE_ENTITY:
-                // 单个实体，返回完整信息或特定字段
-                return processSingleEntity(result, buildingCql);
+    // private String processResultByRequestType(Result result,
+    // ODataUrlParserEnhanced.BuildingCql buildingCql) {
+    // switch (buildingCql.getRequestType()) {
+    // case SINGLE_ENTITY:
+    // // 单个实体，返回完整信息或特定字段
+    // return processSingleEntity(result, buildingCql);
 
-            case ENTITY_SET:
-                // 实体集合，可能需要分页
-                return processEntitySet(result, buildingCql);
+    // case ENTITY_SET:
+    // // 实体集合，可能需要分页
+    // return processEntitySet(result, buildingCql);
 
-            case ENTITY_PROPERTY:
-                // 单个属性值
-                return processEntityProperty(result, buildingCql);
+    // case ENTITY_PROPERTY:
+    // // 单个属性值
+    // return processEntityProperty(result, buildingCql);
 
-            case ENTITY_PROERTIES:
-                // 导航属性，可能是集合或单个对象
-                // return processNavigationProperty(result, urlInfo);
-                return processSingleEntity(result, buildingCql);
+    // case ENTITY_PROERTIES:
+    // // 导航属性，可能是集合或单个对象
+    // // return processNavigationProperty(result, urlInfo);
+    // return processSingleEntity(result, buildingCql);
 
-            default:
-                return processEntitySet(result, buildingCql);
-        }
-    }
+    // default:
+    // return processEntitySet(result, buildingCql);
+    // }
+    // }
 
     /**
      * 处理单个实体
@@ -135,25 +137,30 @@ public class ODataVariableResolverNew implements VariableResolver {
         return result.toJson();
     }
 
-    /**
-     * 处理实体属性
-     */
-    private String processEntityProperty(Result result, ODataUrlParserEnhanced.BuildingCql buildingCql) {
-        // if (!result.iterator().hasNext()) {
-        // return "";
-        // }
-
-        Row row = result.first().orElse(null);
-        if (row == null) {
-            return "";
-        }
-
-        String propertyName = buildingCql.getSelectColumns().getFirst();
-        if (propertyName != null) {
-            Object value = row.get(propertyName);
-            return value != null ? value.toString() : "";
-        }
-
-        return "";
+    private String processDefault(Result result) {
+        return result.toJson();
     }
+
+    // /**
+    // * 处理实体属性
+    // */
+    // private String processEntityProperty(Result result,
+    // ODataUrlParserEnhanced.BuildingCql buildingCql) {
+    // // if (!result.iterator().hasNext()) {
+    // // return "";
+    // // }
+
+    // Row row = result.first().orElse(null);
+    // if (row == null) {
+    // return "";
+    // }
+
+    // String propertyName = buildingCql.getSelectColumns().getFirst();
+    // if (propertyName != null) {
+    // Object value = row.get(propertyName);
+    // return value != null ? value.toString() : "";
+    // }
+
+    // return "";
+    // }
 }
