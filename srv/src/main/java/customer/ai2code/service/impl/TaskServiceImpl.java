@@ -16,9 +16,9 @@ import customer.ai2code.service.ContextService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @Service
 public class TaskServiceImpl implements TaskService {
-
 
     private final BotService botService;
     private final GenericCqnService genericCqnService;
@@ -65,7 +65,6 @@ public class TaskServiceImpl implements TaskService {
         // 6. 放入缓存 - 使用新的缓存管理器
         cacheManager.addTaskNode(task, null);
 
-        
         // 7. 返回新建的Task对象
         return task;
     }
@@ -92,8 +91,8 @@ public class TaskServiceImpl implements TaskService {
         // 3.2 获取绝对路径
         String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, contextPath);
         // 4. 创建Task
-        Tasks newTask = genericCqnService.createAndInsertSubTask(name, description, absoluteOutputContextPath, 
-                                                                sequence, botInstanceId, taskType.getId());
+        Tasks newTask = genericCqnService.createAndInsertSubTask(name, description, absoluteOutputContextPath,
+                sequence, botInstanceId, taskType.getId());
 
         // 5. 为每个BotType创建BotInstance
         for (BotTypes botType : botTypes) {
@@ -105,7 +104,6 @@ public class TaskServiceImpl implements TaskService {
 
         // 7. 放入缓存 - 使用新的缓存管理器
         cacheManager.addTaskNode(task, botInstanceId);
-
 
         // 8.返回新建的Task对象
         return task;
@@ -152,15 +150,12 @@ public class TaskServiceImpl implements TaskService {
             return cachedTask;
         }
 
-
-
         // 从数据库查询
         Tasks taskCDS = genericCqnService.getTaskById(taskId);
         Task task = new GenericTask(taskCDS);
 
         // 放入缓存 - 使用新的缓存管理器
         cacheManager.addTaskNode(task, taskCDS.getBotInstanceId());
-
 
         return task;
     }
@@ -183,8 +178,7 @@ public class TaskServiceImpl implements TaskService {
 
     private void createBasicContextNodes(String taskId, String name, String description) {
         // 创建description节点
-        contextService.upsertContext(taskId, "description", description);
-        
-    
+        contextService.upsertContextWithMainTaskId(taskId, "description", description);
+
     }
 }

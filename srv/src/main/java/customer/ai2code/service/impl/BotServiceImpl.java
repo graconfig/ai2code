@@ -317,16 +317,16 @@ public class BotServiceImpl implements BotService {
 
         // 4. 查询 taskId
         // String taskId = genericCqnService.getTaskIdByBotInstanceId(botInstanceId);
-        String taskId = genericCqnService.getMainTaskId(botInstanceId);
-        if (taskId == null) {
-            updateBotInstanceStatus(bot, "FAILED");
-            throw new BusinessException("No taskId associated with botInstance: " + botInstanceId);
-        }
+        // String taskId = genericCqnService.getMainTaskId(botInstanceId);
+        // if (taskId == null) {
+        //     updateBotInstanceStatus(bot, "FAILED");
+        //     throw new BusinessException("No taskId associated with botInstance: " + botInstanceId);
+        // }
 
         // 5. 获取绝对的 outputContextPath
         String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, outputContextPath);
         // 6. 调用 ContextService 的 upsertContext 方法存储并返回 ContextNodes
-        ContextNodes node = contextService.upsertContext(taskId, absoluteOutputContextPath, messageText);
+        ContextNodes node = contextService.upsertContext(botInstanceId, absoluteOutputContextPath, messageText);
 
         updateBotInstanceStatus(bot, "SUCCESS");
 
