@@ -59,4 +59,6 @@ extend MainService.TaskHierarchyView with @(
         'DrillState',
         'LimitedRank'
     ],
-)
+){
+    
+}
