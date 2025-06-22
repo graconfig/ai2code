@@ -6,8 +6,6 @@ service MainService {
     entity ContextNodes as projection on db.ContextNode;
     entity TaskType as projection on config.TaskType;
     entity TaskHierarchyView as projection on db.TaskHierarchyView;
-    entity Users as projection on db.Users;
-
 
     //entity SubTasks      as projection on db.SubTask;
     entity BotInstances as projection on db.BotInstance
