@@ -1,7 +1,6 @@
 package customer.ai2code.service.execution.functioncall;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Map;

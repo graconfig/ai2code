@@ -58,13 +58,13 @@ class FunctionCallExecutionTest {
                             "sequence": 1,
                             "name": "Test Task 1",
                             "description": "First test task",
-                            "contextPath": "/test/context1"
+                            "contextPath": "SubContext:test.context[1]"
                         },
                         {
                             "sequence": 2,
                             "name": "Test Task 2",
                             "description": "Second test task",
-                            "contextPath": "/test/context2"
+                            "contextPath": "SubContext:test.context[2]"
                         }
                     ]
                 }

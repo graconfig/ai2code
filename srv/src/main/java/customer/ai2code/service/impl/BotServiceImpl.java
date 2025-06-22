@@ -36,6 +36,7 @@ import com.sap.cds.ql.cqn.CqnAnalyzer;
 import com.sap.cds.ql.cqn.CqnStatement;
 import com.sap.cds.ql.cqn.ResolvedRefItem;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -65,6 +66,7 @@ public class BotServiceImpl implements BotService {
     private final TaskBotCacheManager cacheManager;
     private final PromptService promptService;
     private final ContextService contextService;
+    private final BotExecutionFactoryService botExecutionFactoryService;
     // 全局Bot缓存链表 - 保留作为备用，主要使用TaskBotCacheManager
     // private final Map<String, Bot> botCache = new ConcurrentHashMap<>();
 
@@ -73,12 +75,14 @@ public class BotServiceImpl implements BotService {
             GenericCqnService genericCqnService,
             TaskBotCacheManager cacheManager,
             PromptService promptService,
-            ContextService contextService) {
+            ContextService contextService,
+            BotExecutionFactoryService botExecutionFactoryService) {
         this.aiModelResolver = aiModelResolver;
         this.genericCqnService = genericCqnService;
         this.cacheManager = cacheManager;
         this.promptService = promptService;
         this.contextService = contextService;
+        this.botExecutionFactoryService = botExecutionFactoryService;
     }
 
     @Override
@@ -236,7 +240,8 @@ public class BotServiceImpl implements BotService {
             case "A": // AI Chat Bot
                 return new ChatBot(botInstance, aiModel, botType, genericCqnService, promptService, aiModelResolver);
             case "F": // Function Calling Bot
-                return new FunctionCallingBot(botInstance, aiModel, botType, genericCqnService, promptService, aiModelResolver);
+                return new FunctionCallingBot(botInstance, aiModel, botType, genericCqnService, promptService,
+                        aiModelResolver, botExecutionFactoryService);
             case "C": // Coding Bot
                 return new CodingBot(botInstance, aiModel, botType);
             default:
@@ -312,16 +317,16 @@ public class BotServiceImpl implements BotService {
 
         // 4. 查询 taskId
         // String taskId = genericCqnService.getTaskIdByBotInstanceId(botInstanceId);
-        String taskId = genericCqnService.getMainTaskId(botInstanceId);
-        if (taskId == null) {
-            updateBotInstanceStatus(bot, "FAILED");
-            throw new BusinessException("No taskId associated with botInstance: " + botInstanceId);
-        }
+        // String taskId = genericCqnService.getMainTaskId(botInstanceId);
+        // if (taskId == null) {
+        //     updateBotInstanceStatus(bot, "FAILED");
+        //     throw new BusinessException("No taskId associated with botInstance: " + botInstanceId);
+        // }
 
         // 5. 获取绝对的 outputContextPath
         String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, outputContextPath);
         // 6. 调用 ContextService 的 upsertContext 方法存储并返回 ContextNodes
-        ContextNodes node = contextService.upsertContext(taskId, absoluteOutputContextPath, messageText);
+        ContextNodes node = contextService.upsertContext(botInstanceId, absoluteOutputContextPath, messageText);
 
         updateBotInstanceStatus(bot, "SUCCESS");
 
