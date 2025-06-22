@@ -30,6 +30,11 @@
                         path: '/Tasks',
                         sorter: {
                             path: 'name'
+                        },
+                        filters: {
+                                path: 'isMain',
+                                operator: 'NE',
+                                value1: 'false'
                         }
                     }">
                     <headerToolbar>

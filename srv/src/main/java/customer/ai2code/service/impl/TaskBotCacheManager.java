@@ -1,8 +1,8 @@
 package customer.ai2code.service.impl;
 
 import customer.ai2code.model.tree.TaskBotNode;
-import customer.ai2code.model.Bot;
-import customer.ai2code.model.Task;
+import customer.ai2code.model.bot.Bot;
+import customer.ai2code.model.task.Task;
 
 import org.springframework.stereotype.Service;
 

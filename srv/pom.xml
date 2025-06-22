@@ -81,6 +81,18 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>com.google.auto.service</groupId>
+			<artifactId>auto-service</artifactId>
+			<version>1.1.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-suite-api</artifactId>
+			<version>1.13.1</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>com.sap.cds</groupId>
@@ -195,9 +207,9 @@
 						<configuration>
 							<inputSpec>
 								${project.basedir}/src/main/resources/spec/claude-sonnet-3.7.yaml</inputSpec>
-							<apiPackage>customer.ai2code.service.SAPAICore.claude.generated.api</apiPackage>
+							<apiPackage>customer.ai2code.model.aicore.claude.api</apiPackage>
 							<modelPackage>
-								customer.ai2code.service.SAPAICore.claude.generated.model</modelPackage>
+								customer.ai2code.model.aicore.claude</modelPackage>
 							<generateApis>false</generateApis>
 							<additionalProperties>
 								<enumUnknownDefaultCase>true</enumUnknownDefaultCase>

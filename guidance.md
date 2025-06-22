@@ -38,59 +38,66 @@ ai2code
 ## 📁 /db/orchestration-model.cds  
 ```
 using {
-  cuid,
-  managed
+    cuid,
+    managed
 } from '@sap/cds/common';
 
 using {
-  ai.orchestration.config.TaskType as TaskType,
-  ai.orchestration.config.BotType as BotType,
-  ai.orchestration.config.BotInstanceStatus as BotInstanceStatus
+    ai.orchestration.config.TaskType          as TaskType,
+    ai.orchestration.config.BotType           as BotType,
+    ai.orchestration.config.BotInstanceStatus as BotInstanceStatus
 } from './orchestration-config-model';
 
 namespace ai.orchestration;
 
-/* 任务实体，支持多级子任务，记录在context中。 */
+/** Task entity, supports multi-level sub-tasks, recorded in context. */
 entity Task : cuid, managed {
-  botInstance  : Association to BotInstance;
-  type         : Association to TaskType;
-  name         : String(100);
-  description  : String;
-  contextPath  : String(1000);    //Task需要指定的Context路径 例：datasource.children[3]
-  sequence     : Integer;        // SubTask需要指定的执行顺序
-  isMain       : Boolean default true; //冗余存储
-  botInstances : Composition of many BotInstance on botInstances.task = $self;
-  contextNodes : Composition of many ContextNode on contextNodes.task = $self; //任务下所有context节点
+
+    name         : String(100);
+    description  : String;
+    contextPath  : String(1000); // Context path for the task, e.g., datasource.children[3]
+    sequence     : Integer; // Execution order for sub-tasks
+    isMain       : Boolean default true; // Redundant flag to mark main tasks
+    botInstance  : Association to BotInstance;
+    type         : Association to TaskType;
+    botInstances : Composition of many BotInstance
+                    on botInstances.task = $self;
+    contextNodes : Composition of many ContextNode
+                       on contextNodes.task = $self; // All context nodes under this task
 }
 
-/* 单个context节点，采用扁平结构，支持树结构自动还原 */
+/** Single context node, flattened structure to support tree reconstruction */
 entity ContextNode : cuid, managed {
-  task      : Association to Task;        // 所属任务
-  path      : String(1000);              // 唯一路径，如 a.b.c[0].d
-  label     : String(200);               // 节点名称
-  type      : String(50);                // 类型（text, markdown, code, object, array等）
-  value     : LargeString;               // 节点值/内容
-  //readonly  : Boolean default false;     // 是否只读（可选）
+    path  : String(1000); // Unique path, e.g., a.b.c[0].d
+    label : String(200); // Node label
+    type  : String(50); // Type (e.g., text, markdown, code, object, array)
+    value : LargeString; // Node value/content
+    task  : Association to Task; // Parent task
+    //readonly  : Boolean default false; // Optional: whether the node is read-only
+    // Extendable: sorting, validation, metadata, etc.
 }
 
-/* 单次Bot执行实例。 */
+/** Bot execution instance */
 entity BotInstance : cuid, managed {
-  sequence  : Integer;
-  result    : LargeString;
-  type      : Association to BotType;
-  status    : Association to BotInstanceStatus default 'C';
-  task      : Association to Task;    //上级
-  tasks     : Composition of many Task on tasks.botInstance = $self; //下级
-  messages  : Composition of many BotMessage on messages.botInstance = $self; 
+    sequence : Integer;
+    result   : LargeString;
+    type     : Association to BotType;
+    status   : Association to BotInstanceStatus default 'C';
+    task     : Association to Task;
+    tasks    : Composition of many Task
+                   on tasks.botInstance = $self; // Sub-tasks
+    messages : Composition of many BotMessage
+                on messages.botInstance = $self;
 }
 
-/* Bot消息实体，记录人与AI/系统的对话消息。 */
+/** Bot message entity, records human-AI/system conversations */
 entity BotMessage : cuid, managed {
-  role        : String(20);       // 'user' | 'assistant' | 'system'
-  message     : LargeString;
-  ragData     : LargeString; 
-  botInstance : Association to BotInstance;
+    role        : String(20); // 'user' | 'assistant' | 'system'
+    message     : LargeString;
+    ragData     : LargeString; // RAG result data (optional)
+    botInstance : Association to BotInstance;
 }
+
 ```
 
 ## 📁  /db/orchestration-config-model.cds
@@ -103,7 +110,7 @@ using {
 
 namespace ai.orchestration.config;
 
-/* 任务类型，如字段设计、API映射等。 */
+/** Task types, such as field design, API mapping, etc. */
 entity TaskType : cuid, managed {
   name        : String(100);
   description : String;
@@ -113,42 +120,31 @@ entity TaskType : cuid, managed {
                   on botTypes.taskType = $self;
 }
 
-/* 任务类型下的Bot执行顺序定义。 */
-//entity TaskBotSequence : cuid, managed {
-//  taskType : Association to TaskType;
-//sequence : Integer;
-//botType  : Association to BotType;
-//remarks  : String;
-// 可扩展唯一性断言: @assert.unique: ['taskType', 'sequence']
-//}
-
-/* BotType: bot类型，增加contextType字段（枚举引用） */
+/** BotType: bot type, with contextType field (enum reference) */
 entity BotType : cuid, managed {
   taskType            : Association to TaskType;
   sequence            : Integer;
   name                : String(50);
   description         : String;
-  functionType        : Association to BotFunctionType default 'A'; //A F C S
+  functionType        : Association to BotFunctionType default 'AI_CHAT';
   autoRun             : Boolean default false;
   executionCondition  : String(1000);
   model               : Association to ModelConfig;
   prompts             : Composition of many PromptText
                           on prompts.botType = $self;
-  functionCalls       : Composition of many FunctionCall
-                          on functionCalls.botType = $self;
-  outputContextPath   : String(1000); // 输出内容写回路径, 可以是数组[-1], 在subTask中是相对路径；在主task中是绝对路径
-  contextType         : Association to ContextType; // 新增：输出内容的数据类型（枚举）
+  outputContextPath   : String(1000); // Output path, can be array[-1]; relative in subTask, absolute in main task
+  contextType         : Association to ContextType; // New: Output context data type (enum)
   isRAGEnabled        : Boolean default false;
-  //ragFunction         : Association to RagFunction;
-  ragClass            : String(100); //代替ragFunction
+  //ragFunction       : Association to RagFunction;
+  ragClass            : String(100); // Replaces ragFunction
   ragSource           : String(100);
   ragTopK             : Integer;
-  implementationClass : String(100); //C和F适用
-//subTaskContextPath  : String(1000);   // 约定必须包含数组，例如datasource.children[-1].content，数组实例会写入subTask的contextPath, 例如datasource.children[3]
-//subTaskType         : Association to TaskType;
+  implementationClass : String(100); // For C and F types
+  //subTaskContextPath: String(1000); // Must include array, e.g., datasource.children[-1].content
+  //subTaskType       : Association to TaskType;
 }
 
-/* AI模型配置 */
+/** AI model configuration */
 entity ModelConfig : cuid, managed {
   name       : String(100);
   provider   : String(50);
@@ -156,75 +152,73 @@ entity ModelConfig : cuid, managed {
   parameters : LargeString;
 }
 
-/* Bot提示词模板，支持多语言多模板。 */
+/** Bot prompt templates, support multilingual and multiple templates */
 entity PromptText : cuid, managed {
   botType : Association to BotType;
-  lang    : String(5);
+  lang    : Association to Languages; // Association to enable value help
   name    : String(100);
   content : LargeString;
 }
 
-entity FunctionCall : cuid, managed {
-  botType : Association to BotType;
-  name    : String(100);
-  description : String(500);
-  parameters : LargeString; // FunctionCall参数定义 parameters: { "type": "object", "properties": { "param1": { "type": "string" }, "param2": { "type": "integer" } } } / inputSchema: { "type": "object", "properties": { "param1": { "type": "string" }, "param2": { "type": "integer" } } }
-}
-
-/* Bot执行状态枚举 */
+/** Bot execution status enumeration */
 entity BotInstanceStatus : CodeList {
   key code : String enum {
-        C = 'CREATED';
-        R = 'RUNNING';
-        S = 'SUCCESS';
-        F = 'FAILED';
-        K = 'SKIPPED';
-        X = 'CANCELLED';
+        CREATED   = 'CREATED';
+        RUNNING   = 'RUNNING';
+        SUCCESS   = 'SUCCESS';
+        FAILED    = 'FAILED';
+        SKIPPED   = 'SKIPPED';
+        CANCELLED = 'CANCELLED';
       };
 }
 
-/* Bot功能类型枚举 */
+/** Bot function type enumeration */
 entity BotFunctionType : CodeList {
   key code : String enum {
-        A = 'AI';
-        F = 'FUNCTION_CALL';
-        C = 'CODE';
-      //S = 'SUBTASK_GENERATOR';  用Function_call代替
+        AI_CHAT        = 'AI CHAT';
+        FUNCTION_CALL = 'FUNCTION CALL';
+        CODE          = 'CODE';
+      //SUBTASK_GENERATOR = 'SUBTASK_GENERATOR'; replaced by FUNCTION_CALL
       };
 }
 
-/* ContextType: 上下文节点内容类型（强类型约束） */
+entity Languages : CodeList {
+  key code : String enum {
+        EN = 'English';
+        ZH = 'Chinese';
+        DE = 'German';
+        JA = 'Japanese';
+        ID = 'Indonesian';
+      };
+}
+
+/** ContextType: type of content in the context node (strongly typed) */
 entity ContextType : CodeList {
   key code : String enum {
-        string = 'STRING'; // 普通文本
-        markdown = 'MARKDOWN'; // Markdown文档
-        code = 'CODE'; // 代码片段
-        json = 'JSON'; // JSON结构
-      //object   = 'OBJECT';    // 对象
-      //array    = 'ARRAY';     // 数组
-      //table    = 'TABLE';     // 表格
-      //image    = 'IMAGE';     // 图片(base64或URL)
+        string   = 'STRING';   // Plain text
+        markdown = 'MARKDOWN'; // Markdown document
+        code     = 'CODE';     // Code snippet
+        json     = 'JSON';     // JSON structure
+      //object  = 'OBJECT';    // Object
+      //array   = 'ARRAY';     // Array
+      //table   = 'TABLE';     // Table
+      //image   = 'IMAGE';     // Image (base64 or URL)
       };
 }
 
-/* RAG功能类型枚举 */
-entity RagFunction : CodeList {
-  key code : String enum {
-        V = 'Vector';
-        T = 'Table';
-        X = '';
-      };
-}
 ```
 
 ## srv/orchestration-service.cds
 
 ```
 using ai.orchestration as db from '../db/orchestration-model';
+using ai.orchestration.config as config from '../db/orchestration-config-model';
 
 service MainService {
     entity Tasks        as projection on db.Task;
     entity ContextNodes as projection on db.ContextNode;
+    entity TaskType as projection on config.TaskType;
+
 
     //entity SubTasks      as projection on db.SubTask;
     entity BotInstances as projection on db.BotInstance
@@ -233,20 +227,19 @@ service MainService {
                 result : String;
                 tasks  : array of UUID;
             };
-            action executeAsync() return Boolean;
-            
-            action chatCompletion(content: LargeString) returns LargeString;
+            action chatCompletion(content: LargeString) returns BotMessages;
         }
 
     entity BotMessages  as projection on db.BotMessage
         actions {
-            action adopt() returns array of ContextNodes;
+            action adopt() returns ContextNodes;
         }
 
     // Unbound actions
     action createTaskWithBots(name : String,
                               description : String,
                               typeId : UUID) returns Tasks;
+
 
 }
 ```
@@ -261,16 +254,30 @@ service ConfigService {
   entity BotTypes             as projection on cfg.BotType;
   entity ModelConfigs         as projection on cfg.ModelConfig;
   entity PromptTexts          as projection on cfg.PromptText;
-  entity FunctionCalls        as projection on cfg.FunctionCall;
+  //entity FunctionCalls        as projection on cfg.FunctionCall;
   entity BotInstanceStatuses  as projection on cfg.BotInstanceStatus;
   entity BotFunctionTypes     as projection on cfg.BotFunctionType;
-  entity RagFunctions         as projection on cfg.RagFunction;
+  //entity RagFunctions         as projection on cfg.RagFunction;
   entity ContextTypes         as projection on cfg.ContextType;
+  entity Languages             as projection on cfg.Languages;
 }
+
+
+annotate ConfigService.TaskTypes with @odata.draft.enabled ;
 ```
 
 ## 可以直接用 CDS 标准服务的典型用法
-暂时无法在飞书文档外展示此内容
+
+| 功能描述                       | 方法 | 接口路径                                 |
+|------------------------------|------|------------------------------------------|
+| 查询 Task 列表               | GET  | /Tasks                                   |
+| 查询某 Task 的所有 BotInstance | GET  | /Tasks(ID)/botInstances                  |
+| 查询 Task 的所有 ContextNode | GET  | /Tasks(ID)/contextNodes                  |
+| 查询 ContextNode 详情        | GET  | /ContextNodes(ID)                        |
+| 更新 ContextNode             | PATCH| /ContextNodes(ID)                        |
+| 查询 BotInstance 的消息      | GET  | /BotInstances(ID)/messages               |
+| 查询 BotInstance 下的任务    | GET  | /BotInstances(ID)/tasks                  |
+
 
 ## 实体标准接口举例（前端可直接使用，无需 action）
 - 查询 context Node：GET /Tasks('...')/contextNodes
@@ -278,10 +285,15 @@ service ConfigService {
 - 查询 botInstance 树：GET /Tasks('...')/botInstances
 - 查询消息对话：GET /BotInstances('...')/messages
 ## 需自定义的 action
-必须自定义 action 的场景（标准服务不覆盖的业务流）
 
+| 功能描述                                | 接口名称            | 说明                                                                 |
+|---------------------------------------|---------------------|----------------------------------------------------------------------|
+| 创建 Task 并生成 BotInstances         | createTaskWithBots  | 1. 弹出窗口输入 `taskType`、`name`、`description`<br>2. 建 Task 时同时创建 BotInstances |
+| 发送对话消息                           | chatCompletion      | 将用户消息发送给 AI，AI 返回消息，将用户消息和 AI 消息共同存储至 BotMessages 表 |
+| 流式对话消息服务                       | chatStreaming       | 以流式方式返回 AI 消息                                               |
+| BotInstance 执行（Function Call/代码） | execute  | 类型为 F 和 C 的需要执行；S 类型被 F 取代                            |
+| 采用 AI 回复并写回 ContextNode         | adopt     | AI 回复内容写入 ContextNode，同时更新 BotInstance 的 Status 字段     |
 
-暂时无法在飞书文档外展示此内容
 
 ---
 # 后端逻辑
@@ -295,139 +307,1532 @@ service ConfigService {
 | /api/chat/Streaming<br>Restful协议SSE流式接口。| 传参<br>1. 传入<br>a. botInstanceId<br>b. content<br>2. 传出<br>a. SseEmitter对象      | 1. 判断是否第一次对话，第一次对话content字段 作为本次用户对话内容，取BotTypes.prompts作为system消息 组成消息发给AI模型。<br>2. 不是第一次对话，content字段 作为本次用户对话内容，再根据BotInstances.messages取到历史记录消息 组成消息发给AI模型。<br>3. 启动异步线程接收AI返回的流式消息内容：<br>a. 每次AI返回消息段，立刻通过SseEmitter.send()返回消息给前端。<br>b. 在SseEmitter结束的时候启动存储消息的动作：第一次对话，将system消息、user消息和assistant消息存入BotMessages表中。非第一次对话，将user消息和assistant消息存入BotMessages表中。<br>错误处理：<br>1. 将BotInstances的status字段设置为F(Failed)。|
 
 
-<!-- createTaskWithBots -->
-<!-- 1. 传入：<br>  a. name : String,<br>  b. description : String,<br>  c. typeId : UUID<br>2. 传出:<br>  a. tasks: Tasks -->
-<!-- 1. 根据typeId查询ConfigService中TaskTypes表中条目以及他的botTypes
-2. 创建一条目MainService.Tasks。
-  1. 将isMain设置为true
-  2. Name
-  3. Description
-  4. contextPath设置为空
-  5. sequence设置为空或0
-  6. Type 设置为typeId查找到的TaskType
-3. 根据ConfigService.TaskTypes.botTypes的条目数，创建相应条目数的MainService.BotInstances。
-  1. Sequence 设置为 ConfigService.BotTypes.sequence
-  2. Type 设置为ConfigService.BotTypes
-  3. status设置为BotInstanceStatus.code.C (Created)
-4. (自动执行)将name、description和第二步得到的Tasks.Id，创建两条目MainService.ContextNodes。
-  1. 第一条
-    1. path设置为name
-  2. 第二条
-    1. path设置为description
-5. 将创建的Tasks条目返回给前端 -->
-<!-- BotInstances/execute
-1. 传入
-  1. Bound action自带参数
-2. 传出
-  1. result: String(单纯code运行返回的结果)
-  2. tasks(如果是functioncall类型的Bot，执行分解任务的操作，返回的是taskId的数组) -->
-<!-- 正常流程(同步)：<br>1. 将BotInstances的status字段设置为R(Running)。<br>F类型BotInstance:<br>a. 取到维护的BotType.prompts<br>b. 调用AI Function call，调用维护的implementationClass维护的类中execute方法。返回结果存储到BotInstances.result字段中。同时通过维护的outputContextPath写到ContextNodes条目中。<br>c. 将BotInstances.Status设置为S(Success)。<br>C类型BotInstance:<br>a. 执行implementationClass维护的Class中execute方法<br>b. 结果存储在BotInstances.result字段中。<br>c. 将BotInstances.Status设置为S(Success)。<br>错误处理：<br>1. 将BotInstances的status字段设置为F(Failed)。 -->
-<!-- 1. 传入<br>a. Bound action自带参数<br>b. content: LargeString<br>2. 传出<br>a. LargeString -->
-<!-- 正常流程: a. 将BotInstances的status字段设置为R(Running)。<br> b. 判断是否第一次对话，第一次对话content字段 作为本次用户对话内容，取BotTypes.prompts作为system消息 组成消息发给AI模型。<br> c. 不是第一次对话，content字段 作为本次用户对话内容，再根据BotInstances.messages取到历史记录消息 组成消息发给AI模型。<br> d. 第一次对话，将system消息、user消息和assistant消息存入BotMessages表中。非第一次对话，将user消息和assistant消息存入BotMessages表中。<br> e. 返回assistant消息。<br> 错误处理: a. 将BotInstances的status字段设置为F(Failed)。 -->
-
-<!-- 1. 传入<br>a. Bound action自带参数<br>2. 传出<br>a. array of ContextNodes -->
-<!-- 1. 获取当前BotMessages条目。<br>2. 根据BotMessages.botInstance获取到BotInstances条目。<br>3. 根据BotInstances.type获取BotTypes条目。<br>4. 将这条消息内容存储到ContextNodes条目中。<br>a. Path: 根据BotTypes设置的outputContextPath<br>b. label:<br>c. type: 根据BotTypes设置的contextType<br>d. Value: BotMessages.message/根据AI function call转成相应的格式。<br>5. 将BotInstances的status字段设置为S(Success)。<br>6. 返回ContextNodes条目。<br>错误处理：<br>a. 将BotInstances的status字段设置为F(Failed)。 -->
-
-<!-- /api/chat/Streaming
-Restful协议SSE流式接口。 -->
-<!-- 传参<br>1. 传入<br>a. botInstanceId<br>b. content<br>2. 传出<br>a. SseEmitter对象 -->
-
-<!-- 1. 判断是否第一次对话，第一次对话content字段 作为本次用户对话内容，取BotTypes.prompts作为system消息 组成消息发给AI模型。<br>2. 不是第一次对话，content字段 作为本次用户对话内容，再根据BotInstances.messages取到历史记录消息 组成消息发给AI模型。<br>3. 启动异步线程接收AI返回的流式消息内容：<br>a. 每次AI返回消息段，立刻通过SseEmitter.send()返回消息给前端。<br>b. 在SseEmitter结束的时候启动存储消息的动作：第一次对话，将system消息、user消息和assistant消息存入BotMessages表中。非第一次对话，将user消息和assistant消息存入BotMessages表中。<br>错误处理：<br>1. 将BotInstances的status字段设置为F(Failed)。 -->
-
 ## 自动执行
 考虑引入Spring-AI或Langchain4j。
 
 
 ## 类定义
 ### Model
-* AI Config Models:
 
-| 名称| 类型| 描述| 属性| 方法|
-|----|----|----|----|----|
-| AIModel| Interface|| modelConfig: ModelConfigs类<br>Parameters : Map对象|public String getModelName()<br>public  Map<String,E extends Object> parseParameters() //string转到Map对象|
-| OpenAIGPT35Model| Class| OpenAI 3.5模型| 实现AIModel| 实现AIModel|
-| OpenAIGPT4OModel| Class| OpenAI 4O模型 | 实现AIModel| 实现AIModel|
-| ClaudeAI35SonnetModel| Class| Claude 3.5 sonnet| 实现AIModel| 实现AIModel|
-| ClaudeAI37SonnetModel| Class| Claude 3.7 sonnet| 实现AIModel| 实现AIModel|
-| StreamRequestVO| Class| Streaming传入的时候的payload类| botInstanceId: String<br>Content: String| 无|
+#### CDS auto generated POJO Model:
 
-* Bot & Task Model
+1. BotInstances
+```java
+@CdsName("MainService.BotInstances")
+@Generated(
+    value = "cds-maven-plugin",
+    date = "2025-06-12T12:28:49.432640500Z",
+    comments = "com.sap.cds:cds-maven-plugin:3.10.1 / com.sap.cds:cds4j-api:3.10.1"
+)
+public interface BotInstances extends CdsData {
+  String ID = "ID";
 
-| 名称| 类型| 描述| 属性| 方法| 
-|----|----|----|----|----|
-| Bot| Interface| Bot接口| ExecutorService executor;| public BotInstancesExecuteContext.ReturnType execute();<br>public Boolean executeAsync();<br>public Boolean stop();<br>public Boolean resume();<br>Public Boolean cancel();|
-| ChatBot| Class| 对话型Bot| | public String chat(String content);<br>public SseEmitter chatInStreaming(String content);|
-| FunctionCallingBot| Class| FunctionCalling型Bot | | |
-| CodingBot| Class| 代码执行类型Bot| | |
-| Task| Interface| Task接口(暂时不用实现)| | |
+  String CREATED_AT = "createdAt";
+
+  String CREATED_BY = "createdBy";
+
+  String MODIFIED_AT = "modifiedAt";
+
+  String MODIFIED_BY = "modifiedBy";
+
+  String SEQUENCE = "sequence";
+
+  String RESULT = "result";
+
+  String TYPE = "type";
+
+  String TYPE_ID = "type_ID";
+
+  String STATUS = "status";
+
+  String STATUS_CODE = "status_code";
+
+  String TASK = "task";
+
+  String TASK_ID = "task_ID";
+
+  String TASKS = "tasks";
+
+  String MESSAGES = "messages";
+
+  @CdsName(ID)
+  String getId();
+
+  @CdsName(ID)
+  void setId(String id);
+
+  Instant getCreatedAt();
+
+  void setCreatedAt(Instant createdAt);
+
+  /**
+   * Canonical user ID
+   */
+  String getCreatedBy();
+
+  /**
+   * Canonical user ID
+   */
+  void setCreatedBy(String createdBy);
+
+  Instant getModifiedAt();
+
+  void setModifiedAt(Instant modifiedAt);
+
+  /**
+   * Canonical user ID
+   */
+  String getModifiedBy();
+
+  /**
+   * Canonical user ID
+   */
+  void setModifiedBy(String modifiedBy);
+
+  Integer getSequence();
+
+  void setSequence(Integer sequence);
+
+  String getResult();
+
+  void setResult(String result);
+
+  BotType getType();
+
+  void setType(Map<String, ?> type);
+
+  @CdsName(TYPE_ID)
+  String getTypeId();
+
+  @CdsName(TYPE_ID)
+  void setTypeId(String typeId);
+
+  BotInstanceStatus getStatus();
+
+  void setStatus(Map<String, ?> status);
+
+  @CdsName(STATUS_CODE)
+  String getStatusCode();
+
+  @CdsName(STATUS_CODE)
+  void setStatusCode(String statusCode);
+
+  Tasks getTask();
+
+  void setTask(Map<String, ?> task);
+
+  @CdsName(TASK_ID)
+  String getTaskId();
+
+  @CdsName(TASK_ID)
+  void setTaskId(String taskId);
+
+  List<Tasks> getTasks();
+
+  void setTasks(List<? extends Map<String, ?>> tasks);
+
+  List<BotMessages> getMessages();
+
+  void setMessages(List<? extends Map<String, ?>> messages);
+
+  BotInstances_ ref();
+
+  static BotInstances create() {
+    return Struct.create(BotInstances.class);
+  }
+
+  static BotInstances of(Map<String, Object> map) {
+    return Struct.access(map).as(BotInstances.class);
+  }
+
+  static BotInstances create(String id) {
+    Map<String, Object> keys = new HashMap<>();
+    keys.put(ID, id);
+    return Struct.access(keys).as(BotInstances.class);
+  }
+}
+
+```
+
+2. Tasks
+
+```java
+@CdsName("MainService.Tasks")
+@Generated(
+    value = "cds-maven-plugin",
+    date = "2025-06-12T12:28:49.432640500Z",
+    comments = "com.sap.cds:cds-maven-plugin:3.10.1 / com.sap.cds:cds4j-api:3.10.1"
+)
+public interface Tasks extends CdsData {
+  String ID = "ID";
+
+  String CREATED_AT = "createdAt";
+
+  String CREATED_BY = "createdBy";
+
+  String MODIFIED_AT = "modifiedAt";
+
+  String MODIFIED_BY = "modifiedBy";
+
+  String NAME = "name";
+
+  String DESCRIPTION = "description";
+
+  String CONTEXT_PATH = "contextPath";
+
+  String SEQUENCE = "sequence";
+
+  String IS_MAIN = "isMain";
+
+  String BOT_INSTANCE = "botInstance";
+
+  String BOT_INSTANCE_ID = "botInstance_ID";
+
+  String TYPE = "type";
+
+  String TYPE_ID = "type_ID";
+
+  String BOT_INSTANCES = "botInstances";
+
+  String CONTEXT_NODES = "contextNodes";
+
+  @CdsName(ID)
+  String getId();
+
+  @CdsName(ID)
+  void setId(String id);
+
+  Instant getCreatedAt();
+
+  void setCreatedAt(Instant createdAt);
+
+  /**
+   * Canonical user ID
+   */
+  String getCreatedBy();
+
+  /**
+   * Canonical user ID
+   */
+  void setCreatedBy(String createdBy);
+
+  Instant getModifiedAt();
+
+  void setModifiedAt(Instant modifiedAt);
+
+  /**
+   * Canonical user ID
+   */
+  String getModifiedBy();
+
+  /**
+   * Canonical user ID
+   */
+  void setModifiedBy(String modifiedBy);
+
+  String getName();
+
+  void setName(String name);
+
+  String getDescription();
+
+  void setDescription(String description);
+
+  String getContextPath();
+
+  void setContextPath(String contextPath);
+
+  Integer getSequence();
+
+  void setSequence(Integer sequence);
+
+  Boolean getIsMain();
+
+  void setIsMain(Boolean isMain);
+
+  BotInstances getBotInstance();
+
+  void setBotInstance(Map<String, ?> botInstance);
+
+  @CdsName(BOT_INSTANCE_ID)
+  String getBotInstanceId();
+
+  @CdsName(BOT_INSTANCE_ID)
+  void setBotInstanceId(String botInstanceId);
+
+  TaskType getType();
+
+  void setType(Map<String, ?> type);
+
+  @CdsName(TYPE_ID)
+  String getTypeId();
+
+  @CdsName(TYPE_ID)
+  void setTypeId(String typeId);
+
+  List<BotInstances> getBotInstances();
+
+  void setBotInstances(List<? extends Map<String, ?>> botInstances);
+
+  List<ContextNodes> getContextNodes();
+
+  void setContextNodes(List<? extends Map<String, ?>> contextNodes);
+
+  Tasks_ ref();
+
+  static Tasks create() {
+    return Struct.create(Tasks.class);
+  }
+
+  static Tasks of(Map<String, Object> map) {
+    return Struct.access(map).as(Tasks.class);
+  }
+
+  static Tasks create(String id) {
+    Map<String, Object> keys = new HashMap<>();
+    keys.put(ID, id);
+    return Struct.access(keys).as(Tasks.class);
+  }
+}
+```
+
+#### AI Config Models:
+
+1. AIModel:
+```Java
+package customer.ai2code.model;
+
+import cds.gen.configservice.ModelConfigs;
+// import cds.gen.configservice.ModelConfigs;
+// import cds.gen.configservice.ModelConfigs;
+import customer.ai2code.model.config.AIServiceConfig;
+import customer.ai2code.service.AIService;
+
+public interface AIModel {
+    // public ModelConfigs modelConfigs;
+
+    // private Map<String, E extends Object> modelParametersMap;
+    public String getModelName();
+    // public Map<String, Object> getModelParametersMap();
+    public AIServiceConfig parseModelConfigs();
+
+    public ModelConfigs getModelConfigs();
+}
+```
+
+2. SAPAICoreOpenAIgpt4o
+
+```java
+package customer.ai2code.model;
+
+import cds.gen.configservice.ModelConfigs;
+import customer.ai2code.exception.BusinessException;
+import customer.ai2code.model.config.AIServiceConfig;
+import customer.ai2code.model.config.SAPAICoreConfig;
+import customer.ai2code.service.AIService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import static com.sap.ai.sdk.core.JacksonConfiguration.getDefaultObjectMapper;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class SAPAICoreOpenAIgpt4o implements AIModel {
+
+    private ModelConfigs modelConfigs;
+
+    @Override
+    public String getModelName() {
+        return modelConfigs.getModelName();
+    }
+
+    @Override
+    public AIServiceConfig parseModelConfigs() {
+        try {
+            ObjectMapper mapper = getDefaultObjectMapper();
+            
+            // Check if parameters is a String (JSON) or already an Object
+            Object parameters = modelConfigs.getParameters();
+            if (parameters instanceof String) {
+                // Parse JSON string to SAPAICoreConfig
+                return mapper.readValue((String) parameters, SAPAICoreConfig.class);
+            } else {
+                // Convert Object to SAPAICoreConfig
+                return mapper.convertValue(parameters, SAPAICoreConfig.class);
+            }
+        } catch (Exception e) {
+            throw new BusinessException("Failed to parse model configuration", e);
+        }
+    }
+}
+
+
+```
+
+3. StreamRequestVO
+
+```java
+String botInstanceId;
+String Content;
+```
+
+
+#### Bot & Task Model
+
+1. Bot
+
+```java
+public BotInstancesExecuteContext.ReturnType execute();
+
+public Boolean executeAsync();
+
+public Boolean stop();
+
+public Boolean resume();
+
+public Boolean cancel();
+
+public SseEmitter chatInStreaming(String content);
+
+public String chat(String content);
+
+public BotInstances getBotInstance();
+
+public AIModel getAiModel();
+```
+
+2. ChatBot: 具有chatCompletion和chatInStreaming的Bot实施类，BotType=AI_CHAT,参考已经实现的Java代码。
+  - 由BotService.chat调用
+  - 调用AIService.chat方法
+    - 根据AIModel类型，获取到不同AIService服务实现
+    - 第一次chat需要保存prompt消息
+    - 使用genericCqnService.getMainTaskId，再获取Prompt (PromptService中用到ContextService，Context都是以MainTaskId存储的)
+    - 不是第一次调用，获取历史消息
+    - 真正调用AIService.chat服务
+3. FunctionCallingBot: 具有execute的Bot实施类，BotType=FUNCTION_CALL。
+  - 由BotService.execute调用
+  - 调用AIService.functionCalling方法
+    - 根据AIModel类型，获取到不同AIService服务实现
+    - 根据BotType获取prompt
+    - 根据BotType获取implementionClass
+    - 新建implementationClass的实例，作为参数传入AIService.functionCalling方法
+    - 调用AIService.functionCalling方法
+
+4. CodingBot: 具有execute的Bot实施类，BotType=CODE。
+
+5. Task: Task对象类，包含Tasks CDS POJO对象 
+```java
+public Tasks getTask();
+```
 
 
 ### Service
-* AI Service
+#### AI Service
 
-| 名称| 类型| 描述| 属性| 方法| 
-|----|----|----|----|----|
-| AIService| Interface| AI服务的接口| | public String chatWithAI(List<BotMessages> messages,List<PromptTexts> prompts,String content);<br>public SseEmitter chatWithAIStreaming(List<BotMessages> messages,List<PromptTexts> prompts,String content)<br>public <E extends BotExecution> String functionCalling(List<BotMessages> messages,List<PromptTexts> prompts,FunctionCallingBot bot ) |
-| SAPOpenAIServiceImpl| Class| SAP AICore OpenAI服务类 | | |
-| SAPClaudeAIServiceImpl| Class| SAP AICore ClaudeAI服务类 | | |
+1. AIService: AI相关的服务类
+```java
+import cds.gen.configservice.PromptTexts;
+import cds.gen.mainservice.BotMessages;
+import customer.ai2code.model.AIModel;
+import customer.ai2code.service.execution.BotExecution;
+import customer.ai2code.service.processor.StreamingCompletedProcessor;
+
+public interface AIService {
+        public String chatWithAI(
+                        List<BotMessages> messages,
+                        List<PromptTexts> prompts,
+                        String content,
+                        AIModel model);
+
+        public SseEmitter chatWithAIStreaming(
+                        List<BotMessages> messages,
+                        List<PromptTexts> prompts,
+                        String content,
+                        AIModel model,
+                        ExecutorService executor,
+                        StreamingCompletedProcessor streamingCompletionProcessor);
+
+        public <T extends BotExecution> String functionCalling(
+                        List<BotMessages> messages,
+                        List<PromptTexts> prompts,
+                        // FunctionCalls functionCall,
+                        Class<T> botExecutClazz,
+                        AIModel model);
+
+        /**
+         * Send a chunk to the emitter
+         *
+         * @param emitter The emitter to send the chunk to
+         * @param chunk   The chunk to send
+         */
+        public static void send(@Nonnull final SseEmitter emitter, @Nonnull final String chunk) {
+                try {
+                        emitter.send(chunk);
+                } catch (final IOException e) {
+                        emitter.completeWithError(e);
+                }
+        }
+```
+2. SAPOpenAIServiceImpl:  SAP AICore OpenAI服务类
+
+3. SAPClaudeAIServiceImpl SAP AICore ClaudeAI服务类
 
 
-* 通用Service
 
-| 名称| 类型| 描述| 属性| 方法| 
-|----|----|----|----|----|
-| BotService| Interface| Bot相关服务| |    public Bot getCurrentBot(String botInstanceId);<br>  public Bot getCurrentBot(String taskId, Integer sequence);<br>  public Boolean executeAsync(BotInstancesExecuteContext context);<br>  public Boolean executeAsync(String botInstanceId);<br>  public BotInstancesExecuteContext.ReturnType execute(BotInstancesExecuteContext context);<br>  public BotInstancesExecuteContext.ReturnType execute(String botInstanceId);|
-| TaskService| Interface| Task相关服务| |    public Task createTaskWithBots(String name, String description, String taskTypeId);<br>    public Task createTaskWithBots(String botInstanceId);<br>    public Task createTaskWithBots(String botInstanceId, String name);|
-| ContextService| Interface| Context相关服务| |    public List<Map<String, Object>> buildContextAsHierarchy(List<ContextNodes> contextNodes);<br>    public String getContextFullPath(String subPathPrefix, String subPath);<br>    public Result upsertContext(String botInstanceId,String taskId,String contextValue);|
-| PromptService| Interface| 提示词相关服务| | public String parse(PromptTexts prompt,ContextNodes contextNode,String contextPath);|
-| EntityService| Class| CqnService相关服务| |selectSingle(CqnService);<br>selectList(CqnService);<br>insert();<br>batchInsert();<br>update();<br>delete();|
+#### 通用Service
 
+1. BotService: Bot相关服务
 
-* Bot Service
-  - public Bot getCurrentBot(String botInstanceId);
+execute 的步骤：
+a. 获取当前Bot对象
+b. 更新Bot状态
+c. bot执行
+d. 更新bot状态
+e. 更新BotInstance的Result字段
 
-  - public Bot getCurrentBot(String taskId, int sequence);
+```java
+package customer.ai2code.service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-  - public String chat(BotInstancesChatCompletionContext context);
-  - public String chat(String botInstanceId, String content);
+import cds.gen.mainservice.BotInstancesChatCompletionContext;
+import cds.gen.mainservice.BotInstancesExecuteContext;
+import cds.gen.mainservice.BotMessages;
+import cds.gen.mainservice.BotMessagesAdoptContext;
+import cds.gen.mainservice.ContextNodes;
+import customer.ai2code.model.Bot;
 
-  - public SseEmitter chatInStreaming(String botInstanceId, String content);
+public interface BotService {
 
+    
+    public Bot getCurrentBot(String botInstanceId);
 
-  - public Boolean executeAsync(BotInstancesExecuteContext context);
-  - public Boolean executeAsync(String botInstanceId);
+    public Bot getCurrentBot(String taskId, int sequence);
 
-  - public BotInstancesExecuteContext.ReturnType execute(BotInstancesExecuteContext context);
-  - public BotInstancesExecuteContext.ReturnType execute(String botInstanceId);
+    public BotMessages chat(BotInstancesChatCompletionContext context);
+    public BotMessages chat(String botInstanceId, String content);
 
-
-* Task Service
-
-  - public Task createTaskWithBots(String name, String description, String taskTypeId);
-
-  - public Task createTaskWithBots(String botInstanceId, String description,String contextPath);
-
-  - public Task createTaskWithBots(String botInstanceId, String name, String description);
-
-  - public Task getCurrentTask(String taskId);
-  - public Task getCurrentTask(String botInstanceId, Integer sequence);
+    public SseEmitter chatInStreaming(String botInstanceId, String content);
 
 
-* Lifecycle Managements 
+    public Boolean executeAsync(BotInstancesExecuteContext context);
+    public Boolean executeAsync(String botInstanceId);
+
+    public BotInstancesExecuteContext.ReturnType execute(BotInstancesExecuteContext context);
+    public BotInstancesExecuteContext.ReturnType execute(String botInstanceId);
+
+    public ContextNodes adopt(BotMessagesAdoptContext context);
+
+    public ContextNodes adopt(String botInstanceId, String messageId);
+}
+
+```
+
+2. TaskService: Task相关服务
+
+```java
+package customer.ai2code.service;
+
+import cds.gen.mainservice.CreateTaskWithBotsContext;
+import customer.ai2code.model.Task;
+
+public interface TaskService {
+
+    public Task createTaskWithBots(CreateTaskWithBotsContext context);
+
+    public Task createTaskWithBots(String name, String description, String taskTypeId);
+
+    public Task createTaskWithBots(String botInstanceId, String name, String description, String contextPath, int sequence);
+
+    public Task createTaskWithBots(String botInstanceId, String name);
+
+    public Task getCurrentTask(String taskId);
+
+    public Task getCurrentTask(String botInstanceId, int sequence);
+}
+
+
+```
+
+3. ContextService: Context上下文相关服务
+
+```java
+package customer.ai2code.service;
+
+import java.util.List;
+import java.util.Map;
+
+import cds.gen.mainservice.ContextNodes;
+
+public interface ContextService {
+    public List<Map<String, Object>> buildContextAsHierarchy(List<ContextNodes> contextNodes);
+
+    public String getContextFullPath(String botInstanceId, String subPath);
+
+    public ContextNodes upsertContext(
+        //     String botInstanceId,
+            String taskId,
+            // Integer sequence,
+            String contextPath,
+            String contextValue);
+    public ContextNodes getContextNode(
+            String contextNodeId);
+}
+
+```
+
+4. PromptService: 提示词相关服务
+
+```java
+package customer.ai2code.service;
+
+import java.util.List;
+
+import cds.gen.configservice.PromptTexts;
+
+public interface PromptService {
+    /**
+     * 
+     * @param prompt     提示词
+     * @param mainTaskId 主任务ID
+     * @return
+     */
+    public String parse(PromptTexts prompt, String mainTaskId, String botInstanceId);
+
+    /**
+     * 
+     * @param botTypeId
+     * @param mainTaskId
+     * @return
+     */
+    public List<PromptTexts> getPrompts(String botTypeId, String mainTaskId, String botInstanceId);
+}
+
+```
+
+
+#### Lifecycle Managements 
 首先定义一个基于Spring Bean的Bot/Task的链式/树状全局链表。实现BotService/TaskService的以下方法：
 1. 从链表中查询Bot/Task(getCurrentBot/getCurrentTask)，如果没有则从存储的Bot/Task表中取到记录并实例化，再将Bot/Task放到链表中。
 2. CreateTaskWithBots方法新建的Task和Bots除了在表中记录，还需要将Task和Bot放到全局链表中，供所有用户查询和使用。
 
 
-| 名称| 类型| 描述| 属性| 方法| 
-|----|----|----|----|----|
-| BotExecution| Interface| Bot对象执行接口| |<br>public String execute(Map<String, Object> parameters);|
-| CreateSubTaskExecutionImpl| Class| | | |
-| DeployCDSExectionImpl| Class| | | |
-| RAGExtractor| Interface| RAG提取对象| | public String extract(String RAGSource, int RAGTopK)|
- 
+1. TaskBotNode: 任务-Bot树形节点，表示Task和BotInstance的层级关系
+
+```java
+package customer.ai2code.model.tree;
+
+import customer.ai2code.exception.BusinessException;
+import customer.ai2code.model.Bot;
+import customer.ai2code.model.Task;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+
+/**
+ * 任务-Bot树形节点
+ * 表示Task和BotInstance的层级关系
+ */
+public class TaskBotNode {
+    
+    // 节点类型
+    public enum NodeType {
+        TASK,           // 任务节点
+        BOT_INSTANCE    // Bot实例节点
+    }
+    
+    private final String id;
+    private final NodeType type;
+    
+    // 树形关系
+    private TaskBotNode parent;
+    private final List<TaskBotNode> children = new ArrayList<>();
+    
+    // 业务对象 - 只存储Task或Bot
+    private Task taskObject;
+    private Bot botObject;
+    
+    // 快速查找子节点的映射
+    private final Map<String, TaskBotNode> childrenMap = new HashMap<>();
+    
+    // 构造函数 - 用于Task节点
+    public TaskBotNode(Task task) {
+        this.id = task.getTask().getId();
+        this.type = NodeType.TASK;
+        this.taskObject = task;
+        this.botObject = null;
+    }
+    
+    // 构造函数 - 用于Bot节点
+    public TaskBotNode(Bot bot) {
+        this.id = bot.getBotInstance().getId();
+        this.type = NodeType.BOT_INSTANCE;
+        this.taskObject = null;
+        this.botObject = bot;
+    }
+    
+    // 添加子节点
+    public void addChild(TaskBotNode child) {
+        children.add(child);
+        childrenMap.put(child.getId(), child);
+        child.setParent(this);
+    }
+    
+    // 移除子节点
+    public void removeChild(String childId) {
+        TaskBotNode child = childrenMap.remove(childId);
+        if (child != null) {
+            children.remove(child);
+            child.setParent(null);
+        }
+    }
+    
+    // 查找子节点
+    public TaskBotNode findChild(String childId) {
+        return childrenMap.get(childId);
+    }
+    
+    // 递归查找后代节点
+    public TaskBotNode findDescendant(String nodeId) {
+        if (this.id.equals(nodeId)) {
+            return this;
+        }
+        
+        for (TaskBotNode child : children) {
+            TaskBotNode found = child.findDescendant(nodeId);
+            if (found != null) {
+                return found;
+            }
+        }
+        return null;
+    }
+    
+    // 获取根节点（主任务）
+    public TaskBotNode getRoot() {
+        TaskBotNode current = this;
+        while (current.parent != null) {
+            current = current.parent;
+        }
+        return current;
+    }
+    
+    // 获取主任务ID
+    public String getMainTaskId() {
+        TaskBotNode root = getRoot();
+        if (root.type == NodeType.TASK && root.taskObject != null) {
+            if (root.taskObject.getTask().getIsMain() != null && root.taskObject.getTask().getIsMain()) {
+                return root.id;
+            }
+        }
+        // throw new BusinessException("Root node is not a main task");
+        return null;
+    }
+    
+    // 查找指定序列的Bot实例
+    public TaskBotNode findBotBySequence(int sequence) {
+        for (TaskBotNode child : children) {
+            if (child.type == NodeType.BOT_INSTANCE && child.botObject != null) {
+                Integer botSequence = child.botObject.getBotInstance().getSequence();
+                if (botSequence != null && botSequence == sequence) {
+                    return child;
+                }
+            }
+        }
+        return null;
+    }
+    
+    // 获取任务ID（适用于Bot节点）
+    public String getTaskId() {
+        if (type == NodeType.BOT_INSTANCE && botObject != null) {
+            return botObject.getBotInstance().getTaskId();
+        } else if (type == NodeType.TASK && taskObject != null) {
+            return taskObject.getTask().getId();
+        }
+        return null;
+    }
+    
+    // 获取Bot实例的类型ID
+    public String getBotTypeId() {
+        if (type == NodeType.BOT_INSTANCE && botObject != null) {
+            return botObject.getBotInstance().getTypeId();
+        }
+        return null;
+    }
+    
+    // 获取任务的类型ID
+    public String getTaskTypeId() {
+        if (type == NodeType.TASK && taskObject != null) {
+            return taskObject.getTask().getTypeId();
+        }
+        return null;
+    }
+    
+    // 检查是否是主任务
+    public boolean isMainTask() {
+        if (type == NodeType.TASK && taskObject != null) {
+            Boolean isMain = taskObject.getTask().getIsMain();
+            return isMain != null && isMain;
+        }
+        return false;
+    }
+    
+    // 获取Bot实例的状态
+    public String getBotStatus() {
+        if (type == NodeType.BOT_INSTANCE && botObject != null) {
+            return botObject.getBotInstance().getStatusCode();
+        }
+        return null;
+    }
+    
+    // 更新Bot实例的状态
+    public void updateBotStatus(String statusCode) {
+        if (type == NodeType.BOT_INSTANCE && botObject != null) {
+            botObject.getBotInstance().setStatusCode(statusCode);
+        }
+    }
+    
+    // Getters and Setters
+    public String getId() { return id; }
+    public NodeType getType() { return type; }
+    public TaskBotNode getParent() { return parent; }
+    public List<TaskBotNode> getChildren() { return children; }
+    public Task getTaskObject() { return taskObject; }
+    public Bot getBotObject() { return botObject; }
+    
+    public void setParent(TaskBotNode parent) { this.parent = parent; }
+    public void setTaskObject(Task taskObject) { 
+        if (type != NodeType.TASK) {
+            throw new BusinessException("Cannot set task object on non-task node");
+        }
+        this.taskObject = taskObject; 
+    }
+    public void setBotObject(Bot botObject) { 
+        if (type != NodeType.BOT_INSTANCE) {
+            throw new BusinessException("Cannot set bot object on non-bot node");
+        }
+        this.botObject = botObject; 
+    }
+    
+    // 类型安全的数据访问
+    public Task getTask() {
+        if (type != NodeType.TASK) {
+            throw new BusinessException("Node is not a task node");
+        }
+        return taskObject;
+    }
+    
+    public Bot getBot() {
+        if (type != NodeType.BOT_INSTANCE) {
+            throw new BusinessException("Node is not a bot instance node");
+        }
+        return botObject;
+    }
+    
+    @Override
+    public String toString() {
+        String typeName = type == NodeType.TASK ? "Task" : "BotInstance";
+        String name = "";
+        if (type == NodeType.TASK && taskObject != null) {
+            name = taskObject.getTask().getName();
+        } else if (type == NodeType.BOT_INSTANCE && botObject != null) {
+            name = "Bot[" + botObject.getBotInstance().getSequence() + "]";
+        }
+        return typeName + "(" + id + "): " + name;
+    }
+}
+```
+
+2. TaskBotCacheManager: 任务-Bot统一缓存管理器，使用树形结构管理Task和BotInstance的层级关系
+
+```java
+package customer.ai2code.service.impl;
+
+import customer.ai2code.model.tree.TaskBotNode;
+import customer.ai2code.model.Bot;
+import customer.ai2code.model.Task;
+
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * 任务-Bot统一缓存管理器
+ * 使用树形结构管理Task和BotInstance的层级关系
+ */
+@Service
+public class TaskBotCacheManager {
+    
+    // 全局节点缓存：nodeId -> TaskBotNode
+    private final Map<String, TaskBotNode> nodeCache = new ConcurrentHashMap<>();
+    
+    // 根节点缓存：mainTaskId -> rootNode
+    private final Map<String, TaskBotNode> rootCache = new ConcurrentHashMap<>();
+    
+    /**
+     * 添加任务节点
+     */
+    public TaskBotNode addTaskNode(Task task, String parentBotInstanceId) {
+        TaskBotNode taskNode = new TaskBotNode(task);
+        
+        nodeCache.put(task.getTask().getId(), taskNode);
+        
+        // 如果是主任务，添加到根缓存
+        if (task.getTask().getIsMain() != null && task.getTask().getIsMain()) {
+            rootCache.put(task.getTask().getId(), taskNode);
+        } else if (parentBotInstanceId != null) {
+            // 如果有父Bot实例，建立父子关系
+            TaskBotNode parentNode = nodeCache.get(parentBotInstanceId);
+            if (parentNode != null) {
+                parentNode.addChild(taskNode);
+            }
+        }
+        
+        return taskNode;
+    }
+    
+    /**
+     * 添加Bot实例节点
+     */
+    public TaskBotNode addBotInstanceNode(Bot bot) {
+        TaskBotNode botNode = new TaskBotNode(bot);
+        
+        nodeCache.put(bot.getBotInstance().getId(), botNode);
+        
+        // 建立与任务的父子关系
+        String taskId = bot.getBotInstance().getTaskId();
+        if (taskId != null) {
+            TaskBotNode taskNode = nodeCache.get(taskId);
+            if (taskNode != null) {
+                taskNode.addChild(botNode);
+            }
+        }
+        
+        return botNode;
+    }
+    
+    /**
+     * 获取节点
+     */
+    public TaskBotNode getNode(String nodeId) {
+        return nodeCache.get(nodeId);
+    }
+    
+    /**
+     * 获取任务节点
+     */
+    public TaskBotNode getTaskNode(String taskId) {
+        TaskBotNode node = nodeCache.get(taskId);
+        if (node != null && node.getType() == TaskBotNode.NodeType.TASK) {
+            return node;
+        }
+        return null;
+    }
+    
+    /**
+     * 获取Bot实例节点
+     */
+    public TaskBotNode getBotInstanceNode(String botInstanceId) {
+        TaskBotNode node = nodeCache.get(botInstanceId);
+        if (node != null && node.getType() == TaskBotNode.NodeType.BOT_INSTANCE) {
+            return node;
+        }
+        return null;
+    }
+    
+    /**
+     * 根据Bot实例ID获取主任务ID
+     */
+    public String getMainTaskId(String botInstanceId) {
+        TaskBotNode botNode = getBotInstanceNode(botInstanceId);
+        if (botNode != null) {
+            return botNode.getMainTaskId();
+        }
+        return null;
+    }
+    
+    /**
+     * 根据任务ID和序列号查找Bot实例
+     */
+    public TaskBotNode getBotInstanceByTaskAndSequence(String taskId, int sequence) {
+        TaskBotNode taskNode = getTaskNode(taskId);
+        if (taskNode != null) {
+            return taskNode.findBotBySequence(sequence);
+        }
+        return null;
+    }
+    
+    /**
+     * 获取缓存的Task对象
+     */
+    public Task getCachedTask(String taskId) {
+        TaskBotNode node = getTaskNode(taskId);
+        return node != null ? node.getTaskObject() : null;
+    }
+    
+    /**
+     * 获取缓存的Bot对象
+     */
+    public Bot getCachedBot(String botInstanceId) {
+        TaskBotNode node = getBotInstanceNode(botInstanceId);
+        return node != null ? node.getBotObject() : null;
+    }
+    
+    /**
+     * 更新Bot状态
+     */
+    public void updateBotStatus(String botInstanceId, String statusCode) {
+        TaskBotNode node = getBotInstanceNode(botInstanceId);
+        if (node != null) {
+            node.updateBotStatus(statusCode);
+        }
+    }
+    
+    /**
+     * 移除节点及其子树
+     */
+    public void removeNode(String nodeId) {
+        TaskBotNode node = nodeCache.remove(nodeId);
+        if (node != null) {
+            // 递归移除子节点
+            removeSubtree(node);
+            
+            // 从父节点中移除
+            if (node.getParent() != null) {
+                node.getParent().removeChild(nodeId);
+            }
+            
+            // 如果是根节点，从根缓存中移除
+            if (node.isMainTask()) {
+                rootCache.remove(node.getId());
+            }
+        }
+    }
+    
+    private void removeSubtree(TaskBotNode node) {
+        for (TaskBotNode child : node.getChildren()) {
+            nodeCache.remove(child.getId());
+            removeSubtree(child);
+        }
+    }
+    
+    /**
+     * 清空所有缓存
+     */
+    public void clearAll() {
+        nodeCache.clear();
+        rootCache.clear();
+    }
+    
+    /**
+     * 获取缓存统计信息
+     */
+    public Map<String, Integer> getCacheStats() {
+        Map<String, Integer> stats = new ConcurrentHashMap<>();
+        stats.put("totalNodes", nodeCache.size());
+        stats.put("rootNodes", rootCache.size());
+        
+        long taskNodes = nodeCache.values().stream()
+            .filter(node -> node.getType() == TaskBotNode.NodeType.TASK)
+            .count();
+        long botNodes = nodeCache.values().stream()
+            .filter(node -> node.getType() == TaskBotNode.NodeType.BOT_INSTANCE)
+            .count();
+            
+        stats.put("taskNodes", (int) taskNodes);
+        stats.put("botInstanceNodes", (int) botNodes);
+        
+        return stats;
+    }
+}
+```
 
 
+
+
+
+### Bot Execution
+Bot执行模型的相关类
+
+#### Interface
+1. BotExecution: Bot执行接口，所有Bot执行的动作类必须实现这个接口
+```java
+package customer.ai2code.service.execution;
+
+// import customer.ai2code.service.execution.annotation.BotExecutor;
+
+// @BotExecutor(name = "Execute Bot Interface", 
+//              description = "Marker interface for bot execution implementations", 
+//              version = "1.0", 
+//              enabled = true)
+public interface BotExecution {
+    // 空接口，通过注解处理器强制要求实现类必须有execute方法
+}
+```
+
+#### Annotation
+
+1. BotExecutor: execute类注解
+
+```java
+package customer.ai2code.service.execution.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface BotExecutor {
+    String name();
+    String description() default "";
+    String version() default "1.0";
+    boolean enabled() default true;
+}
+```
+
+2. ExecuteMethod: execute方法的注解
+
+```java
+package customer.ai2code.service.execution.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExecuteMethod {
+    String operation() default "";
+    // int timeout() default 30;
+    boolean logExecution() default true;
+}
+```
+
+3. ExecuteParameter: execute方法的参数注解
+
+```java
+// code\srv\src\main\java\customer\ai2code\service\execution\Parameter.java
+package customer.ai2code.service.execution.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExecuteParameter {
+    // String name();
+    boolean required() default false;
+    String description() ;
+}
+```
+
+#### 实现类
+
+1. CreateTasksBotExecution: 创建SubTask的execute类
+
+传入参数 botInstanceId, 
+
+```java
+package customer.ai2code.service.impl;
+
+import customer.ai2code.service.execution.BotExecution;
+import customer.ai2code.service.execution.annotation.BotExecutor;
+import customer.ai2code.service.execution.annotation.ExecuteMethod;
+import customer.ai2code.service.execution.annotation.ExecuteParameter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import customer.ai2code.exception.BusinessException;
+import customer.ai2code.model.Task;
+import customer.ai2code.model.TaskCreationParam;
+import customer.ai2code.service.TaskService;
+
+@BotExecutor(name = "Create Tasks Bot Execution", description = "Implementation for creating tasks in the bot execution framework", version = "1.0", enabled = true)
+public class CreateTasksBotExecution implements BotExecution {
+
+    public Create
+
+    @ExecuteMethod
+    public List<Task> execute(@ExecuteParameter(description = "Bot Instance") String botInstanceId, 
+                         @ExecuteParameter(description = "Array of task parameters") List<TaskCreationParam> taskCreationParam, /** 1. sequence 2.name 3.description 4. contextPath */) {
+
+        List<Task> tasks = new ArrayList<>();
+        // throw new BusinessException("Unimplemented method 'execute'");
+        // 调用BotService.createTaskWithBots(param);
+        if (taskCreationParam == null || taskCreationParam.isEmpty()) {
+            throw new BusinessException("Task creation parameters cannot be null or empty");
+        }
+        if (botInstanceId == null || botInstanceId.isEmpty()) {
+            throw new BusinessException("Bot instance ID cannot be null or empty");
+        }
+
+        // 遍历任务创建参数，创建任务
+        for (TaskCreationParam param : taskCreationParam) {
+            if (param.getSequence() == null || param.getName() == null || param.getDescription() == null) {
+                throw new BusinessException("Task creation parameters must include sequence, name, and description");
+            }
+            // 调用任务服务创建任务
+            tasks.add(taskService.createTaskWithBots(botInstanceId, param.getName(), param.getDescription(), param.getContextPath(), param.getSequence()));
+        }
+        return tasks;
+    }
+}
+```
+
+2. DeployCDSExecutionImpl: 部署CDS的execute类
+
+### RAG Execution
+
+#### Interface
+
+1. RAGExtrator: RAG提取对象
+
+```java
+package customer.ai2code.service.execution;
+
+public interface RAGExtractor {
+    public String extract(String RAGSource, int RAGTopK);
+}
+
+```
+
+
+
+## Function Call 功能架构
+
+### 技术架构概览
+
+Function Call 功能基于注解驱动的架构设计，支持 AI 模型调用 Java 方法执行具体的业务逻辑。整体架构包含以下核心组件：
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         Function Call 架构图                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│   AI Model (OpenAI)                                                         │
+│   ↓ Function Call Request                                                    │
+│   SAPOpenAIServiceImpl.functionCalling()                                    │
+│   ↓                                                                          │
+│   ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐          │
+│   │ FunctionCall    │    │ OpenAIFunction  │    │ FunctionCall    │          │
+│   │ Processor       │    │ CallAdapter     │    │ Execution       │          │
+│   │                 │    │                 │    │                 │          │
+│   │ • 函数信息提取   │    │ • OpenAI格式转换 │    │ • 参数类型转换   │          │
+│   │ • 参数验证      │    │ • JSON Schema   │    │ • 方法执行       │          │
+│   │ • 方法调用      │    │ • 参数映射      │    │ • 结果返回       │          │
+│   └─────────────────┘    └─────────────────┘    └─────────────────┘          │
+│   ↓                                                                          │
+│   BotExecution 实现类 (如 CreateTasksBotExecution)                           │
+│   ↓                                                                          │
+│   业务服务层 (TaskService, etc.)                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 核心组件详解
+
+#### 1. 注解系统
+
+**@BotExecutor**: 类级注解，标识 BotExecution 实现类
+```java
+@BotExecutor(
+    name = "Create Tasks Bot Execution", 
+    description = "Implementation for creating tasks", 
+    version = "1.0", 
+    enabled = true
+)
+```
+
+**@ExecuteMethod**: 方法级注解，标识可被 AI 调用的方法
+```java
+@ExecuteMethod(
+    operation = "Create Tasks Bot Execution_execute",
+    description = "Create multiple tasks",
+    logExecution = true
+)
+```
+
+**@ExecuteParameter**: 参数级注解，定义参数元数据
+```java
+@ExecuteParameter(
+    name = "taskCreationParam",  // 必须与实际参数名一致
+    description = "Array of task creation parameters", 
+    required = true
+)
+```
+
+#### 2. FunctionCallProcessor
+
+**核心功能**:
+- 扫描带有 `@BotExecutor` 注解的类
+- 提取带有 `@ExecuteMethod` 注解的方法信息
+- 解析方法参数的类型信息和注解元数据
+- 执行函数调用并处理参数类型转换
+
+**关键方法**:
+```java
+// 提取函数信息
+public List<FunctionInfo> extractFunctionInfosFromInstance(T botExecutionInstance)
+
+// 执行函数调用
+public Object executeFunctionCallOnInstance(String functionName, String argumentsJson, T botExecutionInstance)
+
+// 参数类型转换
+private Object convertArgumentToParameterType(Object argumentValue, Parameter parameter)
+```
+
+#### 3. OpenAIFunctionCallAdapter
+
+**职责**: 将通用的函数信息转换为 OpenAI Function Calling 所需的 JSON Schema 格式
+
+**转换流程**:
+1. 提取方法名和描述
+2. 分析参数类型，生成 JSON Schema
+3. 处理复杂类型（List、自定义对象等）
+4. 构建 OpenAI 兼容的函数定义
+
+**示例输出**:
+```json
+{
+  "name": "Create Tasks Bot Execution_execute",
+  "description": "Create multiple tasks based on provided parameters",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "botInstanceId": {
+        "type": "string",
+        "description": "Bot Instance ID for task creation"
+      },
+      "taskCreationParam": {
+        "type": "array",
+        "description": "Array of task creation parameters",
+        "items": {
+          "type": "object",
+          "properties": {
+            "sequence": {"type": "integer"},
+            "name": {"type": "string"},
+            "description": {"type": "string"},
+            "contextPath": {"type": "string"}
+          }
+        }
+      }
+    },
+    "required": ["taskCreationParam"]
+  }
+}
+```
+
+#### 4. SAPOpenAIServiceImpl Function Calling 集成
+
+**执行流程**:
+```java
+@Override
+public <T extends BotExecution> Object functionCalling(
+    List<BotMessages> messages, 
+    List<PromptTexts> prompts,
+    T botExecutionInstance,
+    AIModel model) {
+    
+    // 1. 提取函数信息
+    List<FunctionInfo> functionInfos = functionCallProcessor
+        .extractFunctionInfosFromInstance(botExecutionInstance);
+    
+    // 2. 转换为 OpenAI 格式
+    List<Map<String, Object>> openAIFunctions = openAIFunctionCallAdapter
+        .convertToOpenAIFormat(functionInfos);
+    
+    // 3. 构建请求参数并调用 AI
+    OpenAiChatCompletionOutput rawResult = aiClient.chatCompletion(params);
+    
+    // 4. 检查并执行函数调用
+    if (containsFunctionCall(rawResult)) {
+        return executeFunctionCall(rawResult, botExecutionInstance);
+    }
+    
+    return responseContent;
+}
+```
+
+### 类型转换系统
+
+#### 支持的类型转换
+
+1. **基本类型**: String, Integer, Boolean, Double 等
+2. **集合类型**: List\<T\>，支持泛型类型推断
+3. **复杂对象**: 使用 Jackson ObjectMapper 进行转换
+4. **嵌套结构**: 支持多层嵌套的对象结构
+
+#### 转换策略
+
+```java
+private Object convertArgumentToParameterType(Object argumentValue, Parameter parameter) {
+    // 1. 处理 List 类型 - 提取泛型参数并逐个转换元素
+    if (List.class.isAssignableFrom(parameterType)) {
+        return convertToList(argumentValue, genericType);
+    }
+    
+    // 2. 处理基本类型 - 直接类型转换
+    if (parameterType == String.class) {
+        return argumentValue.toString();
+    }
+    
+    // 3. 处理复杂对象 - 使用 Jackson 转换
+    return objectMapper.convertValue(argumentValue, parameterType);
+}
+```
+
+### 编译时验证
+
+通过注解处理器 `BotExecutionProcessor` 在编译时验证：
+
+1. **类验证**: 实现 BotExecution 接口的类必须有 @BotExecutor 注解
+2. **方法验证**: execute 方法必须有 @ExecuteMethod 注解
+3. **参数验证**: 方法参数必须有 @ExecuteParameter 注解
+4. **名称一致性**: @ExecuteParameter 的 name 属性必须与实际参数名一致
+
+### 实现示例
+
+#### CreateTasksBotExecution 示例
+
+```java
+@BotExecutor(name = "Create Tasks Bot Execution", description = "Implementation for creating tasks", version = "1.0", enabled = true)
+public class CreateTasksBotExecution implements BotExecution {
+
+    private final TaskService taskService;
+
+    public CreateTasksBotExecution(TaskService taskService) {
+        this.taskService = taskService;
+    }
+
+    @ExecuteMethod(
+        operation = "Create Tasks Bot Execution_execute",
+        description = "Create multiple tasks based on provided parameters",
+        logExecution = true
+    )
+    public List<Task> execute(
+            @ExecuteParameter(
+                name = "botInstanceId",
+                description = "Bot Instance ID for task creation", 
+                required = false
+            ) 
+            String botInstanceId,
+            
+            @ExecuteParameter(
+                name = "taskCreationParam",
+                description = "Array of task creation parameters", 
+                required = true
+            ) 
+            List<TaskCreationParam> taskCreationParam) {
+        
+        // 业务逻辑验证
+        if (taskCreationParam == null || taskCreationParam.isEmpty()) {
+            throw new BusinessException("Task creation parameters cannot be empty");
+        }
+        
+        if (botInstanceId == null || botInstanceId.trim().isEmpty()) {
+            throw new BusinessException("Bot instance ID cannot be null or empty");
+        }
+        
+        // 执行任务创建
+        List<Task> createdTasks = new ArrayList<>();
+        for (TaskCreationParam param : taskCreationParam) {
+            Task createdTask = taskService.createTaskWithBots(
+                botInstanceId,
+                param.getName(),
+                param.getDescription(),
+                param.getContextPath(),
+                param.getSequence()
+            );
+            createdTasks.add(createdTask);
+        }
+        
+        return createdTasks;
+    }
+}
+```
+
+### AI Service 集成更新
+
+在 AIService 接口中添加 Function Calling 支持：
+
+```java
+public interface AIService {
+    // 新增 Function Calling 方法
+    public <T extends BotExecution> Object functionCalling(
+        List<BotMessages> messages,
+        List<PromptTexts> prompts,
+        T botExecutionInstance,
+        AIModel model);
+        
+    // 现有方法保持不变...
+}
+```
+
+### Bot Service 集成更新
+
+FunctionCallingBot 类更新：
+
+```java
+public class FunctionCallingBot implements Bot {
+    
+    @Override
+    public BotInstancesExecuteContext.ReturnType execute() {
+        // 1. 获取 BotType 配置
+        BotType botType = getBotType();
+        
+        // 2. 根据 implementationClass 创建实例
+        String implementationClass = botType.getImplementationClass();
+        BotExecution botExecution = createBotExecutionInstance(implementationClass);
+        
+        // 3. 获取历史消息和提示词
+        List<BotMessages> messages = getHistoryMessages();
+        List<PromptTexts> prompts = getPrompts();
+        
+        // 4. 调用 AI Function Calling
+        Object result = aiService.functionCalling(messages, prompts, botExecution, getAiModel());
+        
+        // 5. 处理结果并返回
+        return processExecutionResult(result);
+    }
+    
+    private BotExecution createBotExecutionInstance(String className) {
+        try {
+            Class<?> clazz = Class.forName(className);
+            return (BotExecution) applicationContext.getBean(clazz);
+        } catch (Exception e) {
+            throw new BusinessException("Failed to create bot execution instance: " + className, e);
+        }
+    }
+}
+```
+
+### 配置更新
+
+在 BotType 配置中需要添加：
+
+1. **functionType**: 设置为 'FUNCTION_CALL'
+2. **implementationClass**: 指定 BotExecution 实现类的完整类名，如 `customer.ai2code.service.impl.CreateTasksBotExecution`
+3. **contextType**: 设置输出的上下文类型
+4. **outputContextPath**: 设置结果写入的上下文路径
+
+### 错误处理
+
+Function Call 功能包含完整的错误处理机制：
+
+1. **编译时错误**: 注解处理器验证配置正确性
+2. **运行时错误**: 参数转换、方法调用异常处理
+3. **业务逻辑错误**: BotExecution 实现类中的业务验证
+4. **AI 调用错误**: OpenAI API 调用异常处理
+
+所有错误都会被包装为 `BusinessException` 并提供详细的错误信息，便于调试和问题定位。
 
 
 
@@ -563,66 +1968,6 @@ DELETE /ContextNodes('<id>')
      └─ ...
 
 ---
-2️⃣ 前端组装递归树算法
-A. 后端 API 数据拉取方式
-- 拉取根 Task（或所有主 Task）：
-GET /Tasks?$filter=isMain eq true
-- 拉取某 Task 下所有 botInstances：
-GET /Tasks('<taskId>')/botInstances
-- 拉取某 BotInstance 下所有子 Task：
-GET /BotInstances('<botInstanceId>')/tasks
-B. 递归组装树的伪代码示例（TypeScript/JS）
-// 递归函数：从Task开始组装
-async function buildTaskTree(taskId) {
-  // 1. 拉取当前 Task
-  const task = await api.get(
-/Tasks(${taskId})
-);
-  // 2. 拉取当前 Task 下的所有 botInstances
-  const botInstances = await api.get(
-/Tasks(${taskId})/botInstances
-);
-  // 3. 对每个 botInstance 递归拉取其 tasks
-  task.children = await Promise.all(botInstances.map(async (bot) => {
-    // 对每个 botInstance，递归其下所有 task
-    const childTasks = await api.get(
-/BotInstances(${bot.ID})/tasks
-);
-    bot.children = await Promise.all(childTasks.map(childTask => buildTaskTree(childTask.ID)));
-    return bot; // bot节点，children为其下Task[]
-  }));
-  return task;
-}
-- 最终树结构：
-  - 根为 Task，每个 Task 下有 children = [botInstance...]
-  - 每个 botInstance 下有 children = [Task...]
-  - 无限递归嵌套，适配任意层级智能编排树
-
----
-C. 适配树形 UI 组件的数据结构（示例）
-{
-  id: task.ID,
-  label: task.name,
-  type: 'task',
-  children: [
-    {
-      id: bot.ID,
-      label: bot.type, // 可用 type 名称或 description
-      type: 'botInstance',
-      children: [
-        // 子 Task 节点
-      ]
-    }
-  ]
-}
-- 树节点可递归 children 字段适配 antd-tree, element-tree, fiori-tree, vue-tree 等所有主流树控件。
-
----
-3️⃣ 性能建议与扩展
-- 建议懒加载（点击节点时再拉下一级），避免初始递归全部加载造成性能压力。
-- 可缓存已加载节点，减少重复请求。
-- 支持拖拽/批量/节点状态高亮，可用 children 数组灵活拓展。
-
 ---
 4️⃣ 总结
 - 树型结构为 Task（children: botInstances[]），每个 botInstance 再有 children: Task[]，无限递归。
@@ -668,7 +2013,8 @@ Context:projectOwner → 读取顶层 projectOwner 字段
 - 子任务 context 路径（contextPath）与 botType 输出路径（outputContextPath）组合后生成实际写回/读取路径
 - Prompt/AI 统一用 Context:x 和 SubContext:x 变量占位符，平台自动解析
 - 支持复杂嵌套和批量操作，适应多种智能编排场景
-构思
+
+# 示例
 TASK 多层报表
         bot 获取报表初步需求 aichat      outputContextPath: report.requirement
         bot 获取层次        aifuncall    outputContextPath: report.level[-1].content

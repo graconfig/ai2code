@@ -2,8 +2,9 @@ package customer.ai2code.service.handler;
 
 import org.springframework.stereotype.Component;
 import com.sap.ai.sdk.foundationmodels.openai.model.OpenAiChatCompletionOutput;
-import customer.ai2code.service.model.adapter.SAPOpenAIResponseAdapter;
-import customer.ai2code.service.model.AIResponse;
+
+import customer.ai2code.model.ai.response.AIResponse;
+import customer.ai2code.model.ai.response.adapter.SAPOpenAIResponseAdapter;
 
 @Component
 public class SAPOpenAIResponseHandler implements AIResponseHandler {
