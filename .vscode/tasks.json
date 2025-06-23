@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "cds_bind",
+      "type": "shell",
+      "command": "cds bind --exec '--' node ./writecfenv.js",
+      "isBackground": false,
+    }
+  ]
+}

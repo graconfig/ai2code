@@ -43,7 +43,7 @@ entity BotInstance : cuid, managed {
     sequence : Integer;
     result   : LargeString;
     type     : Association to BotType;
-    status   : Association to BotInstanceStatus default 'C';
+    status   : Association to BotInstanceStatus default 'CREATED';
     task     : Association to Task;
     tasks    : Composition of many Task
                    on tasks.botInstance = $self; // Sub-tasks

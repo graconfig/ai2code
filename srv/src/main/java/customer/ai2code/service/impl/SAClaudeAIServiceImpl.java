@@ -8,7 +8,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotMessages;
-import customer.ai2code.model.AIModel;
+import customer.ai2code.model.config.AIModel;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.execution.BotExecution;
 import customer.ai2code.service.processor.StreamingCompletedProcessor;
@@ -30,8 +30,8 @@ public class SAClaudeAIServiceImpl implements AIService{
     }
 
     @Override
-    public <T extends BotExecution> String functionCalling(List<BotMessages> messages, List<PromptTexts> prompts,
-            Class<T> botExecutClazz, AIModel model) {
+    public <T extends BotExecution> Object functionCalling(List<BotMessages> messages, List<PromptTexts> prompts,
+            T botExecutionInstance, AIModel model) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'functionCalling'");
     }

@@ -1,8 +1,8 @@
 package customer.ai2code.model.tree;
 
 import customer.ai2code.exception.BusinessException;
-import customer.ai2code.model.Bot;
-import customer.ai2code.model.Task;
+import customer.ai2code.model.bot.Bot;
+import customer.ai2code.model.task.Task;
 
 import java.util.List;
 import java.util.ArrayList;

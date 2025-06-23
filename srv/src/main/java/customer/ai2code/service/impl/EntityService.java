@@ -60,6 +60,10 @@ public class EntityService {
         return result.listOf(type);
     }
 
+    public Result select(CqnService service, CqnSelect select) {
+        return service.run(select);
+    }
+
     // public Records selectRecordById(CqnService service, String reportId, boolean
     // isActiveEntity) {
     // CqnSelect select = Select.from(Records_.class)

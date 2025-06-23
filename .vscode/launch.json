@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "command": "nxp cds bind --exec mvn spring-boot:run",
+            "name": "cds bind hybrid",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-Application<ai2code>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "customer.ai2code.Application",
+            "projectName": "ai2code",
+            "preLaunchTask": "cds_bind"
+        }
+    ]
+}

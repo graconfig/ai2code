@@ -5,3 +5,7 @@ Content-Type: application/json
 {
   "content": "Test chatCompletion action"
 }
+
+###
+GET http://localhost:8080/odata/v4/MainService/Tasks
+Authorization: Basic system:
