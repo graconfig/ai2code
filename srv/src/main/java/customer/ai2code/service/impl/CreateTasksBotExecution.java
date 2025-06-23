@@ -25,7 +25,7 @@ public class CreateTasksBotExecution implements BotExecution {
     }
 
     @ExecuteMethod
-    public List<Task> execute(
+    public List<String> execute(
             @ExecuteParameter(name = "botInstanceId", description = "Bot Instance") String botInstanceId,
             @ExecuteParameter(name = "taskCreationParams", description = "Array of task parameters") List<TaskCreationParam> taskCreationParams
     /**
@@ -38,7 +38,7 @@ public class CreateTasksBotExecution implements BotExecution {
      */
     ) {
 
-        List<Task> tasks = new ArrayList<>();
+        List<String> tasks = new ArrayList<>();
         // throw new BusinessException("Unimplemented method 'execute'");
         // 调用BotService.createTaskWithBots(param);
         if (taskCreationParams == null || taskCreationParams.isEmpty()) {
@@ -55,7 +55,7 @@ public class CreateTasksBotExecution implements BotExecution {
             }
             // 调用任务服务创建任务
             tasks.add(taskService.createTaskWithBots(botInstanceId, param.getName(), param.getDescription(),
-                    param.getContextPath(), param.getSequence()));
+                    param.getContextPath(), param.getSequence()).getTask().getId());
         }
         return tasks;
     }

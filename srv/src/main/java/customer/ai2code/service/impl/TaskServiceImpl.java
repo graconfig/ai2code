@@ -80,19 +80,24 @@ public class TaskServiceImpl implements TaskService {
         BotInstances PBotInstance = bot.getBotInstance();
 
         // 2. 获取上级BotType
-        BotType PBotType = PBotInstance.getType();
+        // BotType PBotType = PBotInstance.getType();
+        BotTypes PBotType = bot.getBotType();
 
         // 3. 获取TaskType
-        TaskType taskType = PBotType.getTaskType();
+        // TaskType taskType = PBotType.getTaskType();
 
         // 3.1 获取下属BotType
-        List<BotTypes> botTypes = genericCqnService.getBotTypesByTaskType(taskType.getId());
+        List<BotTypes> botTypes = genericCqnService.getBotTypesByTaskType(PBotType.getSubTaskTypeId());
 
         // 3.2 获取绝对路径
         String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, contextPath);
         // 4. 创建Task
         Tasks newTask = genericCqnService.createAndInsertSubTask(name, description, absoluteOutputContextPath,
-                sequence, botInstanceId, taskType.getId());
+                sequence, botInstanceId, PBotType.getSubTaskTypeId());
+
+        // 4.1 为SubTask创建ContextNode - description
+        contextService.upsertContextWithMainTaskId(newTask.getId(), absoluteOutputContextPath + ".description",
+                description, "text");
 
         // 5. 为每个BotType创建BotInstance
         for (BotTypes botType : botTypes) {
@@ -178,7 +183,7 @@ public class TaskServiceImpl implements TaskService {
 
     private void createBasicContextNodes(String taskId, String name, String description) {
         // 创建description节点
-        contextService.upsertContextWithMainTaskId(taskId, "description", description);
+        contextService.upsertContextWithMainTaskId(taskId, "description", description, "text");
 
     }
 }

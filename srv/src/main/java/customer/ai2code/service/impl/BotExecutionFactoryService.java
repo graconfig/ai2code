@@ -15,20 +15,27 @@ import customer.ai2code.service.execution.BotExecution;
  */
 @Service
 public class BotExecutionFactoryService {
-
-    // @Autowired
-    // private ApplicationContext applicationContext;
+    
     private final ApplicationContext applicationContext;
+    
+    // 预定义的包路径，用于搜索类
+    private static final String[] SEARCH_PACKAGES = {
+        "customer.ai2code.service.impl",
+        "customer.ai2code.service.execution.impl",
+        "customer.ai2code.bot.execution",
+        // 可以根据需要添加更多包路径
+    };
 
     public BotExecutionFactoryService(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
+
     /**
      * 创建 BotExecution 实例 - 支持构造函数注入
      */
     public BotExecution createBotExecutionInstance(String className) {
         try {
-            Class<?> clazz = Class.forName(className);
+            Class<?> clazz = resolveClass(className);
 
             // 检查是否实现了 BotExecution 接口
             if (!BotExecution.class.isAssignableFrom(clazz)) {
@@ -39,7 +46,7 @@ public class BotExecutionFactoryService {
             try {
                 if (applicationContext.getBeanNamesForType(clazz).length > 0) {
                     BotExecution instance = (BotExecution) applicationContext.getBean(clazz);
-                    System.out.println("- Retrieved BotExecution instance from Spring container: " + className);
+                    System.out.println("- Retrieved BotExecution instance from Spring container: " + clazz.getName());
                     return instance;
                 }
             } catch (Exception e) {
@@ -50,9 +57,60 @@ public class BotExecutionFactoryService {
             return createInstanceWithDependencyInjection(clazz);
 
         } catch (ClassNotFoundException e) {
-            throw new BusinessException("Implementation class not found: " + className, e);
+            throw new BusinessException("Implementation class not found: " + className + ". Searched in packages: " + String.join(", ", SEARCH_PACKAGES), e);
         } catch (Exception e) {
             throw new BusinessException("Failed to create bot execution instance: " + className, e);
+        }
+    }
+
+    /**
+     * 解析类名 - 支持简单类名和完整类名
+     */
+    private Class<?> resolveClass(String className) throws ClassNotFoundException {
+        // 1. 如果已经是完整类名，直接尝试加载
+        if (className.contains(".")) {
+            return Class.forName(className);
+        }
+
+        // 2. 如果是简单类名，在预定义的包中搜索
+        for (String packageName : SEARCH_PACKAGES) {
+            try {
+                String fullClassName = packageName + "." + className;
+                Class<?> clazz = Class.forName(fullClassName);
+                System.out.println("- Found class: " + fullClassName);
+                return clazz;
+            } catch (ClassNotFoundException e) {
+                // 继续搜索下一个包
+            }
+        }
+
+        // 3. 尝试扫描 Spring 容器中的所有 BotExecution 实现类
+        return findClassInSpringContext(className);
+    }
+
+    /**
+     * 在 Spring 容器中查找 BotExecution 实现类
+     */
+    private Class<?> findClassInSpringContext(String className) throws ClassNotFoundException {
+        try {
+            // 获取所有 BotExecution 类型的 Bean
+            String[] beanNames = applicationContext.getBeanNamesForType(BotExecution.class);
+            
+            for (String beanName : beanNames) {
+                Object bean = applicationContext.getBean(beanName);
+                Class<?> beanClass = bean.getClass();
+                
+                // 检查简单类名是否匹配
+                if (beanClass.getSimpleName().equals(className)) {
+                    System.out.println("- Found class in Spring context: " + beanClass.getName());
+                    return beanClass;
+                }
+            }
+            
+            throw new ClassNotFoundException("Class not found in Spring context: " + className);
+            
+        } catch (Exception e) {
+            throw new ClassNotFoundException("Failed to search in Spring context for: " + className, e);
         }
     }
 

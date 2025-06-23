@@ -94,6 +94,8 @@ public class FunctionCallProcessor {
     private FunctionInfo createFunctionInfo(Method method, ExecuteMethod executeMethod, BotExecutor botExecutor) {
         String functionName = executeMethod.operation().isEmpty() ? botExecutor.name() + "_" + method.getName()
                 : executeMethod.operation();
+        // 标准化函数名称，确保符合 AI 规范
+        functionName = sanitizeFunctionName(functionName);
 
         String description = botExecutor.description().isEmpty() ? "Function from " + botExecutor.name()
                 : botExecutor.description();
@@ -108,6 +110,34 @@ public class FunctionCallProcessor {
                 .targetClass(method.getDeclaringClass())
                 .logExecution(executeMethod.logExecution())
                 .build();
+    }
+
+    /**
+     * 标准化函数名称，确保符合 OpenAI 规范
+     * 只保留字母、数字、下划线、点和连字符
+     */
+    private String sanitizeFunctionName(String originalName) {
+        if (originalName == null || originalName.isEmpty()) {
+            return "unknown_function";
+        }
+
+        // 移除或替换不符合规范的字符
+        String sanitized = originalName
+                .replaceAll("[^a-zA-Z0-9_.-]", "_") // 将不符合规范的字符替换为下划线
+                .replaceAll("_{2,}", "_") // 将连续的下划线替换为单个下划线
+                .replaceAll("^_+|_+$", ""); // 移除开头和结尾的下划线
+
+        // 确保函数名不为空
+        if (sanitized.isEmpty()) {
+            sanitized = "function_" + Math.abs(originalName.hashCode());
+        }
+
+        // 确保函数名以字母开头
+        if (!sanitized.matches("^[a-zA-Z].*")) {
+            sanitized = "func_" + sanitized;
+        }
+
+        return sanitized;
     }
 
     /**

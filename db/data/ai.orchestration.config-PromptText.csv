@@ -272,7 +272,7 @@ eea80c1e-8ac6-dc15-2a2c-ed6106b013dd,8399a613-eb2f-e307-d930-920c0a5f8175,EN,Get
 ###数据源###
 这是按照层级整理好的用户需求：{{SubContext:requirement}}
 这是当前botInstanceId的值：{{Instance:ID}}
-这是当前botInstance的outputContextPath的值：{{OData:BotInstance/{{Instance:ID}}/type/outputContextPath}}
+这是当前botInstance的outputContextPath的值：{{OData:BotInstances/{{Instance:ID}}/type/outputContextPath}}
 
 ###要求###
 按照需求层级将用户需求内容分解为多个子任务，确保每个子任务只处理一个层级的需求任务，如果未检测到用户需求，则必须向用户索取。

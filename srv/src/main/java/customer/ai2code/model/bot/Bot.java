@@ -4,8 +4,10 @@ package customer.ai2code.model.bot;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import cds.gen.configservice.BotTypes;
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
+// import cds.gen.mainservice.BotType;
 import customer.ai2code.model.config.AIModel;
 
 public interface Bot {
@@ -26,6 +28,8 @@ public interface Bot {
     public String chat(String content);
 
     public BotInstances getBotInstance();
+
+    public BotTypes getBotType();
 
     public AIModel getAiModel();
 }
