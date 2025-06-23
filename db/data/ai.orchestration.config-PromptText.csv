@@ -275,7 +275,10 @@ eea80c1e-8ac6-dc15-2a2c-ed6106b013dd,8399a613-eb2f-e307-d930-920c0a5f8175,EN,Get
 这是当前botInstance的outputContextPath的值：{{OData:BotInstances/{{Instance:ID}}/type/outputContextPath}}
 
 ###要求###
-按照需求层级将用户需求内容分解为多个子任务，确保每个子任务只处理一个层级的需求任务，如果未检测到用户需求，则必须向用户索取。
+**按照需求层级将用户需求内容分解为多个子任务，确保每个子任务只处理一个层级的需求任务，如果未检测到用户需求，则必须向用户索取。
+**确保子任务数量和层级数量一致。
+**确保所有子任务都挂在taskCreationParams下，不要额外拆分。
+**执行完之后调用工具整理你的回答，不管有多少层级数据，仅调用一次，所有数据必须一次性处理完。
 
 ###输出格式###
 1.botInstanceId：###botInstanceId的值###
@@ -293,7 +296,20 @@ eea80c1e-8ac6-dc15-2a2c-ed6106b013dd,8399a613-eb2f-e307-d930-920c0a5f8175,EN,Get
                         **抬头项目：输出当前层级需要在Object Page页面中显示的字段列表。
                         **计算逻辑：输出当前层级包含计算逻辑的字段，若没有则无需输出此项。
                 --contextPath: outputContextPath的值+[层级编号],例如：当前层级为0，outputContextPath的值为SubContext:path，则contextPath的值为：SubContext:path[0]
-",,,,
+        子任务2：
+                --sequence: 和层级级别保持一致；
+                --name: SubTask+层级编号，例如：SubTask1
+                --description: 当前层级的完整需求内容，包含以下内容：
+                        **层级级别：输出当前层级编号。
+                        **数据来源：输出当前层级使用到的所有数据源视图列表。
+                        **关联关系：输出当前层级中各个视图之间的关联关系。
+                        **主键字段：输出当前层级的主键字段。
+                        **选择项目：输出当前层级的选择字段，注意只有根视图需要输出此项。
+                        **一览项目：输出当前层级所有的字段列表。
+                        **抬头项目：输出当前层级需要在Object Page页面中显示的字段列表。
+                        **计算逻辑：输出当前层级包含计算逻辑的字段，若没有则无需输出此项。
+                --contextPath: outputContextPath的值+[层级编号],例如：当前层级为1，outputContextPath的值为SubContext:path，则contextPath的值为：SubContext:path[1]
+        子任务n:每层需求对应一个子任务，以此类推。",,,,
 13e7283e-e9ce-a0dd-06e8-d082983d43f6,635d82d3-82b7-4733-560e-f8c7633838ce,EN,AddRelationship,"###角色###
 你现在是一个精通SAP RAP（ABAP RESTful Application Programming Model）编程模型的专家，你最终需要根据用户提供多组CDS，添加正确的关联关系。
 
