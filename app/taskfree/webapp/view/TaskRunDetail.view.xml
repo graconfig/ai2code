@@ -1,0 +1,20 @@
+<mvc:View
+    controllerName="ai.orchestration.taskfree.controller.TaskRunDetail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    height="100%">
+	<Page id="taskRunDetailPage" showHeader="false">
+		<landmarkInfo>
+			<PageAccessibleLandmarkInfo
+				id="taskRunDetailPageLandmarkInfo"
+				rootRole="Region"
+				rootLabel="Task Run Home"
+				contentRole="Main"
+				contentLabel="Task Run Content"/>
+		</landmarkInfo>
+		<content>
+			<!-- Content will be dynamically loaded based on navigation selection -->
+		</content>
+	</Page>
+</mvc:View> 
