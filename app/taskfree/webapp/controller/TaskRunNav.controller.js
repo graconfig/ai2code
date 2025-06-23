@@ -351,7 +351,12 @@ sap.ui.define(
 
           // Add BotInstances as child items
           if (oTask.botInstances && Array.isArray(oTask.botInstances)) {
-            oTask.botInstances.forEach(function (oBotInstance) {
+            // Sort botInstances by sequence before processing
+            var aSortedBotInstances = oTask.botInstances.slice().sort(function(a, b) {
+              return (a.sequence || 0) - (b.sequence || 0);
+            });
+            
+            aSortedBotInstances.forEach(function (oBotInstance) {
               var oBotInstanceItem = this._buildBotInstanceItem(oBotInstance);
               oTaskItem.items.push(oBotInstanceItem);
             }.bind(this));
@@ -385,7 +390,12 @@ sap.ui.define(
 
           // Add sub-tasks recursively
           if (oBotInstance.tasks && Array.isArray(oBotInstance.tasks)) {
-            oBotInstance.tasks.forEach(function (oSubTask) {
+            // Sort sub-tasks by sequence before processing
+            var aSortedSubTasks = oBotInstance.tasks.slice().sort(function(a, b) {
+              return (a.sequence || 0) - (b.sequence || 0);
+            });
+            
+            aSortedSubTasks.forEach(function (oSubTask) {
               var oSubTaskItem = this._buildTaskItemRecursively(oSubTask);
               oBotInstanceItem.items.push(oSubTaskItem);
             }.bind(this));
