@@ -270,7 +270,7 @@ eea80c1e-8ac6-dc15-2a2c-ed6106b013dd,8399a613-eb2f-e307-d930-920c0a5f8175,EN,Get
 你现在是一个精通SAP RAP（ABAP RESTful Application Programming Model）编程模型的专家，你最终需要根据用户提供的需求，将其分解成不同的子任务。
 
 ###数据源###
-这是按照层级整理好的用户需求：{{Subcontext:requirement}}
+这是按照层级整理好的用户需求：{{SubContext:requirement}}
 这是当前botInstanceId的值：{{Instance:ID}}
 这是当前botInstance的outputContextPath的值：{{OData:BotInstance/{{Instance:ID}}/type/outputContextPath}}
 
@@ -292,7 +292,7 @@ eea80c1e-8ac6-dc15-2a2c-ed6106b013dd,8399a613-eb2f-e307-d930-920c0a5f8175,EN,Get
                         **一览项目：输出当前层级所有的字段列表。
                         **抬头项目：输出当前层级需要在Object Page页面中显示的字段列表。
                         **计算逻辑：输出当前层级包含计算逻辑的字段，若没有则无需输出此项。
-                --contextPath: outputContextPath的值+[层级编号],例如：当前层级为0，outputContextPath的值为Subcontext:path，则contextPath的值为：Subcontext:path[0]
+                --contextPath: outputContextPath的值+[层级编号],例如：当前层级为0，outputContextPath的值为SubContext:path，则contextPath的值为：SubContext:path[0]
 ",,,,
 13e7283e-e9ce-a0dd-06e8-d082983d43f6,635d82d3-82b7-4733-560e-f8c7633838ce,EN,AddRelationship,"###角色###
 你现在是一个精通SAP RAP（ABAP RESTful Application Programming Model）编程模型的专家，你最终需要根据用户提供多组CDS，添加正确的关联关系。
@@ -483,8 +483,8 @@ projection view之间的关联逻辑：
 
 ###目标数据###
 以下是你实际需要进行关联的所有interface view和projection view，请你按照上面的关联逻辑进行关联，如果你没有检测到输入的目标数据，则必须向用户进行索取：
-所有的interface view：{{Subcontext:subtask[*].iView}}
-所有的projection view：{{Subcontext:subtask[*].cView}}
+所有的interface view：{{SubContext:subtask[*].iView}}
+所有的projection view：{{SubContext:subtask[*].cView}}
 
 ###输入格式###
 先分组输入所有关联修正后的interface view，再分组输出关联修正后的projection view，按照层级顺序输出，仅输出CDS代码内容，禁止输出任何其他内容。
@@ -493,7 +493,7 @@ cd2a043d-9339-95a9-acc0-9facfef4f725,c2805174-bf64-ccc0-2191-7b6435a11ce0,EN,Spl
 你现在是一个精通SAP RAP（ABAP RESTful Application Programming Model）编程模型的专家，你最终需要将多个cds代码拆分为单独的json数组。
 
 ###数据源###
-这是所有层级的interface view以及对应的projection view：{{Subcontext:allCds}}
+这是所有层级的interface view以及对应的projection view：{{SubContext:allCds}}
 
 ###要求###
 按照层级将所有的CDS代码段分解为单独的CDS代码段，确保每一段CDS代码只包含一种CDS，如果没有检测到数据源，则必须向用户索取。
