@@ -1,4 +1,4 @@
 ID,name,description,autoRun,isMain,createdAt,createdBy,modifiedAt,modifiedBy
-17f0ad88-ae6b-4114-bc4b-e8e15ae0cceb,SimpleRAPReport,Simple RAP generate Report,,X,,,,
-b492d44d-932c-1acc-7dc8-26bdde4329c2,MultipleRAPReport,Multiple RAP Report Main Task,,X,,,,
+17f0ad88-ae6b-4114-bc4b-e8e15ae0cceb,SimpleRAPReport,Simple RAP generate Report,,true,,,,
+b492d44d-932c-1acc-7dc8-26bdde4329c2,MultipleRAPReport,Multiple RAP Report Main Task,,true,,,,
 b105869c-26ef-8ec6-584c-e71578454418,MultipleReportSubtask,Multiple Report Subtask,,,,,,

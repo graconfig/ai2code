@@ -272,7 +272,11 @@ public class BotServiceImpl implements BotService {
 
     private String extractIdFromContext(BotInstancesExecuteContext context) {
         // 从CQN查询中提取ID，需要解析CqnSelect
-        return context.getCqn().ref().segments().get(0).id();
+        // return context.getCqn().ref().segments().get(0).id();
+        CqnAnalyzer cqnAnalyzer = CqnAnalyzer.create(context.getModel());
+        AnalysisResult result = cqnAnalyzer.analyze(context.getCqn().ref());
+        // return result.rootKeys().get("ID").toString();
+        return result.targetKeys().get("ID").toString();
     }
 
     @Override
@@ -319,8 +323,9 @@ public class BotServiceImpl implements BotService {
         // String taskId = genericCqnService.getTaskIdByBotInstanceId(botInstanceId);
         // String taskId = genericCqnService.getMainTaskId(botInstanceId);
         // if (taskId == null) {
-        //     updateBotInstanceStatus(bot, "FAILED");
-        //     throw new BusinessException("No taskId associated with botInstance: " + botInstanceId);
+        // updateBotInstanceStatus(bot, "FAILED");
+        // throw new BusinessException("No taskId associated with botInstance: " +
+        // botInstanceId);
         // }
 
         // 5. 获取绝对的 outputContextPath

@@ -28,3 +28,6 @@ hs_err*
 
 .idea
 .reloadtrigger
+
+# added by cds
+.cdsrc-private.json
