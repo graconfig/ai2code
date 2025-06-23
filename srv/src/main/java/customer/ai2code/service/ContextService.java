@@ -20,9 +20,11 @@ public interface ContextService {
     /**
      * 创建或更新上下文节点
      */
-    public ContextNodes upsertContext(String botInstanceId, String contextPath, String contextValue);
+    public ContextNodes upsertContext(String botInstanceId, String contextPath, String contextValue,
+            String contextType);
 
-    public ContextNodes upsertContextWithMainTaskId(String mainTaskId, String contextPath, String contextValue);
+    public ContextNodes upsertContextWithMainTaskId(String mainTaskId, String contextPath, String contextValue,
+            String contextType);
 
     /**
      * 获取上下文节点
@@ -32,7 +34,8 @@ public interface ContextService {
     /**
      * 批量更新/创建上下文节点
      */
-    public List<ContextNodes> upsertContextBatch(String botInstanceId, Map<String, String> contextPathValueMap);
+    public List<ContextNodes> upsertContextBatch(String botInstanceId, Map<String, String> contextPathValueMap,
+            String contextType);
 
     /**
      * 根据路径模式查询上下文节点（支持数组语法）
