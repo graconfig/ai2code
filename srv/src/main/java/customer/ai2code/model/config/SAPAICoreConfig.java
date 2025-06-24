@@ -19,7 +19,7 @@ import java.util.Map;
 public class SAPAICoreConfig implements AIServiceConfig {
     
     @JsonProperty("serviceurls")
-    @Nullable
+    @Nonnull
     private ServiceUrls serviceUrls;
     
     @JsonProperty("appname")
@@ -27,11 +27,11 @@ public class SAPAICoreConfig implements AIServiceConfig {
     private String appName;
     
     @JsonProperty("clientid")
-    @Nullable
+    @Nonnull
     private String clientId;
     
     @JsonProperty("clientsecret")
-    @Nullable
+    @Nonnull
     private String clientSecret;
     
     @JsonProperty("identityzone")
@@ -43,7 +43,7 @@ public class SAPAICoreConfig implements AIServiceConfig {
     private String identityZoneId;
     
     @JsonProperty("url")
-    @Nullable
+    @Nonnull
     private String url;
     
     @JsonProperty("credential-type")

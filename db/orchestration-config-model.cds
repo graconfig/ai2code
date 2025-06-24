@@ -37,7 +37,7 @@ entity BotType : cuid, managed {
   ragTopK             : Integer;
   implementationClass : String(100); // For C and F types
   //subTaskContextPath: String(1000); // Must include array, e.g., datasource.children[-1].content
-  //subTaskType       : Association to TaskType;
+  subTaskType       : Association to TaskType;
 }
 
 /** AI model configuration */

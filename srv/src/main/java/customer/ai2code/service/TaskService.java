@@ -1,7 +1,7 @@
 package customer.ai2code.service;
 
 import cds.gen.mainservice.CreateTaskWithBotsContext;
-import customer.ai2code.model.Task;
+import customer.ai2code.model.task.Task;
 
 public interface TaskService {
 

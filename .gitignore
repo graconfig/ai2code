@@ -26,6 +26,8 @@ hs_err*
 *.tgz
 *.iml
 
-.vscode
 .idea
 .reloadtrigger
+
+# added by cds
+.cdsrc-private.json

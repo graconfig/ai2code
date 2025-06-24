@@ -6,9 +6,9 @@ import cds.gen.mainservice.BotType;
 import cds.gen.mainservice.CreateTaskWithBotsContext;
 import cds.gen.mainservice.TaskType;
 import cds.gen.configservice.BotTypes;
-import customer.ai2code.model.Bot;
-import customer.ai2code.model.GenericTask;
-import customer.ai2code.model.Task;
+import customer.ai2code.model.bot.Bot;
+import customer.ai2code.model.task.GenericTask;
+import customer.ai2code.model.task.Task;
 import customer.ai2code.model.tree.TaskBotNode;
 import customer.ai2code.service.BotService;
 import customer.ai2code.service.TaskService;
@@ -16,9 +16,9 @@ import customer.ai2code.service.ContextService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @Service
 public class TaskServiceImpl implements TaskService {
-
 
     private final BotService botService;
     private final GenericCqnService genericCqnService;
@@ -65,7 +65,6 @@ public class TaskServiceImpl implements TaskService {
         // 6. 放入缓存 - 使用新的缓存管理器
         cacheManager.addTaskNode(task, null);
 
-        
         // 7. 返回新建的Task对象
         return task;
     }
@@ -81,17 +80,24 @@ public class TaskServiceImpl implements TaskService {
         BotInstances PBotInstance = bot.getBotInstance();
 
         // 2. 获取上级BotType
-        BotType PBotType = PBotInstance.getType();
+        // BotType PBotType = PBotInstance.getType();
+        BotTypes PBotType = bot.getBotType();
 
         // 3. 获取TaskType
-        TaskType taskType = PBotType.getTaskType();
+        // TaskType taskType = PBotType.getTaskType();
 
         // 3.1 获取下属BotType
-        List<BotTypes> botTypes = genericCqnService.getBotTypesByTaskType(taskType.getId());
+        List<BotTypes> botTypes = genericCqnService.getBotTypesByTaskType(PBotType.getSubTaskTypeId());
 
+        // 3.2 获取绝对路径
+        String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, contextPath);
         // 4. 创建Task
-        Tasks newTask = genericCqnService.createAndInsertSubTask(name, description, contextPath, 
-                                                                sequence, botInstanceId, taskType.getId());
+        Tasks newTask = genericCqnService.createAndInsertSubTask(name, description, absoluteOutputContextPath,
+                sequence, botInstanceId, PBotType.getSubTaskTypeId());
+
+        // 4.1 为SubTask创建ContextNode - description
+        contextService.upsertContextWithMainTaskId(newTask.getId(), absoluteOutputContextPath + ".description",
+                description, "text");
 
         // 5. 为每个BotType创建BotInstance
         for (BotTypes botType : botTypes) {
@@ -103,7 +109,6 @@ public class TaskServiceImpl implements TaskService {
 
         // 7. 放入缓存 - 使用新的缓存管理器
         cacheManager.addTaskNode(task, botInstanceId);
-
 
         // 8.返回新建的Task对象
         return task;
@@ -150,15 +155,12 @@ public class TaskServiceImpl implements TaskService {
             return cachedTask;
         }
 
-
-
         // 从数据库查询
         Tasks taskCDS = genericCqnService.getTaskById(taskId);
         Task task = new GenericTask(taskCDS);
 
         // 放入缓存 - 使用新的缓存管理器
         cacheManager.addTaskNode(task, taskCDS.getBotInstanceId());
-
 
         return task;
     }
@@ -181,8 +183,7 @@ public class TaskServiceImpl implements TaskService {
 
     private void createBasicContextNodes(String taskId, String name, String description) {
         // 创建description节点
-        contextService.upsertContext(taskId, "description", description);
-        
-    
+        contextService.upsertContextWithMainTaskId(taskId, "description", description, "text");
+
     }
 }

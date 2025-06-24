@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import customer.ai2code.service.model.adapter.SAPClaudeAIResponseAdapter;
-import customer.ai2code.service.model.AIResponse;
 import customer.ai2code.exception.BusinessException;
-import customer.ai2code.service.SAPAICore.claude.generated.model.InvokeResponse;
-import customer.ai2code.service.SAPAICore.claude.generated.model.ConverseResponse;
+import customer.ai2code.model.ai.response.AIResponse;
+import customer.ai2code.model.ai.response.adapter.SAPClaudeAIResponseAdapter;
+import customer.ai2code.model.aicore.claude.ConverseResponse;
+import customer.ai2code.model.aicore.claude.InvokeResponse;
 
 @Component
 public class SAPClaudeAIResponseHandler implements AIResponseHandler {

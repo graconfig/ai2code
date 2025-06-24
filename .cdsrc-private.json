@@ -1,0 +1,20 @@
+{
+  "requires": {
+    "[hybrid]": {
+      "db": {
+        "binding": {
+          "type": "cf",
+          "apiEndpoint": "https://api.cf.jp10.hana.ondemand.com",
+          "org": "PwC Consulting LLC_genai-japan-aws-7ht03ppo",
+          "space": "CLC",
+          "instance": "ai2code-db",
+          "key": "ai2code-db-key"
+        },
+        "kind": "hana-cloud",
+        "vcap": {
+          "name": "db"
+        }
+      }
+    }
+  }
+}
