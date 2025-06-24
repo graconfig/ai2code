@@ -49,7 +49,7 @@ class FunctionCallExecutionTest {
         System.out.println("=== Testing executeFunctionCallOnInstance - Success Case ===");
 
         // Given - 准备测试数据
-        String functionName = "Create Tasks Bot Execution_execute";
+        String functionName = "Create_Tasks_Bot_Execution_execute";
         String argumentsJson = """
                 {
                     "botInstanceId": "test-bot-123",
@@ -137,7 +137,7 @@ class FunctionCallExecutionTest {
         System.out.println("=== Testing executeFunctionCallOnInstance - Null BotInstanceId ===");
 
         // Given - botInstanceId 为 null
-        String functionName = "Create Tasks Bot Execution_execute";
+        String functionName = "Create_Tasks_Bot_Execution_execute";
         String argumentsJson = """
                 {
                     "botInstanceId": null,
@@ -180,7 +180,7 @@ class FunctionCallExecutionTest {
         System.out.println("=== Testing executeFunctionCallOnInstance - Empty Task List ===");
 
         // Given - 空的任务列表（应该抛出异常）
-        String functionName = "Create Tasks Bot Execution_execute";
+        String functionName = "Create_Tasks_Bot_Execution_execute";
         String argumentsJson = """
                 {
                     "botInstanceId": "test-bot-123",
@@ -221,7 +221,7 @@ class FunctionCallExecutionTest {
         System.out.println("=== Testing executeFunctionCallOnInstance - Invalid JSON ===");
 
         // Given - 无效的 JSON
-        String functionName = "Create Tasks Bot Execution_execute";
+        String functionName = "Create_Tasks_Bot_Execution_execute";
         String invalidJson = """
                 {
                     "botInstanceId": "test",
@@ -264,7 +264,7 @@ class FunctionCallExecutionTest {
         System.out.println("=== Testing executeFunctionCallOnInstance - TaskService Exception ===");
 
         // Given
-        String functionName = "Create Tasks Bot Execution_execute";
+        String functionName = "Create_Tasks_Bot_Execution_execute";
         String argumentsJson = """
                 {
                     "botInstanceId": "test-bot-123",
@@ -318,7 +318,7 @@ class FunctionCallExecutionTest {
         System.out.println("=== Testing executeFunctionCallOnInstance - Complex Parameter Types ===");
 
         // Given - 包含复杂嵌套数据的参数
-        String functionName = "Create Tasks Bot Execution_execute";
+        String functionName = "Create_Tasks_Bot_Execution_execute";
         String argumentsJson = """
                 {
                     "botInstanceId": "complex-bot-456",
@@ -394,7 +394,7 @@ class FunctionCallExecutionTest {
         System.out.println("=== Testing executeFunctionCallOnInstance - Logging Enabled ===");
 
         // Given
-        String functionName = "Create Tasks Bot Execution_execute";
+        String functionName = "Create_Tasks_Bot_Execution_execute";
         String argumentsJson = """
                 {
                     "botInstanceId": "logging-test-bot",
@@ -446,7 +446,7 @@ class FunctionCallExecutionTest {
         System.out.println("=== Testing executeFunctionCallOnInstance - Parameter Type Conversion ===");
 
         // Given - 测试不同数据类型的转换
-        String functionName = "Create Tasks Bot Execution_execute";
+        String functionName = "Create_Tasks_Bot_Execution_execute";
         String argumentsJson = """
                 {
                     "botInstanceId": "type-conversion-bot",
@@ -500,7 +500,7 @@ class FunctionCallExecutionTest {
         System.out.println("=== Testing executeFunctionCallOnInstance - Performance ===");
 
         // Given - 大量任务创建
-        String functionName = "Create Tasks Bot Execution_execute";
+        String functionName = "Create_Tasks_Bot_Execution_execute";
         StringBuilder jsonBuilder = new StringBuilder();
         jsonBuilder.append("{\n");
         jsonBuilder.append("  \"botInstanceId\": \"performance-test-bot\",\n");

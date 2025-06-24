@@ -1554,7 +1554,7 @@ Function Call 功能基于注解驱动的架构设计，支持 AI 模型调用 J
 **@ExecuteMethod**: 方法级注解，标识可被 AI 调用的方法
 ```java
 @ExecuteMethod(
-    operation = "Create Tasks Bot Execution_execute",
+    operation = "Create_Tasks_Bot_Execution_execute",
     description = "Create multiple tasks",
     logExecution = true
 )
@@ -1602,7 +1602,7 @@ private Object convertArgumentToParameterType(Object argumentValue, Parameter pa
 **示例输出**:
 ```json
 {
-  "name": "Create Tasks Bot Execution_execute",
+  "name": "Create_Tasks_Bot_Execution_execute",
   "description": "Create multiple tasks based on provided parameters",
   "parameters": {
     "type": "object",
@@ -1713,7 +1713,7 @@ public class CreateTasksBotExecution implements BotExecution {
     }
 
     @ExecuteMethod(
-        operation = "Create Tasks Bot Execution_execute",
+        operation = "Create_Tasks_Bot_Execution_execute",
         description = "Create multiple tasks based on provided parameters",
         logExecution = true
     )
