@@ -5,6 +5,9 @@ Content-Type: application/json
 {
   "content": "Test chatCompletion action"
 }
+###BotExecutionClass查询测试
+GET http://localhost:8080/odata/v4/ConfigService/BotExecutionClass?$filter=contains(Description, 'Bot') 
+Accept:application/json
 
 ###
 GET http://localhost:8080/odata/v4/MainService/Tasks
