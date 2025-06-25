@@ -33,7 +33,7 @@ sap.ui.define(
               
               // Clear previous binding context to force refresh
               this.getView().setBindingContext(null);
-              
+              this.getView().setBusy(true);
               // Force immediate loading with slight delay to prevent request collision
               setTimeout(() => {
                 this._loadBotInstanceDetail(sBotInstanceId);
@@ -91,6 +91,7 @@ sap.ui.define(
           });
           
           oBinding.requestObject().catch(function(oError) {
+            that.getView().setBusy(false);
             MessageToast.show("Failed to load Bot Instance data: " + (oError.message || oError.toString()));
           });
         },

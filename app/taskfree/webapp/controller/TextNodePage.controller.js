@@ -31,7 +31,6 @@ sap.ui.define([
             if (oViewModel) {
                 oViewModel.setProperty("/htmlValue", "");
                 oViewModel.setProperty("/value", "");
-                oViewModel.setProperty("/type", "");
             }
 
         
@@ -40,8 +39,6 @@ sap.ui.define([
                 MessageToast.show("No context node id provided");
                 oViewModel.setProperty("/value", "");
                 oViewModel.setProperty("/title", "Text Node");
-                oViewModel.setProperty("/type", "");
-                this._setMarkdownContent("");
                 return;
             }
 
@@ -50,20 +47,13 @@ sap.ui.define([
             // 如果 contextNodeId 是字符串主键，需要加引号
             var sPath = "/ContextNodes(" + contextNodeId + ")";
             oModel.bindContext(sPath).requestObject().then(function (oData) {
-                oViewModel.setProperty("/type", oData.type);
                 oViewModel.setProperty("/value", oData.value);
                 oViewModel.setProperty("/title", oData.title);
-                if (oData.type === "markdown") {
-                    oController._setMarkdownContent(oData.value);
-                } else {
-                    oController._setMarkdownContent(""); // 清空
-                }
+
 
             }).catch(function () {
                 oViewModel.setProperty("/value", "加载失败");
                 oViewModel.setProperty("/title", "Text Node");
-                oViewModel.setProperty("/type", "");
-                oController._setMarkdownContent(""); // 清空
                 MessageToast.show("加载失败");
             });
         },

@@ -7,7 +7,6 @@
     <content>
       <c:HTML
         id="markdownContent"
-        visible="{= ${viewModel>/type} === 'markdown'}"
         content="{viewModel>/htmlValue}"/>
     </content>
   </Page>
