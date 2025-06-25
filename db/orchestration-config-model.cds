@@ -101,3 +101,15 @@ entity ContextType : CodeList {
       //image   = 'IMAGE';     // Image (base64 or URL)
       };
 }
+/** Bot Execution interface impl class */
+@cds.persistence.skip
+entity BotExecutionClass {
+    key Name: String;
+    Description : String;
+}
+/** RAG Extractor interface impl class */
+@cds.persistence.skip
+entity RAGExtractorClass {
+    key Name: String;
+    Description : String;
+}
