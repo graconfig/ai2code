@@ -35,6 +35,7 @@ entity BotType : cuid, managed {
   ragClass            : String(100); // Replaces ragFunction
   ragSource           : String(100);
   ragTopK             : Integer;
+  ragThreshold        : String;
   implementationClass : String(100); // For C and F types
   //subTaskContextPath: String(1000); // Must include array, e.g., datasource.children[-1].content
   subTaskType       : Association to TaskType;
