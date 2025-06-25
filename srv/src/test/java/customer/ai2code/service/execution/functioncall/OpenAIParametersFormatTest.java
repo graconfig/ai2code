@@ -68,7 +68,7 @@ class OpenAIParametersFormatTest {
             System.out.println(prettyJson);
             
             // Validate the JSON structure matches OpenAI requirements
-            assertTrue(prettyJson.contains("\"name\" : \"Create Tasks Bot Execution_execute\""));
+            assertTrue(prettyJson.contains("\"name\" : \"Create_Tasks_Bot_Execution_execute\""));
             assertTrue(prettyJson.contains("\"description\""));
             assertTrue(prettyJson.contains("\"parameters\""));
             assertTrue(prettyJson.contains("\"type\" : \"object\""));
@@ -107,7 +107,7 @@ class OpenAIParametersFormatTest {
         Map<String, Object> function = openAIFunctions.get(0);
         
         // Validate top-level structure
-        assertEquals("Create Tasks Bot Execution_execute", function.get("name"));
+        assertEquals("Create_Tasks_Bot_Execution_execute", function.get("name"));
         assertEquals("Implementation for creating tasks in the bot execution framework", function.get("description"));
         assertTrue(function.containsKey("parameters"));
         

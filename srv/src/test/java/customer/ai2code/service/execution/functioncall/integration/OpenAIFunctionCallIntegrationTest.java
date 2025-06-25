@@ -66,7 +66,7 @@ public class OpenAIFunctionCallIntegrationTest {
         Map<String, Object> function = openAIFunctions.get(0);
         
         // Verification of basic structure
-        assertEquals("Create Tasks Bot Execution_execute", function.get("name"));
+        assertEquals("Create_Tasks_Bot_Execution_execute", function.get("name"));
         assertEquals("Implementation for creating tasks in the bot execution framework", 
                     function.get("description"));
         
@@ -154,7 +154,7 @@ public class OpenAIFunctionCallIntegrationTest {
     //     System.out.println("=== Simulated Function Call Execution Test ===");
         
     //     // Simulate OpenAI function call response
-    //     String functionName = "Create Tasks Bot Execution_execute";
+    //     String functionName = "Create_Tasks_Bot_Execution_execute";
     //     Map<String, Object> arguments = new HashMap<>();
     //     arguments.put("botInstanceId", "test-bot-123");
         
