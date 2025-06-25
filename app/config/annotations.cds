@@ -256,6 +256,51 @@ annotate service.BotTypes with @(
 );
 
 annotate service.BotTypes with {
+    implementationClass @(
+        Common.Text                    : implementationClass,
+        Common.ValueList               : {
+            $Type         : 'Common.ValueListType',
+            CollectionPath: 'BotExecutionClass',
+            Parameters    : [
+                {
+                    $Type            : 'Common.ValueListParameterInOut',
+                    LocalDataProperty: implementationClass,
+                    ValueListProperty: 'Name',
+                },
+                {
+                    $Type            : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty: 'Description',
+                },
+            ],
+        },
+        Common.ValueListWithFixedValues: false,
+    )
+};
+
+annotate service.BotTypes with {
+    ragClass @(
+        Common.Text                    : ragClass,
+        Common.ValueList               : {
+            $Type         : 'Common.ValueListType',
+            CollectionPath: 'RAGExtractorClass',
+            Parameters    : [
+                {
+                    $Type            : 'Common.ValueListParameterInOut',
+                    LocalDataProperty: ragClass,
+                    ValueListProperty: 'Name',
+                },
+                {
+                    $Type            : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty: 'Description',
+                },
+            ],
+        },
+        Common.ValueListWithFixedValues: false,
+    )
+};
+
+
+annotate service.BotTypes with {
     functionType @(
         Common.Text                    : functionType.descr,
         Common.ValueList               : {
