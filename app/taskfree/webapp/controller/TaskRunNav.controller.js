@@ -367,8 +367,8 @@ sap.ui.define(
 
         _buildBotInstanceItem: function (oBotInstance) {
           var icon = "";
-
-          if( oBotInstance.type.name && oBotInstance.type.name.startsWith("Chat"))
+          var functionType_code = oBotInstance.type && oBotInstance.type.functionType_code ;
+          if( functionType_code && functionType_code === "A")
           {
              icon = "sap-icon://SAP-icons-TNT/robot";
           }else{
@@ -528,7 +528,8 @@ sap.ui.define(
 
                 // Check if this is a Chat BotInstance
                 var sBotTypeName = oItemData.data.type && oItemData.data.type.name;
-                if (sBotTypeName && sBotTypeName.startsWith("Chat")) {
+                var functionType_code = oItemData.data.type && oItemData.data.type.functionType_code;
+                if (functionType_code && functionType_code === "A") {
                   // Navigate to AI Conversation page
                   oRouter.navTo("RouteAIConversation", {
                     taskRunId: that._getCurrentTaskRunId(),
