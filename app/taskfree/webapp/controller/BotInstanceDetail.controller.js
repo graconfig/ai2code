@@ -119,9 +119,6 @@ sap.ui.define(
           // Same functionality as onBotInstancePress
           this.onBotInstancePress();
         },
-
-
-
         onBotInstancePress: function (oEvent) {
           if (!this.oContext) {
             MessageToast.show("No bot instance data available");
@@ -255,6 +252,39 @@ sap.ui.define(
           // sap.ui.getCore().getEventBus().publish("DataUpdate", "TaskChanged");
           
           MessageToast.show("Execute functionality not yet implemented");
+        },
+
+        onExecuteButtonPress: function(oEvent) {
+          oEvent.getSource().setBusy(true);
+          var context = oEvent.getSource().getBindingContext();
+          
+          if (!context) {
+            MessageToast.show("No message context available");
+            oEvent.getSource().setBusy(false);
+            return;
+          }
+
+          var contextBinding = this.getView().getModel().bindContext("MainService.execute(...)", context);
+          var that = this;
+
+          contextBinding.invoke().then(function(result) {
+            MessageToast.show("Message execute successfully");
+            
+            // Notify navigation controller that ContextNode data has changed
+            sap.ui.getCore().getEventBus().publish("DataUpdate", "ContextNodeChanged");
+            
+            var oBotInstanceContext = that.getView().getBindingContext();
+            if (oBotInstanceContext) {
+              oBotInstanceContext.refresh();
+            }
+            
+          }).catch(function(error) {
+            MessageToast.show("Error executing message: " + (error.message || error.toString()));
+            
+          }).finally(function() {
+            oEvent.getSource().setBusy(false);
+          });
+
         }
       }
     );

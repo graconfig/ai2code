@@ -15,6 +15,7 @@
 		</landmarkInfo>
 		<headerContent>
 			<Button id="aiChatButton" text="AI Chat" icon="sap-icon://da-2" press="onAIChatPress" visible="false"/>
+			<Button id="executeButton" text="execute" icon="sap-icon://message-success" press="onExecuteButtonPress" />
 		</headerContent>
 		<content>
 			<ObjectHeader

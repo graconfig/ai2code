@@ -105,12 +105,6 @@ sap.ui.define(
 
         onRouteChange: function (oEvent) {
           
-          // Initialize navigation model
-          this._initNavigationModel();
-
-          //set the nav level to 1
-          this.byId("idItemsNavigationTree").expandToLevel(1);
-
           var sRouteName = oEvent.getParameter('name');
           var oArguments = oEvent.getParameter('arguments');
 
@@ -126,6 +120,12 @@ sap.ui.define(
           // Handle RouteTaskRunNav navigation from TaskRunList
           if (sRouteName === "RouteTaskRunNav" && oArguments && oArguments.taskRunId) {
             var sTaskId = oArguments.taskRunId;
+
+            // Initialize navigation model
+            this._initNavigationModel();
+
+            //set the nav level to 1
+            this.byId("idItemsNavigationTree").expandToLevel(1);
 
             // Check if we need to load data for a new task
             if (!this._dataCache.currentTask || this._dataCache.currentTask.ID !== sTaskId) {
