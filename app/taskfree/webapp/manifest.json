@@ -130,17 +130,17 @@
         },
         {
           "name": "RouteTextNodePage",
-          "pattern": "TextNode/text/{contextNodeId}",
+          "pattern": "ContextNodeDetail/string({contextNodeId})",
           "target": ["TargetTaskRunNav", "TargetTextNodePage"]
         },
         {
           "name": "RouteTextAreaNodePage",
-          "pattern": "TextNode/code/{contextNodeId}",
+          "pattern": "ContextNodeDetail/code({contextNodeId})",
           "target": ["TargetTaskRunNav", "TargetTextAreaNodePage"]
         },
         {
           "name": "RouteMarkDownNodePage",
-          "pattern": "TextNode/markdown/{contextNodeId}",
+          "pattern": "ContextNodeDetail/markdown({contextNodeId})",
           "target": ["TargetTaskRunNav", "TargetMarkDownNodePage"]
         }
         ],

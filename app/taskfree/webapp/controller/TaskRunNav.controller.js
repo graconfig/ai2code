@@ -563,11 +563,11 @@ sap.ui.define(
               var sContextNodeId = oItemData.data.ID;
               var sNodeType = oItemData.data.type;
               if (sContextNodeId) {
-                if (sNodeType === "text" ){
+                if (sNodeType === "string" ){
                    oRouter.navTo("RouteTextNodePage", { contextNodeId: sContextNodeId });
                 }else if(sNodeType === "markdown"){
                    oRouter.navTo("RouteMarkDownNodePage", { contextNodeId: sContextNodeId });
-                } else if( sNodeType === "codeEditor") {
+                } else if( sNodeType === "code" || sNodeType === "json" ) {
                   oRouter.navTo("RouteTextAreaNodePage", { contextNodeId: sContextNodeId });
                 } else {
                   // 默认跳转
