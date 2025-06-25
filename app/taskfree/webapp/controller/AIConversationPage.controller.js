@@ -62,6 +62,7 @@ sap.ui.define(
           });
           
           oBinding.attachDataReceived(function() {
+            that.getView().setBusy(false);
             var oBoundContext = oBinding.getBoundContext();
             if (oBoundContext) {
               var oData = oBoundContext.getObject();
