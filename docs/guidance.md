@@ -1554,7 +1554,7 @@ Function Call 功能基于注解驱动的架构设计，支持 AI 模型调用 J
 **@ExecuteMethod**: 方法级注解，标识可被 AI 调用的方法
 ```java
 @ExecuteMethod(
-    operation = "Create Tasks Bot Execution_execute",
+    operation = "Create_Tasks_Bot_Execution_execute",
     description = "Create multiple tasks",
     logExecution = true
 )
@@ -1602,7 +1602,7 @@ private Object convertArgumentToParameterType(Object argumentValue, Parameter pa
 **示例输出**:
 ```json
 {
-  "name": "Create Tasks Bot Execution_execute",
+  "name": "Create_Tasks_Bot_Execution_execute",
   "description": "Create multiple tasks based on provided parameters",
   "parameters": {
     "type": "object",
@@ -1713,7 +1713,7 @@ public class CreateTasksBotExecution implements BotExecution {
     }
 
     @ExecuteMethod(
-        operation = "Create Tasks Bot Execution_execute",
+        operation = "Create_Tasks_Bot_Execution_execute",
         description = "Create multiple tasks based on provided parameters",
         logExecution = true
     )
@@ -1975,12 +1975,40 @@ DELETE /ContextNodes('<id>')
 - 不需要 SubTask，结构更简洁、性能优、易维护。
 
 ---
-4️⃣ Prompt/AI 脚本 context 引用变量
+# Prompt/AI 脚本 context 引用变量
+## Prompt中引用格式
+以{{}}包围表达式的形式引用变量。
+## ContextNode型引用变量
 为方便灵活引用 context 数据，在 Prompt、代码模板、AI 推理中统一采用以下变量前缀：
 暂时无法在飞书文档外展示此内容
 - Context:path：绝对路径引用 Task context 中任意节点
 - SubContext:path：相对路径引用当前任务 context 节点下的内容（平台自动补全为绝对 path）
 平台在解析时自动将 SubContext:x 替换为 Task.contextPath + '.' + x，Context:x 保持绝对路径
+
+## 引用实例变量
+引用当前实例的属性，支持BotInstances和Tasks两张表的引用，仅允许BotInstances和Tasks两个实例表。用法：
+
+Instance前缀后跟上属性名称，属性名称来源是CDS Entity属性，区分大小写。
+- Instance:ID
+- Instance:result
+- Instance:type
+
+解析方式：
+1. 判断当前的实例是Bot还是Task。
+2. 通过cds.gen目录自动生成的CDS Entity Java POJO类，解析到对应的getter方法
+3. 通过cds model reflection类解析。
+
+## 引用OData Read/Query作为变量
+支持在Prompt中直接使用OData Read/Query查询的方式将想要的值引用进来。用法：
+
+OData:/BotInstances/b631b9de-24ba-439c-afb3-f6a8002ddc9c/type/outputContextPath
+
+## 混合引用
+支持在引用表达式中嵌入引用表达式。用法:
+嵌入表达式需要使用{{}}符号包括，用以区别。
+示例：
+
+{{OData:/BotInstances/{{Instance:ID}}/type/outputContextPath}}
 
 ---
 5️⃣ 常见场景示例

@@ -24,6 +24,6 @@ public class MainServiceBotInstancesExecuteHandler implements EventHandler {
   public void handleExecute(BotInstancesExecuteContext context) {
     // Your code goes here
     // context.setCompleted();
-    botService.execute(context);
+    context.setResult(botService.execute(context));
   }
 }

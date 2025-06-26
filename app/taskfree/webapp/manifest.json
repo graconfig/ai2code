@@ -1,0 +1,232 @@
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "ai.orchestration.taskfree",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.12.5",
+      "toolsId": "9fd18d17-0ade-4703-820c-8aaa435064e6"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/odata/v4/MainService/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.136.1",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.tnt": {},
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.comp": {},
+        "sap.ui.generic.app": {},
+        "sap.ui.table": {},
+        "sap.ushell": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "ai.orchestration.taskfree.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "ai.orchestration.taskfree.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        {
+          "name": "RouteTaskRunList",
+          "pattern": "",
+          "target": "TargetTaskRunList"
+        },
+                {
+          "name": "RouteTaskRunNav",
+          "pattern": "Tasks({taskRunId})",
+          "target": ["TargetTaskRunNav", "TargetTaskRunDetail"]
+        },
+        {
+          "name": "RouteTaskDetail",
+          "pattern": "TaskDetail({taskId})",
+          "target": ["TargetTaskRunNav", "TargetTaskDetail"]
+        },
+        {
+          "name": "RouteBotInstanceDetail",
+          "pattern": "BotInstanceDetail({botInstanceId})",
+          "target": ["TargetTaskRunNav", "TargetBotInstanceDetail"]
+        },
+        {
+          "name": "RouteContextNodeDetail",
+          "pattern": "ContextNodeDetail({contextNodeId})",
+          "target": ["TargetTaskRunNav", "TargetContextNodeDetail"]
+        },
+        {
+          "name": "RouteAIConversation",
+          "pattern": "Tasks({taskRunId})/aiConversation({botInstanceId})",
+          "target": ["TargetTaskRunNav", "TargetAIConversation"]
+        },
+        {
+          "name": "RouteTextNodePage",
+          "pattern": "TextNode/text/{contextNodeId}",
+          "target": ["TargetTaskRunNav", "TargetTextNodePage"]
+        },
+        {
+          "name": "RouteTextAreaNodePage",
+          "pattern": "TextNode/code/{contextNodeId}",
+          "target": ["TargetTaskRunNav", "TargetTextAreaNodePage"]
+        },
+        {
+          "name": "RouteMarkDownNodePage",
+          "pattern": "TextNode/markdown/{contextNodeId}",
+          "target": ["TargetTaskRunNav", "TargetMarkDownNodePage"]
+        }
+        ],
+      "targets": {
+        "TargetTaskRunList": {
+          "viewType": "XML",
+          "clearControlAggregation": false,
+          "viewId": "TaskRunList",
+          "viewName": "TaskRunList"
+        },
+        "TargetTaskRunNav": {
+          "viewType": "XML",
+          "clearControlAggregation": false,
+          "viewId": "TaskRunNav",
+          "viewName": "TaskRunNav"
+        },
+        "TargetTaskRunDetail": {
+          "viewType": "XML",
+          "clearControlAggregation": false,
+          "viewId": "TaskRunDetail",
+          "viewName": "TaskRunDetail",
+          "controlId": "navMainContents",
+          "parent": "TargetTaskRunNav"
+        },
+        "TargetTaskDetail": {
+          "viewType": "XML",
+          "clearControlAggregation": false,
+          "viewId": "TaskDetail",
+          "viewName": "TaskDetail",
+          "controlId": "navMainContents",
+          "parent": "TargetTaskRunNav"
+        },
+        "TargetBotInstanceDetail": {
+          "viewType": "XML",
+          "clearControlAggregation": false,
+          "viewId": "BotInstanceDetail",
+          "viewName": "BotInstanceDetail",
+          "controlId": "navMainContents",
+          "parent": "TargetTaskRunNav"
+        },
+        "TargetContextNodeDetail": {
+          "viewType": "XML",
+          "clearControlAggregation": false,
+          "viewId": "ContextNodeDetail",
+          "viewName": "ContextNodeDetail",
+          "controlId": "navMainContents",
+          "parent": "TargetTaskRunNav"
+        },
+        "TargetAIConversation": {
+          "viewType": "XML",
+          "clearControlAggregation": false,
+          "viewId": "AIConversationPage",
+          "viewName": "AIConversationPage",
+          "controlId": "navMainContents",
+          "parent": "TargetTaskRunNav"
+        },
+        "TargetTextNodePage": {
+          "viewType": "XML",
+          "viewId": "TextNodePage",
+          "viewName": "TextNodePage",
+          "controlId": "navMainContents",
+          "parent": "TargetTaskRunNav",
+          "clearControlAggregation": true
+        },
+        "TargetTextAreaNodePage": {
+          "viewType": "XML",
+          "viewId": "TextAreaNodePage",
+          "viewName": "TextAreaNodePage",
+          "controlId": "navMainContents",
+          "parent": "TargetTaskRunNav",
+          "clearControlAggregation": true
+        },"TargetMarkDownNodePage": {
+          "viewType": "XML",
+          "viewId": "MarkDownNodePage",
+          "viewName": "MarkDownNodePage",
+          "controlId": "navMainContents",
+          "parent": "TargetTaskRunNav",
+          "clearControlAggregation": true
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "ai.orchestration.taskfree.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    }
+  }
+}

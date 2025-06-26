@@ -19,10 +19,10 @@ flowchart TD
     H --> K[AIModel.execute + 代码生成]
     
     I --> L[设置执行结果]
-    J --> L
-    K --> L
+    J --> L[设置执行结果]
+    K --> L[设置执行结果]
 
-    L --> L1[BotService.saveContext：将结果保存到ContextNode表中(待完成)]
+    L --> L1[BotService.saveContext将结果保存到ContextNode表中]
     
     L --> M[MainServiceBotInstancesExecuteHandler.after]
     M --> N[返回执行结果]
@@ -44,12 +44,12 @@ flowchart TD
     D2 --> G
     
     G --> I[Bot.chat]
-    I --> I1[AIModelResolver.resolveAIService通过AIModel注入不同aiService(待完成)]
+    I --> I1[AIModelResolver.resolveAIService通过AIModel注入不同aiService]
     I1 --> J[AIService.chatCompletion]
 
     J --> O[设置响应结果]
 
-    O --> P[BotService.saveMessage将用户消息和AI消息保存至表中(待完成)]
+    O --> P[BotService.saveMessage将用户消息和AI消息保存至表中]
     P --> Q[返回响应]
     Q --> R[结束]
 ```

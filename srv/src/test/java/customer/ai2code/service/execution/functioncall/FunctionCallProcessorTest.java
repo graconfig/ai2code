@@ -1,7 +1,6 @@
 package customer.ai2code.service.execution.functioncall;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Map;
@@ -65,7 +64,7 @@ public class FunctionCallProcessorTest {
         // 验证函数基本信息
         System.out.println("Function Name: " + functionInfo.getName());
         System.out.println("Function Description: " + functionInfo.getDescription());
-        assertEquals("Create Tasks Bot Execution_execute", functionInfo.getName());
+        assertEquals("Create_Tasks_Bot_Execution_execute", functionInfo.getName());
         assertEquals("Implementation for creating tasks in the bot execution framework", functionInfo.getDescription());
         
         // 验证参数信息
@@ -114,7 +113,7 @@ public class FunctionCallProcessorTest {
         System.out.println("Name: " + function.get("name"));
         System.out.println("Description: " + function.get("description"));
         
-        assertEquals("Create Tasks Bot Execution_execute", function.get("name"));
+        assertEquals("Create_Tasks_Bot_Execution_execute", function.get("name"));
         assertEquals("Implementation for creating tasks in the bot execution framework", function.get("description"));
         assertTrue(function.containsKey("parameters"), "Should contain parameters");
         
