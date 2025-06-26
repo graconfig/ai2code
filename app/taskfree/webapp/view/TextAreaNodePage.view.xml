@@ -6,5 +6,6 @@
 		id="textAreaCodeEditor"
 		type="json"
 		value="{viewModel>/value}"
-	  height="100%" />
+		editable="false"
+	  height="95%" />
 </mvc:View>
