@@ -5,5 +5,5 @@
  <CodeEditor
 		type="json"
 		value="{viewModel>/value}"
-	  height="100%" />
+	  height="95%" />
 </mvc:View>
