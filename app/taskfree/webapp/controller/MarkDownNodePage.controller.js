@@ -3,8 +3,9 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/m/MessageBox",
     "sap/ui/model/json/JSONModel",
-    "ai/orchestration/taskfree/control/marked"
-], function (Controller, MessageToast, MessageBox, JSONModel, marked) {
+    "ai/orchestration/taskfree/control/marked",
+    "sap/ui/core/HTML"
+], function (Controller, MessageToast, MessageBox, JSONModel, marked, HTML) {
     "use strict";
 
     return Controller.extend("ai.orchestration.taskfree.controller.MarkDownNodePage", {
@@ -14,14 +15,14 @@ sap.ui.define([
                 value: "",
                 title: "Text Node",
                 type: "",
-                htmlValue: ""
+                htmlValue: "",
+                busy: false
             });
             this.getView().setModel(oViewModel, "viewModel");
 
             // 监听路由
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.getRoute("RouteMarkDownNodePage").attachPatternMatched(this._onRouteMatched, this);
-
         },
 
         _onRouteMatched: function (oEvent) {
@@ -29,59 +30,69 @@ sap.ui.define([
             var contextNodeId = oArgs && oArgs.contextNodeId;
             var oViewModel = this.getView().getModel("viewModel");
             var oController = this;
-            
-            // Immediately clear content and set loading title
-            oController._setMarkdownContent("");
+            var oPage = this.getView().byId("MarkDownNodePage");
+            var oVBox;
+
+            // 动态创建 VBox 容器（只创建一次）
+            if (!this._oVBox) {
+                oVBox = new sap.m.VBox("markdownVBox");
+                oPage.removeAllContent();
+                oPage.addContent(oVBox);
+                this._oVBox = oVBox;
+            } else {
+                oVBox = this._oVBox;
+                oVBox.removeAllItems();
+            }
+
+            // 立即 busy，立即移除 HTML 控件
+            oController.getView().setBusy(true);
 
             if (!contextNodeId) {
                 MessageToast.show("No context node id provided");
-                oViewModel.setProperty("/value", "");
                 oViewModel.setProperty("/title", "Text Node");
-                oViewModel.setProperty("/type", "");
-                this._setMarkdownContent("");
+                oViewModel.setProperty("/busy", false);
                 return;
             }
 
-            // Set busy state
-            oController.getView().setBusy(true);
-
-            // 直接查OData
+            // OData 请求
             var oModel = this.getView().getModel();
-            // 如果 contextNodeId 是字符串主键，需要加引号
             var sPath = "/ContextNodes(" + contextNodeId + ")";
             oModel.bindContext(sPath).requestObject().then(function (oData) {
                 oController.getView().setBusy(false);
-                oData.type = "markdown" ;
                 oViewModel.setProperty("/type", oData.type);
                 oViewModel.setProperty("/value", oData.value);
                 oViewModel.setProperty("/title", oData.title);
+
+                // 加载完成后再创建 HTML 控件
                 if (oData.type === "markdown") {
-                    oController._setMarkdownContent(oData.value);
-                } else {
-                    oController._setMarkdownContent(""); // 清空
+                    var htmlContent = window.marked ? window.marked.parse(oData.value || "") : (oData.value || "");
+                    var oHtml = new HTML({
+                        content: htmlContent
+                    });
+                    oVBox.addItem(oHtml);
                 }
+                oViewModel.setProperty("/busy", false);
             }).catch(function () {
                 oController.getView().setBusy(false);
                 oViewModel.setProperty("/value", "加载失败");
                 oViewModel.setProperty("/title", "Text Node");
                 oViewModel.setProperty("/type", "");
-                oController._setMarkdownContent(""); // 清空
+                oVBox.removeAllItems();
+                oViewModel.setProperty("/busy", false);
                 MessageToast.show("加载失败");
             });
         },
 
-        _setMarkdownContent: function (markdownText) {
-            var oViewModel = this.getView().getModel("viewModel");
-            var htmlContent = window.marked ? window.marked.parse(markdownText || "") : (markdownText || "");
-            oViewModel.setProperty("/htmlValue", htmlContent);
-        },
-        
         onExit: function () {
             var oViewModel = this.getView().getModel("viewModel");
             if (oViewModel) {
                 oViewModel.setProperty("/htmlValue", "");
                 oViewModel.setProperty("/value", "");
                 oViewModel.setProperty("/type", "");
+                oViewModel.setProperty("/busy", false);
+            }
+            if (this._oVBox) {
+                this._oVBox.removeAllItems();
             }
         }
     });
