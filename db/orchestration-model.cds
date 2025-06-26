@@ -59,13 +59,13 @@ entity BotMessage : cuid, managed {
     botInstance : Association to BotInstance;
 }
 
-view TaskHierarchyView as
+view TaskHierarchy as
         select from Task as a {
             key a.ID,
                 'TASK'           as nodeType               : String(10),
                 a.name,
                 a.botInstance.ID as parent_ID,
-                parent                                     : Association to TaskHierarchyView
+                parent                                     : Association to TaskHierarchy
                                                                  on parent.ID = $self.parent_ID,
                 null             as LimitedDescendantCount : Integer64,
                 null             as DistanceFromRoot       : Integer64,
@@ -78,7 +78,7 @@ view TaskHierarchyView as
                     'BOT'     as nodeType               : String(10),
                     null      as name,
                     a.task.ID as parent_ID,
-                    parent                              : Association to TaskHierarchyView
+                    parent                              : Association to TaskHierarchy
                                                               on parent.ID = $self.parent_ID,
                     null      as LimitedDescendantCount : Integer64,
                     null      as DistanceFromRoot       : Integer64,

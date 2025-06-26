@@ -7,7 +7,7 @@ service MainService {
     entity TaskType as projection on config.TaskType;
 
     @readonly
-    entity TaskHierarchyView as projection on db.TaskHierarchyView;
+    entity TaskHierarchy as projection on db.TaskHierarchy;
 
     //entity SubTasks      as projection on db.SubTask;
     entity BotInstances as projection on db.BotInstance
@@ -32,14 +32,14 @@ service MainService {
 
 }
 
-annotate MainService.TaskHierarchyView with @Aggregation.RecursiveHierarchy #TaskHierarchyView : {
+annotate MainService.TaskHierarchy with @Aggregation.RecursiveHierarchy #TaskHierarchy : {
   ParentNavigationProperty : parent, // navigates to a node's parent
   NodeProperty             : ID, // identifies a node, usually the key
 };
 
-extend MainService.TaskHierarchyView with @(
+extend MainService.TaskHierarchy with @(
     // The columns expected by Fiori to be present in hierarchy entities
-    Hierarchy.RecursiveHierarchy #GenresHierarchy          : {
+    Hierarchy.RecursiveHierarchy #TaskHierarchy          : {
         LimitedDescendantCount: LimitedDescendantCount,
         DistanceFromRoot      : DistanceFromRoot,
         DrillState            : DrillState,
