@@ -3,7 +3,8 @@
   xmlns:mvc="sap.ui.core.mvc"
 	xmlns="sap.ui.codeeditor">
  <CodeEditor
+		id="textAreaCodeEditor"
 		type="json"
 		value="{viewModel>/value}"
-	  height="95%" />
+	  height="100%" />
 </mvc:View>

@@ -14,7 +14,7 @@ sap.ui.define([
                 value: "",
                 title: "Text Node",
                 type: "",
-                htmlValue: "" // 新增
+                htmlValue: ""
             });
             this.getView().setModel(oViewModel, "viewModel");
 
@@ -28,14 +28,11 @@ sap.ui.define([
             var oArgs = oEvent.getParameter("arguments");
             var contextNodeId = oArgs && oArgs.contextNodeId;
             var oViewModel = this.getView().getModel("viewModel");
-            if (oViewModel) {
-                oViewModel.setProperty("/htmlValue", "");
-                oViewModel.setProperty("/value", "");
-                oViewModel.setProperty("/type", "");
-            }
-
-        
             var oController = this;
+            
+            // Immediately clear content and set loading title
+            oController._setMarkdownContent("");
+
             if (!contextNodeId) {
                 MessageToast.show("No context node id provided");
                 oViewModel.setProperty("/value", "");
@@ -45,11 +42,15 @@ sap.ui.define([
                 return;
             }
 
+            // Set busy state
+            oController.getView().setBusy(true);
+
             // 直接查OData
             var oModel = this.getView().getModel();
             // 如果 contextNodeId 是字符串主键，需要加引号
             var sPath = "/ContextNodes(" + contextNodeId + ")";
             oModel.bindContext(sPath).requestObject().then(function (oData) {
+                oController.getView().setBusy(false);
                 oData.type = "markdown" ;
                 oViewModel.setProperty("/type", oData.type);
                 oViewModel.setProperty("/value", oData.value);
@@ -59,16 +60,8 @@ sap.ui.define([
                 } else {
                     oController._setMarkdownContent(""); // 清空
                 }
-
-                // if (oData.type === "markdown") {
-                //   var htmlValue = marked ? marked.parse(oData.value || "") : (oData.value || "");
-                //   oViewModel.setProperty("/value", htmlValue);
-                // }else{
-                //   var value = oData.value;
-                //   oViewModel.setProperty("/value", oData.value);
-                // }
-
             }).catch(function () {
+                oController.getView().setBusy(false);
                 oViewModel.setProperty("/value", "加载失败");
                 oViewModel.setProperty("/title", "Text Node");
                 oViewModel.setProperty("/type", "");
@@ -80,9 +73,9 @@ sap.ui.define([
         _setMarkdownContent: function (markdownText) {
             var oViewModel = this.getView().getModel("viewModel");
             var htmlContent = window.marked ? window.marked.parse(markdownText || "") : (markdownText || "");
-            //console.log("setMarkdownContent called. markdownText:", markdownText, "htmlContent:", htmlContent);
             oViewModel.setProperty("/htmlValue", htmlContent);
         },
+        
         onExit: function () {
             var oViewModel = this.getView().getModel("viewModel");
             if (oViewModel) {

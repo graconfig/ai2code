@@ -33,7 +33,7 @@ sap.ui.define([
                 oViewModel.setProperty("/value", "");
             }
 
-        
+
             var oController = this;
             if (!contextNodeId) {
                 MessageToast.show("No context node id provided");
@@ -42,16 +42,21 @@ sap.ui.define([
                 return;
             }
 
+            // Set busy state
+            oController.getView().setBusy(true);
+
             // 直接查OData
             var oModel = this.getView().getModel();
             // 如果 contextNodeId 是字符串主键，需要加引号
             var sPath = "/ContextNodes(" + contextNodeId + ")";
             oModel.bindContext(sPath).requestObject().then(function (oData) {
+                oController.getView().setBusy(false);
                 oViewModel.setProperty("/value", oData.value);
                 oViewModel.setProperty("/title", oData.title);
 
 
             }).catch(function () {
+                oController.getView().setBusy(false);
                 oViewModel.setProperty("/value", "加载失败");
                 oViewModel.setProperty("/title", "Text Node");
                 MessageToast.show("加载失败");

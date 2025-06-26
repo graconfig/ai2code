@@ -45,11 +45,15 @@ sap.ui.define([
                 return;
             }
 
+            // Set busy state
+            oController.getView().setBusy(true);
+
             // 直接查OData
             var oModel = this.getView().getModel();
             // 如果 contextNodeId 是字符串主键，需要加引号
             var sPath = "/ContextNodes(" + contextNodeId + ")";
             oModel.bindContext(sPath).requestObject().then(function (oData) {
+                oController.getView().setBusy(false);
                 oViewModel.setProperty("/type", oData.type);
                 oViewModel.setProperty("/value", oData.value);
                 oViewModel.setProperty("/title", oData.title);
@@ -68,6 +72,7 @@ sap.ui.define([
                 // }
 
             }).catch(function () {
+                oController.getView().setBusy(false);
                 oViewModel.setProperty("/value", "加载失败");
                 oViewModel.setProperty("/title", "Text Node");
                 oViewModel.setProperty("/type", "");
