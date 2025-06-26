@@ -1,6 +1,12 @@
 package customer.ai2code.service.impl;
 
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.cds.Result;
+import com.sap.cds.Row;
+import com.sap.cds.ql.CQL;
 import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnSelect;
 
@@ -21,8 +27,10 @@ import cds.gen.mainservice.MainService;
 import cds.gen.configservice.PromptTexts;
 import cds.gen.configservice.PromptTexts_;
 
-import java.util.List;
-import java.util.UUID;
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import customer.ai2code.exception.BusinessException;
 
@@ -32,6 +40,8 @@ public class GenericCqnService {
     private final MainService mainService;
     private final ConfigService configService;
     private final EntityService entityService;
+    private final ObjectMapper objectMapper;
+    private final DataSource dataSource;
 
     private final TaskBotCacheManager cacheManager;
 
@@ -39,11 +49,15 @@ public class GenericCqnService {
             EntityService entityService,
             MainService mainService,
             ConfigService configService,
-            TaskBotCacheManager cacheManager) {
+            TaskBotCacheManager cacheManager,
+            ObjectMapper objectMapper,
+            DataSource dataSource) {
         this.entityService = entityService;
         this.mainService = mainService;
         this.configService = configService;
         this.cacheManager = cacheManager;
+        this.dataSource = dataSource;
+        this.objectMapper = objectMapper;
     }
 
     // 原有查询方法...
@@ -408,11 +422,13 @@ public class GenericCqnService {
                 .where(b -> b.ID().eq(botInstanceId));
 
         // 查询结果列表
-        BotInstances instance = entityService.selectSingle(mainService, select, BotInstances.class,String.format("Parent task not found for bot instance %s", botInstanceId));
+        BotInstances instance = entityService.selectSingle(mainService, select, BotInstances.class,
+                String.format("Parent task not found for bot instance %s", botInstanceId));
 
         // 检查并返回结果
         // if (instance.isEmpty() || instances.get(0).getTaskId() == null) {
-        //     throw new IllegalStateException("No taskId found for botInstanceId: " + botInstanceId);
+        // throw new IllegalStateException("No taskId found for botInstanceId: " +
+        // botInstanceId);
         // }
 
         return instance.getTaskId();
@@ -434,11 +450,12 @@ public class GenericCqnService {
             Tasks currentTask = getTaskById(taskId);
 
             // 4. 如果当前任务有父任务ID，则获取父任务
-            // if (currentTask.getParentTaskId() != null && !currentTask.getParentTaskId().isEmpty()) {
-            //     return getTaskById(currentTask.getParentTaskId());
+            // if (currentTask.getParentTaskId() != null &&
+            // !currentTask.getParentTaskId().isEmpty()) {
+            // return getTaskById(currentTask.getParentTaskId());
             // } else {
-            //     // 5. 如果没有父任务，返回当前任务本身
-            //     return currentTask;
+            // // 5. 如果没有父任务，返回当前任务本身
+            // return currentTask;
             // }
             return currentTask;
 
@@ -447,4 +464,154 @@ public class GenericCqnService {
         }
     }
 
+    /**
+     * 执行原生SQL查询，返回结果列表（Map形式）
+     */
+    public List<Map<String, Object>> execNativeSql(String sql) throws SQLException {
+        try (Connection conn = dataSource.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
+
+            List<Map<String, Object>> results = new ArrayList<>();
+            ResultSetMetaData meta = rs.getMetaData();
+            int colCount = meta.getColumnCount();
+
+            while (rs.next()) {
+                Map<String, Object> row = new LinkedHashMap<>();
+                for (int i = 1; i <= colCount; i++) {
+                    Object val = rs.getObject(i);
+                    row.put(meta.getColumnLabel(i), val);
+                }
+                results.add(row);
+            }
+            return results;
+        }
+    }
+
+    public List<Map<String, Object>> findMatchingViewsByScenario(String query, double threshold, int topK) {
+        List<Map<String, Object>> resultList = new ArrayList<>();
+
+        try (Connection conn = dataSource.getConnection();
+                Statement stmt = conn.createStatement()) {
+
+            String escapedQuery = query.replace("'", "''");
+
+            String sqlScenario = String.format("""
+                        SELECT viewCategory
+                        FROM ai_orchestration_rag_BusinessScenarios
+                        WHERE COSINE_SIMILARITY(embeddings, VECTOR_EMBEDDING('%s')) >= %.4f
+                        ORDER BY COSINE_SIMILARITY(embeddings, VECTOR_EMBEDDING('%s')) DESC
+                        LIMIT 1
+                    """, escapedQuery, threshold, escapedQuery);
+
+            ResultSet rs = stmt.executeQuery(sqlScenario);
+
+            if (!rs.next())
+                return resultList;
+
+            String viewCategoryStr = rs.getString("viewCategory");
+            List<String> categories = Arrays.stream(viewCategoryStr.split("/"))
+                    .map(c -> c.replace("'", "''"))
+                    .collect(Collectors.toList());
+
+            if (categories.isEmpty())
+                return resultList;
+
+            String inClause = categories.stream()
+                    .map(c -> "'" + c + "'")
+                    .collect(Collectors.joining(","));
+
+            String sqlView = String.format("""
+                        SELECT viewName, viewDesc, viewCategory
+                        FROM ai_orchestration_rag_CDSViews
+                        WHERE viewCategory IN (%s)
+                          AND isActive = true
+                    """, inClause);
+
+            ResultSet rsViews = stmt.executeQuery(sqlView);
+            // 将结果集转换为列表
+            resultList = resultSetToList(rsViews);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return resultList;
+    }
+
+    public List<Map<String, Object>> findViewFieldsByViewNames(List<String> viewNames, Locale locale) {
+        List<Map<String, Object>> results = new ArrayList<>();
+
+        if (viewNames == null || viewNames.isEmpty())
+            return results;
+
+        String inClause = viewNames.stream()
+                .map(v -> "'" + v.replace("'", "''") + "'")
+                .collect(Collectors.joining(","));
+
+        String language = locale.getLanguage();
+
+        String sql = String.format("""
+                    SELECT tableName, tableDesc, content, langu
+                    FROM ai_orchestration_rag_Viewfields
+                    WHERE tableName IN (%s)
+                      AND langu = '%s'
+                """, inClause, language);
+
+        try (Connection conn = dataSource.getConnection();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+
+            results = resultSetToList(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return results;
+    }
+
+    public List<Map<String, Object>> findJoinConditionsByViewNames(List<String> viewNames) {
+        List<Map<String, Object>> results = new ArrayList<>();
+
+        if (viewNames == null || viewNames.isEmpty())
+            return results;
+
+        String inClause = viewNames.stream()
+                .map(v -> "'" + v.replace("'", "''") + "'")
+                .collect(Collectors.joining(","));
+
+        String sql = String.format("""
+                    SELECT tableFirst, tableSecond, tableJoin
+                    FROM ai_orchestration_rag_RagJoinCond
+                    WHERE tableFirst IN (%s)
+                      AND tableSecond IN (%s)
+                """, inClause, inClause);
+
+        try (Connection conn = dataSource.getConnection();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+
+            results = resultSetToList(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return results;
+    }
+
+    private List<Map<String, Object>> resultSetToList(ResultSet rs) throws SQLException {
+        List<Map<String, Object>> list = new ArrayList<>();
+        ResultSetMetaData meta = rs.getMetaData();
+        int colCount = meta.getColumnCount();
+
+        while (rs.next()) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            for (int i = 1; i <= colCount; i++) {
+                row.put(meta.getColumnLabel(i), rs.getObject(i));
+            }
+            list.add(row);
+        }
+
+        return list;
+    }
 }
