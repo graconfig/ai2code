@@ -76,7 +76,9 @@ view TaskHierarchy as
             select from BotInstance as a {
                 key a.ID,
                     'BOT'     as nodeType               : String(10),
-                    null      as name,
+                    concat(
+                        a.task.name, '_', a.ID
+                    )         as name,
                     a.task.ID as parent_ID,
                     parent                              : Association to TaskHierarchy
                                                               on parent.ID = $self.parent_ID,

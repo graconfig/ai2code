@@ -291,7 +291,7 @@ public class MainServiceTaskHierarchyHandler implements EventHandler {
         Deque<String> getPath(TaskHierarchy gh) {
             Deque<String> path = new ArrayDeque<>();
             do {
-                path.push(gh.getName());
+                path.push(gh.getDistanceFromRoot().toString());
                 gh = gh.getParent();
             } while (gh != null);
 
