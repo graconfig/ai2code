@@ -39,6 +39,7 @@ service MainService {
     entity CDSViewFiles      as projection on rag.CDSViewFiles actions {
             action generateEmbeddings()  returns String;
             action deleteEmbeddings()    returns String;
+            action linkToView(viewName: String) returns Boolean;
         };
     entity Viewfields       as projection on rag.Viewfields 
             excluding {
@@ -52,10 +53,17 @@ service MainService {
     entity excelupload {
         @Core.MediaType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         excel : LargeBinary;
+
+        @Core.MediaType: 'text/plain'
+        txtViewFields : LargeBinary;
     };
     
     //查询CDS View的Fields 也可直接查询db
     action viewFieldsSearch(question : String, threshold : Decimal(5, 2), langu : String) returns array of Viewfields;
     action viewJoinSearch() returns array of RagJoinCond;
+
+    // 新增上传动作
+    action uploadCDSViews(excel: LargeBinary) returns String;
+    action uploadCDSViewFields(txt: LargeBinary, langu: String) returns String;
     
 }
