@@ -52,8 +52,14 @@ public class ChatBot implements Bot {
                 if (prompts != null && !prompts.isEmpty()) {
                     savePromptMessages(prompts);
                 }
-
             }
+            // 3.1 获取RAG相关的Prompt
+            // if (botType.getIsRAGEnabled()) {
+                // List<PromptTexts> ragPrompts = aiModel.getRagConfig().getPrompts();
+                // if (ragPrompts != null && !ragPrompts.isEmpty()) {
+                //     prompts.addAll(ragPrompts);
+                // }
+            // }
 
             // 4. 获取历史消息
             List<BotMessages> historyMessages = genericCqnService.getBotMessagesByBotInstanceId(botInstance.getId());
