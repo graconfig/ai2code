@@ -31,7 +31,9 @@ public class ContextVariableResolver implements VariableResolver {
             String taskId = context.getMainTaskId(); // 统一使用mainTaskId
             
             ContextNodes contextNode = genericCqnService.getContextNodeByTaskAndPath(taskId, contextPath);
-            return contextNode != null ? contextNode.getValue() : "";
+            //改成返回整个contextNode对象
+            return contextNode != null ? contextNode.toJson() : "";
+            // return contextNode != null ? contextNode.getValue() : "";
             
         } catch (Exception e) {
             System.err.println("Failed to resolve context variable: " + variableExpression + ", error: " + e.getMessage());
