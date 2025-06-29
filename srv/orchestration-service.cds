@@ -33,7 +33,7 @@ service MainService {
         };
     entity CDSViews          as projection on rag.CDSViews;
     //按场景查询匹配的CDS Views
-    action cdsViewsSearch(question : String, threshold : Decimal(5, 2))  returns array of CDSViews;
+    // action cdsViewsSearch(question : String, threshold : Decimal(5, 2))  returns array of CDSViews;
 
 
     entity CDSViewFiles      as projection on rag.CDSViewFiles actions {
