@@ -22,13 +22,14 @@ public class RAGCDSViewExtractorImpl implements RAGExtractor {
     private ObjectMapper objectMapper;
 
     @Override
-    public String extract(String ragSource, int ragTopK, String query, Locale language, int threshold) {
+    public String extract(String ragSource, int ragTopK, String query, Locale language, double threshold) {
         if (!"cdsViews".equalsIgnoreCase(ragSource)) {
             return "{\"error\":\"Unsupported ragSource: " + ragSource + "\"}";
         }
 
         try {
-            List<Map<String, Object>> views = genericCqnService.findMatchingViewsByScenario(query, threshold / 100.0, ragTopK);
+            List<Map<String, Object>> views = genericCqnService.findMatchingViewsByScenario(query, threshold , ragTopK);
+            // List<Map<String, Object>> views = genericCqnService.findMatchingViewsByScenario(query, threshold / 100.0, ragTopK);
             return objectMapper.writeValueAsString(views);
         } catch (Exception e) {
             e.printStackTrace();

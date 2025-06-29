@@ -346,6 +346,22 @@ public class GenericCqnService {
     }
 
     /**
+     * 创建并插入单条BotMessage（指定角色）
+     */
+    public BotMessages createAndInsertBotMessage(String botInstanceId, String message, String ragContent,String role) {
+        BotMessages botMessage = BotMessages.create();
+        botMessage.setId(UUID.randomUUID().toString());
+        botMessage.setBotInstanceId(botInstanceId);
+        botMessage.setMessage(message);
+        botMessage.setRagData(ragContent);
+        botMessage.setRole(role);
+
+        entityService.insert(mainService, null, BotMessages_.class, botMessage, true);
+        return botMessage;
+    }
+
+
+    /**
      * 判断是否是第一次调用
      */
     public boolean isFirstCall(String botInstanceId) {

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+
 /**
  * RAGViewFieldExtractorImpl 实现了 RAGExtractor 接口，用于从视图中提取字段信息。
  * 它使用 GenericCqnService 来查询视图字段，并将结果转换为 JSON 格式。
@@ -22,7 +23,7 @@ public class RAGViewFieldExtractorImpl implements RAGExtractor {
     private ObjectMapper objectMapper;
 
     @Override
-    public String extract(String ragSource, int ragTopK, String query, Locale language, int threshold) {
+    public String extract(String ragSource, int ragTopK, String query, Locale language, double threshold) {
         if (!"viewFields".equalsIgnoreCase(ragSource)) {
             return "{\"error\":\"Unsupported ragSource: " + ragSource + "\"}";
         }

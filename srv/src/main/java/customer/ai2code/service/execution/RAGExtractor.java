@@ -5,5 +5,5 @@ import java.util.Locale;
 import cds.gen.configservice.PromptTexts;
 
 public interface RAGExtractor {
-    public String extract(String ragSource, int ragTopK, String query, Locale language, int threshold);
+    public String extract(String ragSource, int ragTopK, String query, Locale language, double threshold);
 }

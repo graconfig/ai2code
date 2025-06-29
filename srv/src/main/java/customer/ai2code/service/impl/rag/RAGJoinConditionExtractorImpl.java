@@ -22,7 +22,7 @@ public class RAGJoinConditionExtractorImpl implements RAGExtractor {
     private ObjectMapper objectMapper;
 
     @Override
-    public String extract(String ragSource, int ragTopK, String query, Locale language, int threshold) {
+    public String extract(String ragSource, int ragTopK, String query, Locale language, double threshold) {
         if (!"joinConditions".equalsIgnoreCase(ragSource)) {
             return "{\"error\":\"Unsupported ragSource: " + ragSource + "\"}";
         }

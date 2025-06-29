@@ -29,7 +29,8 @@ service MainService {
                               typeId : UUID) returns Tasks;
 
     entity BusinessScenarios as projection on rag.BusinessScenarios excluding {
-            embeddings
+            embeddings,
+            embeddings_ai
         };
     entity CDSViews          as projection on rag.CDSViews;
     //按场景查询匹配的CDS Views

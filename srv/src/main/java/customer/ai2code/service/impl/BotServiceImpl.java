@@ -24,8 +24,6 @@ import customer.ai2code.model.tree.TaskBotNode;
 import customer.ai2code.service.BotService;
 import customer.ai2code.service.ContextService;
 
-import customer.ai2code.service.ContextService;
-
 import customer.ai2code.service.PromptService;
 import customer.ai2code.service.constant.AIConstants;
 
@@ -37,11 +35,13 @@ import com.sap.cds.ql.cqn.CqnStatement;
 import com.sap.cds.ql.cqn.ResolvedRefItem;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import cds.gen.mainservice.BotMessages;
@@ -157,16 +157,13 @@ public class BotServiceImpl implements BotService {
             // 更新状态为SUCCESS
             // updateBotInstanceStatus(bot, "S");
 
-            // 3. 将用户和AI的聊天内容存储到表中
-            BotMessages userMessage = genericCqnService.createAndInsertBotMessage(botInstanceId, content, "user");
-
-            // 3.1 停顿0.5 秒，确保用户消息先插入
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // 恢复中断状态
-                throw new BusinessException(AIConstants.Messages.THREAD_INTERRUPTED, e);
-            }
+            // // 3.1 停顿0.5 秒，确保用户消息先插入
+            // try {
+            // Thread.sleep(500);
+            // } catch (InterruptedException e) {
+            // Thread.currentThread().interrupt(); // 恢复中断状态
+            // throw new BusinessException(AIConstants.Messages.THREAD_INTERRUPTED, e);
+            // }
 
             BotMessages botMessage = genericCqnService.createAndInsertBotMessage(botInstanceId, response, "assistant");
 
@@ -234,16 +231,18 @@ public class BotServiceImpl implements BotService {
     }
 
     private Bot createBotInstance(BotInstances botInstance, BotTypes botType, AIModel aiModel) {
+        Locale locale = LocaleContextHolder.getLocale();
         String functionTypeCode = botType.getFunctionTypeCode();
 
         switch (functionTypeCode) {
             case "A": // AI Chat Bot
-                return new ChatBot(botInstance, aiModel, botType, genericCqnService, promptService, aiModelResolver);
+                return new ChatBot(botInstance, aiModel, botType, locale, genericCqnService, promptService,
+                        aiModelResolver);
             case "F": // Function Calling Bot
-                return new FunctionCallingBot(botInstance, aiModel, botType, genericCqnService, promptService,
+                return new FunctionCallingBot(botInstance, aiModel, botType, locale, genericCqnService, promptService,
                         aiModelResolver, botExecutionFactoryService);
             case "C": // Coding Bot
-                return new CodingBot(botInstance, aiModel, botType);
+                return new CodingBot(botInstance, aiModel, botType, locale);
             default:
                 throw new BusinessException("Unsupported bot function type: " + functionTypeCode);
         }
@@ -333,6 +332,17 @@ public class BotServiceImpl implements BotService {
         // 6. 调用 ContextService 的 upsertContext 方法存储并返回 ContextNodes
         ContextNodes node = contextService.upsertContext(botInstanceId, absoluteOutputContextPath, messageText,
                 bot.getBotType().getContextTypeCode());
+
+        // 7. 检查botType的ragOutputContextPath，有维护值的情况下写入一条新的ContextNode
+        String ragOutputContextPath = bot.getBotType().getRagOutputContextPath();
+        if (ragOutputContextPath != null && !ragOutputContextPath.isBlank()) {
+            // 获取绝对的 RAG 输出上下文路径
+            String absoluteRagOutputContextPath = contextService.getContextFullPath(botInstanceId,
+                    ragOutputContextPath);
+            // 将RAG输出上下文路径和消息文本存储到新的ContextNode中
+            contextService.upsertContext(botInstanceId, absoluteRagOutputContextPath, botMessage.getRagData(),
+                    "text");
+        }
 
         updateBotInstanceStatus(bot, "SUCCESS");
 
