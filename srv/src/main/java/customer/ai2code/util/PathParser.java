@@ -1,5 +1,7 @@
 package customer.ai2code.util;
 
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -8,6 +10,7 @@ import java.util.regex.Pattern;
 /**
  * 上下文路径解析工具，处理带数组索引的路径
  */
+@Component // 添加Spring组件注解
 public class PathParser {
     private static final Pattern ARRAY_PATTERN = Pattern.compile("(.*?)\\[(\\d+)\\]$");
     private static final Pattern PATH_SEGMENT_PATTERN = Pattern.compile("([^\\[\\]]+)(\\[\\d+\\])?");

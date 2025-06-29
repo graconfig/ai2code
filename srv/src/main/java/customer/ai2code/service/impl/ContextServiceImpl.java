@@ -64,6 +64,7 @@ public class ContextServiceImpl implements ContextService {
 // 
 //         return rootNodes;
 //     }
+    // 重写buildContextAsHierarchy - context tree
     @Override
     public List<Map<String, Object>> buildContextAsHierarchy(List<ContextNodes> contextNodes) {
         if (contextNodes == null || contextNodes.isEmpty()) {
@@ -97,6 +98,7 @@ public class ContextServiceImpl implements ContextService {
         return convertToMapList(rootNodes);
     }
 
+    // 新增convertToMapList - context tree
     private List<Map<String, Object>> convertToMapList(List<ContextTreeNode> nodes) {
         List<Map<String, Object>> result = new ArrayList<>();
         for (ContextTreeNode node : nodes) {
