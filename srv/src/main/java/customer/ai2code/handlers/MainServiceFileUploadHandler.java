@@ -31,7 +31,6 @@ public class MainServiceFileUploadHandler implements EventHandler {
 
     /**
      * 处理CDS视图上传事件（无异常处理，异常向上抛出）
-     * 与现有处理器的handleExecute方法风格一致
      */
     @On(event = "uploadCDSViews")
     public String handleUploadCDSViews(Excelupload_ ref, InputStream excel) {
