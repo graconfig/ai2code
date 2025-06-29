@@ -19,8 +19,12 @@ import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstances_;
 import cds.gen.mainservice.BotMessages;
 import cds.gen.mainservice.BotMessages_;
+import cds.gen.mainservice.CDSViews;
+import cds.gen.mainservice.CDSViews_;
 import cds.gen.mainservice.Tasks;
 import cds.gen.mainservice.Tasks_;
+import cds.gen.mainservice.Viewfields;
+import cds.gen.mainservice.Viewfields_;
 import cds.gen.mainservice.ContextNodes;
 import cds.gen.mainservice.ContextNodes_;
 import cds.gen.mainservice.MainService;
@@ -630,4 +634,46 @@ public class GenericCqnService {
 
         return list;
     }
+
+     // ========== 新增CDSViews插入方法 ==========
+    /**
+     * 插入CDSViews实体（基于viewName主键）
+     * @param view CDSViews实体（需包含viewName）
+     */
+    public void insertCDSView(CDSViews view) {
+        // 校验必填字段（viewName）
+        if (view.getViewName() == null || view.getViewName().isEmpty()) {
+            throw new IllegalArgumentException("CDSViews.viewName不能为空");
+        }
+        
+        entityService.insert(
+            mainService,  // 使用MainService作为服务上下文
+            null,         // 无事务上下文
+            CDSViews_.class, 
+            view, 
+            true  // 自动生成审计字段（managed aspect）
+        );
+    }
+
+    // ========== 新增Viewfields插入方法 ==========
+    /**
+     * 插入Viewfields实体（带ID主键）
+     * @param field Viewfields实体（需包含ID或自动生成）
+     */
+    public void insertViewfield(Viewfields field) {
+        // 自动生成ID（如果未设置）
+        if (field.getId() == null) {
+            field.setId(UUID.randomUUID().toString());
+        }
+        
+        // 调用entityService插入
+        entityService.insert(
+            mainService,
+            null,
+            Viewfields_.class,
+            field,
+            true
+        );
+    }
+
 }
