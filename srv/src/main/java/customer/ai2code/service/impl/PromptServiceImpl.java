@@ -9,7 +9,7 @@ import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotInstances;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.service.PromptService;
-import customer.ai2code.service.execution.RAGExtractor;
+import customer.ai2code.service.execution.RAGExtraction;
 import customer.ai2code.service.variable.VariableContext;
 import customer.ai2code.service.variable.VariableParsingService;
 
@@ -107,10 +107,10 @@ public class PromptServiceImpl implements PromptService {
 
                 // 5.4 通过接口RAGExtractor实例化implementationClass
                 Class<?> clazz = Class.forName(implementationClass);
-                RAGExtractor ragExtractor = (RAGExtractor) clazz.getDeclaredConstructor().newInstance();
+                RAGExtraction ragExtraction = (RAGExtraction) clazz.getDeclaredConstructor().newInstance();
 
                 // 5.5 调用RAGExtractor.extract方法获取RAG结果
-                String ragContent = ragExtractor.extract(ragSource, ragTopK, combinedRagInput, bot.getLocale(),
+                String ragContent = ragExtraction.extract(ragSource, ragTopK, combinedRagInput, bot.getLocale(),
                         ragThreshold);
 
                 // 5.6 将RAG结果添加到prompts中
