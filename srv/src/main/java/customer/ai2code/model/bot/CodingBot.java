@@ -1,5 +1,7 @@
 package customer.ai2code.model.bot;
 
+import java.util.Locale;
+
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import cds.gen.configservice.BotTypes;
@@ -18,6 +20,7 @@ public class CodingBot implements Bot {
     private BotInstances botInstance;
     private AIModel aiModel;
     private BotTypes botType;
+    private Locale locale;
     // public CodingBot(BotInstances botInstance, BotTypes botType) {
     //     //TODO Auto-generated constructor stub
     // }

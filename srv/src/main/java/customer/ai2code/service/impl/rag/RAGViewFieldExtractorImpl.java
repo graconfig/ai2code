@@ -6,6 +6,7 @@ import customer.ai2code.service.impl.GenericCqnService;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+
 /**
  * RAGViewFieldExtractorImpl 实现了 RAGExtractor 接口，用于从视图中提取字段信息。
  * 它使用 GenericCqnService 来查询视图字段，并将结果转换为 JSON 格式。

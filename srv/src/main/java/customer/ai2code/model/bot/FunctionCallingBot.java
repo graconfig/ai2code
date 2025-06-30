@@ -3,6 +3,7 @@ package customer.ai2code.model.bot;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -31,6 +32,7 @@ public class FunctionCallingBot implements Bot {
     private BotInstances botInstance;
     private AIModel aiModel;
     private BotTypes botType;
+    private Locale locale;
 
     // 服务依赖（通过构造函数注入）
     private GenericCqnService genericCqnService;
@@ -57,7 +59,7 @@ public class FunctionCallingBot implements Bot {
             // String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
 
 
-            prompts = promptService.getPrompts(botType.getId(),  botInstance.getId());
+            prompts = promptService.getPrompts(this);
             System.out.println("- Retrieved " + prompts.size() + " prompts for execution");
 
             // 3. 获取历史消息

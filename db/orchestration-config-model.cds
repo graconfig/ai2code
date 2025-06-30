@@ -18,27 +18,29 @@ entity TaskType : cuid, managed {
 
 /** BotType: bot type, with contextType field (enum reference) */
 entity BotType : cuid, managed {
-  taskType            : Association to TaskType;
-  sequence            : Integer;
-  name                : String(50);
-  description         : String;
-  functionType        : Association to BotFunctionType default 'AI_CHAT';
-  autoRun             : Boolean default false;
-  executionCondition  : String(1000);
-  model               : Association to ModelConfig;
-  prompts             : Composition of many PromptText
-                          on prompts.botType = $self;
-  outputContextPath   : String(1000); // Output path, can be array[-1]; relative in subTask, absolute in main task
-  contextType         : Association to ContextType; // New: Output context data type (enum)
-  isRAGEnabled        : Boolean default false;
+  taskType             : Association to TaskType;
+  sequence             : Integer;
+  name                 : String(50);
+  description          : String;
+  functionType         : Association to BotFunctionType default 'AI_CHAT';
+  autoRun              : Boolean default false;
+  executionCondition   : String(1000);
+  model                : Association to ModelConfig;
+  prompts              : Composition of many PromptText
+                           on prompts.botType = $self;
+  outputContextPath    : String(1000); // Output path, can be array[-1]; relative in subTask, absolute in main task
+  contextType          : Association to ContextType; // New: Output context data type (enum)
+  isRAGEnabled         : Boolean default false;
   //ragFunction       : Association to RagFunction;
-  ragClass            : String(100); // Replaces ragFunction
-  ragSource           : String(100);
-  ragTopK             : Integer;
-  ragThreshold        : String;
-  implementationClass : String(100); // For C and F types
+  ragClass             : String(100); // Replaces ragFunction
+  ragSource            : String(100);
+  ragParameter         : String(2000);
+  ragTopK              : Integer;
+  ragThreshold         : Double;
+  ragOutputContextPath : String(1000); //
+  implementationClass  : String(100); // For C and F types
   //subTaskContextPath: String(1000); // Must include array, e.g., datasource.children[-1].content
-  subTaskType       : Association to TaskType;
+  subTaskType          : Association to TaskType;
 }
 
 /** AI model configuration */
@@ -60,11 +62,11 @@ entity PromptText : cuid, managed {
 /** Bot execution status enumeration */
 entity BotInstanceStatus : CodeList {
   key code : String enum {
-        CREATED   = 'CREATED';
-        RUNNING   = 'RUNNING';
-        SUCCESS   = 'SUCCESS';
-        FAILED    = 'FAILED';
-        SKIPPED   = 'SKIPPED';
+        CREATED = 'CREATED';
+        RUNNING = 'RUNNING';
+        SUCCESS = 'SUCCESS';
+        FAILED = 'FAILED';
+        SKIPPED = 'SKIPPED';
         CANCELLED = 'CANCELLED';
       };
 }
@@ -72,9 +74,9 @@ entity BotInstanceStatus : CodeList {
 /** Bot function type enumeration */
 entity BotFunctionType : CodeList {
   key code : String enum {
-        AI_CHAT        = 'AI CHAT';
+        AI_CHAT = 'AI CHAT';
         FUNCTION_CALL = 'FUNCTION CALL';
-        CODE          = 'CODE';
+        CODE = 'CODE';
       //SUBTASK_GENERATOR = 'SUBTASK_GENERATOR'; replaced by FUNCTION_CALL
       };
 }
@@ -92,25 +94,27 @@ entity Languages : CodeList {
 /** ContextType: type of content in the context node (strongly typed) */
 entity ContextType : CodeList {
   key code : String enum {
-        string   = 'STRING';   // Plain text
+        string = 'STRING'; // Plain text
         markdown = 'MARKDOWN'; // Markdown document
-        code     = 'CODE';     // Code snippet
-        json     = 'JSON';     // JSON structure
+        code = 'CODE'; // Code snippet
+        json = 'JSON'; // JSON structure
       //object  = 'OBJECT';    // Object
       //array   = 'ARRAY';     // Array
       //table   = 'TABLE';     // Table
       //image   = 'IMAGE';     // Image (base64 or URL)
       };
 }
+
 /** Bot Execution interface impl class */
 @cds.persistence.skip
 entity BotExecutionClass {
-    key Name: String;
-    Description : String;
+  key Name        : String;
+      Description : String;
 }
+
 /** RAG Extractor interface impl class */
 @cds.persistence.skip
 entity RAGExtractorClass {
-    key Name: String;
-    Description : String;
+  key Name        : String;
+      Description : String;
 }

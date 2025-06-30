@@ -1,34 +1,22 @@
 package customer.ai2code.service.execution;
 
-import customer.ai2code.exception.BusinessException;
-import org.springframework.web.multipart.MultipartFile;
+import java.io.InputStream;
 
-import java.io.IOException;
-
-/**
- * CDS视图文件上传服务接口
- * 基于CDS的CQN服务操作数据
- */
 public interface CdsViewFileUploadService {
+
+    /**
+     * 上传Excel文件导入CDS视图
+     * @param excel Excel文件输入流
+     * @return 操作结果描述
+     */
+    String uploadCDSViews(InputStream excel);
     
     /**
-     * 上传Excel文件并导入CDS Views
-     * @param file Excel文件
-     * @return 导入成功的记录数
-     * @throws BusinessException 业务异常
-     * @throws IOException 文件操作异常
+     * 上传TXT文件导入CDS视图字段
+     * @param txt TXT文件输入流
+     * @param langu 语言代码
+     * @return 操作结果描述
      */
-    int uploadExcelForCdsViews(MultipartFile file) throws BusinessException, IOException;
-    
-    /**
-     * 上传TXT文件并导入CDS View Fields
-     * @param file TXT文件
-     * @param viewName 所属视图名称
-     * @param locale 语言区域
-     * @return 导入成功的记录数
-     * @throws BusinessException 业务异常
-     * @throws IOException 文件操作异常
-     */
-    int uploadTxtForCdsViewFields(MultipartFile file, String viewName, String locale) 
-            throws BusinessException, IOException;
+    String uploadCDSViewFields(InputStream txt, String langu);
+
 }
