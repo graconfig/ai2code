@@ -640,7 +640,7 @@ public class GenericCqnService {
      * 插入CDSViews实体（基于viewName主键）
      * @param view CDSViews实体（需包含viewName）
      */
-    public void insertCDSView(CDSViews view) {
+    public void insertCDSViews(CDSViews view) {
         // 校验必填字段（viewName）
         if (view.getViewName() == null || view.getViewName().isEmpty()) {
             throw new IllegalArgumentException("CDSViews.viewName不能为空");
@@ -660,7 +660,7 @@ public class GenericCqnService {
      * 插入Viewfields实体（带ID主键）
      * @param field Viewfields实体（需包含ID或自动生成）
      */
-    public void insertViewfield(Viewfields field) {
+    public void insertViewfields(Viewfields field) {
         // 自动生成ID（如果未设置）
         if (field.getId() == null) {
             field.setId(UUID.randomUUID().toString());

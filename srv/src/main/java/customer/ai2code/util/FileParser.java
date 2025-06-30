@@ -6,6 +6,7 @@ import customer.ai2code.exception.BusinessException;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -17,6 +18,7 @@ import java.time.Instant;
 /**
  * 统一文件解析器（Excel+TXT），基于viewName为主键
  */
+@Component // 添加Spring组件注解
 public class FileParser {
     
     // 解析CDSViews（Excel）

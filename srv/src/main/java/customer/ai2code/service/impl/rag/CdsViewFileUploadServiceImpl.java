@@ -28,8 +28,7 @@ public class CdsViewFileUploadServiceImpl implements CdsViewFileUploadService {
             List<CDSViews> views = parser.parseCDSViews(excel);
             for (CDSViews view : views) {
                 view.setIsActive(true);
-                // cqnService.insertCDSView(view);  // 传递mainservice包的实体
-                cqnService.insertCDSView(view);
+                cqnService.insertCDSViews(view);
             }
             return "成功导入 " + views.size() + " 条CDS视图";
         } catch (Exception e) {
@@ -43,7 +42,7 @@ public class CdsViewFileUploadServiceImpl implements CdsViewFileUploadService {
             List<Viewfields> fields = parser.parseViewFields(txt, langu);
             for (Viewfields field : fields) {
                 field.setIsGeneratedEmbedding(false);
-                cqnService.insertViewfield(field);  // 传递mainservice包的实体
+                cqnService.insertViewfields(field);  // 传递mainservice包的实体
             }
             return "成功导入 " + fields.size() + " 条视图字段";
         } catch (Exception e) {

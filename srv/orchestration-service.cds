@@ -51,7 +51,7 @@ service MainService {
 
     @cds.persistence.skip: true
     @odata.singleton
-    entity excelupload {
+    entity Excelupload {
         @Core.MediaType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         excel : LargeBinary;
 
