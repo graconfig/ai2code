@@ -18,6 +18,7 @@ import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnElementRef;
 import com.sap.cds.ql.cqn.CqnPredicate;
 import com.sap.cds.ql.cqn.CqnSelect;
+import com.sap.cds.ql.cqn.CqnSelectListItem;
 import com.sap.cds.ql.cqn.CqnValue;
 import com.sap.cds.ql.cqn.Modifier;
 import com.sap.cds.ql.cqn.transformation.CqnTopLevelsTransformation;
@@ -40,18 +41,20 @@ import cds.gen.mainservice.TaskHierarchy;
 
 import static cds.gen.mainservice.MainService_.TASK_HIERARCHY;
 
-
 @Component
 @ServiceName(MainService_.CDS_NAME)
 public class MainServiceTaskHierarchyHandler implements EventHandler {
     private final PersistenceService db;
+    private List<CqnSelectListItem> columns;
 
-    MainServiceTaskHierarchyHandler(PersistenceService db) {
+    MainServiceTaskHierarchyHandler(PersistenceService db, List<CqnSelectListItem> columns) {
         this.db = db;
+        this.columns = columns;
     }
 
     @Before(event = CqnService.EVENT_READ, entity = TaskHierarchy_.CDS_NAME)
     public void readTaskHierarchy(CdsReadEventContext event) {
+        this.columns = event.getCqn().items();
         List<CqnTransformation> trafos = event.getCqn().transformations();
         List<TaskHierarchy> result = null;
 
@@ -165,7 +168,9 @@ public class MainServiceTaskHierarchyHandler implements EventHandler {
 
     private List<TaskHierarchy> handleDescendants(CqnDescendantsTransformation descendants) {
         CqnPredicate filter = descendantsFilter(descendants);
-        CqnSelect childrenCQN = Select.from(TASK_HIERARCHY).where(filter);
+        CqnSelect childrenCQN = Select.from(TASK_HIERARCHY)
+                .columns(this.columns)
+                .where(filter);
         List<TaskHierarchy> nodes = db.run(childrenCQN).listOf(TaskHierarchy.class);
 
         connect(nodes);
@@ -203,7 +208,9 @@ public class MainServiceTaskHierarchyHandler implements EventHandler {
         Map<String, TaskHierarchy> lookup = new HashMap<>();
         Map<Object, Long> expandLevels = topLevels.expandLevels();
 
-        CqnSelect getRoots = Select.from(TASK_HIERARCHY).where(gh -> gh.parent_ID().isNull().and(filter));
+        CqnSelect getRoots = Select.from(TASK_HIERARCHY)
+                .columns(this.columns)
+                .where(gh -> gh.parent_ID().isNull().and(filter));
         List<TaskHierarchy> roots = db.run(getRoots).listOf(TaskHierarchy.class);
         roots.forEach(root -> {
             root.setDistanceFromRoot(0l);
@@ -211,7 +218,7 @@ public class MainServiceTaskHierarchyHandler implements EventHandler {
             List<String> parents = List.of(root.getId());
             for (long i = 1; i < limit; i++) {
                 List<String> ps = parents;
-                CqnSelect getChildren = Select.from(TASK_HIERARCHY)
+                CqnSelect getChildren = Select.from(TASK_HIERARCHY).columns(this.columns)
                         .where(gh -> gh.parent_ID().in(ps).and(filter));
                 List<TaskHierarchy> children = db.run(getChildren).listOf(TaskHierarchy.class);
                 if (children.isEmpty()) {
@@ -246,7 +253,9 @@ public class MainServiceTaskHierarchyHandler implements EventHandler {
     }
 
     private List<TaskHierarchy> topLevelsAll(CqnPredicate filter) {
-        CqnSelect allCqn = Select.from(TASK_HIERARCHY).where(filter);
+        CqnSelect allCqn = Select.from(TASK_HIERARCHY)
+                .columns(this.columns)
+                .where(filter);
         var all = db.run(allCqn).listOf(TaskHierarchy.class);
 
         connect(all);

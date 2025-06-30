@@ -14,10 +14,14 @@ GET  http://localhost:8080/odata/v4/MainService/TaskHierarchy
 Authorization: Basic system:
 
 ### 获取TaskHierarchy根节点
+GET  http://localhost:8080/odata/v4/MainService/TaskHierarchy?$select=ID,parent_ID,name&$apply=com.sap.vocabularies.Hierarchy.v1.TopLevels(HierarchyNodes=$root/TaskHierarchy,HierarchyQualifier='TaskHierarchy',NodeProperty='ID',Levels=1)
+Authorization: Basic system:
+
+### 获取TaskHierarchy根节点
 GET  http://localhost:8080/odata/v4/MainService/TaskHierarchy?$apply=com.sap.vocabularies.Hierarchy.v1.TopLevels(HierarchyNodes=$root/TaskHierarchy,HierarchyQualifier='TaskHierarchy',NodeProperty='ID')
 Authorization: Basic system:
 
 ### 获取TaskHierarchy某节点所有子节点
-GET  http://localhost:8080/odata/v4/MainService/TaskHierarchy?$select=ID,name,parent_ID&$apply=descendants($root/TaskHierarchy,TaskHierarchy,ID,filter(ID eq 98eb493f-02fa-42cd-9f7d-1741c4575aec),keep start)
+GET  http://localhost:8080/odata/v4/MainService/TaskHierarchy?$apply=descendants($root/TaskHierarchy,TaskHierarchy,ID,filter(ID eq 98eb493f-02fa-42cd-9f7d-1741c4575aec),keep start)
 Authorization: Basic system:
 
