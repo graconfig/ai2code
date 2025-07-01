@@ -50,7 +50,7 @@ sap.ui.define(
           // For cuid (GUID) primary keys in OData V4, don't use quotes
           var sPath = "/Tasks(" + sTaskId + ")";
           
-          console.log("Loading Task detail with path:", sPath);
+
           
           var oBinding = oModel.bindContext(sPath, null, {
             $expand: "type,botInstances($expand=type),contextNodes"
@@ -62,7 +62,7 @@ sap.ui.define(
               if (oBoundContext) {
                 var oData = oBoundContext.getObject();
                 if (oData) {
-                  console.log("Task data loaded successfully:", oData);
+    
                   
                   // Bind the view to the context
                   that.getView().setBindingContext(oBoundContext);
@@ -71,35 +71,26 @@ sap.ui.define(
                   var sTitle = oData.name || "Task Detail";
                   that.byId("taskDetailPage").setTitle(sTitle);
                 } else {
-                  console.error("No data found in bound context");
                   MessageToast.show("No data found for Task");
                 }
               } else {
-                console.error("Failed to get bound context");
                 MessageToast.show("Failed to load Task data");
               }
             } catch (error) {
-              console.error("Error processing Task data:", error);
               MessageToast.show("Error processing Task data: " + error.message);
             }
-          });
-          
-          oBinding.attachDataRequested(function() {
-            console.log("Task data requested");
           });
           
           // Enhanced error handling
           oBinding.attachEvent("dataReceived", function(oEvent) {
             var oParameters = oEvent.getParameters();
             if (oParameters && oParameters.error) {
-              console.error("OData error loading Task:", oParameters.error);
               MessageToast.show("Error loading Task: " + oParameters.error.message);
             }
           });
           
           // Request data with proper error handling
           oBinding.requestObject().catch(function(oError) {
-            console.error("Failed to request Task data:", oError);
             MessageToast.show("Failed to load Task data: " + (oError.message || oError.toString()));
           });
         }

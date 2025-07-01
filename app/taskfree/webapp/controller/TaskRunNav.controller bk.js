@@ -237,7 +237,7 @@ sap.ui.define(
           }
           // Create binding with comprehensive $expand to get all related data in one request
           var oBinding = oModel.bindContext("/Tasks(" + sTaskId + ")", null, {
-            $expand: "botInstances($expand=type,messages,tasks($expand=botInstances($expand=type))),contextNodes"
+            $expand: "botInstances($expand=type,messages,tasks($expand=botInstances($expand=type,messages))),contextNodes"
           });
 
           oBinding.attachDataReceived(function () {
@@ -482,11 +482,7 @@ sap.ui.define(
           var sKey = oData.key;
 
           this.getView().getModel("side").setProperty("/selectedKey", sKey);
-
-          // Ensure navigation data remains available after route change
           this._maintainNavigationState();
-
-          // Navigate to appropriate view based on item type and data
           this._navigateToItem(oData);
         },
 
@@ -670,7 +666,10 @@ sap.ui.define(
         },
 
         _onDataUpdated: function () {
-          // Mark cache as invalidated when data is updated
+          // Clear cache when data is updated
+          this._dataCache.botInstances.clear();
+          this._dataCache.contextNodes.clear();
+          this._dataCache.botMessages.clear();
           this._dataCache.invalidated = true;
         },
 

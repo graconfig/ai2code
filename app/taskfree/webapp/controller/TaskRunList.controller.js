@@ -7,6 +7,7 @@ sap.ui.define(
     "sap/m/Button",
     "sap/m/ButtonType",
     "sap/m/MessageToast",
+    "sap/m/MessageBox",
     "sap/m/Label",
     "sap/m/Input",
     "sap/m/TextArea",
@@ -24,6 +25,7 @@ sap.ui.define(
     Button,
     ButtonType,
     MessageToast,
+    MessageBox,
     Label,
     Input,
     TextArea,
@@ -48,7 +50,7 @@ sap.ui.define(
           this._initializeViewModel();
         },
 
-        _initializeViewModel: function() {
+        _initializeViewModel: function () {
           var oViewModel = new sap.ui.model.json.JSONModel({
             showCards: false,
             searchValue: "",
@@ -57,13 +59,7 @@ sap.ui.define(
           this.getView().setModel(oViewModel, "view");
         },
 
-        onRefresh: function() {
-          var oModel = this.getOwnerComponent().getModel();
-          oModel.refresh();
-          MessageToast.show("Data refreshed");
-        },
-
-        onSearch: function(oEvent) {
+        onSearch: function (oEvent) {
           var sQuery = oEvent.getParameter("query") || oEvent.getParameter("newValue");
           var oTable = this.byId("taskTable");
           var oBinding = oTable.getBinding("items");
@@ -79,13 +75,13 @@ sap.ui.define(
           }
         },
 
-        onStatusFilterChange: function(oEvent) {
+        onStatusFilterChange: function (oEvent) {
           var sKey = oEvent.getParameter("selectedItem").getKey();
           var oTable = this.byId("taskTable");
           var oBinding = oTable.getBinding("items");
           var aFilters = [];
           
-          switch(sKey) {
+          switch (sKey) {
             case "main":
               aFilters.push(new sap.ui.model.Filter("isMain", sap.ui.model.FilterOperator.EQ, true));
               break;
@@ -100,11 +96,11 @@ sap.ui.define(
           oBinding.filter(aFilters);
         },
 
-        onExport: function() {
+        onExport: function () {
           MessageToast.show("Export functionality to be implemented");
         },
 
-        onSettings: function() {
+        onSettings: function () {
           MessageToast.show("Settings functionality to be implemented");
         },
 
@@ -139,6 +135,70 @@ sap.ui.define(
           this.oSubmitDialog.open();
         },
 
+        onDelete: function (oEvent) {
+          var oTable = this.byId("taskTable");
+          var aSelectedItems = oTable.getSelectedItems();
+          var that = this;
+
+          if (aSelectedItems.length === 0) {
+            MessageToast.show("No items selected for deletion");
+            return;   
+          }
+
+          // Show confirmation dialog
+          MessageBox.confirm(
+            "Are you sure you want to delete the selected " + aSelectedItems.length + " item(s)?",
+            {
+              title: "Confirm Deletion",
+              onClose: function (oAction) {
+                if (oAction === MessageBox.Action.OK) {
+                  that._deleteSelectedItems(aSelectedItems);
+                }
+              }
+            }
+          );
+        },
+
+        _deleteSelectedItems: function (aSelectedItems) {
+          var oTable = this.byId("taskTable");
+          var that = this;
+          var aPromises = [];
+
+          oTable.setBusy(true);
+
+          // Get contexts from selected items and delete them
+          aSelectedItems.forEach(function (oItem) {
+            try {
+              var oContext = oItem.getBindingContext();
+              if (oContext) {
+                var sPath = oContext.getPath();
+
+                var oDeletePromise = oContext.delete("$auto").then(function () {
+                }).catch(function (oError) {
+                  throw oError;
+                });
+
+                aPromises.push(oDeletePromise);
+              }
+            } catch (error) {
+              // Silent error handling
+            }
+          });
+
+          Promise.all(aPromises).then(function (aResults) {
+            MessageToast.show(aSelectedItems.length + " item(s) deleted successfully");
+
+            // Clear selection after successful deletion
+            oTable.removeSelections(true);
+
+          }).catch(function (oError) {
+            MessageToast.show("Error deleting items: " + (oError.message || oError.toString()));
+
+          }).finally(function () {
+            oTable.setBusy(false);
+          });
+        },
+
         onItemPress: function (oEvent) {
           // Handle item press event
           const oItem = oEvent.getSource();
@@ -167,7 +227,7 @@ sap.ui.define(
                   template: new sap.m.StandardListItem({
                     title: "{name}",
                     description: "{description}",
-                    highlightText: "{ID}", // ID placeholder
+                  highlightText: "{ID}",
                   }),
                 },
                 confirm: function (oEvent) {
@@ -202,7 +262,6 @@ sap.ui.define(
                   this.oSelectTypeDialog.open();
                 }.bind(this),
               }),
-              // new Label({ text: "Type id" }),
               new Input("taskTypeId", {
                 editable: false,
                 visible: false,

@@ -1,0 +1,14 @@
+<mvc:View
+  controllerName="ai.orchestration.taskfree.controller.TextNodePage"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:c="sap.ui.core">
+  <Page id="textNodePage" title="{viewModel>/title}">
+    <content>
+      <Text
+        text="{viewModel>/value}"
+        wrapping="true"
+        class="sapUiSmallMargin"/>
+    </content>
+  </Page>
+</mvc:View>

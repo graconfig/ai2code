@@ -127,6 +127,21 @@
           "name": "RouteAIConversation",
           "pattern": "Tasks({taskRunId})/aiConversation({botInstanceId})",
           "target": ["TargetTaskRunNav", "TargetAIConversation"]
+        },
+        {
+          "name": "RouteTextNodePage",
+          "pattern": "ContextNodeDetail({contextNodeId})/string",
+          "target": ["TargetTaskRunNav", "TargetTextNodePage"]
+        },
+        {
+          "name": "RouteTextAreaNodePage",
+          "pattern": "ContextNodeDetail({contextNodeId})/code",
+          "target": ["TargetTaskRunNav", "TargetTextAreaNodePage"]
+        },
+        {
+          "name": "RouteMarkDownNodePage",
+          "pattern": "ContextNodeDetail({contextNodeId})/markdown",
+          "target": ["TargetTaskRunNav", "TargetMarkDownNodePage"]
         }
         ],
       "targets": {
@@ -181,6 +196,29 @@
           "viewName": "AIConversationPage",
           "controlId": "navMainContents",
           "parent": "TargetTaskRunNav"
+        },
+        "TargetTextNodePage": {
+          "viewType": "XML",
+          "viewId": "TextNodePage",
+          "viewName": "TextNodePage",
+          "controlId": "navMainContents",
+          "parent": "TargetTaskRunNav",
+          "clearControlAggregation": true
+        },
+        "TargetTextAreaNodePage": {
+          "viewType": "XML",
+          "viewId": "TextAreaNodePage",
+          "viewName": "TextAreaNodePage",
+          "controlId": "navMainContents",
+          "parent": "TargetTaskRunNav",
+          "clearControlAggregation": true
+        },"TargetMarkDownNodePage": {
+          "viewType": "XML",
+          "viewId": "MarkDownNodePage",
+          "viewName": "MarkDownNodePage",
+          "controlId": "navMainContents",
+          "parent": "TargetTaskRunNav",
+          "clearControlAggregation": true
         }
       }
     },

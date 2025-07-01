@@ -40,9 +40,13 @@ sap.ui.define(
           var oModel = this.getOwnerComponent().getModel();
           var that = this;
           
+          // Set busy state
+          that.getView().setBusy(true);
+          
           // Validate GUID format
           var guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
           if (!guidPattern.test(sContextNodeId)) {
+            that.getView().setBusy(false);
             MessageToast.show("Invalid GUID format for Context Node ID: " + sContextNodeId);
             return;
           }
@@ -50,20 +54,17 @@ sap.ui.define(
           // For cuid (GUID) primary keys in OData V4, don't use quotes
           var sPath = "/ContextNodes(" + sContextNodeId + ")";
           
-          console.log("Loading ContextNode detail with path:", sPath);
-          
           var oBinding = oModel.bindContext(sPath, null, {
             $expand: "task"
           });
           
           oBinding.attachDataReceived(function(oEvent) {
+            that.getView().setBusy(false);
             try {
               var oBoundContext = oBinding.getBoundContext();
               if (oBoundContext) {
                 var oData = oBoundContext.getObject();
                 if (oData) {
-                  console.log("ContextNode data loaded successfully:", oData);
-                  
                   // Bind the view to the context
                   that.getView().setBindingContext(oBoundContext);
                   
@@ -71,35 +72,28 @@ sap.ui.define(
                   var sTitle = oData.label || "Context Node Detail";
                   that.byId("contextNodeDetailPage").setTitle(sTitle);
                 } else {
-                  console.error("No data found in bound context");
                   MessageToast.show("No data found for Context Node");
                 }
               } else {
-                console.error("Failed to get bound context");
                 MessageToast.show("Failed to load Context Node data");
               }
             } catch (error) {
-              console.error("Error processing ContextNode data:", error);
               MessageToast.show("Error processing Context Node data: " + error.message);
             }
           });
           
-          oBinding.attachDataRequested(function() {
-            console.log("ContextNode data requested");
-          });
-          
           // Enhanced error handling
           oBinding.attachEvent("dataReceived", function(oEvent) {
+            that.getView().setBusy(false);
             var oParameters = oEvent.getParameters();
             if (oParameters && oParameters.error) {
-              console.error("OData error loading ContextNode:", oParameters.error);
               MessageToast.show("Error loading Context Node: " + oParameters.error.message);
             }
           });
           
           // Request data with proper error handling
           oBinding.requestObject().catch(function(oError) {
-            console.error("Failed to request ContextNode data:", oError);
+            that.getView().setBusy(false);
             MessageToast.show("Failed to load Context Node data: " + (oError.message || oError.toString()));
           });
         }

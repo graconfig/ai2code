@@ -56,7 +56,7 @@ sap.ui.define(
           // For cuid (GUID) primary keys in OData V4, don't use quotes
           var sPath = "/Tasks(" + sTaskRunId + ")";
           
-          console.log("Loading TaskRun detail with path:", sPath);
+
           
           var oBinding = oModel.bindContext(sPath, null, {
             $expand: "type,botInstances($expand=type),contextNodes"
@@ -68,7 +68,7 @@ sap.ui.define(
               if (oBoundContext) {
                 var oData = oBoundContext.getObject();
                 if (oData) {
-                  console.log("TaskRun data loaded successfully:", oData);
+    
                   
                   // Bind the view to the context
                   that.getView().setBindingContext(oBoundContext);
@@ -76,35 +76,26 @@ sap.ui.define(
                   // Render task run overview content
                   that._renderTaskRunContent(oData);
                 } else {
-                  console.error("No data found in bound context");
                   MessageToast.show("No data found for Task Run");
                 }
               } else {
-                console.error("Failed to get bound context");
                 MessageToast.show("Failed to load Task Run data");
               }
             } catch (error) {
-              console.error("Error processing TaskRun data:", error);
               MessageToast.show("Error processing Task Run data: " + error.message);
             }
-          });
-          
-          oBinding.attachDataRequested(function() {
-            console.log("TaskRun data requested");
           });
           
           // Enhanced error handling
           oBinding.attachEvent("dataReceived", function(oEvent) {
             var oParameters = oEvent.getParameters();
             if (oParameters && oParameters.error) {
-              console.error("OData error loading TaskRun:", oParameters.error);
               MessageToast.show("Error loading Task Run: " + oParameters.error.message);
             }
           });
           
           // Request data with proper error handling
           oBinding.requestObject().catch(function(oError) {
-            console.error("Failed to request TaskRun data:", oError);
             MessageToast.show("Failed to load Task Run data: " + (oError.message || oError.toString()));
           });
         },

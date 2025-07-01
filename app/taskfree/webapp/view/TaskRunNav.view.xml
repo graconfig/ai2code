@@ -106,6 +106,7 @@
 						<StandardTreeItem 
 							id="idGenStandardTreeItem" 
 							title="{side>text}" 
+							icon="{side>icon}"
 							type="Navigation"/>
 					</Tree>
 					</ScrollContainer>

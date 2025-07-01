@@ -1,0 +1,11 @@
+<mvc:View
+  controllerName="ai.orchestration.taskfree.controller.TextAreaNodePage"
+  xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.ui.codeeditor">
+ <CodeEditor
+		id="textAreaCodeEditor"
+		type="json"
+		value="{viewModel>/value}"
+		editable="false"
+	  height="95%" />
+</mvc:View>

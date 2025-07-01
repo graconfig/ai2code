@@ -55,7 +55,7 @@ sap.ui.define(
           // For cuid (GUID) primary keys in OData V4, don't use quotes
           var sPath = "/BotInstances(" + sBotInstanceId + ")";
           
-          console.log("Loading BotInstance detail with path:", sPath);
+
           
           var oBinding = oModel.bindContext(sPath, null, {
             $expand: "type,messages"
@@ -67,7 +67,7 @@ sap.ui.define(
               if (oBoundContext) {
                 var oData = oBoundContext.getObject();
                 if (oData) {
-                  console.log("BotInstance data loaded successfully:", oData);
+
                   
                   // Bind the view to the context
                   that.getView().setBindingContext(oBoundContext);
@@ -82,35 +82,26 @@ sap.ui.define(
                   that.bindingmodel = that.oContext;
                   that.servicemodel = that.getOwnerComponent().getModel();
                 } else {
-                  console.error("No data found in bound context");
                   MessageToast.show("No data found for Bot Instance");
                 }
               } else {
-                console.error("Failed to get bound context");
                 MessageToast.show("Failed to load Bot Instance data");
               }
             } catch (error) {
-              console.error("Error processing BotInstance data:", error);
               MessageToast.show("Error processing Bot Instance data: " + error.message);
             }
-          });
-          
-          oBinding.attachDataRequested(function() {
-            console.log("BotInstance data requested");
           });
           
           // Enhanced error handling
           oBinding.attachEvent("dataReceived", function(oEvent) {
             var oParameters = oEvent.getParameters();
             if (oParameters && oParameters.error) {
-              console.error("OData error loading BotInstance:", oParameters.error);
               MessageToast.show("Error loading Bot Instance: " + oParameters.error.message);
             }
           });
           
           // Request data with proper error handling
           oBinding.requestObject().catch(function(oError) {
-            console.error("Failed to request BotInstance data:", oError);
             MessageToast.show("Failed to load Bot Instance data: " + (oError.message || oError.toString()));
           });
         },
@@ -128,9 +119,6 @@ sap.ui.define(
           // Same functionality as onBotInstancePress
           this.onBotInstancePress();
         },
-
-
-
         onBotInstancePress: function (oEvent) {
           if (!this.oContext) {
             MessageToast.show("No bot instance data available");
@@ -206,19 +194,21 @@ sap.ui.define(
               
               contextBinding.invoke().then(() => {
                 MessageToast.show("Message adopted successfully");
+                
+                // Notify navigation controller that ContextNode data has changed
+                sap.ui.getCore().getEventBus().publish("DataUpdate", "ContextNodeChanged");
+                
                 // Refresh the messages list to reflect changes
                 var messageList = this._dialog.getContent()[0].getContent()[0].getItems()[0];
                 if (messageList && messageList.getBinding("items")) {
                   messageList.getBinding("items").refresh();
                 }
               }).catch((error) => {
-                console.error("Adopt error:", error);
                 MessageToast.show("Error adopting message: " + error.message);
               }).finally(() => {
                 event.getSource().setBusy(false);
               });
             } catch (error) {
-              console.error("Adopt error (setup):", error);
               MessageToast.show("Error setting up adopt operation: " + error.message);
               event.getSource().setBusy(false);
             }
@@ -247,6 +237,54 @@ sap.ui.define(
               setTimeout(() => this.scrollToListEnd(), 100);
             }
           };
+        },
+        
+        // Reserved method for execute functionality - to be implemented later
+        onExecutePress: function() {
+          var oContext = this.getView().getBindingContext();
+          if (!oContext) {
+            MessageToast.show("No bot instance context available");
+            return;
+          }
+          
+          // TODO: Implement execute functionality
+          // When implemented, add this after successful execution:
+          // sap.ui.getCore().getEventBus().publish("DataUpdate", "TaskChanged");
+          
+          MessageToast.show("Execute functionality not yet implemented");
+        },
+
+        onExecuteButtonPress: function(oEvent) {
+          oEvent.getSource().setBusy(true);
+          var context = oEvent.getSource().getBindingContext();
+          
+          if (!context) {
+            MessageToast.show("No message context available");
+            oEvent.getSource().setBusy(false);
+            return;
+          }
+
+          var contextBinding = this.getView().getModel().bindContext("MainService.execute(...)", context);
+          var that = this;
+
+          contextBinding.invoke().then(function(result) {
+            MessageToast.show("Message execute successfully");
+            
+            // Notify navigation controller that ContextNode data has changed
+            sap.ui.getCore().getEventBus().publish("DataUpdate", "ContextNodeChanged");
+            
+            var oBotInstanceContext = that.getView().getBindingContext();
+            if (oBotInstanceContext) {
+              oBotInstanceContext.refresh();
+            }
+            
+          }).catch(function(error) {
+            MessageToast.show("Error executing message: " + (error.message || error.toString()));
+            
+          }).finally(function() {
+            oEvent.getSource().setBusy(false);
+          });
+
         }
       }
     );
