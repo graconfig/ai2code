@@ -22,33 +22,39 @@ entity Task : cuid, managed {
     botInstance  : Association to BotInstance;
     type         : Association to TaskType;
     botInstances : Composition of many BotInstance
-                    on botInstances.task = $self;
+                       on botInstances.task = $self;
     contextNodes : Composition of many ContextNode
                        on contextNodes.task = $self; // All context nodes under this task
 }
 
 /** Single context node, flattened structure to support tree reconstruction */
 entity ContextNode : cuid, managed {
-    path  : String(1000); // Unique path, e.g., a.b.c[0].d
-    label : String(200); // Node label
-    type  : String(50); // Type (e.g., text, markdown, code, object, array)
-    value : LargeString; // Node value/content
-    task  : Association to Task; // Parent task
+    path           : String(1000); // Unique path, e.g., a.b.c[0].d
+    label          : String(200); // Node label
+    type           : String(50); // Type (e.g., text, markdown, code, object, array)
+    value          : LargeString; // Node value/content
+    additionalInfo : String(2000);
+    task           : Association to Task; // Parent task
     //readonly  : Boolean default false; // Optional: whether the node is read-only
     // Extendable: sorting, validation, metadata, etc.
+    botInstances   : Association to many BotInstance
+                         on botInstances.context = $self; // All bot instances using this context node
 }
 
 /** Bot execution instance */
 entity BotInstance : cuid, managed {
-    sequence : Integer;
-    result   : LargeString;
-    type     : Association to BotType;
-    status   : Association to BotInstanceStatus default 'CREATED';
-    task     : Association to Task;
-    tasks    : Composition of many Task
-                   on tasks.botInstance = $self; // Sub-tasks
-    messages : Composition of many BotMessage
-                on messages.botInstance = $self;
+    sequence  : Integer;
+    result    : LargeString;
+    contextID : UUID;
+    type      : Association to BotType;
+    status    : Association to BotInstanceStatus default 'CREATED';
+    task      : Association to Task;
+    tasks     : Composition of many Task
+                    on tasks.botInstance = $self; // Sub-tasks
+    messages  : Composition of many BotMessage
+                    on messages.botInstance = $self;
+    context   : Association to ContextNode
+                    on context.ID = $self.ID; // Context node used by this bot instance
 }
 
 /** Bot message entity, records human-AI/system conversations */
