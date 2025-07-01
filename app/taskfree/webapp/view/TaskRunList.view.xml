@@ -12,7 +12,7 @@
         <f:title>
             <f:DynamicPageTitle id="dynamicPageTitle">
                 <f:heading>
-                    <Title id="pageTitle" text="Task Management" level="H1"/>
+                    <Title id="pageTitle" text="AI2Code Orchestration" level="H1"/>
                 </f:heading>
             </f:DynamicPageTitle>
         </f:title>
