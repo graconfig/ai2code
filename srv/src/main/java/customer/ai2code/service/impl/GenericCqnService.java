@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cds.Result;
 import com.sap.cds.Row;
 import com.sap.cds.ql.CQL;
+import com.sap.cds.ql.Delete;
 import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnSelect;
 
@@ -19,6 +20,8 @@ import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstances_;
 import cds.gen.mainservice.BotMessages;
 import cds.gen.mainservice.BotMessages_;
+import cds.gen.mainservice.CDSViewFiles;
+import cds.gen.mainservice.CDSViewFiles_;
 import cds.gen.mainservice.CDSViews;
 import cds.gen.mainservice.CDSViews_;
 import cds.gen.mainservice.Tasks;
@@ -674,6 +677,51 @@ public class GenericCqnService {
             field,
             true
         );
+    }
+
+    // ========== 新增CDSViewFiles插入方法 ==========
+    /**
+     * 插入CDSViewFiles实体
+     * @param file CDSViewFiles实体（需包含fileName）
+     */
+    public void insertCDSViewFiles(CDSViewFiles file) {
+        // 校验必填字段
+        if (file.getFileName() == null || file.getFileName().isEmpty()) {
+            throw new IllegalArgumentException("CDSViewFiles.fileName不能为空");
+        }
+        
+        // 自动生成ID（如果未设置）
+        if (file.getId() == null) {
+            file.setId(UUID.randomUUID().toString());
+        }
+        
+        // 调用entityService插入
+        entityService.insert(
+            mainService,
+            null,
+            CDSViewFiles_.class,
+            file,
+            true
+        );
+    }
+
+    // 在GenericCqnService中添加以下方法
+    public void deleteCDSViewsByNames(List<String> viewNames) {
+        if (viewNames == null || viewNames.isEmpty()) return;
+        // 使用entityService的delete方法
+        for (String viewName : viewNames) {
+            CDSViews view = CDSViews.create();
+            view.setViewName(viewName);
+            entityService.delete(mainService, null, CDSViews_.class, view, true);
+        }
+    }
+
+    public void deleteViewFieldsByTableAndLangu(String tableName, String langu) {
+        // 使用entityService的delete方法
+        Viewfields field = Viewfields.create();
+        field.setTableName(tableName);
+        field.setLangu(langu);
+        entityService.delete(mainService, null, Viewfields_.class, field, true);
     }
 
 }
