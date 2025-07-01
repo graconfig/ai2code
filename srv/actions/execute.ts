@@ -3,14 +3,14 @@ import * as TJS from "typescript-json-schema";
 import * as functions from "./Functions/index.js";
 
 export const executeHandler = async function (this: any, req: any) {
-  let functionName: keyof typeof functions;
 
-  functionName = "callOdata"; // Ensure the function name is set correctly
+  const ClassName = "callOdata"; // Example function name, adjust as needed
+  const functionName = ClassName as keyof typeof functions;
 
   const callOdata = functions[functionName];
 
   const program = TJS.getProgramFromFiles(
-    [resolve("srv/actions/Functions/callOdata.ts")]
+    [resolve("srv/actions/Functions/" + ClassName + ".ts")]
   );
 
   const schema = TJS.generateSchema(program, "odataRequest");
