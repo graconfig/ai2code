@@ -35,10 +35,6 @@
 					id="navTitle"
 					text="{i18n>appTitle}"
 					level="H2"/>
-				<Text 
-					id="navBreadcrumb"
-					text="Task Run Details"
-					class="sapUiTinyMarginBegin"/>
 				<ToolbarSpacer id="navToolbarSpacer2"/>
 				<Button
 					id="navErrorButton"
