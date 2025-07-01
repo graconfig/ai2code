@@ -4,16 +4,19 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.cds.CdsVector;
 import com.sap.cds.Result;
 import com.sap.cds.Row;
 import com.sap.cds.ql.CQL;
 import com.sap.cds.ql.Delete;
 import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnSelect;
+import com.sap.cds.ql.cqn.CqnVector;
 
 import cds.gen.configservice.ConfigService;
 import cds.gen.configservice.ModelConfigs;
 import cds.gen.configservice.ModelConfigs_;
+import cds.gen.ai.orchestration.rag.*;
 import cds.gen.configservice.BotTypes;
 import cds.gen.configservice.BotTypes_;
 import cds.gen.mainservice.BotInstances;
@@ -24,6 +27,7 @@ import cds.gen.mainservice.CDSViewFiles;
 import cds.gen.mainservice.CDSViewFiles_;
 import cds.gen.mainservice.CDSViews;
 import cds.gen.mainservice.CDSViews_;
+import cds.gen.mainservice.BusinessScenarios_;
 import cds.gen.mainservice.Tasks;
 import cds.gen.mainservice.Tasks_;
 import cds.gen.mainservice.Viewfields;
@@ -34,6 +38,7 @@ import cds.gen.mainservice.MainService;
 import cds.gen.configservice.PromptTexts;
 import cds.gen.configservice.PromptTexts_;
 
+import javax.print.DocFlavor.STRING;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.*;
@@ -487,155 +492,113 @@ public class GenericCqnService {
         }
     }
 
-    /**
-     * 执行原生SQL查询，返回结果列表（Map形式）
-     */
-    public List<Map<String, Object>> execNativeSql(String sql) throws SQLException {
-        try (Connection conn = dataSource.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                ResultSet rs = stmt.executeQuery()) {
+    // /**
+    // * 执行原生SQL查询，返回结果列表（Map形式）
+    // */
+    // public List<Map<String, Object>> execNativeSql(String sql) throws
+    // SQLException {
+    // try (Connection conn = dataSource.getConnection();
+    // PreparedStatement stmt = conn.prepareStatement(sql);
+    // ResultSet rs = stmt.executeQuery()) {
 
-            List<Map<String, Object>> results = new ArrayList<>();
-            ResultSetMetaData meta = rs.getMetaData();
-            int colCount = meta.getColumnCount();
+    // List<Map<String, Object>> results = new ArrayList<>();
+    // ResultSetMetaData meta = rs.getMetaData();
+    // int colCount = meta.getColumnCount();
 
-            while (rs.next()) {
-                Map<String, Object> row = new LinkedHashMap<>();
-                for (int i = 1; i <= colCount; i++) {
-                    Object val = rs.getObject(i);
-                    row.put(meta.getColumnLabel(i), val);
+    // while (rs.next()) {
+    // Map<String, Object> row = new LinkedHashMap<>();
+    // for (int i = 1; i <= colCount; i++) {
+    // Object val = rs.getObject(i);
+    // row.put(meta.getColumnLabel(i), val);
+    // }
+    // results.add(row);
+    // }
+    // return results;
+    // }
+    // }
+
+    public String findMatchingViewsByScenario(String ragSource, int ragTopK, String query,
+            Locale language, double threshold) {
+        
+        // 1.构建向量
+        CqnVector vector = CQL.vector(query);
+        var similarity = CQL.cosineSimilarity(CQL.get("embeddings"), vector);
+        // 2.查询 BusinessScenarios 表，获取符合条件的场景
+        CqnSelect selectScenario = Select.from(BusinessScenarios_.class)
+                .columns(b -> b.get("scenario"), b -> b.get("description"), b -> b.get("viewCategory"),
+                        b -> similarity.as("similarity"))
+                .where(b -> similarity.gt(threshold))
+                .orderBy(b -> similarity.desc())
+                .limit(ragTopK);
+
+        List<Row> scenarioRows = mainService.run(selectScenario).listOf(Row.class);
+        if (scenarioRows.isEmpty()) {
+            return "[]"; // 如果没有匹配的场景，返回空数组
+        }
+        // 3.提取 viewCategory 并展开
+        Set<String> categories = new LinkedHashSet<>();
+        for (Row row : scenarioRows) {
+            String viewCategory = (String) row.get("viewCategory");
+            if (viewCategory != null) {
+                String[] parts = viewCategory.split("/");
+                for (String part : parts) {
+                    categories.add(part.trim());
                 }
-                results.add(row);
             }
-            return results;
-        }
-    }
-
-    public List<Map<String, Object>> findMatchingViewsByScenario(String query, double threshold, int topK) {
-        List<Map<String, Object>> resultList = new ArrayList<>();
-
-        try (Connection conn = dataSource.getConnection();
-                Statement stmt = conn.createStatement()) {
-
-            String escapedQuery = query.replace("'", "''");
-
-            String sqlScenario = String.format("""
-                        SELECT viewCategory
-                        FROM ai_orchestration_rag_BusinessScenarios
-                        WHERE COSINE_SIMILARITY(embeddings, VECTOR_EMBEDDING('%s')) >= %.4f
-                        ORDER BY COSINE_SIMILARITY(embeddings, VECTOR_EMBEDDING('%s')) DESC
-                        LIMIT 1
-                    """, escapedQuery, threshold, escapedQuery);
-
-            ResultSet rs = stmt.executeQuery(sqlScenario);
-
-            if (!rs.next())
-                return resultList;
-
-            String viewCategoryStr = rs.getString("viewCategory");
-            List<String> categories = Arrays.stream(viewCategoryStr.split("/"))
-                    .map(c -> c.replace("'", "''"))
-                    .collect(Collectors.toList());
-
-            if (categories.isEmpty())
-                return resultList;
-
-            String inClause = categories.stream()
-                    .map(c -> "'" + c + "'")
-                    .collect(Collectors.joining(","));
-
-            String sqlView = String.format("""
-                        SELECT viewName, viewDesc, viewCategory
-                        FROM ai_orchestration_rag_CDSViews
-                        WHERE viewCategory IN (%s)
-                          AND isActive = true
-                    """, inClause);
-
-            ResultSet rsViews = stmt.executeQuery(sqlView);
-            // 将结果集转换为列表
-            resultList = resultSetToList(rsViews);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
 
-        return resultList;
+        if (categories.isEmpty())
+            return "[]";
+
+        // Step 4: 查询 CDSViews 表中符合条件的 view
+        CqnSelect selectViews = Select.from(CDSViews_.class)
+                .columns("viewName", "viewDesc", "viewCategory")
+                .where(c -> CQL.get("viewCategory").in(categories)
+                        .and(CQL.get("isActive").eq(true)));
+
+        List<Row> viewRows = mainService.run(selectViews).listOf(Row.class);
+
+        // Step 5: 返回 JSON 格式
+        return rowsToJson(viewRows);
+
     }
 
-    public List<Map<String, Object>> findViewFieldsByViewNames(List<String> viewNames, Locale locale) {
-        List<Map<String, Object>> results = new ArrayList<>();
+    public String findViewFieldsByViewNames(List<String> viewList, int ragTopK, Locale language) {
 
-        if (viewNames == null || viewNames.isEmpty())
-            return results;
+        CqnSelect select = Select.from(Viewfields_.class)
+                .columns(f -> f.get("tableName"), f -> f.get("tableDesc"), f -> f.get("content"))
+                .where(f -> f.get("category").in(viewList).and(f.get("langu").eq(language.getLanguage())))
+                .limit(ragTopK);
 
-        String inClause = viewNames.stream()
-                .map(v -> "'" + v.replace("'", "''") + "'")
-                .collect(Collectors.joining(","));
+        List<Row> rows = mainService.run(select).listOf(Row.class);
+        return rowsToJson(rows);
 
-        String language = locale.getLanguage();
-
-        String sql = String.format("""
-                    SELECT tableName, tableDesc, content, langu
-                    FROM ai_orchestration_rag_Viewfields
-                    WHERE tableName IN (%s)
-                      AND langu = '%s'
-                """, inClause, language);
-
-        try (Connection conn = dataSource.getConnection();
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(sql)) {
-
-            results = resultSetToList(rs);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return results;
     }
 
-    public List<Map<String, Object>> findJoinConditionsByViewNames(List<String> viewNames) {
-        List<Map<String, Object>> results = new ArrayList<>();
+    public String findJoinConditionsByViewNames(List<String> viewList) {
+        CqnSelect select = Select.from(RagJoinCond_.class)
+                .columns(c -> c.get("tableFirst"), c -> c.get("tableSecond"), c -> c.get("tableJoin"))
+                .where(c -> c.get("tableFirst").in(viewList).or(c.get("tableSecond").in(viewList)));
 
-        if (viewNames == null || viewNames.isEmpty())
-            return results;
-
-        String inClause = viewNames.stream()
-                .map(v -> "'" + v.replace("'", "''") + "'")
-                .collect(Collectors.joining(","));
-
-        String sql = String.format("""
-                    SELECT tableFirst, tableSecond, tableJoin
-                    FROM ai_orchestration_rag_RagJoinCond
-                    WHERE tableFirst IN (%s)
-                      AND tableSecond IN (%s)
-                """, inClause, inClause);
-
-        try (Connection conn = dataSource.getConnection();
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(sql)) {
-
-            results = resultSetToList(rs);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return results;
+        List<Row> rows = mainService.run(select).listOf(Row.class);
+        return rowsToJson(rows);
     }
 
-    private List<Map<String, Object>> resultSetToList(ResultSet rs) throws SQLException {
-        List<Map<String, Object>> list = new ArrayList<>();
-        ResultSetMetaData meta = rs.getMetaData();
-        int colCount = meta.getColumnCount();
-
-        while (rs.next()) {
-            Map<String, Object> row = new LinkedHashMap<>();
-            for (int i = 1; i <= colCount; i++) {
-                row.put(meta.getColumnLabel(i), rs.getObject(i));
+    private String rowsToJson(List<Row> rows) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Row row : rows) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            for (String column : row.keySet()) {
+                map.put(column, row.get(column));
             }
-            list.add(row);
+            result.add(map);
         }
 
-        return list;
+        try {
+            return objectMapper.writeValueAsString(result);
+        } catch (Exception e) {
+            return "[{\"error\":\"Failed to convert result to JSON\"}]";
+        }
     }
 
      // ========== 新增CDSViews插入方法 ==========
