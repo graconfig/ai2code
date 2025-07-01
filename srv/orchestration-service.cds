@@ -40,7 +40,6 @@ service MainService {
     entity CDSViewFiles      as projection on rag.CDSViewFiles actions {
             action generateEmbeddings()  returns String;
             action deleteEmbeddings()    returns String;
-            action linkToView(viewName: String) returns Boolean;
         };
     entity Viewfields       as projection on rag.Viewfields 
             excluding {
