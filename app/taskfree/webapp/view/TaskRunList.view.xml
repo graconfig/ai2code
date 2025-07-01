@@ -80,10 +80,16 @@
                 
                 <columns>
                     <Column id="nameColumn">
-                        <Text id="nameHeader" text="Name"/>
+                        <Text id="nameHeader" text="Main Task"/>
                     </Column>
                     <Column id="descriptionColumn" width="25%">
                         <Text id="descriptionHeader" text="Description"/>
+                    </Column>
+                    <Column id="typeName" width="25%">
+                        <Text id="typeNameHeader" text="Task Type"/>
+                    </Column>
+                    <Column id="typeDesc" width="25%">
+                        <Text id="typeDescHeader" text="Type Description"/>
                     </Column>
                 </columns>
                 
@@ -95,13 +101,10 @@
                         <cells>
                             <VBox id="nameCell">
                                 <Text id="nameText" text="{name}" wrapping="false" class="sapUiTinyMarginBottom"/>
-                                <ObjectStatus 
-                                    id="isMainStatus"
-                                    text="{= ${isMain} ? 'Main Task' : 'Sub Task' }"
-                                    state="{= ${isMain} ? 'Success' : 'Information' }"/>
                             </VBox>
                             <Text id="descriptionText" text="{description}" wrapping="true" maxLines="3"/>
-                            <Text id="typeText" text="{= ${type} ? ${type/name} : 'No Type' }" wrapping="false"/>
+                            <Text id="typeNameText" text="{type/name}" wrapping="false"/>
+                            <Text id="typeDescText" text="{type/description}" wrapping="false"/>
                         </cells>
                     </ColumnListItem>
                 </items>

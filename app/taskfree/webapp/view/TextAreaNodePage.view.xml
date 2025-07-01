@@ -1,11 +1,32 @@
 <mvc:View
-  controllerName="ai.orchestration.taskfree.controller.TextAreaNodePage"
-  xmlns:mvc="sap.ui.core.mvc"
-	xmlns="sap.ui.codeeditor">
- <CodeEditor
-		id="textAreaCodeEditor"
-		type="json"
-		value="{viewModel>/value}"
-		editable="false"
-	  height="95%" />
+    controllerName="ai.orchestration.taskfree.controller.TextAreaNodePage"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:codeeditor="sap.ui.codeeditor"
+    height="100%">
+    <Page id="textAreaNodePage" showHeader="true" title="Code Editor">
+        <customHeader>
+            <Bar id="textAreaNodePageHeader">
+                <contentLeft>
+                    <Title id="textAreaPageTitle" text="{viewModel>/title}" level="H2"/>
+                </contentLeft>
+                <contentRight>
+                    <Button id="returnToConversationBtn" 
+                            text="Return To Conversation" 
+                            type="Emphasized"
+                            press="onReturnToConversation"
+                            visible="{viewModel>/showReturnButton}"/>
+                </contentRight>
+            </Bar>
+        </customHeader>
+        
+        <content>
+            <codeeditor:CodeEditor
+                id="textAreaCodeEditor"
+                type="{viewModel>/editorType}"
+                value="{viewModel>/value}"
+                editable="false"
+                height="100%" />
+        </content>
+    </Page>
 </mvc:View>

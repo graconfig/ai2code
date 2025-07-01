@@ -9,26 +9,60 @@
         LayoutManager: 'ai/orchestration/taskfree/util/LayoutManager',
         ChatFormatter: 'ai/orchestration/taskfree/formatter/ChatFormatter'
     }"
-    height="98%">
-    
-    <Page id="aiConversationPage" showHeader="false" ztitle="AI Conversation" class="aiConversationPage aiConversationFullWidth">
+    height="98%"
+>
+    <Page
+        id="aiConversationPage"
+        showHeader="false"
+        class="aiConversationPage aiConversationFullWidth"
+    >
         <headerContent>
-            <Button id="refreshButton" icon="sap-icon://refresh" press="onRefreshPress" tooltip="{i18n>refreshButtonTooltip}"/>
+            <Button
+                id="refreshButton"
+                icon="sap-icon://refresh"
+                press="onRefreshPress"
+                tooltip="{i18n>refreshButtonTooltip}"
+            />
         </headerContent>
-        
+
         <content>
-            <Page id="chatPage" class="sapUiContentPadding chatPage" showFooter="true"
-            floatingFooter="false" showHeader="false">
-            
-            <Toolbar id="conversationPanelToolbar">
-                <Title id="conversationPanelTitle" text="Conversation"/>
-                <ToolbarSpacer id="conversationPanelSpacer"/>
-                <Button id="clearButton" icon="sap-icon://delete" press="onClearPress" tooltip="{i18n>clearButtonTooltip}" type="Transparent"/>
-            </Toolbar>
-                    
-            <content>
-                <VBox id="_IDGenVBox" class="sapUiMediumMarginBottom">
-                    <List
+            <Page
+                id="aiChatPage"
+                class="sapUiContentPadding chatPage"
+                showFooter="true"
+                floatingFooter="false"
+                showHeader="false"
+            >
+                <Toolbar id="conversationPanelToolbar">
+                    <Title
+                        id="conversationPanelTitle"
+                        text="{type/name}"
+                    />
+                    <ToolbarSpacer id="conversationPanelSpacer" />
+                    <!-- 
+                    <Button
+                        id="clearButton"
+                        icon="sap-icon://delete"
+                        press="onClearPress"
+                        tooltip="{i18n>clearButtonTooltip}"
+                        type="Emphasized"
+                    />
+                    -->
+                    <Button
+                        id="gotoContextButton"
+                        text="Go To Context"
+                        press="onGotoContextPress"
+                        tooltip="{i18n>clearButtonTooltip}"
+                        type="Emphasized"
+                    />
+                </Toolbar>
+
+                <content>
+                    <VBox
+                        id="aiMessageVBox"
+                        class="sapUiMediumMarginBottom"
+                    >
+                        <List
                             id="aiPageMessageList"
                             showNoData="true"
                             noDataText="No messages yet. Start a conversation below."
@@ -47,13 +81,15 @@
                                 }
                             }"
                         >
-                            <custom:ChatMessageListItem id="chatMessageListItem"
+                            <custom:ChatMessageListItem
+                                id="chatMessageListItem"
                                 message="{message}"
                                 sender="{role}"
                                 date="{createdAt}"
                             >
                                 <custom:avatar>
-                                    <Avatar id="messageAvatar"
+                                    <Avatar
+                                        id="messageAvatar"
                                         displaySize="S"
                                         src="{ path: 'role', formatter: 'ChatFormatter.senderIcon' }"
                                         displayShape="Square"
@@ -62,7 +98,8 @@
                                 </custom:avatar>
 
                                 <custom:adopt>
-                                    <Button id="adoptButton"
+                                    <Button
+                                        id="adoptButton"
                                         class="sapUiTinyMarginBegin"
                                         type="Emphasized"
                                         icon="sap-icon://thumb-up"
@@ -74,22 +111,26 @@
                                 </custom:adopt>
                             </custom:ChatMessageListItem>
                         </List>
-                    <Text id="aiPageListEndMarker" text="" visible="false"/>
-                </VBox>
-            </content>
-            <footer>
-                <OverflowToolbar id="_IDGenOverflowToolbar">
-                    <FeedInput
-                                id="aiPageMessageInput"
-                                post="onPostMessage"
-                                showIcon="false"
-                                growing="true"
-                                placeholder="Type your message here..."
-                                maxLength="2000"
-                            />
-                </OverflowToolbar>
-            </footer>
-        </Page>
+                        <Text
+                            id="aiPageListEndMarker"
+                            text=""
+                            visible="false"
+                        />
+                    </VBox>
+                </content>
+                <footer>
+                    <OverflowToolbar id="aiInputToolbar">
+                        <FeedInput
+                            id="aiPageMessageInput"
+                            post="onPostMessage"
+                            showIcon="false"
+                            growing="true"
+                            placeholder="Type your message here..."
+                            maxLength="2000"
+                        />
+                    </OverflowToolbar>
+                </footer>
+            </Page>
         </content>
     </Page>
-</mvc:View> 
+</mvc:View>
