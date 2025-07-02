@@ -13,7 +13,7 @@ service MainService {
         actions {
             action execute() returns {
                 result : String;
-                tasks  : array of UUID;
+                // tasks  : array of UUID;
             };
             action chatCompletion(content: LargeString) returns BotMessages;
         }

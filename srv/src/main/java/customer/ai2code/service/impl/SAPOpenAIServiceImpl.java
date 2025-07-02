@@ -9,8 +9,8 @@ import javax.annotation.Nonnull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
+// import com.fasterxml.jackson.databind.ObjectMapper;
+// import com.fasterxml.jackson.core.type.TypeReference;
 import com.sap.ai.sdk.core.AiCoreService;
 import com.sap.ai.sdk.foundationmodels.openai.OpenAiClient;
 import com.sap.ai.sdk.foundationmodels.openai.OpenAiModel;
@@ -53,8 +53,9 @@ public class SAPOpenAIServiceImpl implements AIService {
         public SAPOpenAIServiceImpl(SAPOpenAIChatMessageFactory messageFactory,
                         AIResponseHandlerFactory responseHandlerFactory,
                         FunctionCallProcessor functionCallProcessor,
-                        OpenAIFunctionCallAdapter openAIFunctionCallAdapter,
-                        ObjectMapper objectMapper) {
+                        OpenAIFunctionCallAdapter openAIFunctionCallAdapter
+                        // ObjectMapper objectMapper
+                        ) {
                 this.messageFactory = messageFactory;
                 this.responseHandlerFactory = responseHandlerFactory;
                 this.functionCallProcessor = functionCallProcessor;
