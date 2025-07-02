@@ -13,6 +13,8 @@ import customer.ai2code.model.tree.TaskBotNode;
 import customer.ai2code.service.BotService;
 import customer.ai2code.service.TaskService;
 import customer.ai2code.service.ContextService;
+
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,10 +1,13 @@
 package customer.ai2code.model.bot;
 
+import java.util.Locale;
+
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import cds.gen.configservice.BotTypes;
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
+import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.config.AIModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +21,7 @@ public class CodingBot implements Bot {
     private BotInstances botInstance;
     private AIModel aiModel;
     private BotTypes botType;
+    private Locale locale;
     // public CodingBot(BotInstances botInstance, BotTypes botType) {
     //     //TODO Auto-generated constructor stub
     // }
@@ -25,7 +29,8 @@ public class CodingBot implements Bot {
     @Override
     public BotInstancesExecuteContext.ReturnType execute() {
         // 实现代码生成机器人的执行逻辑
-        return null; // 返回执行结果
+        throw new BusinessException("CodingBot execution not implemented yet");
+        // return null; // 返回执行结果
     }
 
     @Override

@@ -17,7 +17,7 @@ import com.sap.cds.services.handler.annotations.On;
 import com.sap.cds.services.handler.annotations.ServiceName;
 import cds.gen.configservice.ConfigService_;
 import cds.gen.configservice.RAGExtractorClass_;
-import customer.ai2code.service.execution.RAGExtractor;
+import customer.ai2code.service.execution.RAGExtraction;
 import customer.ai2code.utils.CheckDataVisitor;
 import customer.ai2code.utils.ClassReflection;
 import customer.ai2code.utils.UnmanagedReportUtils;
@@ -34,7 +34,7 @@ public class ConfigServiceRAGExtractorClassHandler implements EventHandler {
         // Get CqnSelect
         CqnSelect select = context.getCqn();
         // ReflectionUtils.
-        implementedByClasses = ClassReflection.getClassbyInterface(RAGExtractor.class);
+        implementedByClasses = ClassReflection.getClassbyInterface(RAGExtraction.class);
 
         implementedByClasses.forEach((clazz) -> {
             CheckDataVisitor checkDataVisitor = new CheckDataVisitor(clazz);

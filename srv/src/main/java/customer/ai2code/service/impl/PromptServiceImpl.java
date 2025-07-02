@@ -4,9 +4,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import cds.gen.configservice.BotTypes;
 import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotInstances;
+import customer.ai2code.model.bot.Bot;
 import customer.ai2code.service.PromptService;
+import customer.ai2code.service.execution.RAGExtraction;
 import customer.ai2code.service.variable.VariableContext;
 import customer.ai2code.service.variable.VariableParsingService;
 
@@ -44,13 +47,13 @@ public class PromptServiceImpl implements PromptService {
     }
 
     @Override
-    public List<PromptTexts> getPrompts(String botTypeId, String botInstanceId) {
+    public List<PromptTexts> getPrompts(Bot bot) {
         try {
             // 1. 查询BotType对应的所有PromptTexts
-            List<PromptTexts> prompts = genericCqnService.getPromptTextsByBotType(botTypeId);
+            List<PromptTexts> prompts = genericCqnService.getPromptTextsByBotType(bot.getBotType().getId());
 
             // 2. 构建变量解析上下文
-            VariableContext context = buildVariableContext(botInstanceId);
+            VariableContext context = buildVariableContext(bot.getBotInstance().getId());
 
             // 3. 解析每个PromptTexts的内容
             for (PromptTexts prompt : prompts) {
@@ -61,10 +64,68 @@ public class PromptServiceImpl implements PromptService {
             return prompts;
 
         } catch (Exception e) {
-            System.err.println("Failed to get and parse prompts for botTypeId: " + botTypeId +
+            System.err.println("Failed to get and parse prompts for botTypeId: " + bot.getBotType().getId() +
                     ", error: " + e.getMessage());
             return List.of();
         }
+    }
+
+    @Override
+    public PromptTexts getRagAsPrompts(Bot bot, String query) {
+        // 5检查botType.isRAGEnabled，维护true情况下,
+        // 5.1.读取botType.ragParameter,再通过promptService.parse获取配置好的表达式，作为RAG输入语句
+        // 5.2.与content合并成新的RAG输入语句
+        // 5.3获取botType.implementationClass,ragTopK,ragThreshold
+        // 5.4.通过接口RAGExtrator实例化implementationClass
+        // 5.5.调用RAGExtrator.extract方法获取RAG结果
+        // 5.6.将RAG结果添加到prompts中
+
+        PromptTexts ragPrompt = PromptTexts.create();
+
+        BotTypes botType = bot.getBotType();
+
+        if (botType.getIsRAGEnabled() != null && botType.getIsRAGEnabled()) {
+            try {
+                // 5.1 读取botType.ragParameter,再通过promptService.parse获取配置好的表达式，作为RAG输入语句
+                String ragParameter = botType.getRagParameter();
+                // 2. 构建变量解析上下文
+                VariableContext context = buildVariableContext(bot.getBotInstance().getId());
+
+                PromptTexts ragInput = PromptTexts.create();
+                ragInput.setContent(ragParameter);
+
+                String ragInputStatement = parse(ragInput, context);
+
+                // 5.2 与content合并成新的RAG输入语句
+                String combinedRagInput = ragInputStatement + " " + query;
+
+                // 5.3 获取botType.implementationClass,ragTopK,ragThreshold
+                String implementationClass = botType.getImplementationClass();
+                Integer ragTopK = botType.getRagTopK();
+                double ragThreshold = botType.getRagThreshold();
+                String ragSource = botType.getRagSource();
+
+                // 5.4 通过接口RAGExtractor实例化implementationClass
+                Class<?> clazz = Class.forName(implementationClass);
+                RAGExtraction ragExtraction = (RAGExtraction) clazz.getDeclaredConstructor().newInstance();
+
+                // 5.5 调用RAGExtractor.extract方法获取RAG结果
+                String ragContent = ragExtraction.extract(ragSource, ragTopK, combinedRagInput, bot.getLocale(),
+                        ragThreshold);
+
+                // 5.6 将RAG结果添加到prompts中
+                if (ragContent != null && !ragContent.isEmpty()) {
+                    // PromptTexts ragPrompt = new PromptTexts();
+                    ragPrompt.setContent(ragContent);
+                    // prompts.add(ragPrompt);
+                }
+
+            } catch (Exception e) {
+                System.err.println("RAG processing failed: " + e.getMessage());
+                // RAG失败时继续正常流程，不中断聊天
+            }
+        }
+        return ragPrompt; // 返回包含RAG结果的单个PromptTexts列表
     }
 
     /**
@@ -141,17 +202,6 @@ public class PromptServiceImpl implements PromptService {
                     // BotInstance不存在，尝试Task
                 }
             }
-
-            // if (currentInstance == null) {
-            // try {
-            // Tasks task = genericCqnService.getTaskById(taskId);
-            // if (task != null) {
-            // currentInstance = task;
-            // }
-            // } catch (Exception e) {
-            // // Task也不存在
-            // }
-            // }
 
             builder.currentInstance(currentInstance);
 

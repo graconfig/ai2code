@@ -1,5 +1,7 @@
 package customer.ai2code.model.bot;
 
+import java.util.Locale;
+
 // import java.util.concurrent.Executor;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -32,4 +34,6 @@ public interface Bot {
     public BotTypes getBotType();
 
     public AIModel getAiModel();
+
+    public Locale getLocale();
 }

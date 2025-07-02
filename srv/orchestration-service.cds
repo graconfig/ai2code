@@ -1,5 +1,6 @@
 using ai.orchestration as db from '../db/orchestration-model';
 using ai.orchestration.config as config from '../db/orchestration-config-model';
+using ai.orchestration.rag as rag from '../db/orchestration-rag-model';
 
 service MainService {
     entity Tasks        as projection on db.Task;
@@ -27,5 +28,42 @@ service MainService {
                               description : String,
                               typeId : UUID) returns Tasks;
 
+    entity BusinessScenarios as projection on rag.BusinessScenarios excluding {
+            embeddings,
+            embeddings_ai
+        };
+    entity CDSViews          as projection on rag.CDSViews;
+    //按场景查询匹配的CDS Views
+    // action cdsViewsSearch(question : String, threshold : Decimal(5, 2))  returns array of CDSViews;
 
+
+    entity CDSViewFiles      as projection on rag.CDSViewFiles actions {
+            action generateEmbeddings()  returns String;
+            action deleteEmbeddings()    returns String;
+        };
+    entity Viewfields       as projection on rag.Viewfields 
+            excluding {
+                    embeddings
+                };
+
+    entity RagJoinCond       as projection on rag.RagJoinCond;
+
+    @cds.persistence.skip: true
+    @odata.singleton
+    entity Excelupload {
+        @Core.MediaType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        excel : LargeBinary;
+
+        @Core.MediaType: 'text/plain'
+        txtViewFields : LargeBinary;
+    };
+    
+    //查询CDS View的Fields 也可直接查询db
+    action viewFieldsSearch(question : String, threshold : Decimal(5, 2), langu : String) returns array of Viewfields;
+    action viewJoinSearch() returns array of RagJoinCond;
+
+    // 新增上传动作
+    action uploadCDSViews(excel: LargeBinary) returns String;
+    action uploadCDSViewFields(txt: LargeBinary, langu: String) returns String;
+    
 }
