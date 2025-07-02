@@ -270,10 +270,13 @@ sap.ui.define(
           contextBinding.invoke().then(function(result) {
             MessageToast.show("Message execute successfully");
             
-            // Notify navigation controller that ContextNode data has changed
-            sap.ui.getCore().getEventBus().publish("DataUpdate", "ContextNodeChanged");
-            
+            // Get BotInstance ID and notify navigation controller
             var oBotInstanceContext = that.getView().getBindingContext();
+            var sBotInstanceId = oBotInstanceContext ? oBotInstanceContext.getProperty("ID") : null;
+            
+            // Notify navigation controller that BotInstance data has changed with new tasks
+            sap.ui.getCore().getEventBus().publish("DataUpdate", "BotInstanceChanged", { botInstanceId: sBotInstanceId });
+            
             if (oBotInstanceContext) {
               oBotInstanceContext.refresh();
             }

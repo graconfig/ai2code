@@ -93,6 +93,7 @@ sap.ui.define(
 
           // Listen for data update events
           sap.ui.getCore().getEventBus().subscribe("DataUpdate", "ContextNodeChanged", this._onDataUpdated, this);
+          sap.ui.getCore().getEventBus().subscribe("DataUpdate", "BotInstanceChanged", this._onBotInstanceUpdated, this);
           sap.ui.getCore().getEventBus().subscribe("DataUpdate", "TaskChanged", this._onDataUpdated, this);
         },
 
@@ -100,6 +101,7 @@ sap.ui.define(
           Device.media.detachHandler(this._handleWindowResize, this);
           // Unsubscribe from events
           sap.ui.getCore().getEventBus().unsubscribe("DataUpdate", "ContextNodeChanged", this._onDataUpdated, this);
+          sap.ui.getCore().getEventBus().unsubscribe("DataUpdate", "BotInstanceChanged", this._onBotInstanceUpdated, this);
           sap.ui.getCore().getEventBus().unsubscribe("DataUpdate", "TaskChanged", this._onDataUpdated, this);
         },
 
@@ -237,7 +239,7 @@ sap.ui.define(
           }
           // Create binding with comprehensive $expand to get all related data in one request
           var oBinding = oModel.bindContext("/Tasks(" + sTaskId + ")", null, {
-            $expand: "botInstances($expand=type,messages,tasks($expand=botInstances($expand=type))),contextNodes"
+            $expand: "botInstances($expand=type,messages,tasks($expand=type,botInstances($expand=type,messages,tasks($expand=type,botInstances($expand=type))))),contextNodes"
           });
 
           oBinding.attachDataReceived(function () {
@@ -561,7 +563,7 @@ sap.ui.define(
               }
             } else if (oItemData.type === "ContextNode") {
               var sContextNodeId = oItemData.data.ID;
-              var sNodeType = oItemData.data.type;
+              var sNodeType = (oItemData.data.type || "").toLowerCase();
               if (sContextNodeId) {
                 if (sNodeType === "string" ){
                    oRouter.navTo("RouteTextNodePage", { contextNodeId: sContextNodeId });
@@ -674,6 +676,14 @@ sap.ui.define(
           this._dataCache.invalidated = true;
         },
 
+        _onBotInstanceUpdated: function (sChannelId, sEventId, oData) {
+          // Handle BotInstance updates (like execute creating new tasks)
+          if (this._dataCache.isLoaded && this._dataCache.currentTask) {
+            // Reload the current task data to get updated BotInstance with new tasks
+            this._preloadTaskData(this._dataCache.currentTask.ID, "");
+          }
+        },
+
         _buildTaskHierarchyMap: function () {
           if (!this._taskHierarchyMap) {
             this._taskHierarchyMap = new Map();
@@ -720,7 +730,7 @@ sap.ui.define(
 
           // Try to load the task and check if it has a botInstance (indicating it's a subTask)
           var oBinding = oModel.bindContext("/Tasks(" + sTaskId + ")", null, {
-            $expand: "botInstance/task($expand=botInstances($expand=type,messages,tasks($expand=botInstances($expand=type))),contextNodes)"
+            $expand: "botInstance/task($expand=botInstances($expand=type,messages,tasks($expand=type,botInstances($expand=type,messages,tasks($expand=type,botInstances($expand=type))))),contextNodes)"
           });
 
           oBinding.attachDataReceived(function () {
