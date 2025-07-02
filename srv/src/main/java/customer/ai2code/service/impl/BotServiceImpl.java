@@ -231,7 +231,7 @@ public class BotServiceImpl implements BotService {
             updateBotInstanceStatus(bot, "FAILED");
             // throw new BusinessException("Execution failed for bot: " + botInstanceId, e);
             // 异常情况下，为了不打断事务提交，使用catch语句后，将exception消息存储至result字段，且返回包含错误消息的result对象·
-            BotInstancesExecuteContext.ReturnType exceptionResult =  BotInstancesExecuteContext.ReturnType.create();
+            BotInstancesExecuteContext.ReturnType exceptionResult = BotInstancesExecuteContext.ReturnType.create();
             exceptionResult.setResult("Execution failed: " + e.getMessage());
             updateBotInstanceResult(bot, exceptionResult.getResult());
             return exceptionResult;
@@ -254,19 +254,6 @@ public class BotServiceImpl implements BotService {
             default:
                 throw new BusinessException("Unsupported bot function type: " + functionTypeCode);
         }
-    }
-
-    private void updateBotInstanceStatus(Bot bot, String status) {
-        String botInstanceId = bot.getBotInstance().getId();
-        // 使用缓存管理器更新状态
-        cacheManager.updateBotStatus(botInstanceId, status);
-        // 同时更新数据库
-        genericCqnService.updateBotInstanceStatus(botInstanceId, status);
-    }
-
-    private void updateBotInstanceResult(Bot bot, String result) {
-        String botInstanceId = bot.getBotInstance().getId();
-        genericCqnService.updateBotInstanceResult(botInstanceId, result);
     }
 
     private String extractIdFromContext(BotInstancesChatCompletionContext context) {
@@ -341,6 +328,9 @@ public class BotServiceImpl implements BotService {
         ContextNodes node = contextService.upsertContext(botInstanceId, absoluteOutputContextPath, messageText,
                 bot.getBotType().getContextTypeCode());
 
+        // 6.1 将 ContextNode 的 ID 设置到 BotInstance 中
+        updateBotInstanceContextNodeId(bot, node.getId());
+
         // 7. 检查botType的ragOutputContextPath，有维护值的情况下写入一条新的ContextNode
         String ragOutputContextPath = bot.getBotType().getRagOutputContextPath();
         if (ragOutputContextPath != null && !ragOutputContextPath.isBlank()) {
@@ -414,4 +404,33 @@ public class BotServiceImpl implements BotService {
     // throw new BusinessException("Main task not found for botInstanceId: " +
     // botInstanceId);
     // }
+
+    /**
+     * 更新BotInstance的contextNodeId字段
+     */
+    private void updateBotInstanceContextNodeId(Bot bot, String contextNodeId) {
+        try {
+            // 使用genericCqnService更新数据库中的contextNodeId
+            genericCqnService.updateBotInstanceContextNodeId(bot.getBotInstance(), contextNodeId);
+            System.out.println(
+                    "Updated contextNodeId for botInstance: " + bot.getBotInstance().getId() + " -> " + contextNodeId);
+
+        } catch (Exception e) {
+            throw new BusinessException(
+                    "Failed to update contextNodeId for botInstance: " + bot.getBotInstance().getId(), e);
+        }
+    }
+
+    private void updateBotInstanceStatus(Bot bot, String status) {
+        String botInstanceId = bot.getBotInstance().getId();
+        // 使用缓存管理器更新状态
+        cacheManager.updateBotStatus(botInstanceId, status);
+        // 同时更新数据库
+        genericCqnService.updateBotInstanceStatus(bot.getBotInstance(), status);
+    }
+
+    private void updateBotInstanceResult(Bot bot, String result) {
+        // String botInstanceId = bot.getBotInstance().getId();
+        genericCqnService.updateBotInstanceResult(bot.getBotInstance(), result);
+    }
 }
