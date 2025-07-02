@@ -189,20 +189,20 @@ public class GenericCqnService {
         entityService.update(mainService, null, BotInstances_.class, botInstance, true);
     }
 
-    public void updateBotInstanceStatus(String botInstanceId, String statusCode) {
-        BotInstances botInstance = getBotInstanceById(botInstanceId);
+    public void updateBotInstanceStatus(BotInstances botInstance, String statusCode) {
+        // BotInstances botInstance = getBotInstanceById(botInstanceId);
         botInstance.setStatusCode(statusCode);
         updateBotInstance(botInstance);
     }
 
-    public void updateBotInstanceResult(String botInstanceId, String result) {
-        BotInstances botInstance = getBotInstanceById(botInstanceId);
+    public void updateBotInstanceResult(BotInstances botInstance, String result) {
+        // BotInstances botInstance = getBotInstanceById(botInstanceId);
         botInstance.setResult(result);
         updateBotInstance(botInstance);
     }
 
-    public void updateBotInstanceStatusAndResult(String botInstanceId, String statusCode, String result) {
-        BotInstances botInstance = getBotInstanceById(botInstanceId);
+    public void updateBotInstanceStatusAndResult(BotInstances botInstance, String statusCode, String result) {
+        // BotInstances botInstance = getBotInstanceById(botInstanceId);
         botInstance.setStatusCode(statusCode);
         botInstance.setResult(result);
         updateBotInstance(botInstance);
@@ -360,7 +360,7 @@ public class GenericCqnService {
     /**
      * 创建并插入单条BotMessage（指定角色）
      */
-    public BotMessages createAndInsertBotMessage(String botInstanceId, String message, String ragContent,String role) {
+    public BotMessages createAndInsertBotMessage(String botInstanceId, String message, String ragContent, String role) {
         BotMessages botMessage = BotMessages.create();
         botMessage.setId(UUID.randomUUID().toString());
         botMessage.setBotInstanceId(botInstanceId);
@@ -371,7 +371,6 @@ public class GenericCqnService {
         entityService.insert(mainService, null, BotMessages_.class, botMessage, true);
         return botMessage;
     }
-
 
     /**
      * 判断是否是第一次调用
@@ -519,7 +518,7 @@ public class GenericCqnService {
 
     public String findMatchingViewsByScenario(String ragSource, int ragTopK, String query,
             Locale language, double threshold) {
-        
+
         // 1.构建向量
         CqnVector vector = CQL.vector(query);
         var similarity = CQL.cosineSimilarity(CQL.get("embeddings"), vector);
@@ -601,9 +600,10 @@ public class GenericCqnService {
         }
     }
 
-     // ========== 新增CDSViews插入方法 ==========
+    // ========== 新增CDSViews插入方法 ==========
     /**
      * 插入CDSViews实体（基于viewName主键）
+     * 
      * @param view CDSViews实体（需包含viewName）
      */
     public void insertCDSViews(CDSViews view) {
@@ -611,19 +611,20 @@ public class GenericCqnService {
         if (view.getViewName() == null || view.getViewName().isEmpty()) {
             throw new IllegalArgumentException("CDSViews.viewName不能为空");
         }
-        
+
         entityService.insert(
-            mainService,  // 使用MainService作为服务上下文
-            null,         // 无事务上下文
-            CDSViews_.class, 
-            view, 
-            true  // 自动生成审计字段（managed aspect）
+                mainService, // 使用MainService作为服务上下文
+                null, // 无事务上下文
+                CDSViews_.class,
+                view,
+                true // 自动生成审计字段（managed aspect）
         );
     }
 
     // ========== 新增Viewfields插入方法 ==========
     /**
      * 插入Viewfields实体（带ID主键）
+     * 
      * @param field Viewfields实体（需包含ID或自动生成）
      */
     public void insertViewfields(Viewfields field) {
@@ -631,20 +632,20 @@ public class GenericCqnService {
         if (field.getId() == null) {
             field.setId(UUID.randomUUID().toString());
         }
-        
+
         // 调用entityService插入
         entityService.insert(
-            mainService,
-            null,
-            Viewfields_.class,
-            field,
-            true
-        );
+                mainService,
+                null,
+                Viewfields_.class,
+                field,
+                true);
     }
 
     // ========== 新增CDSViewFiles插入方法 ==========
     /**
      * 插入CDSViewFiles实体
+     * 
      * @param file CDSViewFiles实体（需包含fileName）
      */
     public void insertCDSViewFiles(CDSViewFiles file) {
@@ -652,25 +653,25 @@ public class GenericCqnService {
         if (file.getFileName() == null || file.getFileName().isEmpty()) {
             throw new IllegalArgumentException("CDSViewFiles.fileName不能为空");
         }
-        
+
         // 自动生成ID（如果未设置）
         if (file.getId() == null) {
             file.setId(UUID.randomUUID().toString());
         }
-        
+
         // 调用entityService插入
         entityService.insert(
-            mainService,
-            null,
-            CDSViewFiles_.class,
-            file,
-            true
-        );
+                mainService,
+                null,
+                CDSViewFiles_.class,
+                file,
+                true);
     }
 
     // 在GenericCqnService中添加以下方法
     public void deleteCDSViewsByNames(List<String> viewNames) {
-        if (viewNames == null || viewNames.isEmpty()) return;
+        if (viewNames == null || viewNames.isEmpty())
+            return;
         // 使用entityService的delete方法
         for (String viewName : viewNames) {
             CDSViews view = CDSViews.create();
@@ -685,6 +686,19 @@ public class GenericCqnService {
         field.setTableName(tableName);
         field.setLangu(langu);
         entityService.delete(mainService, null, Viewfields_.class, field, true);
+    }
+
+    // 在GenericCqnService中添加这个方法
+    public void updateBotInstanceContextNodeId(BotInstances botInstance, String contextNodeId) {
+        // Update updateQuery = Update.entity(BotInstances_.class)
+        // .where(b -> b.ID().eq(botInstanceId))
+        // .data(BotInstances.CONTEXT_NODE_ID, contextNodeId);
+
+        // persistenceService.run(updateQuery);
+        botInstance.setContextID(contextNodeId);
+        // entityService.update(mainService, null, BotInstances_.class, botInstance,
+        // true);
+        updateBotInstance(botInstance);
     }
 
 }

@@ -54,7 +54,7 @@ entity BotInstance : cuid, managed {
     messages  : Composition of many BotMessage
                     on messages.botInstance = $self;
     context   : Association to ContextNode
-                    on context.ID = $self.ID; // Context node used by this bot instance
+                    on context.ID = $self.contextID; // Context node used by this bot instance
 }
 
 /** Bot message entity, records human-AI/system conversations */
