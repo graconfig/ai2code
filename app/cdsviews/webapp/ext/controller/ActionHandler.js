@@ -55,14 +55,29 @@ sap.ui.define([
                     this._selectedFile = null;
                 }
             },
-            onOk: function (oEvent) {
+            onOk: async function (oEvent) {
                 setDialogBusy(true)
-                const oUploader = byId("uploader");
-                if (!oUploader.getValue()) {
-                    sap.m.MessageBox.warning("请先选择文件！");
-                    return;
+                const oModel = oExtensionAPI.getModel();
+
+                const base64Content = await this.fileToBase64(this._selectedFile);
+
+                const oContextBinding = oModel.bindContext("/uploadCDSViews(...)");
+                oContextBinding.setParameter("excel", base64Content);
+
+                try {
+                    await oContextBinding.execute();
+
+                    const result = oContextBinding.getBoundContext().getObject();
+                    //MessageToast.show(result.value);
+                } catch (e) {
+                    MessageBox.error("上传失败: " + e.message);
                 }
-                oUploader.upload(); // 执行 PUT 请求，发送二进制流
+                // const oUploader = byId("uploader");
+                // if (!oUploader.getValue()) {
+                //     sap.m.MessageBox.warning("请先选择文件！");
+                //     return;
+                // }
+                // oUploader.upload(); // 执行 PUT 请求，发送二进制流
                 setDialogBusy(false)
                 // const that = this;
                 // const file = this._selectedFile;
@@ -136,7 +151,17 @@ sap.ui.define([
                 //         setDialogBusy(false)
                 //     })
             },
-
+            fileToBase64: function (file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const base64 = reader.result.split(',')[1]; // 去掉 data: 前缀
+                        resolve(base64);
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            },
             onCancel: function (oEvent) {
                 closeDialog();
             },

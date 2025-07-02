@@ -8,7 +8,7 @@
                     fileType="xlsx"
                     name="excel"
                     multiple="false"
-                    uploadUrl="/odata/v4/Main/excelupload/excel"
+                    uploadUrl="/odata/v4/Main/uploadCDSViews"
                     fileAllowed=".onFileAllowed"
                     fileEmpty=".onFileEmpty"
                     uploadComplete=".onUploadComplete"

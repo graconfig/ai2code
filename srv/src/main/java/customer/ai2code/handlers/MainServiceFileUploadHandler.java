@@ -1,24 +1,19 @@
 package customer.ai2code.handlers;
 
-import cds.gen.mainservice.Excelupload_;
 import cds.gen.mainservice.MainService_;
+import cds.gen.mainservice.UploadCDSViewsContext;
+import cds.gen.mainservice.UploadCDSViewFieldsContext;
 import customer.ai2code.exception.BusinessException;
 import customer.ai2code.service.execution.CdsViewFileUploadService;
-import customer.ai2code.service.impl.rag.CdsViewFileUploadServiceImpl;
 
 import com.sap.cds.services.handler.EventHandler;
 import com.sap.cds.services.handler.annotations.On;
 import com.sap.cds.services.handler.annotations.ServiceName;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
-/**
- * MainService文件上传处理器，处理CDS视图和字段的上传事件
- * 参考现有处理器类的命名和代码风格实现
- */
 @Component
 @ServiceName(MainService_.CDS_NAME)
 public class MainServiceFileUploadHandler implements EventHandler {
@@ -30,18 +25,30 @@ public class MainServiceFileUploadHandler implements EventHandler {
     }
 
     /**
-     * 处理CDS视图上传事件（无异常处理，异常向上抛出）
+     * 处理CDS视图上传（无界action，使用EventContext）
      */
-    @On(event = "uploadCDSViews")
-    public String handleUploadCDSViews(Excelupload_ ref, InputStream excel) {
-        return fileUploadService.uploadCDSViews(excel);
+    @On(event = UploadCDSViewsContext.CDS_NAME)
+    public void handleUploadCDSViews(UploadCDSViewsContext context) {
+        try (InputStream excel = new ByteArrayInputStream(context.getExcel())) {
+            String result = fileUploadService.uploadCDSViews(excel);
+            context.setResult(result);
+        } catch (Exception e) {
+            throw new BusinessException("CDS视图上传失败", e);
+        }
     }
 
     /**
-     * 处理CDS视图字段上传事件（无异常处理，异常向上抛出）
+     * 处理CDS视图字段上传（无界action，使用EventContext）
      */
-    @On(event = "uploadCDSViewFields")
-    public String handleUploadCDSViewFields(Excelupload_ ref, InputStream txt, String langu) {
-        return fileUploadService.uploadCDSViewFields(txt, langu);
+    @On(event = UploadCDSViewFieldsContext.CDS_NAME)
+    public void handleUploadCDSViewFields(UploadCDSViewFieldsContext context) {
+        context.setResult("uploadCDSViews action 调用成功！");
+        // try (InputStream txt = new ByteArrayInputStream(context.getTxt())) {
+        //     String result = fileUploadService.uploadCDSViewFields(txt, context.getLangu());
+        //     //context.setResult(result);
+        //     context.setResult("uploadCDSViews action 调用成功！");
+        // } catch (Exception e) {
+        //     throw new BusinessException("视图字段上传失败", e);
+        // }
     }
 }

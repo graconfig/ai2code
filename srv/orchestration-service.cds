@@ -40,7 +40,6 @@ service MainService {
     entity CDSViewFiles      as projection on rag.CDSViewFiles actions {
             action generateEmbeddings()  returns String;
             action deleteEmbeddings()    returns String;
-            action linkToView(viewName: String) returns Boolean;
         };
     entity Viewfields       as projection on rag.Viewfields 
             excluding {
@@ -51,7 +50,7 @@ service MainService {
 
     @cds.persistence.skip: true
     @odata.singleton
-    entity excelupload {
+    entity Excelupload {
         @Core.MediaType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         excel : LargeBinary;
 
