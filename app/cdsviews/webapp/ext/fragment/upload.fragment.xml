@@ -1,0 +1,29 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns:u="sap.ui.unified"
+                         xmlns="sap.m">
+    <Dialog id="uploadDialogId" title="Import Data" class="sapUiResponsiveContentPadding" beforeOpen=".onBeforeOpen"
+            afterClose=".onAfterClose">
+        <content>
+            <u:FileUploader
+                    id="uploader"
+                    fileType="xlsx"
+                    name="excel"
+                    multiple="false"
+                    uploadUrl="/odata/v4/Main/excelupload/excel"
+                    fileAllowed=".onFileAllowed"
+                    fileEmpty=".onFileEmpty"
+                    uploadComplete=".onUploadComplete"
+                    typeMissmatch=".onTypeMismatch"
+                    sendXHR="true"
+                    useMultipart="true"
+                    change=".onFileChange"
+                    placeholder="Choose a excel file..."
+                    httpRequestMethod="Put"/>
+        </content>
+        <beginButton>
+            <Button id="ok" text="OK" press=".onOk" type="Emphasized" enabled="false"/>
+        </beginButton>
+        <endButton>
+            <Button id="cancel" text="Cancel" press=".onCancel"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

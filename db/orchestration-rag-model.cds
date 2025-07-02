@@ -9,12 +9,12 @@ entity BusinessScenarios : cuid, managed {
     scenario        : String @title: 'Business Scenario';
     description     : String @title: 'Scenario Description';
     viewCategory    : String @title: 'View Category';
-    embeddings      : Vector(768);    //HANA生成的向量
-    embeddings_ai   : Vector(1536);   //AI Core生成的向量
+    //embeddings      : Vector(768);    //HANA生成的向量
+    //embeddings_ai   : Vector(1536);   //AI Core生成的向量
 }
 
 
-entity CDSViews : managed {
+entity CDSViews : cuid, managed {
     viewCategory : String  @title: 'View Category';
     key viewName     : String  @title: 'View Name';
     viewDesc     : String  @title: 'View Description';
@@ -43,7 +43,7 @@ entity Viewfields : cuid, managed {
     tableName            : String;
     tableDesc            : String;
     langu                : String;
-    embeddings           : Vector(768);//可选生成向量，可以直接根据View查询fields
+    //embeddings           : Vector(768);//可选生成向量，可以直接根据View查询fields
 }
 
 entity RagJoinCond : cuid, managed {
