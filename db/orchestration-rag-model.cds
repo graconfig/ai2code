@@ -16,7 +16,7 @@ entity BusinessScenarios : cuid, managed {
 
 entity CDSViews : cuid, managed {
     viewCategory : String  @title: 'View Category';
-    key viewName     : String  @title: 'View Name';
+    viewName     : String  @title: 'View Name';
     viewDesc     : String  @title: 'View Description';
     isActive     : Boolean @title: 'is Active'
 }
