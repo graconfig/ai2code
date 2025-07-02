@@ -59,6 +59,7 @@ sap.ui.define([
             var sPath = "/ContextNodes(" + contextNodeId + ")";
             oModel.bindContext(sPath).requestObject().then(function (oData) {
                 oController.getView().setBusy(false);
+                oData.type = (oData.type || "").toLowerCase()
                 oViewModel.setProperty("/type", oData.type);
                 oViewModel.setProperty("/value", oData.value);
                 oViewModel.setProperty("/title", oData.title);
