@@ -72,22 +72,7 @@ annotate service.CDSViewFiles with @(
             $Type : 'UI.DataField',
             Label : 'Media Type',
             Value : mediaType,
-        },
-        {
-            $Type : 'UI.DataField',
-            Label : 'isGenerateEmbedding',
-            Value : isGenerated,
-        },
-                {
-            $Type : 'UI.DataFieldForAction',
-            Action: 'MainService.generateEmbeddings',
-            Label : 'Generate Embeddings'
-        },
-        {
-            $Type : 'UI.DataFieldForAction',
-            Action: 'MainService.deleteEmbeddings',
-            Label : 'Delete Embeddings'
-        },
+        }
     ],
     UI.FieldGroup #FileDetails : {
         $Type : 'UI.FieldGroupType',
@@ -111,20 +96,10 @@ annotate service.CDSViewFiles with @(
                 $Type : 'UI.DataField',
                 Value : fileContent,
                 Label : '{i18n>FileContent}',
-            },
-            {
-                $Type : 'UI.DataField',
-                Value : isGenerated,
-                Label : '{i18n>isGenerateEmbedding}',
-            },
+            }
         ],
     },
-)actions {
-    @Common.SideEffects: {TargetProperties: ['in/isGenerated'], }
-    generateEmbeddings;
-    @Common.SideEffects: {TargetProperties: ['in/isGenerated'], }
-    deleteEmbeddings;
-};
+);
 
 annotate service.Viewfields with @(
     UI.LineItem #ViewFields : [
