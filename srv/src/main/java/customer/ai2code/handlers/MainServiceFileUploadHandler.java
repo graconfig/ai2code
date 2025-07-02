@@ -55,10 +55,9 @@ public class MainServiceFileUploadHandler implements EventHandler {
     }
 
     /**
-     * 将Base64编码的byte[]转换为InputStream
+     * 将Base64编码的String转换为InputStream
      */
-    private InputStream decodeBase64ToInputStream(byte[] base64Bytes) {
-        String base64Str = new String(base64Bytes);
+    private InputStream decodeBase64ToInputStream(String base64Str) {
         byte[] decodedBytes = Base64.getDecoder().decode(base64Str);
         return new ByteArrayInputStream(decodedBytes);
     }
