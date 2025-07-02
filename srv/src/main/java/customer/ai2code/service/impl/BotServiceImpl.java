@@ -40,6 +40,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.xml.transform.Result;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -226,7 +229,12 @@ public class BotServiceImpl implements BotService {
         } catch (Exception e) {
             // 更新状态为FAILED
             updateBotInstanceStatus(bot, "FAILED");
-            throw new BusinessException("Execution failed for bot: " + botInstanceId, e);
+            // throw new BusinessException("Execution failed for bot: " + botInstanceId, e);
+            // 异常情况下，为了不打断事务提交，使用catch语句后，将exception消息存储至result字段，且返回包含错误消息的result对象·
+            BotInstancesExecuteContext.ReturnType exceptionResult =  BotInstancesExecuteContext.ReturnType.create();
+            exceptionResult.setResult("Execution failed: " + e.getMessage());
+            updateBotInstanceResult(bot, exceptionResult.getResult());
+            return exceptionResult;
         }
     }
 
