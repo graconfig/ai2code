@@ -9,11 +9,7 @@ entity BusinessScenarios : cuid, managed {
     scenario        : String @title: 'Business Scenario';
     description     : String @title: 'Scenario Description';
     viewCategory    : String @title: 'View Category';
-<<<<<<< HEAD
     embeddings      : Vector(768);    //HANA生成的向量
-=======
-    embeddings      : Vector(768);      //HANA生成的向量
->>>>>>> 346865ae0aaf26a7e1949c8119a55dd7ed1caf85
     embeddings_ai   : Vector(1536);   //AI Core生成的向量
 }
 
