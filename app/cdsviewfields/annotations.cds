@@ -80,22 +80,22 @@ annotate service.CDSViewFiles with @(
             {
                 $Type : 'UI.DataField',
                 Value : fileName,
-                Label : '{i18n>FileName}',
+                Label : 'file Name',
             },
             {
                 $Type : 'UI.DataField',
                 Value : size,
-                Label : '{i18n>FileSize}',
+                Label : 'File Size',
             },
             {
                 $Type : 'UI.DataField',
                 Value : mediaType,
-                Label : '{i18n>MediaType}',
+                Label : 'Media Type',
             },
             {
                 $Type : 'UI.DataField',
                 Value : fileContent,
-                Label : '{i18n>FileContent}',
+                Label : 'File Content',
             }
         ],
     },
@@ -106,28 +106,23 @@ annotate service.Viewfields with @(
         {
             $Type : 'UI.DataField',
             Value : langu,
-            Label : '{i18n>Language}',
+            Label : 'Language',
         },
         {
             $Type : 'UI.DataField',
             Value : tableName,
-            Label : '{i18n>ViewName}',
+            Label : 'View Name',
         },
         {
             $Type : 'UI.DataField',
             Value : tableDesc,
-            Label : '{i18n>ViewDesc}',
+            Label : 'View Desc',
         },
         {
             $Type : 'UI.DataField',
             Value : content,
-            Label : '{i18n>Fields}',
-        },
-        {
-            $Type : 'UI.DataField',
-            Value : isGeneratedEmbedding,
-            Label : '{i18n>Isgenerateembedding}',
-        },
+            Label : 'Fields',
+        }
     ]
 );
 

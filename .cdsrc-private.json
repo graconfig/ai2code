@@ -10,7 +10,7 @@
           "instance": "ai2code-db",
           "key": "ai2code-db-key"
         },
-        "kind": "hana-cloud",
+        "kind": "hana",
         "vcap": {
           "name": "db"
         }

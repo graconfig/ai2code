@@ -10,6 +10,10 @@ sap.ui.define(
         return sap.ui.core.Fragment.byId("fileUploadFragment", sId);
       }
 
+      function setDialogBusy(bBusy) {
+        oUploadDialog.setBusy(bBusy)
+      }
+
       function closeDialog() {
         oUploadDialog && oUploadDialog.close();
       }
@@ -32,7 +36,17 @@ sap.ui.define(
         onAfterItemAdded: function (oEvent) {
           const oItem = oEvent.getParameter("item");
           const oFile = oItem.getFileObject();
-          this.uploadContent(oFile, "ZH").then(() => {
+          var langu = "";
+          if (oFile.name.includes("EN")) {
+            langu = 'en';
+          } else if (oFile.name.includes("ZH")) {
+            langu = 'zh';
+          } else if (oFile.name.includes("JA")) {
+            langu = 'ja';
+          } else {
+            langu = 'en';
+          }
+          this.uploadContent(oFile, langu).then(() => {
             oItem.setUploadState("Complete");
           });
         },
@@ -106,7 +120,7 @@ sap.ui.define(
         //   }
         // },
         uploadContent: async function (oFile, langu) {
-
+          setDialogBusy(true);
           const oModel = oExtensionAPI.getModel();
           const binaryBuffer = await this.fileToArrayBuffer(oFile);
           const sBase64 = await this.fileToBase64(oFile);  // base64 string, no data URI
@@ -116,15 +130,19 @@ sap.ui.define(
           oContextBinding.setParameter("langu", langu);
 
           try {
-            const resultContext = await oContextBinding.execute();
-            const resultValue = resultContext.getObject(); // result: { value: "成功导入 38 条视图字段" }
-
-            sap.m.MessageToast.show(resultValue.value);
+            await oContextBinding.execute();
+            const result = oContextBinding.getBoundContext().getObject();
+            MessageToast.show(result.value);
+            setDialogBusy(false);
+            oExtensionAPI.refresh()
+            closeDialog();
           } catch (err) {
             console.error("上传失败", err);
+            setDialogBusy(false);
             sap.m.MessageBox.error("上传失败: " + err.message);
           }
         },
+
         fileToBase64: function (file) {
           return new Promise((resolve, reject) => {
             const reader = new FileReader();
