@@ -1,6 +1,10 @@
 package customer.ai2code.service.variable.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import cds.gen.mainservice.ContextNodes;
 import customer.ai2code.service.variable.VariableContext;
@@ -15,8 +19,11 @@ public class ContextVariableResolver implements VariableResolver {
 
     private final GenericCqnService genericCqnService;
 
-    public ContextVariableResolver(GenericCqnService genericCqnService) {
+    private final ObjectMapper objectMapper;
+
+    public ContextVariableResolver(GenericCqnService genericCqnService, ObjectMapper objectMapper) {
         this.genericCqnService = genericCqnService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -29,14 +36,31 @@ public class ContextVariableResolver implements VariableResolver {
         try {
             String contextPath = resolveContextPath(variableExpression, context);
             String taskId = context.getMainTaskId(); // 统一使用mainTaskId
-            
-            ContextNodes contextNode = genericCqnService.getContextNodeByTaskAndPath(taskId, contextPath);
-            //改成返回整个contextNode对象
-            return contextNode != null ? contextNode.toJson() : "";
-            // return contextNode != null ? contextNode.getValue() : "";
-            
+
+            // 判断 contextPath 是否包含 [*]
+            if (contextPath.contains("[*]")) {
+                // 获取多个 ContextNodes
+                List<ContextNodes> contextNodes = genericCqnService.getContextNodesByTaskAndPathPattern(taskId,
+                        contextPath);
+
+                // 如果只有一个节点，直接返回其值；如果多个节点，返回数组格式
+                if (contextNodes == null || contextNodes.isEmpty()) {
+                    return "";
+
+                } else {
+                    // 多个节点，构建 JSON 数组
+                    return objectMapper.writeValueAsString(contextNodes);
+                }
+            } else {
+                // 获取单个 ContextNode
+                ContextNodes contextNode = genericCqnService.getContextNodeByTaskAndPath(taskId, contextPath);
+
+                return contextNode != null ? contextNode.toJson() : "";
+            }
+
         } catch (Exception e) {
-            System.err.println("Failed to resolve context variable: " + variableExpression + ", error: " + e.getMessage());
+            System.err.println(
+                    "Failed to resolve context variable: " + variableExpression + ", error: " + e.getMessage());
             return "";
         }
     }
