@@ -98,8 +98,10 @@ public class TaskServiceImpl implements TaskService {
                 sequence, botInstanceId, PBotType.getSubTaskTypeId());
 
         // 4.1 为SubTask创建ContextNode - description
-        contextService.upsertContextWithMainTaskId(newTask.getId(), absoluteOutputContextPath + ".description",
-                description, "text");
+        // contextService.upsertContextWithMainTaskId(newTask.getId(),
+        // absoluteOutputContextPath + ".description",
+        // description, "text");
+        contextService.upsertContext(botInstanceId, absoluteOutputContextPath + ".description", description, "text");
 
         // 5. 为每个BotType创建BotInstance
         for (BotTypes botType : botTypes) {
