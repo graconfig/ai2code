@@ -673,7 +673,8 @@ public class GenericCqnService {
             file.setId(UUID.randomUUID().toString());
         }
         
-        // 调用entityService插入
+        try {
+            // 调用entityService插入
         entityService.insert(
             mainService,
             null,
@@ -681,6 +682,11 @@ public class GenericCqnService {
             file,
             true
         );
+        } catch (Exception e) {
+            // TODO: handle exception
+            throw new BusinessException("CDS视图上传失败543: " + e.getMessage(), e);
+        }
+        
     }
 
     // 在GenericCqnService中添加以下方法

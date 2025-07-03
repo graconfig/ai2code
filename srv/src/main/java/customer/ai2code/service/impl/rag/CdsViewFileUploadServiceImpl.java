@@ -41,12 +41,12 @@ public class CdsViewFileUploadServiceImpl implements CdsViewFileUploadService {
             fileRecord.setId(UUID.randomUUID().toString());
             fileRecord.setFileName("cds_view_" + UUID.randomUUID() + ".xlsx");
             fileRecord.setSize(String.valueOf(content.length));
-            // fileRecord.setMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            fileRecord.setMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             fileRecord.setFileContent(new ByteArrayInputStream(content)); // 直接存储byte[]
             cqnService.insertCDSViewFiles(fileRecord);
 
             // 3. 解析并保存视图数据
-            List<CDSViews> views = parser.parseCDSViews(excel);
+            List<CDSViews> views = parser.parseCDSViews(new ByteArrayInputStream(content));
 
             // 获取所有视图名称
             Set<String> viewNames = new HashSet<>();
@@ -88,7 +88,7 @@ public class CdsViewFileUploadServiceImpl implements CdsViewFileUploadService {
             cqnService.insertCDSViewFiles(fileRecord);
 
             // 3. 解析并保存字段数据
-            List<Viewfields> fields = parser.parseViewFields(txt, langu);
+            List<Viewfields> fields = parser.parseViewFields(new ByteArrayInputStream(content), langu);
 
             // 按表名和语言分组
             Map<String, List<Viewfields>> fieldsByTable = new HashMap<>();

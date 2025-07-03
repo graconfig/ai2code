@@ -34,7 +34,7 @@ public class MainServiceFileUploadHandler implements EventHandler {
             String result = fileUploadService.uploadCDSViews(excel);
             context.setResult(result);
         } catch (Exception e) {
-            throw new BusinessException("CDS视图上传失败", e);
+            throw new BusinessException("CDS视图上传失败" + e.getMessage(), e);
         }
     }
 
@@ -43,15 +43,12 @@ public class MainServiceFileUploadHandler implements EventHandler {
      */
     @On(event = UploadCDSViewFieldsContext.CDS_NAME)
     public void handleUploadCDSViewFields(UploadCDSViewFieldsContext context) {
-        context.setResult("uploadCDSViews action 调用成功！");
-        // try (InputStream txt = new ByteArrayInputStream(context.getTxt())) {
-        // String result = fileUploadService.uploadCDSViewFields(txt,
-        // context.getLangu());
-        // //context.setResult(result);
-        // context.setResult("uploadCDSViews action 调用成功！");
-        // } catch (Exception e) {
-        // throw new BusinessException("视图字段上传失败", e);
-        // }
+        try (InputStream txt = decodeBase64ToInputStream(context.getTxt())) {
+            String result = fileUploadService.uploadCDSViewFields(txt,context.getLangu());
+            context.setResult(result);
+        } catch (Exception e) {
+            throw new BusinessException("视图字段上传失败", e);
+        }
     }
 
     /**

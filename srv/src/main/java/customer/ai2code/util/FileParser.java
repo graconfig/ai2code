@@ -58,7 +58,7 @@ public class FileParser {
             String headerLine = reader.readLine();
             if (headerLine == null) return fields;
             
-            String[] headers = headerLine.split("\t");
+            String[] headers = headerLine.split(",");
             
             // 定义必需的列索引
             int categoryCol = indexOf(headers, "category");
