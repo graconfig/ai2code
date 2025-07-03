@@ -66,90 +66,15 @@ sap.ui.define([
 
                 try {
                     await oContextBinding.execute();
-
                     const result = oContextBinding.getBoundContext().getObject();
-                    //MessageToast.show(result.value);
+                    const message = result?.value;
+                    MessageToast.show(result.value);
+                    oExtensionAPI.refresh()
+                    closeDialog();
                 } catch (e) {
                     MessageBox.error("上传失败: " + e.message);
                 }
-                // const oUploader = byId("uploader");
-                // if (!oUploader.getValue()) {
-                //     sap.m.MessageBox.warning("请先选择文件！");
-                //     return;
-                // }
-                // oUploader.upload(); // 执行 PUT 请求，发送二进制流
                 setDialogBusy(false)
-                // const that = this;
-                // const file = this._selectedFile;
-                // if (!file) {
-                //     sap.m.MessageBox.error("请先选择文件");
-                //     return;
-                // }
-
-                // // 读取为 ArrayBuffer → Base64
-                // const reader = new FileReader();
-                // reader.onload = async function (e) {
-                //     try {
-                //         const arrayBuffer = e.target.result;
-                //         const uint8Array = new Uint8Array(arrayBuffer);
-                //         let binary = '';
-                //         for (let i = 0; i < uint8Array.length; i++) {
-                //             binary += String.fromCharCode(uint8Array[i]);
-                //         }
-                //         const base64 = btoa(binary);
-
-                //         const payload = {
-                //             excel: {
-                //                 $binary: base64
-                //             }
-                //         };
-
-                //         const response = await fetch("/odata/v4/Main/uploadCDSViews", {
-                //             method: "POST",
-                //             headers: {
-                //                 "Content-Type": "application/json"
-                //             },
-                //             body: JSON.stringify(payload)
-                //         });
-
-                //         const result = await response.statusText;
-                //         if (response.ok) {
-                //             sap.m.MessageToast.show("上传成功：" + result.value);
-                //             that.byId("uploadDialogId").close();
-                //             setDialogBusy(false);
-                //         } else {
-                //             sap.m.MessageBox.error("上传失败：" + (result.error?.message || JSON.stringify(result)));
-                //             setDialogBusy(false);
-                //         }
-                //     } catch (err) {
-                //         sap.m.MessageBox.error("上传失败：" + err.message);
-                //         setDialogBusy(false);
-                //     }
-                // };
-                // reader.readAsArrayBuffer(file);
-
-                // //fragment.xml中uploader控件的ID
-                // var oFileUploader = byId("uploader")
-                // var headPar = new sap.ui.unified.FileUploaderParameter();
-                // //设置参数
-                // headPar.setName('slug');
-                // headPar.setValue('CDSViews');
-                // oFileUploader.removeHeaderParameter('slug');
-                // oFileUploader.addHeaderParameter(headPar);
-                // //设置excelupload服务路径，需要加上/excel（其中excel是entity中声明的属性）
-                // var sUploadUri = oExtensionAPI._controller.extensionAPI._controller._oAppComponent.getManifestObject().resolveUri("/uploadCDSViews")
-                // oFileUploader.setUploadUrl(sUploadUri);
-
-                // oFileUploader
-                //     .checkFileReadable()
-                //     .then(function () {
-                //         //执行upload动作，调用后端
-                //         oFileUploader.upload();
-                //     })
-                //     .catch(function (error) {
-                //         showError("The file cannot be read.");
-                //         setDialogBusy(false)
-                //     })
             },
             fileToBase64: function (file) {
                 return new Promise((resolve, reject) => {

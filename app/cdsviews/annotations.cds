@@ -1,5 +1,13 @@
 using MainService as service from '../../srv/orchestration-service';
+
+annotate service.CDSViews with @odata.draft.enabled;
+
 annotate service.CDSViews with @(
+    UI.HeaderInfo:{
+        TypeName:'Views',
+        TypeNamePlural:'Views'
+    },
+
     UI.FieldGroup #GeneratedGroup : {
         $Type : 'UI.FieldGroupType',
         Data : [
