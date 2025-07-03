@@ -126,6 +126,7 @@ public class CdsViewFileUploadServiceImpl implements CdsViewFileUploadService {
             Set<String> tableNames = new HashSet<>();
             for (Viewfields field : fields) {
                 if (field.getTableName() != null) {
+                    field.setFile(fileRecord);
                     tableNames.add(field.getTableName());
                 }
             }
