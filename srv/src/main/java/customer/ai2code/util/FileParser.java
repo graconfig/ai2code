@@ -54,52 +54,70 @@ public class FileParser {
     public List<Viewfields> parseViewFields(InputStream txtStream, String defaultLang) {
         List<Viewfields> fields = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(txtStream))) {
-            // 读取表头
-            String headerLine = reader.readLine();
-            if (headerLine == null) return fields;
-            
-            String[] headers = headerLine.split(",");
-            
-            // 定义必需的列索引
-            int categoryCol = indexOf(headers, "category");
-            int contentCol = indexOf(headers, "content");
-            int tableNameCol = indexOf(headers, "tableName");
-            int tableDescCol = indexOf(headers, "tableDesc");
-            int langCol = indexOf(headers, "langu"); // 可选列
-            
-            // 校验必需字段
-            if (categoryCol == -1 || contentCol == -1 || 
-                tableNameCol == -1 || tableDescCol == -1) {
-                throw new BusinessException("TXT文件缺少必需表头字段");
-            }
-            
-            // 读取数据行
+            StringBuilder lineBuilder = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] data = line.split("\t");
-                if (data.length < headers.length) continue;
+                line = line.trim();
+                if (line.isEmpty()) continue;
                 
-                Viewfields field = Viewfields.create();
-                field.setCategory(data[categoryCol]);
-                field.setContent(data[contentCol]);
-                field.setTableName(data[tableNameCol]);
-                field.setTableDesc(data[tableDescCol]);
-                
-                // 处理语言字段
-                if (langCol >= 0 && langCol < data.length) {
-                    field.setLangu(data[langCol]);
+                // 检查行是否完整（以]]结尾）
+                if (line.endsWith("]]")) {
+                    // 完整行直接处理
+                    if (lineBuilder.length() > 0) {
+                        // 如果有之前未处理的内容，先处理
+                        processLine(lineBuilder.toString(), fields, defaultLang);
+                        lineBuilder.setLength(0);
+                    }
+                    processLine(line, fields, defaultLang);
                 } else {
-                    field.setLangu(defaultLang);
+                    // 不完整的行追加到builder
+                    lineBuilder.append(line);
                 }
-                
-                fields.add(field);
             }
-        } catch (BusinessException e) {
-            throw e; // 重新抛出业务异常
+            
+            // 处理最后未处理的行
+            if (lineBuilder.length() > 0) {
+                processLine(lineBuilder.toString(), fields, defaultLang);
+            }
         } catch (Exception e) {
             throw new BusinessException("TXT解析失败: " + e.getMessage(), e);
         }
         return fields;
+    }
+
+    // 处理单行内容
+    private void processLine(String line, List<Viewfields> fields, String defaultLang) {
+        // 查找第一个引号结束位置
+        int firstQuoteEnd = line.indexOf("\",");
+        if (firstQuoteEnd == -1) return;
+        
+        // 查找第二个引号结束位置
+        int secondQuoteEnd = line.indexOf("\",", firstQuoteEnd + 2);
+        if (secondQuoteEnd == -1) return;
+        
+        // 提取表名（第一个引号内容）
+        String tableName = line.substring(1, firstQuoteEnd).trim();
+        
+        // 提取表描述（第二个引号内容）
+        String tableDesc = line.substring(firstQuoteEnd + 3, secondQuoteEnd).trim();
+        
+        // 提取内容部分（第二个引号之后的内容）
+        String content = line.substring(secondQuoteEnd + 2).trim();
+        
+        // 移除内容开头的逗号（如果有）
+        if (content.startsWith(",")) {
+            content = content.substring(1).trim();
+        }
+
+        // 创建实体
+        Viewfields field = Viewfields.create();
+        field.setCategory("CDSViewFields");
+        field.setContent(content);
+        field.setTableName(tableName);
+        field.setTableDesc(tableDesc);
+        field.setLangu(defaultLang);
+        
+        fields.add(field);
     }
     
     // 工具方法 - 保持不变
