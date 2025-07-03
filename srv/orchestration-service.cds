@@ -63,7 +63,7 @@ service MainService {
     action viewJoinSearch() returns array of RagJoinCond;
 
     // 新增上传动作
-    action uploadCDSViews(excel: LargeString) returns String;
-    action uploadCDSViewFields(txt: LargeString, langu: String) returns String;
+    action uploadCDSViews(excel: LargeString, filename: String) returns String;
+    action uploadCDSViewFields(txt: LargeString, langu: String, filename: String) returns String;
     
 }

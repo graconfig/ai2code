@@ -265,14 +265,14 @@ public class EntityService {
             Boolean isActiveEntity) {
         entities.forEach(entity -> {
             // Use reflection to set common properties
-            try {
-                entity.getClass().getMethod("setReportId", String.class)
-                        .invoke(entity, reportId);
-                entity.getClass().getMethod("setIsActiveEntity", Boolean.class)
-                        .invoke(entity, isActiveEntity);
-            } catch (Exception e) {
-                throw new BusinessException("Failed_To_Set_Entity_Properties", e); // Changed exception type
-            }
+            // try {
+            //     entity.getClass().getMethod("setReportId", String.class)
+            //             .invoke(entity, reportId);
+            //     entity.getClass().getMethod("setIsActiveEntity", Boolean.class)
+            //             .invoke(entity, isActiveEntity);
+            // } catch (Exception e) {
+            //     throw new BusinessException("Failed_To_Set_Entity_Properties", e); // Changed exception type
+            // }
             insert(service, serviceDraft, entityClass, entity, isActiveEntity);
         });
     }

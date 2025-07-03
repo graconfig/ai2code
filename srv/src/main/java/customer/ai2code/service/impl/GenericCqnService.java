@@ -600,6 +600,21 @@ public class GenericCqnService {
         }
     }
 
+    
+    // 在GenericCqnService中添加这个方法
+    public void updateBotInstanceContextNodeId(BotInstances botInstance, String contextNodeId) {
+        // Update updateQuery = Update.entity(BotInstances_.class)
+        // .where(b -> b.ID().eq(botInstanceId))
+        // .data(BotInstances.CONTEXT_NODE_ID, contextNodeId);
+
+        // persistenceService.run(updateQuery);
+        botInstance.setContextID(contextNodeId);
+        // entityService.update(mainService, null, BotInstances_.class, botInstance,
+        // true);
+        updateBotInstance(botInstance);
+    }
+
+
     // ========== 新增CDSViews插入方法 ==========
     /**
      * 插入CDSViews实体（基于viewName主键）
@@ -642,21 +657,6 @@ public class GenericCqnService {
                 true);
     }
 
-
-
-    // 在GenericCqnService中添加这个方法
-    public void updateBotInstanceContextNodeId(BotInstances botInstance, String contextNodeId) {
-        // Update updateQuery = Update.entity(BotInstances_.class)
-        // .where(b -> b.ID().eq(botInstanceId))
-        // .data(BotInstances.CONTEXT_NODE_ID, contextNodeId);
-
-        // persistenceService.run(updateQuery);
-        botInstance.setContextID(contextNodeId);
-        // entityService.update(mainService, null, BotInstances_.class, botInstance,
-        // true);
-        updateBotInstance(botInstance);
-    }
-
     // ========== 新增CDSViewFiles插入方法 ==========
     /**
      * 插入CDSViewFiles实体
@@ -689,7 +689,6 @@ public class GenericCqnService {
         
     }
 
-    // 在GenericCqnService中添加以下方法
     public void deleteCDSViewsByNames(List<String> viewNames) {
         if (viewNames == null || viewNames.isEmpty()) return;
         // 使用entityService的delete方法
@@ -706,6 +705,184 @@ public class GenericCqnService {
         field.setTableName(tableName);
         field.setLangu(langu);
         entityService.delete(mainService, null, Viewfields_.class, field, true);
+    }
+    
+    /**
+     * 批量插入CDSViews实体
+     * @param views CDSViews实体列表
+     */
+    public void batchInsertCDSViews(List<CDSViews> views) {
+        if (views == null || views.isEmpty()) return;
+        
+        // 检查每个视图是否有viewName
+        for (CDSViews view : views) {
+            if (view.getViewName() == null || view.getViewName().isEmpty()) {
+                throw new IllegalArgumentException("CDSViews的viewName不能为空");
+            }
+        }
+        
+        // 使用EntityService的批量插入方法
+        entityService.batchInsert(
+            mainService, 
+            null, 
+            CDSViews_.class, 
+            views, 
+            null,  // 没有reportId
+            true   // 非草稿模式
+        );
+    }
+
+    /**
+     * 批量插入Viewfields实体
+     * @param fields Viewfields实体列表
+     */
+    public void batchInsertViewfields(List<Viewfields> fields) {
+        if (fields == null || fields.isEmpty()) return;
+        
+        // 为每个字段生成ID（如果未设置）
+        for (Viewfields field : fields) {
+            if (field.getId() == null) {
+                field.setId(UUID.randomUUID().toString());
+            }
+        }
+        
+        // 使用EntityService的批量插入方法
+        entityService.batchInsert(
+            mainService, 
+            null, 
+            Viewfields_.class, 
+            fields, 
+            null,  // 没有reportId
+            true   // 非草稿模式
+        );
+    }
+
+    /**
+     * 批量查询CDSViews（根据viewName列表）
+     * @param viewNames 视图名称列表
+     * @return CDSViews实体列表
+     */
+    public List<CDSViews> batchSelectCDSViews(List<String> viewNames) {
+        if (viewNames == null || viewNames.isEmpty()) {
+            return Collections.emptyList();
+        }
+        
+        CqnSelect select = Select.from(CDSViews_.class)
+                .where(v -> v.viewName().in(viewNames));
+        
+        return entityService.selectList(mainService, select, CDSViews.class);
+    }
+
+    /**
+     * 批量查询Viewfields（根据ID列表）
+     * @param fieldIds 字段ID列表
+     * @return Viewfields实体列表
+     */
+    public List<Viewfields> batchSelectViewfields(List<String> fieldIds) {
+        if (fieldIds == null || fieldIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        
+        CqnSelect select = Select.from(Viewfields_.class)
+                .where(f -> f.ID().in(fieldIds));
+        
+        return entityService.selectList(mainService, select, Viewfields.class);
+    }
+
+    /**
+     * 根据表名和语言批量查询Viewfields
+     * @param tableNames 表名列表
+     * @param language 语言代码
+     * @return Viewfields实体列表
+     */
+    public List<Viewfields> batchSelectViewfieldsByTable(List<String> tableNames, String language) {
+        if (tableNames == null || tableNames.isEmpty()) {
+            return Collections.emptyList();
+        }
+        
+        CqnSelect select = Select.from(Viewfields_.class)
+                .where(f -> f.tableName().in(tableNames)
+                        .and(f.langu().eq(language)));
+        
+        return entityService.selectList(mainService, select, Viewfields.class);
+    }
+
+    // ========== 批量更新方法 ==========
+
+    /**
+     * 批量更新CDSViews
+     * @param views 需要更新的视图实体列表
+     */
+    public void batchUpdateCDSViews(List<CDSViews> views) {
+        if (views == null || views.isEmpty()) return;
+        
+        views.forEach(view -> {
+            // 校验必要字段
+            if (view.getViewName() == null) {
+                throw new IllegalArgumentException("CDSViews必须包含viewName");
+            }
+            
+            // 执行单个更新
+            entityService.update(
+                mainService, 
+                null, 
+                CDSViews_.class, 
+                view, 
+                true
+            );
+        });
+    }
+
+    /**
+     * 批量更新Viewfields
+     * @param fields 需要更新的字段实体列表
+     */
+    public void batchUpdateViewfields(List<Viewfields> fields) {
+        if (fields == null || fields.isEmpty()) return;
+        
+        fields.forEach(field -> {
+            // 校验必要字段
+            if (field.getId() == null) {
+                field.setId(UUID.randomUUID().toString());
+            }
+            
+            // 执行单个更新
+            entityService.update(
+                mainService, 
+                null, 
+                Viewfields_.class, 
+                field, 
+                true
+            );
+        });
+    }
+
+    /**
+     * 根据表名和语言批量更新Viewfields
+     * @param tableName 表名
+     * @param language 语言代码
+     * @param updateData 更新数据（不包含ID）
+     */
+    public void batchUpdateViewfieldsByTable(String tableName, String language, Viewfields updateData) {
+        // 1. 查询符合条件的字段
+        List<Viewfields> fields = batchSelectViewfieldsByTable(
+            Collections.singletonList(tableName), 
+            language
+        );
+        
+        // 2. 应用更新数据
+        fields.forEach(field -> {
+            // 复制更新数据到实体
+            if (updateData.getTableDesc() != null) {
+                field.setTableDesc(updateData.getTableDesc());
+            }
+            if (updateData.getContent() != null) {
+                field.setContent(updateData.getContent());
+            }
+        });
+        
+        // 3. 批量更新
+        batchUpdateViewfields(fields);
     }
 
 }

@@ -31,7 +31,7 @@ public class CdsViewFileUploadServiceImpl implements CdsViewFileUploadService {
 
     @Override
     @Transactional
-    public String uploadCDSViews(InputStream excel) {
+    public String uploadCDSViews(InputStream excel, String filename) {
         try {
             // 1. 读取完整文件内容
             byte[] content = IOUtils.toByteArray(excel);
@@ -39,7 +39,12 @@ public class CdsViewFileUploadServiceImpl implements CdsViewFileUploadService {
             // 2. 保存文件到CDSViewFiles
             CDSViewFiles fileRecord = CDSViewFiles.create();
             fileRecord.setId(UUID.randomUUID().toString());
-            fileRecord.setFileName("cds_view_" + UUID.randomUUID() + ".xlsx");
+            // 
+            if (filename != null ) {
+                fileRecord.setFileName(filename);
+            }else{
+                fileRecord.setFileName("cds_view_" + UUID.randomUUID() + ".xlsx");
+            }
             fileRecord.setSize(String.valueOf(content.length));
             fileRecord.setMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             fileRecord.setFileContent(new ByteArrayInputStream(content)); // 直接存储byte[]
@@ -56,16 +61,37 @@ public class CdsViewFileUploadServiceImpl implements CdsViewFileUploadService {
                 }
             }
 
-            // 删除已存在的视图
-            if (!viewNames.isEmpty()) {
-                cqnService.deleteCDSViewsByNames(new ArrayList<>(viewNames));
+            // 批量查询已存在的视图
+            List<CDSViews> existingViews = cqnService.batchSelectCDSViews(new ArrayList<>(viewNames));
+            Map<String, CDSViews> existingViewMap = new HashMap<>();
+            for (CDSViews view : existingViews) {
+                existingViewMap.put(view.getViewName(), view);
             }
-
+            
+            // 分离需要更新和插入的视图
+            List<CDSViews> toUpdate = new ArrayList<>();
+            List<CDSViews> toInsert = new ArrayList<>();
+            
             for (CDSViews view : views) {
-                cqnService.insertCDSViews(view);
+                if (existingViewMap.containsKey(view.getViewName())) {
+                    // 设置已存在视图的ID（如果需要其他字段可在此补充）
+                    CDSViews existing = existingViewMap.get(view.getViewName());
+                    view.setId(existing.getId()); // 如果CDSViews有ID字段
+                    toUpdate.add(view);
+                } else {
+                    toInsert.add(view);
+                }
+            }
+            
+            // 执行批量操作
+            if (!toInsert.isEmpty()) {
+                cqnService.batchInsertCDSViews(toInsert);
+            }
+            if (!toUpdate.isEmpty()) {
+                cqnService.batchUpdateCDSViews(toUpdate);
             }
 
-            return "成功导入 " + views.size() + " 条CDS视图";
+            return "成功导入CDS视图: 新增" + toInsert.size() + "条, 更新" + toUpdate.size() + "条";
         } catch (Exception e) {
             throw new BusinessException("CDS视图上传失败: " + e.getMessage(), e);
         }
@@ -73,7 +99,7 @@ public class CdsViewFileUploadServiceImpl implements CdsViewFileUploadService {
 
     @Override
     @Transactional
-    public String uploadCDSViewFields(InputStream txt, String langu) {
+    public String uploadCDSViewFields(InputStream txt, String langu, String filename) {
         try {
             // 1. 读取完整文件内容
             byte[] content = IOUtils.toByteArray(txt);
@@ -81,7 +107,13 @@ public class CdsViewFileUploadServiceImpl implements CdsViewFileUploadService {
             // 2. 保存文件到CDSViewFiles
             CDSViewFiles fileRecord = CDSViewFiles.create();
             fileRecord.setId(UUID.randomUUID().toString());
-            fileRecord.setFileName("view_fields_" + UUID.randomUUID() + ".txt");
+            // 
+            if (filename != null ) {
+                fileRecord.setFileName(filename);
+            }else{
+                fileRecord.setFileName("view_fields_" + UUID.randomUUID() + ".txt");
+            }
+            
             fileRecord.setSize(String.valueOf(content.length));
             fileRecord.setMediaType("text/plain");
             fileRecord.setFileContent(new ByteArrayInputStream(content)); // 直接存储byte[]
@@ -90,28 +122,51 @@ public class CdsViewFileUploadServiceImpl implements CdsViewFileUploadService {
             // 3. 解析并保存字段数据
             List<Viewfields> fields = parser.parseViewFields(new ByteArrayInputStream(content), langu);
 
-            // 按表名和语言分组
-            Map<String, List<Viewfields>> fieldsByTable = new HashMap<>();
+            // 收集所有表名
+            Set<String> tableNames = new HashSet<>();
             for (Viewfields field : fields) {
-                String key = field.getTableName() + "|" + field.getLangu();
-                fieldsByTable.computeIfAbsent(key, k -> new ArrayList<>()).add(field);
-            }
-
-            // 删除已存在的字段
-            for (Map.Entry<String, List<Viewfields>> entry : fieldsByTable.entrySet()) {
-                String[] parts = entry.getKey().split("\\|");
-                if (parts.length == 2) {
-                    cqnService.deleteViewFieldsByTableAndLangu(parts[0], parts[1]);
+                if (field.getTableName() != null) {
+                    tableNames.add(field.getTableName());
                 }
             }
-
-            for (Viewfields field : fields) {
-                // 设置正确的文件关联
-                field.setFile(fileRecord);
-                cqnService.insertViewfields(field);
+            
+            // 批量查询已存在的字段（按表名和语言）
+            List<Viewfields> existingFields = cqnService.batchSelectViewfieldsByTable(
+                new ArrayList<>(tableNames), langu);
+            
+            // 构建复合键的映射 (tableName + fieldName + langu)
+            Map<String, Viewfields> existingFieldMap = new HashMap<>();
+            for (Viewfields field : existingFields) {
+                String key = field.getTableName() + "|" + field.getLangu();
+                existingFieldMap.put(key, field);
             }
-
-            return "成功导入 " + fields.size() + " 条视图字段";
+            
+            // 分离需要更新和插入的字段
+            List<Viewfields> toUpdate = new ArrayList<>();
+            List<Viewfields> toInsert = new ArrayList<>();
+            
+            for (Viewfields field : fields) {
+                String compositeKey = field.getTableName() + "|"  + langu;
+                
+                if (existingFieldMap.containsKey(compositeKey)) {
+                    // 设置已存在字段的ID
+                    Viewfields existing = existingFieldMap.get(compositeKey);
+                    field.setId(existing.getId());
+                    toUpdate.add(field);
+                } else {
+                    toInsert.add(field);
+                }
+            }
+            
+            // 执行批量操作
+            if (!toInsert.isEmpty()) {
+                cqnService.batchInsertViewfields(toInsert);
+            }
+            if (!toUpdate.isEmpty()) {
+                cqnService.batchUpdateViewfields(toUpdate);
+            }
+            
+            return "成功导入视图字段: 新增" + toInsert.size() + "条, 更新" + toUpdate.size() + "条";
         } catch (Exception e) {
             throw new BusinessException("视图字段上传失败: " + e.getMessage(), e);
         }
