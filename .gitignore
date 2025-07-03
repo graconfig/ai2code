@@ -32,3 +32,6 @@ hs_err*
 # added by cds
 .cdsrc-private.json
 .github/prompts/developer.prompt.md
+
+# added by cds
+.cdsrc-private.json

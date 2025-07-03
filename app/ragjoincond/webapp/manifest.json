@@ -1,0 +1,151 @@
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "ragjoincond",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:lrop",
+      "version": "1.13.2",
+      "toolsId": "ce8b1806-03f1-41ce-b84c-8792df0298d9"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/odata/v4/MainService/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.136.2",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.ushell": {},
+        "sap.fe.templates": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "ragjoincond.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "@i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "uri": "i18n/i18n.properties"
+      }
+    },
+    "resources": {
+      "css": []
+    },
+    "routing": {
+      "config": {},
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "RagJoinCondList",
+          "target": "RagJoinCondList"
+        },
+        {
+          "pattern": "RagJoinCond({key}):?query:",
+          "name": "RagJoinCondObjectPage",
+          "target": "RagJoinCondObjectPage"
+        }
+      ],
+      "targets": {
+        "RagJoinCondList": {
+          "type": "Component",
+          "id": "RagJoinCondList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/RagJoinCond",
+              "variantManagement": "Page",
+              "navigation": {
+                "RagJoinCond": {
+                  "detail": {
+                    "route": "RagJoinCondObjectPage"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "RagJoinCondObjectPage": {
+          "type": "Component",
+          "id": "RagJoinCondObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/RagJoinCond",
+              "content": {
+                "body": {
+                  "sections": {
+                    "CDSSection": {
+                      "type": "XMLFragment",
+                      "template": "ragjoincond.ext.fragment.joincond",
+                      "title": "Join Condition",
+                      "position": {
+                        "placement": "After",
+                        "anchor": "Fields"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "sap.fiori": {
+    "registrationIds": [],
+    "archeType": "transactional"
+  }
+}

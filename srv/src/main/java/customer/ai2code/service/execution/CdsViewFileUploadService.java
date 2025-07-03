@@ -9,7 +9,7 @@ public interface CdsViewFileUploadService {
      * @param excel Excel文件输入流
      * @return 操作结果描述
      */
-    String uploadCDSViews(InputStream excel);
+    String uploadCDSViews(InputStream excel, String filename);
     
     /**
      * 上传TXT文件导入CDS视图字段
@@ -17,6 +17,6 @@ public interface CdsViewFileUploadService {
      * @param langu 语言代码
      * @return 操作结果描述
      */
-    String uploadCDSViewFields(InputStream txt, String langu);
+    String uploadCDSViewFields(InputStream txt, String langu, String filename);
 
 }
