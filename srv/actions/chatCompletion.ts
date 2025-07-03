@@ -2,7 +2,7 @@ import { AiDeploymentList, DeploymentApi } from "@sap-ai-sdk/ai-api";
 import { __LargeString } from "@sap/cds";
 import { AzureOpenAiChatClient } from "@sap-ai-sdk/foundation-models";
 import axios from "axios";
-import { HttpDestination } from "@sap-cloud-sdk/connectivity";
+
 let tokenCache: { token: any, expiry: any } = {
   token: undefined,
   expiry: undefined
@@ -26,14 +26,24 @@ export const chatCompletionHandler = async function (this: any, req: any) {
    */
 
   //获取当前Tasks
-  const currentTasks = await SELECT.one
-    .from(Tasks)
-    .where({ ID: req.params[0] });
+  // const currentTasks = await SELECT.one
+  //   .from(Tasks)
+  //   .where({ ID: req.params[0] });
+
+  // //获取当前BotInstance
+  // const currentBotInstance = await SELECT.one
+  //   .from(BotInstances)
+  //   .where({ ID: req.params[1] });
 
   //获取当前BotInstance
   const currentBotInstance = await SELECT.one
     .from(BotInstances)
-    .where({ ID: req.params[1] });
+    .where({ ID: req.params[0] });
+
+  //获取当前Tasks
+  const currentTasks = await SELECT.one
+    .from(Tasks)
+    .where({ ID: currentBotInstance.task_ID });
 
   //更新状态为RUNNING
   await batchDynamicUpdate(this, "BotInstances", [
@@ -80,6 +90,7 @@ export const chatCompletionHandler = async function (this: any, req: any) {
     currentSystemPrompt.content = await replacePlaceHolder(
       currentSystemPrompt.content,
       ContextNodes,
+      Tasks,
       currentTasks
     );
   } else {
@@ -264,22 +275,42 @@ function getCurrentLanguage(req: any) {
  * 若存在：则根据{{}}中的路径值，从ContextNodes中根据TaskID + path获取对应的value值，替换提示词中的占位符
  * @param   {__LargeString} Prompt - 提示词
  * @param   {object} ContextNodes  - ContextNodes实体
+ * @param   {object} Tasks         - Tasks实体
  * @param   {object} currentTasks  - currentTasks实体
  * @returns                        - 提示词
  */
 async function replacePlaceHolder(
   PromptContent: any,
   ContextNodes: any,
+  Tasks: any,
   currentTasks: any
 ) {
   const markers = extractTemplateMarkers(PromptContent);
 
   let contextNodeValue;
+  let contextPath;
+  let path;
+  
   for (const marker of markers) {
-    contextNodeValue = await SELECT.one
-      .from(ContextNodes)
-      .where({ task_ID: currentTasks.ID })
-      .columns("value");
+    const cleanMarker = marker.slice(2, -2); 
+    const [identifier, content] = cleanMarker.split(':');
+
+    if (identifier.toLowerCase() === 'subcontext') {
+      //获取当前Task的contextPath
+      contextPath = await SELECT.one
+        .from(Tasks)
+        .where({ ID: currentTasks.ID })
+        .columns("contextPath")
+
+      //拼接当前变量名
+      path = contextPath + '.' + content;
+
+      //获取当前Task对应的ContextNode中对应的value
+      contextNodeValue = await SELECT.one
+        .from(ContextNodes)
+        .where({ task_ID: currentTasks.ID, path: path })
+        .columns("value");
+    }
 
     if (contextNodeValue) {
       PromptContent = PromptContent.replace(marker, contextNodeValue.value);
@@ -455,7 +486,7 @@ async function getAICoreDestination(parameters_JSON: any) {
  * @param tools           - tools
  */
 async function invokeGPTModel(
-  aiDestination: HttpDestination,
+  aiDestination: any,
   DeploymentID: string,
   Messages_GPT: any,
   tools: any) {
