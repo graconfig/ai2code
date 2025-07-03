@@ -11,8 +11,8 @@ entity BusinessScenarios : cuid, managed {
     viewCategory    : String @title: 'View Category';
     embeddings      : Vector(768);    //HANA生成的向量
     embeddings_ai   : Vector(1536);   //AI Core生成的向量
-}
 
+}
 
 entity CDSViews : cuid, managed {
     viewCategory : String  @title: 'View Category';

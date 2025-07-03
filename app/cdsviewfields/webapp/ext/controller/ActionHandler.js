@@ -36,6 +36,7 @@ sap.ui.define(
         onAfterItemAdded: function (oEvent) {
           const oItem = oEvent.getParameter("item");
           const oFile = oItem.getFileObject();
+          const filename = oFile.name;
           var langu = "";
           if (oFile.name.includes("EN")) {
             langu = 'en';
@@ -46,7 +47,7 @@ sap.ui.define(
           } else {
             langu = 'en';
           }
-          this.uploadContent(oFile, langu).then(() => {
+          this.uploadContent(oFile, langu, filename).then(() => {
             oItem.setUploadState("Complete");
           });
         },
@@ -119,7 +120,7 @@ sap.ui.define(
         //     item.setUploadState("Error");
         //   }
         // },
-        uploadContent: async function (oFile, langu) {
+        uploadContent: async function (oFile, langu, filename) {
           setDialogBusy(true);
           const oModel = oExtensionAPI.getModel();
           const binaryBuffer = await this.fileToArrayBuffer(oFile);
@@ -128,6 +129,7 @@ sap.ui.define(
 
           oContextBinding.setParameter("txt", sBase64);
           oContextBinding.setParameter("langu", langu);
+          oContextBinding.setParameter("filename", filename);
 
           try {
             await oContextBinding.execute();
