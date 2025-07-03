@@ -223,6 +223,55 @@ public class GenericCqnService {
                 "ContextNode not found for task: " + taskId + ", path: " + contextPath);
     }
 
+    /**
+     * 根据任务ID和路径模式查询ContextNodes
+     * 支持通配符模式，如: subtask[*].a.property 匹配 subtask[0].a.property, subtask[123].a.property 等
+     */
+    public List<ContextNodes> getContextNodesByTaskAndPathPattern(String taskId, String contextPath) {
+        // 将通配符模式转换为正则表达式
+        // 例如: subtask[*].a.property -> subtask\[\d+\]\.a\.property
+        String regexPattern = convertWildcardToRegex(contextPath);
+
+        var select = Select.from(ContextNodes_.class)
+                .where(c -> c.task_ID().eq(taskId).and(c.path().matchesPattern(regexPattern)));
+        return entityService.selectList(mainService, select, ContextNodes.class);
+    }
+    
+    /**
+     * 将通配符模式转换为正则表达式
+     * 例如: subtask[*].a.property -> subtask\[\d+\]\.a\.property
+     */
+    private String convertWildcardToRegex(String wildcardPattern) {
+        if (wildcardPattern == null) {
+            return null;
+        }
+        
+        // 首先处理特殊的通配符模式 [*]，避免被后续的转义影响
+        String regex = wildcardPattern.replace("[*]", "PLACEHOLDER_FOR_DIGITS");
+        
+        // 转义正则表达式特殊字符
+        regex = regex
+                .replace("\\", "\\\\")    // 转义反斜杠
+                .replace(".", "\\.")      // 转义点号
+                .replace("(", "\\(")      // 转义左括号
+                .replace(")", "\\)")      // 转义右括号
+                .replace("+", "\\+")      // 转义加号
+                .replace("^", "\\^")      // 转义尖角号
+                .replace("$", "\\$")      // 转义美元符号
+                .replace("|", "\\|")      // 转义管道符
+                .replace("?", "\\?")      // 转义问号
+                .replace("*", "\\*")      // 转义星号（但不是在[]内的）
+                .replace("{", "\\{")      // 转义左大括号
+                .replace("}", "\\}")      // 转义右大括号
+                .replace("[", "\\[")      // 转义左中括号
+                .replace("]", "\\]");     // 转义右中括号
+        
+        // 最后将占位符替换为正确的数字匹配模式
+        regex = regex.replace("PLACEHOLDER_FOR_DIGITS", "\\[\\d+\\]");
+        
+        return regex;
+    }
+
     // 更新ContextNode的业务方法
     public ContextNodes updateContextNodeValue(ContextNodes existingNode, String contextValue) {
         existingNode.setValue(contextValue);
