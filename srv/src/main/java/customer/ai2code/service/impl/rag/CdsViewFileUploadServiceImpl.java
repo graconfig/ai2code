@@ -5,8 +5,8 @@ import cds.gen.mainservice.CDSViewFiles;
 import cds.gen.mainservice.CDSViews; // 导入mainservice包下的实体
 import cds.gen.mainservice.Viewfields;
 import customer.ai2code.exception.BusinessException;
-import customer.ai2code.service.execution.CdsViewFileUploadService;
 import customer.ai2code.service.impl.GenericCqnService;
+import customer.ai2code.service.rag.CdsViewFileUploadService;
 import customer.ai2code.util.FileParser;
 
 import org.springframework.stereotype.Service;

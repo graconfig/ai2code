@@ -9,7 +9,7 @@ import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotInstances;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.service.PromptService;
-import customer.ai2code.service.execution.RAGExtraction;
+import customer.ai2code.service.rag.RAGExtraction;
 import customer.ai2code.service.variable.VariableContext;
 import customer.ai2code.service.variable.VariableParsingService;
 

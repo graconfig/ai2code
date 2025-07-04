@@ -1,8 +1,9 @@
 package customer.ai2code.service.impl.rag;
 
 import customer.ai2code.model.execution.annotation.ExecuteMethod;
-import customer.ai2code.service.execution.RAGExtraction;
 import customer.ai2code.service.impl.GenericCqnService;
+import customer.ai2code.service.rag.RAGExtraction;
+
 import org.springframework.stereotype.Service;
 
 import java.util.*;
