@@ -3,9 +3,8 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/m/MessageBox",
     "sap/ui/model/json/JSONModel",
-    "ai/orchestration/taskfree/control/marked",
     "sap/ui/core/HTML"
-], function (Controller, MessageToast, MessageBox, JSONModel, marked, HTML) {
+], function (Controller, MessageToast, MessageBox, JSONModel, HTML) {
     "use strict";
 
     return Controller.extend("ai.orchestration.taskfree.controller.MarkDownNodePage", {
@@ -31,18 +30,6 @@ sap.ui.define([
             var oViewModel = this.getView().getModel("viewModel");
             var oController = this;
             var oPage = this.getView().byId("MarkDownNodePage");
-            var oVBox;
-
-            // 动态创建 VBox 容器（只创建一次）
-            if (!this._oVBox) {
-                oVBox = new sap.m.VBox("markdownVBox");
-                oPage.removeAllContent();
-                oPage.addContent(oVBox);
-                this._oVBox = oVBox;
-            } else {
-                oVBox = this._oVBox;
-                oVBox.removeAllItems();
-            }
 
             // 立即 busy，立即移除 HTML 控件
             oController.getView().setBusy(true);
@@ -66,11 +53,10 @@ sap.ui.define([
 
                 // 加载完成后再创建 HTML 控件
                 if (oData.type === "markdown") {
-                    var htmlContent = window.marked ? window.marked.parse(oData.value || "") : (oData.value || "");
-                    var oHtml = new HTML({
-                        content: htmlContent
-                    });
-                    oVBox.addItem(oHtml);
+                    //var htmlContent = window.marked ? window.marked.parse(oData.value || "") : (oData.value || "");
+                    var htmlContent = marked.parse(oData.value);
+                    oController.getView().byId("markdownContent").setContent(htmlContent);
+
                 }
                 oViewModel.setProperty("/busy", false);
             }).catch(function () {

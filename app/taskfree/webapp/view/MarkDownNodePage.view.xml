@@ -6,7 +6,7 @@
   xmlns:c="sap.ui.core">
   <Page id="MarkDownNodePage" title="{viewModel>/title}">
     <content>
-      <VBox id="markdownVBox"/>
+      <c:HTML id="markdownContent"></c:HTML>
     </content>
   </Page>
 </mvc:View>
