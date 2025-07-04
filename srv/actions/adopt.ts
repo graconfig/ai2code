@@ -3,7 +3,8 @@ export const adoptHandler = async function (this: any, req: any) {
       BotInstances, 
       BotMessages,
       BotType,
-      ContextNodes
+      ContextNodes,
+      Tasks
     } 
       = this.entities;
 
@@ -28,6 +29,18 @@ export const adoptHandler = async function (this: any, req: any) {
         //  2. label:
         //  3. type: 根据BotTypes设置的contextType
         //  4. Value: BotMessages.message/根据AI function call转成相应的格式
+    if ( botTypes.outputContextPath && botTypes.outputContextPath.startsWith("SubContext"))// 需要判定outputContextPath是否以SubContext开头，
+    {
+      // 如果是，则先根据TaskID找到contextPath,再把'SubContext:'替换成Task中contextPath的值，再拼接SubContext:后面的值
+      //查找Taks.contextPath
+        const task = await SELECT.one
+          .from(Tasks)
+          .where({ ID: BotInstance.task_ID });
+      const replacedA = task.contextPath + "." + botTypes.outputContextPath.substring("SubContext:".length);
+      botTypes.outputContextPath = replacedA
+    }else{
+      //无需替换
+    }
   const contextNodeData = await this.run(
     INSERT({
       path: botTypes.outputContextPath,
