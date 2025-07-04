@@ -4,7 +4,7 @@ import cds.gen.mainservice.MainService_;
 import cds.gen.mainservice.UploadCDSViewsContext;
 import cds.gen.mainservice.UploadCDSViewFieldsContext;
 import customer.ai2code.exception.BusinessException;
-import customer.ai2code.service.execution.CdsViewFileUploadService;
+import customer.ai2code.service.rag.CdsViewFileUploadService;
 
 import com.sap.cds.services.handler.EventHandler;
 import com.sap.cds.services.handler.annotations.On;

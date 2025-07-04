@@ -22,7 +22,7 @@ import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.task.GenericTask;
 import customer.ai2code.model.task.Task;
 import customer.ai2code.service.TaskService;
-import customer.ai2code.service.impl.CreateTasksBotExecution;
+import customer.ai2code.service.impl.execution.CreateTasksBotExecution;
 
 @ExtendWith(MockitoExtension.class)
 class FunctionCallExecutionTest {
