@@ -166,10 +166,23 @@ annotate service.BotTypes with @(
     },
     UI.Facets             : [
         {
-            $Type : 'UI.ReferenceFacet',
+            $Type : 'UI.CollectionFacet',
             Label : 'Bot Type',
-            ID    : 'BotType',
-            Target: '@UI.FieldGroup#BotType',
+            ID    : 'BotTypeCollection',
+            Facets: [
+                {
+                    $Type : 'UI.ReferenceFacet',
+                    Label : 'General',
+                    ID    : 'BotTypeGeneralFacet',
+                    Target: '@UI.FieldGroup#BotTypeGeneral',
+                },
+                {
+                    $Type : 'UI.ReferenceFacet',
+                    Label : 'RAG Configuration',
+                    ID    : 'BotTypeRAGFacet',
+                    Target: '@UI.FieldGroup#BotTypeRAG',
+                },
+            ]
         },
         {
             $Type : 'UI.ReferenceFacet',
@@ -178,7 +191,7 @@ annotate service.BotTypes with @(
             Target: 'prompts/@UI.LineItem#Prompts',
         }
     ],
-    UI.FieldGroup #BotType: {
+    UI.FieldGroup #BotTypeGeneral: {
         $Type: 'UI.FieldGroupType',
         Data : [
             {
@@ -188,23 +201,18 @@ annotate service.BotTypes with @(
             },
             {
                 $Type: 'UI.DataField',
-                Value: autoRun,
-                Label: '{i18n>AutoRun}',
-            },
-            {
-                $Type: 'UI.DataField',
-                Value: contextType_code,
-                Label: '{i18n>ContextType}',
-            },
-            {
-                $Type: 'UI.DataField',
                 Value: description,
                 Label: '{i18n>Description}',
             },
             {
                 $Type: 'UI.DataField',
-                Value: executionCondition,
-                Label: '{i18n>ExecutionCondition}',
+                Value: sequence,
+                Label: '{i18n>Sequence}',
+            },
+            {
+                $Type: 'UI.DataField',
+                Value: autoRun,
+                Label: '{i18n>AutoRun}',
             },
             {
                 $Type: 'UI.DataField',
@@ -213,23 +221,37 @@ annotate service.BotTypes with @(
             },
             {
                 $Type: 'UI.DataField',
-                Value: implementationClass,
-                Label: '{i18n>ImplementationClass}',
-            },
-            {
-                $Type: 'UI.DataField',
-                Value: isRAGEnabled,
-                Label: '{i18n>IsRagenabled}',
-            },
-            {
-                $Type: 'UI.DataField',
                 Value: model_ID,
                 Label: '{i18n>Model}',
             },
             {
                 $Type: 'UI.DataField',
+                Value: implementationClass,
+                Label: '{i18n>ImplementationClass}',
+            },
+            {
+                $Type: 'UI.DataField',
+                Value: contextType_code,
+                Label: '{i18n>ContextType}',
+            },
+            {
+                $Type: 'UI.DataField',
                 Value: outputContextPath,
                 Label: '{i18n>OutputContextpath}',
+            },
+            {
+                $Type: 'UI.DataField',
+                Value: executionCondition,
+                Label: '{i18n>ExecutionCondition}',
+            },
+        ],
+    },
+    UI.FieldGroup #BotTypeRAG   : {
+        Data: [
+            {
+                $Type: 'UI.DataField',
+                Value: isRAGEnabled,
+                Label: '{i18n>IsRagenabled}',
             },
             {
                 $Type: 'UI.DataField',
@@ -256,13 +278,8 @@ annotate service.BotTypes with @(
                 Value: ragOutputContextPath,
                 Label: '{i18n>RagOutputContextPath}',
             },
-            {
-                $Type: 'UI.DataField',
-                Value: sequence,
-                Label: '{i18n>Sequence}',
-            },
-        ],
-    },
+        ]
+    }
 );
 
 annotate service.BotTypes with {
@@ -474,3 +491,4 @@ annotate service.PromptTexts with @(
 annotate service.PromptTexts with {
     content @UI.MultiLineText: true
 };
+
