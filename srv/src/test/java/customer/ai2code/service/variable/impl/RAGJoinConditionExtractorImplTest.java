@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -30,8 +32,13 @@ class RAGJoinConditionExtractorImplTest {
         String query = "I_PURCHASEORDERITEMAPI01,I_CHANGEDOCUMENTITEM";
         String expectedJson = "[{\"view\":\"ZCDS_VIEW_1\"},{\"view\":\"ZCDS_VIEW_2\"}]";
 
-        when(genericCqnService.findJoinConditionsByViewNames(anyList()))
-                .thenReturn(expectedJson);
+        try {
+            when(genericCqnService.findJoinConditionsByViewNames(anyList()))
+                    .thenReturn(expectedJson);
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         String result = extractor.extract("test", 5, query, Locale.ENGLISH, 0.75);
 
@@ -41,7 +48,12 @@ class RAGJoinConditionExtractorImplTest {
         System.out.println("Returned JSON: " + result);
 
         assertEquals(expectedJson, result);
-        verify(genericCqnService, times(1))
-                .findJoinConditionsByViewNames(List.of("I_PURCHASEORDERITEMAPI01", "I_CHANGEDOCUMENTITEM"));
+        try {
+            verify(genericCqnService, times(1))
+                    .findJoinConditionsByViewNames(List.of("I_PURCHASEORDERITEMAPI01", "I_CHANGEDOCUMENTITEM"));
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }

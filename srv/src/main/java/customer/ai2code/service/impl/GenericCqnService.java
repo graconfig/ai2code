@@ -39,8 +39,10 @@ import cds.gen.mainservice.ContextNodes_;
 import cds.gen.mainservice.MainService;
 import cds.gen.configservice.PromptTexts;
 import cds.gen.configservice.PromptTexts_;
-import cds.gen.mainservice.BusinessScenarios_;
-import cds.gen.mainservice.BusinessScenarios;
+// import cds.gen.mainservice.BusinessScenarios_;
+// import cds.gen.mainservice.BusinessScenarios;
+import  cds.gen.ai.orchestration.rag.BusinessScenarios_;
+import  cds.gen.ai.orchestration.rag.BusinessScenarios;
 
 import javax.print.DocFlavor.STRING;
 import javax.sql.DataSource;
