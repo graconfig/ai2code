@@ -13,6 +13,7 @@ import com.sap.cds.ql.Delete;
 import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnSelect;
 import com.sap.cds.ql.cqn.CqnVector;
+import com.sap.cds.services.persistence.PersistenceService;
 
 import cds.gen.configservice.ConfigService;
 import cds.gen.configservice.ModelConfigs;
@@ -28,7 +29,6 @@ import cds.gen.mainservice.CDSViewFiles;
 import cds.gen.mainservice.CDSViewFiles_;
 import cds.gen.mainservice.CDSViews;
 import cds.gen.mainservice.CDSViews_;
-import cds.gen.mainservice.BusinessScenarios_;
 import cds.gen.mainservice.Tasks;
 import cds.gen.mainservice.Tasks_;
 import cds.gen.mainservice.Viewfields;
@@ -54,7 +54,7 @@ public class GenericCqnService {
     private final ConfigService configService;
     private final EntityService entityService;
     private final ObjectMapper objectMapper;
-    private final DataSource dataSource;
+    private final PersistenceService persistenceService;
 
     private final TaskBotCacheManager cacheManager;
 
@@ -64,12 +64,12 @@ public class GenericCqnService {
             ConfigService configService,
             TaskBotCacheManager cacheManager,
             ObjectMapper objectMapper,
-            DataSource dataSource) {
+            PersistenceService persistenceService) {
         this.entityService = entityService;
         this.mainService = mainService;
         this.configService = configService;
         this.cacheManager = cacheManager;
-        this.dataSource = dataSource;
+        this.persistenceService = persistenceService;
         this.objectMapper = objectMapper;
     }
 
@@ -572,21 +572,21 @@ public class GenericCqnService {
         CqnVector vector = CQL.vector(query);
         var similarity = CQL.cosineSimilarity(CQL.get("embeddings"), vector);
         // 2.查询 BusinessScenarios 表，获取符合条件的场景
-        CqnSelect selectScenario = Select.from(BusinessScenarios_.class)
-                .columns(b -> b.get("scenario"), b -> b.get("description"), b -> b.get("viewCategory"),
-                        b -> similarity.as("similarity"))
+        CqnSelect selectScenario = Select.from(BusinessScenarios_.CDS_NAME)
+                .columns(b -> b.get("scenario"), b -> b.get("description"), b -> b.get("viewCategory"))
                 .where(b -> similarity.gt(threshold))
                 .orderBy(b -> similarity.desc())
                 .limit(ragTopK);
 
-        List<Row> scenarioRows = mainService.run(selectScenario).listOf(Row.class);
+        List<BusinessScenarios> scenarioRows = mainService.run(selectScenario).listOf(BusinessScenarios.class);
+        // List<BusinessScenarios> scenarioRows = persistenceService.run(selectScenario).listOf(BusinessScenarios.class);   
         if (scenarioRows.isEmpty()) {
             return "[]"; // 如果没有匹配的场景，返回空数组
         }
         // 3.提取 viewCategory 并展开
         Set<String> categories = new LinkedHashSet<>();
-        for (Row row : scenarioRows) {
-            String viewCategory = (String) row.get("viewCategory");
+        for (BusinessScenarios row : scenarioRows) {
+            String viewCategory = row.getViewCategory();
             if (viewCategory != null) {
                 String[] parts = viewCategory.split("/");
                 for (String part : parts) {
