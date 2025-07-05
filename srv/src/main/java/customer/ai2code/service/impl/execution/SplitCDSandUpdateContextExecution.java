@@ -9,6 +9,9 @@ import customer.ai2code.model.execution.annotation.ExecuteParameter;
 import customer.ai2code.service.ContextService;
 import customer.ai2code.service.execution.BotExecution;
 
+/**
+ * 假定AI帮我们把ContextNodes.value字段更新成最新的CDS内容，且整理好形成List<ContextNodes>的传参结构，我们需要用这个数据集直接更新ContextNodes。
+ */
 @BotExecutor(name = "Split CDS and Update Context Execution", description = "Implementation for splitting CDS and updating context in the bot execution framework", version = "1.0", enabled = true)
 public class SplitCDSandUpdateContextExecution implements BotExecution {
 
