@@ -25,7 +25,23 @@ public class RAGViewFieldExtractorImpl implements RAGExtraction {
     @ExecuteMethod
     public String extract(String ragSource, int ragTopK, String query, Locale language, double threshold) {
         try {
-            List<String> viewNames = Arrays.asList(query.split(",")); // 初定query为CSV形式
+            // 解析 query 中的 JSON 数组
+            List<Map<String, Object>> jsonList = new ArrayList<>();
+            jsonList = new com.fasterxml.jackson.databind.ObjectMapper().readValue(
+                    query,
+                    new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {
+                    });
+
+            // 提取 viewName 列表
+            List<String> viewNames = jsonList.stream()
+                    .map(entry -> (String) entry.get("viewName"))
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .toList();
+
+            if (viewNames.isEmpty()) {
+                return "[]";
+            }
             return genericCqnService.findViewFieldsByViewNames(viewNames, ragTopK, language);
         } catch (Exception e) {
             e.printStackTrace();
