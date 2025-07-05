@@ -248,6 +248,16 @@ annotate service.BotTypes with @(
             },
             {
                 $Type: 'UI.DataField',
+                Value: ragParameter,
+                Label: '{i18n>RagParameter}',
+            },
+            {
+                $Type: 'UI.DataField',
+                Value: ragOutputContextPath,
+                Label: '{i18n>RagOutputContextPath}',
+            },
+            {
+                $Type: 'UI.DataField',
                 Value: sequence,
                 Label: '{i18n>Sequence}',
             },
