@@ -34,6 +34,8 @@ import cds.gen.mainservice.Tasks;
 import cds.gen.mainservice.Tasks_;
 import cds.gen.mainservice.Viewfields;
 import cds.gen.mainservice.Viewfields_;
+import cds.gen.mainservice.RagJoinCond;
+import cds.gen.mainservice.RagJoinCond_;
 import cds.gen.mainservice.ContextNodes;
 import cds.gen.mainservice.ContextNodes_;
 import cds.gen.mainservice.MainService;
@@ -639,20 +641,20 @@ public class GenericCqnService {
 
         CqnSelect select = Select.from(Viewfields_.class)
                 .columns(f -> f.get("tableName"), f -> f.get("tableDesc"), f -> f.get("content"))
-                .where(f -> f.get("category").in(viewList).and(f.get("langu").eq(language.getLanguage())))
+                .where(f -> f.get("tableName").in(viewList).and(f.get("langu").eq(language.getLanguage())))
                 .limit(ragTopK);
 
-        List<Row> rows = mainService.run(select).listOf(Row.class);
+        List<Viewfields> rows = mainService.run(select).listOf(Viewfields.class);
         return objectMapper.writeValueAsString(rows);
 
     }
 
     public String findJoinConditionsByViewNames(List<String> viewList) throws JsonProcessingException {
         CqnSelect select = Select.from(RagJoinCond_.class)
-                .columns(c -> c.get("tableFirst"), c -> c.get("tableSecond"), c -> c.get("tableJoin"))
-                .where(c -> c.get("tableFirst").in(viewList).or(c.get("tableSecond").in(viewList)));
+                .columns(c -> c.tableFirst(), c -> c.tableSecond(), c -> c.tableJoin())
+                .where(c -> c.tableFirst().in(viewList).or(c.tableSecond().in(viewList)));
 
-        List<Row> rows = mainService.run(select).listOf(Row.class);
+        List<RagJoinCond> rows = mainService.run(select).listOf(RagJoinCond.class);
         return objectMapper.writeValueAsString(rows);
     }
 
