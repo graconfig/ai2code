@@ -4,7 +4,7 @@ import cds.gen.mainservice.MainService_;
 import cds.gen.mainservice.UploadCDSViewsContext;
 import cds.gen.mainservice.UploadCDSViewFieldsContext;
 import customer.ai2code.exception.BusinessException;
-import customer.ai2code.service.execution.CdsViewFileUploadService;
+import customer.ai2code.service.rag.CdsViewFileUploadService;
 
 import com.sap.cds.services.handler.EventHandler;
 import com.sap.cds.services.handler.annotations.On;
@@ -13,11 +13,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Base64;
 
 @Component
 @ServiceName(MainService_.CDS_NAME)
 public class MainServiceFileUploadHandler implements EventHandler {
-    
+
     private final CdsViewFileUploadService fileUploadService;
 
     public MainServiceFileUploadHandler(CdsViewFileUploadService fileUploadService) {
@@ -29,11 +30,11 @@ public class MainServiceFileUploadHandler implements EventHandler {
      */
     @On(event = UploadCDSViewsContext.CDS_NAME)
     public void handleUploadCDSViews(UploadCDSViewsContext context) {
-        try (InputStream excel = new ByteArrayInputStream(context.getExcel())) {
-            String result = fileUploadService.uploadCDSViews(excel);
+        try (InputStream excel = decodeBase64ToInputStream(context.getExcel())) {
+            String result = fileUploadService.uploadCDSViews(excel,context.getFilename());
             context.setResult(result);
         } catch (Exception e) {
-            throw new BusinessException("CDS视图上传失败", e);
+            throw new BusinessException("CDS视图上传失败" + e.getMessage(), e);
         }
     }
 
@@ -42,11 +43,19 @@ public class MainServiceFileUploadHandler implements EventHandler {
      */
     @On(event = UploadCDSViewFieldsContext.CDS_NAME)
     public void handleUploadCDSViewFields(UploadCDSViewFieldsContext context) {
-        try (InputStream txt = new ByteArrayInputStream(context.getTxt())) {
-            String result = fileUploadService.uploadCDSViewFields(txt, context.getLangu());
+        try (InputStream txt = decodeBase64ToInputStream(context.getTxt())) {
+            String result = fileUploadService.uploadCDSViewFields(txt,context.getLangu(),context.getFilename());
             context.setResult(result);
         } catch (Exception e) {
-            throw new BusinessException("视图字段上传失败", e);
+            throw new BusinessException("视图字段上传失败" + e.getMessage(), e);
         }
+    }
+
+    /**
+     * 将Base64编码的String转换为InputStream
+     */
+    private InputStream decodeBase64ToInputStream(String base64Str) {
+        byte[] decodedBytes = Base64.getDecoder().decode(base64Str);
+        return new ByteArrayInputStream(decodedBytes);
     }
 }

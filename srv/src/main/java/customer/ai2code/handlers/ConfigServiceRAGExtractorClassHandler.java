@@ -17,7 +17,7 @@ import com.sap.cds.services.handler.annotations.On;
 import com.sap.cds.services.handler.annotations.ServiceName;
 import cds.gen.configservice.ConfigService_;
 import cds.gen.configservice.RAGExtractorClass_;
-import customer.ai2code.service.execution.RAGExtraction;
+import customer.ai2code.service.rag.RAGExtraction;
 import customer.ai2code.utils.CheckDataVisitor;
 import customer.ai2code.utils.ClassReflection;
 import customer.ai2code.utils.UnmanagedReportUtils;

@@ -9,7 +9,12 @@
   },
   "sapux": [
     "app/runtime",
-    "app/model-config"
+    "app/model-config",
+    "app/cdsviews",
+    "app/scenarios",
+    "app/ragjoincond",
+    "app/ragjoincond",
+    "app/cdsviewfields"
   ],
   "dependencies": {
     "ai2code-cds": "file:"

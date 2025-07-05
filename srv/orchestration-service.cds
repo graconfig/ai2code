@@ -13,7 +13,7 @@ service MainService {
         actions {
             action execute() returns {
                 result : String;
-                tasks  : array of UUID;
+                // tasks  : array of UUID;
             };
             action chatCompletion(content: LargeString) returns BotMessages;
         }
@@ -29,7 +29,7 @@ service MainService {
                               typeId : UUID) returns Tasks;
 
     entity BusinessScenarios as projection on rag.BusinessScenarios excluding {
-            embeddings,
+            // embeddings,
             embeddings_ai
         };
     entity CDSViews          as projection on rag.CDSViews;
@@ -63,7 +63,7 @@ service MainService {
     action viewJoinSearch() returns array of RagJoinCond;
 
     // 新增上传动作
-    action uploadCDSViews(excel: LargeBinary) returns String;
-    action uploadCDSViewFields(txt: LargeBinary, langu: String) returns String;
+    action uploadCDSViews(excel: LargeString, filename: String) returns String;
+    action uploadCDSViewFields(txt: LargeString, langu: String, filename: String) returns String;
     
 }

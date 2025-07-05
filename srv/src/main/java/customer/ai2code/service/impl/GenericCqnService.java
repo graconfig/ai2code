@@ -1,3 +1,4 @@
+
 package customer.ai2code.service.impl;
 
 import org.springframework.stereotype.Service;
@@ -38,6 +39,8 @@ import cds.gen.mainservice.ContextNodes_;
 import cds.gen.mainservice.MainService;
 import cds.gen.configservice.PromptTexts;
 import cds.gen.configservice.PromptTexts_;
+import cds.gen.mainservice.BusinessScenarios_;
+import cds.gen.mainservice.BusinessScenarios;
 
 import javax.print.DocFlavor.STRING;
 import javax.sql.DataSource;
@@ -755,7 +758,6 @@ public class GenericCqnService {
 
     }
 
-    // 在GenericCqnService中添加以下方法
     public void deleteCDSViewsByNames(List<String> viewNames) {
         if (viewNames == null || viewNames.isEmpty())
             return;

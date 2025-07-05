@@ -6,39 +6,9 @@
     height="100%">
 	<Page id="contextNodeDetailPage" showHeader="true" title="Context Node Detail">
 		<content>
-			<ObjectHeader
-				id="contextNodeObjectHeader"
-				title="{label}"
-				number="{path}"
-				numberUnit="Path">
-				<attributes>
-					<ObjectAttribute id="contextNodeTypeAttr" title="Type" text="{type}"/>
-					<ObjectAttribute id="contextNodePathAttr" title="Path" text="{path}"/>
-				</attributes>
-			</ObjectHeader>
-			
-			<f:SimpleForm
-				id="contextNodeDetailsForm"
-				editable="false"
-				layout="ResponsiveGridLayout"
-				title="Context Node Information"
-				adjustLabelSpan="false"
-				singleContainerFullSize="false">
-				<f:content>
-					<Label id="contextNodeLabelLabel" text="Label"/>
-					<Text  id="contextNodeLabelText" text="{label}"/>
-					<Label id="contextNodePathLabel" text="Path"/>
-					<Text  id="contextNodePathText" text="{path}"/>
-					<Label id="contextNodeTypeLabel" text="Type"/>
-					<Text  id="contextNodeTypeText" text="{type}"/>
-					<Label id="contextNodeValueLabel" text="Value"/>
-					<Text  id="contextNodeValueText" text="{value}" maxLines="10"/>
-					<Label id="contextNodeCreatedLabel" text="Created At"/>
-					<Text  id="contextNodeCreatedText" text="{createdAt}"/>
-					<Label id="contextNodeModifiedLabel" text="Modified At"/>
-					<Text  id="contextNodeModifiedText" text="{modifiedAt}"/>
-				</f:content>
-			</f:SimpleForm>
+			<VBox id="contextNodeValueContainer" class="sapUiMediumMargin">
+				<Text id="contextNodeValueText" text="{value}" wrapping="true" class="sapUiLargeText"/>
+			</VBox>
 		</content>
 	</Page>
 </mvc:View>

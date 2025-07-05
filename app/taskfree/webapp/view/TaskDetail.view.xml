@@ -6,42 +6,9 @@
     height="100%">
 	<Page id="taskDetailPage" showHeader="true" title="Task Detail">
 		<content>
-			<ObjectHeader
-				id="taskObjectHeader"
-				title="{name}"
-				number="{sequence}"
-				numberUnit="Sequence">
-				<attributes>
-					<ObjectAttribute id="taskDescriptionAttr" title="Description" text="{description}"/>
-					<ObjectAttribute id="taskContextPathAttr" title="Context Path" text="{contextPath}"/>
-					<ObjectAttribute id="taskIsMainAttr" title="Is Main Task" text="{isMain}"/>
-				</attributes>
-			</ObjectHeader>
-			
-			<f:SimpleForm
-				id="taskDetailsForm"
-				editable="false"
-				layout="ResponsiveGridLayout"
-				title="Task Information"
-				adjustLabelSpan="false"
-				singleContainerFullSize="false">
-				<f:content>
-					<Label id="taskNameLabel" text="Name"/>
-					<Text id="taskNameText" text="{name}"/>
-					<Label id="taskDescLabel" text="Description"/>
-					<Text id="taskDescText" text="{description}"/>
-					<Label id="taskContextLabel" text="Context Path"/>
-					<Text id="taskContextText" text="{contextPath}"/>
-					<Label id="taskSeqLabel" text="Sequence"/>
-					<Text id="taskSeqText" text="{sequence}"/>
-					<Label id="taskMainLabel" text="Is Main Task"/>
-					<Text id="taskMainText" text="{isMain}"/>
-					<Label id="taskCreatedLabel" text="Created At"/>
-					<Text id="taskCreatedText" text="{createdAt}"/>
-					<Label id="taskModifiedLabel" text="Modified At"/>
-					<Text id="taskModifiedText" text="{modifiedAt}"/>
-				</f:content>
-			</f:SimpleForm>
+			<VBox id="taskDescriptionContainer" class="sapUiMediumMargin">
+				<Text id="taskDescriptionText" text="{description}" wrapping="true" class="sapUiLargeText"/>
+			</VBox>
 		</content>
 	</Page>
 </mvc:View> 

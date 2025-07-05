@@ -1,3 +1,4 @@
+<!-- MarkDownNodePage.view.xml -->
 <mvc:View
   controllerName="ai.orchestration.taskfree.controller.MarkDownNodePage"
   xmlns:mvc="sap.ui.core.mvc"
@@ -5,10 +6,7 @@
   xmlns:c="sap.ui.core">
   <Page id="MarkDownNodePage" title="{viewModel>/title}">
     <content>
-      <c:HTML
-        id="markdownContent"
-        visible="{= ${viewModel>/type} === 'markdown'}"
-        content="{viewModel>/htmlValue}"/>
+      <c:HTML id="markdownContent"></c:HTML>
     </content>
   </Page>
 </mvc:View>

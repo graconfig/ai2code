@@ -1,0 +1,65 @@
+<core:FragmentDefinition xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m.upload"
+    xmlns:u="sap.ui.unified">
+
+    <m:Dialog id="fileUploadFragment" title="Upload Files" beforeOpen=".onBeforeOpen" afterClose=".onAfterClose">
+    <UploadSet 
+        id="uploadSet"
+        instantUpload="false"
+        uploadEnabled="true"
+        showIcons="true"
+        terminationEnabled="true"
+        maxFileNameLength="30"
+        maxFileSize="200"
+        fileTypes="txt,pdf"
+        mediaTypes="text/plain,application/pdf"
+        afterItemAdded=".onAfterItemAdded"
+        uploadCompleted=".onUploadCompleted"
+        mode="None" 
+        items="{ 
+            path:'/CDSViewFiles',
+            parameters: {
+                $orderby: 'createdAt desc'
+            },
+            templateShareable: false
+         }">
+         <items>
+            <UploadSetItem 
+                id="uploadSetItems"
+                fileName="{fileName}"
+                mediaType="{mediaType}"
+                enabledEdit="false"
+                visibleEdit="false"
+                enabledRemove="false"
+                visibleRemove="false"
+                >
+                <m:ObjectAttribute
+                    id="uploadSetItemAttribute1" 
+                    title="Uploaded By"
+                    text="{createdBy}"
+                    active="false"/>
+                <m:ObjectAttribute
+                    id="uploadSetItemAttribute2" 
+                    title="Uploaded on"
+                    text="{createdAt}"
+                    active="false"/>
+                <m:ObjectAttribute
+                    id="uploadSetItemAttribute3" 
+                    title="File Size"
+                    text="{size}"
+                    active="false"/>
+            </UploadSetItem>
+         </items>
+    </UploadSet>
+
+	    <m:beginButton>
+	        <m:Button
+	            id="closeBtn"
+	            text="Close"
+	            press=".onCloseUploadFileFragment"/>
+    </m:beginButton>
+    </m:Dialog>
+
+</core:FragmentDefinition>
