@@ -22,8 +22,8 @@ import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZsgenDdlsSourceList;
 import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZtgenddlsL;
 import cds.gen.mainservice.CreateCds_;
 import cds.gen.mainservice.MainService_;
-import customer.ai2code.service.impl.CreateCdsOdataBotExecution;
 import customer.ai2code.service.impl.GenericCqnService;
+import customer.ai2code.service.impl.execution.CreateCdsOdataBotExecution;
 
 @Component
 @ServiceName(MainService_.CDS_NAME)
