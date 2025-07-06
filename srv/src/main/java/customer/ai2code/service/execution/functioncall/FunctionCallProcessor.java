@@ -567,7 +567,10 @@ public class FunctionCallProcessor {
                 } else {
                     return Double.parseDouble(argumentValue.toString());
                 }
+            } else if (parameterType instanceof Class){
+                return convertToSpecificType(argumentValue, parameterType);
             }
+            
 
             // 如果参数类型就是期望的类型，直接返回
             if (parameterType.isAssignableFrom(argumentValue.getClass())) {
