@@ -41,4 +41,7 @@ public interface ContextService {
      * 根据路径模式查询上下文节点（支持数组语法）
      */
     public List<ContextNodes> getContextNodesByPattern(String botInstanceId, String pathPattern);
+
+    public void updateAdditionInfo(String botInstanceId,String contextPath,String additionalInfo);
+
 }
