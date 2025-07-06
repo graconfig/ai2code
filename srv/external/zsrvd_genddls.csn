@@ -1,0 +1,778 @@
+{
+ "meta": {
+  "creator": "cds-dk 8.9.3"
+ },
+ "$version": "2.0",
+ "definitions": {
+  "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_pCbAControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "_log": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "_source": {
+     "type": "cds.Boolean",
+     "notNull": true
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_pOperationControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "activeCDS": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "Edit": {
+     "type": "cds.Boolean",
+     "notNull": true
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_genddls.v0001.ZSGEN_DDLS_SOURCE_LIST": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "VIEWNAME": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true
+    },
+    "VIEWDESC": {
+     "type": "cds.String",
+     "length": 60,
+     "notNull": true
+    },
+    "REFERENCE": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true
+    },
+    "SOURCECODE": {
+     "type": "cds.LargeString",
+     "notNull": true
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_genddls.v0001.ZTGENDDLS_L": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "MANDT": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true
+    },
+    "PROJNAME": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true
+    },
+    "UUID": {
+     "type": "cds.UUID"
+    },
+    "REFERENCE": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true
+    },
+    "MESSAGE": {
+     "type": "cds.String",
+     "length": 220,
+     "notNull": true
+    },
+    "TYPE": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true
+    },
+    "ID": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true
+    },
+    "MESSAGE_V1": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true
+    },
+    "MESSAGE_V2": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true
+    },
+    "MESSAGE_V3": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true
+    },
+    "MESSAGE_V4": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true
+    },
+    "CREATED_BY": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "CREATED_AT": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "LOCAL_LAST_CHANGED_BY": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "LOCAL_LAST_CHANGED_AT": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_genddls.v0001.EntityControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "Deletable": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "Updatable": {
+     "type": "cds.Boolean",
+     "notNull": true
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_genddls.v0001.SAP__Message": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "code": {
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "message": {
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "target": {
+     "type": "cds.LargeString"
+    },
+    "additionalTargets": {
+     "items": {
+      "type": "cds.LargeString",
+      "notNull": true
+     }
+    },
+    "transition": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "numericSeverity": {
+     "type": "cds.Integer",
+     "@odata.Type": "Edm.Byte",
+     "notNull": true
+    },
+    "longtextUrl": {
+     "type": "cds.LargeString"
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_genddls.v0001": {
+   "kind": "service",
+   "@cds.external": true
+  },
+  "com.sap.gateway.srvd.zsrvd_genddls.v0001.I_DraftAdministrativeData": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "DraftUUID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "DraftEntityType": {
+     "key": true,
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true
+    },
+    "CreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "CreatedByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "LastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "LastChangedByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "DraftAccessType": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true
+    },
+    "ProcessingStartDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "InProcessByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "DraftIsKeptByUser": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "EnqueueStartDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "DraftIsCreatedByMe": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "DraftIsLastChangedByMe": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "DraftIsProcessedByMe": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "CreatedByUserDescription": {
+     "type": "cds.String",
+     "length": 80,
+     "notNull": true
+    },
+    "LastChangedByUserDescription": {
+     "type": "cds.String",
+     "length": 80,
+     "notNull": true
+    },
+    "InProcessByUserDescription": {
+     "type": "cds.String",
+     "length": 80,
+     "notNull": true
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_l": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Projname": {
+     "key": true,
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true
+    },
+    "UUID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Reference": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true
+    },
+    "Message": {
+     "type": "cds.String",
+     "length": 220,
+     "notNull": true
+    },
+    "Type": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true
+    },
+    "Id": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true
+    },
+    "MessageV1": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true
+    },
+    "MessageV2": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true
+    },
+    "MessageV3": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true
+    },
+    "MessageV4": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "LocalLastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "LocalLastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "__EntityControl": {
+     "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.EntityControl"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.SAP__Message",
+      "notNull": true
+     }
+    },
+    "DraftAdministrativeData": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.I_DraftAdministrativeData",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_l",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_proj": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Projname": {
+     "key": true,
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true
+    },
+    "Projdesc": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true
+    },
+    "Withdraft": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "Withadditionalsave": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "Devclass": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true
+    },
+    "Trkorr": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true
+    },
+    "Status": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "LocalLastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "LocalLastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "__CreateByAssociationControl": {
+     "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_pCbAControl"
+    },
+    "__EntityControl": {
+     "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.EntityControl"
+    },
+    "__OperationControl": {
+     "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_pOperationControl"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.SAP__Message",
+      "notNull": true
+     }
+    },
+    "DraftAdministrativeData": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.I_DraftAdministrativeData",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_log": {
+     "type": "cds.Composition",
+     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_l",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    },
+    "_source": {
+     "type": "cds.Composition",
+     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_s",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    }
+   },
+   "actions": {
+    "activeCDS": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p",
+      "notNull": true
+     }
+    },
+    "Activate": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p",
+      "notNull": true
+     }
+    },
+    "Edit": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "PreserveChanges": {
+       "type": "cds.Boolean",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p",
+      "notNull": true
+     }
+    },
+    "Prepare": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     }
+    },
+    "autoActiveCDS": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "items": {
+        "type": "$self",
+        "notNull": true
+       }
+      },
+      "PROJNAME": {
+       "type": "cds.String",
+       "length": 30,
+       "notNull": true
+      },
+      "PROJDESC": {
+       "type": "cds.String",
+       "length": 40,
+       "notNull": true
+      },
+      "WITHDRAFT": {
+       "type": "cds.Boolean",
+       "notNull": true
+      },
+      "WITHADDITIONALSAVE": {
+       "type": "cds.Boolean",
+       "notNull": true
+      },
+      "DEVCLASS": {
+       "type": "cds.String",
+       "length": 30,
+       "notNull": true
+      },
+      "TRKORR": {
+       "type": "cds.String",
+       "length": 20,
+       "notNull": true
+      },
+      "_SOURCE": {
+       "items": {
+        "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.ZSGEN_DDLS_SOURCE_LIST",
+        "notNull": true
+       }
+      }
+     },
+     "returns": {
+      "items": {
+       "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.ZTGENDDLS_L"
+      }
+     }
+    },
+    "Resume": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     }
+    },
+    "Discard": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     }
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_s": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Projname": {
+     "key": true,
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true
+    },
+    "Viewname": {
+     "key": true,
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true
+    },
+    "Viewdesc": {
+     "type": "cds.String",
+     "length": 60,
+     "notNull": true
+    },
+    "Reference": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true
+    },
+    "Sourcecode": {
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "LocalLastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "LocalLastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "__EntityControl": {
+     "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.EntityControl"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.SAP__Message",
+      "notNull": true
+     }
+    },
+    "DraftAdministrativeData": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.I_DraftAdministrativeData",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_s",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_proj": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    }
+   }
+  }
+ }
+}

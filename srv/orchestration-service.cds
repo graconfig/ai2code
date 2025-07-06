@@ -26,6 +26,7 @@ service MainService {
     action createTaskWithBots(name : String,
                               description : String,
                               typeId : UUID) returns Tasks;
-
+      //Create CDS
+      entity CreateCds as projection on db.CreateCds;
 
 }
