@@ -1,17 +1,32 @@
 <mvc:View
-  controllerName="ai.orchestration.taskfree.controller.TextAreaNodePage"
-  xmlns:mvc="sap.ui.core.mvc"
-  xmlns="sap.m"
-  xmlns:c="sap.ui.core">
-  <Page id="textAreaNodePage" title="{viewModel>/title}">
-    <content>
-      <TextArea
-        visible="{= ${viewModel>/type} === 'codeEditor'}"
-        value="{viewModel>/value}"
-        rows="20"
-        width="100%"
-        editable="false"
-        class="sapUiSmallMargin"/>
-    </content>
-  </Page>
+    controllerName="ai.orchestration.taskfree.controller.TextAreaNodePage"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:codeeditor="sap.ui.codeeditor"
+    height="100%">
+    <Page id="textAreaNodePage" showHeader="true" title="Code Editor">
+        <customHeader>
+            <Bar id="textAreaNodePageHeader">
+                <contentLeft>
+                    <Title id="textAreaPageTitle" text="{viewModel>/title}" level="H2"/>
+                </contentLeft>
+                <contentRight>
+                    <Button id="returnToConversationBtn" 
+                            text="Return To Conversation" 
+                            type="Emphasized"
+                            press="onReturnToConversation"
+                            visible="{viewModel>/showReturnButton}"/>
+                </contentRight>
+            </Bar>
+        </customHeader>
+        
+        <content>
+            <codeeditor:CodeEditor
+                id="textAreaCodeEditor"
+                type="{viewModel>/editorType}"
+                value="{viewModel>/value}"
+                editable="false"
+                height="95%" />
+        </content>
+    </Page>
 </mvc:View>

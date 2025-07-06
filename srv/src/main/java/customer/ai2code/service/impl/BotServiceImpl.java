@@ -24,8 +24,6 @@ import customer.ai2code.model.tree.TaskBotNode;
 import customer.ai2code.service.BotService;
 import customer.ai2code.service.ContextService;
 
-import customer.ai2code.service.ContextService;
-
 import customer.ai2code.service.PromptService;
 import customer.ai2code.service.constant.AIConstants;
 
@@ -37,11 +35,16 @@ import com.sap.cds.ql.cqn.CqnStatement;
 import com.sap.cds.ql.cqn.ResolvedRefItem;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.xml.transform.Result;
+
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import cds.gen.mainservice.BotMessages;
@@ -157,16 +160,13 @@ public class BotServiceImpl implements BotService {
             // 更新状态为SUCCESS
             // updateBotInstanceStatus(bot, "S");
 
-            // 3. 将用户和AI的聊天内容存储到表中
-            BotMessages userMessage = genericCqnService.createAndInsertBotMessage(botInstanceId, content, "user");
-
-            // 3.1 停顿0.5 秒，确保用户消息先插入
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // 恢复中断状态
-                throw new BusinessException(AIConstants.Messages.THREAD_INTERRUPTED, e);
-            }
+            // // 3.1 停顿0.5 秒，确保用户消息先插入
+            // try {
+            // Thread.sleep(500);
+            // } catch (InterruptedException e) {
+            // Thread.currentThread().interrupt(); // 恢复中断状态
+            // throw new BusinessException(AIConstants.Messages.THREAD_INTERRUPTED, e);
+            // }
 
             BotMessages botMessage = genericCqnService.createAndInsertBotMessage(botInstanceId, response, "assistant");
 
@@ -229,37 +229,31 @@ public class BotServiceImpl implements BotService {
         } catch (Exception e) {
             // 更新状态为FAILED
             updateBotInstanceStatus(bot, "FAILED");
-            throw new BusinessException("Execution failed for bot: " + botInstanceId, e);
+            // throw new BusinessException("Execution failed for bot: " + botInstanceId, e);
+            // 异常情况下，为了不打断事务提交，使用catch语句后，将exception消息存储至result字段，且返回包含错误消息的result对象·
+            BotInstancesExecuteContext.ReturnType exceptionResult = BotInstancesExecuteContext.ReturnType.create();
+            exceptionResult.setResult("Execution failed: " + e.getMessage());
+            updateBotInstanceResult(bot, exceptionResult.getResult());
+            return exceptionResult;
         }
     }
 
     private Bot createBotInstance(BotInstances botInstance, BotTypes botType, AIModel aiModel) {
+        Locale locale = LocaleContextHolder.getLocale();
         String functionTypeCode = botType.getFunctionTypeCode();
 
         switch (functionTypeCode) {
             case "A": // AI Chat Bot
-                return new ChatBot(botInstance, aiModel, botType, genericCqnService, promptService, aiModelResolver);
+                return new ChatBot(botInstance, aiModel, botType, locale, genericCqnService, promptService,
+                        aiModelResolver);
             case "F": // Function Calling Bot
-                return new FunctionCallingBot(botInstance, aiModel, botType, genericCqnService, promptService,
+                return new FunctionCallingBot(botInstance, aiModel, botType, locale, genericCqnService, promptService,
                         aiModelResolver, botExecutionFactoryService);
             case "C": // Coding Bot
-                return new CodingBot(botInstance, aiModel, botType);
+                return new CodingBot(botInstance, aiModel, botType, locale);
             default:
                 throw new BusinessException("Unsupported bot function type: " + functionTypeCode);
         }
-    }
-
-    private void updateBotInstanceStatus(Bot bot, String status) {
-        String botInstanceId = bot.getBotInstance().getId();
-        // 使用缓存管理器更新状态
-        cacheManager.updateBotStatus(botInstanceId, status);
-        // 同时更新数据库
-        genericCqnService.updateBotInstanceStatus(botInstanceId, status);
-    }
-
-    private void updateBotInstanceResult(Bot bot, String result) {
-        String botInstanceId = bot.getBotInstance().getId();
-        genericCqnService.updateBotInstanceResult(botInstanceId, result);
     }
 
     private String extractIdFromContext(BotInstancesChatCompletionContext context) {
@@ -334,6 +328,20 @@ public class BotServiceImpl implements BotService {
         ContextNodes node = contextService.upsertContext(botInstanceId, absoluteOutputContextPath, messageText,
                 bot.getBotType().getContextTypeCode());
 
+        // 6.1 将 ContextNode 的 ID 设置到 BotInstance 中
+        updateBotInstanceContextNodeId(bot, node.getId());
+
+        // 7. 检查botType的ragOutputContextPath，有维护值的情况下写入一条新的ContextNode
+        String ragOutputContextPath = bot.getBotType().getRagOutputContextPath();
+        if (ragOutputContextPath != null && !ragOutputContextPath.isBlank()) {
+            // 获取绝对的 RAG 输出上下文路径
+            String absoluteRagOutputContextPath = contextService.getContextFullPath(botInstanceId,
+                    ragOutputContextPath);
+            // 将RAG输出上下文路径和消息文本存储到新的ContextNode中
+            contextService.upsertContext(botInstanceId, absoluteRagOutputContextPath, botMessage.getRagData(),
+                    "text");
+        }
+
         updateBotInstanceStatus(bot, "SUCCESS");
 
         return node;
@@ -396,4 +404,33 @@ public class BotServiceImpl implements BotService {
     // throw new BusinessException("Main task not found for botInstanceId: " +
     // botInstanceId);
     // }
+
+    /**
+     * 更新BotInstance的contextNodeId字段
+     */
+    private void updateBotInstanceContextNodeId(Bot bot, String contextNodeId) {
+        try {
+            // 使用genericCqnService更新数据库中的contextNodeId
+            genericCqnService.updateBotInstanceContextNodeId(bot.getBotInstance(), contextNodeId);
+            System.out.println(
+                    "Updated contextNodeId for botInstance: " + bot.getBotInstance().getId() + " -> " + contextNodeId);
+
+        } catch (Exception e) {
+            throw new BusinessException(
+                    "Failed to update contextNodeId for botInstance: " + bot.getBotInstance().getId(), e);
+        }
+    }
+
+    private void updateBotInstanceStatus(Bot bot, String status) {
+        String botInstanceId = bot.getBotInstance().getId();
+        // 使用缓存管理器更新状态
+        cacheManager.updateBotStatus(botInstanceId, status);
+        // 同时更新数据库
+        genericCqnService.updateBotInstanceStatus(bot.getBotInstance(), status);
+    }
+
+    private void updateBotInstanceResult(Bot bot, String result) {
+        // String botInstanceId = bot.getBotInstance().getId();
+        genericCqnService.updateBotInstanceResult(bot.getBotInstance(), result);
+    }
 }

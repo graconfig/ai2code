@@ -2,6 +2,7 @@ package customer.ai2code.model.bot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -30,6 +31,7 @@ public class ChatBot implements Bot {
     private BotInstances botInstance;
     private AIModel aiModel;
     private BotTypes botType;
+    private Locale locale;
 
     // 服务依赖（通过构造函数注入）
     private GenericCqnService genericCqnService;
@@ -38,27 +40,35 @@ public class ChatBot implements Bot {
 
     @Override
     public String chat(String content) {
-        List<PromptTexts> prompts = new ArrayList<>();;
+        List<PromptTexts> prompts = new ArrayList<>();
         try {
             // 1. 根据AIModel类型，获取到不同AIService服务
             AIService aiService = aiModelResolver.resolveAIService(aiModel.getModelConfigs());
 
-            // 3. 第一次chat需要保存prompt消息
+            // 2. 第一次chat需要保存prompt消息
             boolean isFirstCall = genericCqnService.isFirstCall(botInstance.getId());
             if (isFirstCall) {
-                // 2. 使用genericCqnService.getMainTaskId，再获取Prompt
+                // 3. 使用genericCqnService.getMainTaskId，再获取Prompt
                 // String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
-                prompts = promptService.getPrompts(botType.getId(), botInstance.getId());
+                prompts = promptService.getPrompts(this);
                 if (prompts != null && !prompts.isEmpty()) {
                     savePromptMessages(prompts);
                 }
-
             }
 
             // 4. 获取历史消息
             List<BotMessages> historyMessages = genericCqnService.getBotMessagesByBotInstanceId(botInstance.getId());
 
-            // 5. 真正调用chat服务
+            // String ragContent = ;
+            PromptTexts ragPrompt = promptService.getRagAsPrompts(this, content);
+
+            // 6.将用户的聊天内容存储到表中
+            BotMessages userMessage = genericCqnService.createAndInsertBotMessage(botInstance.getId(), content,
+                    ragPrompt.getContent(), "user");
+
+            prompts.add(ragPrompt);
+
+            // 7. 真正调用chat服务
             String response = aiService.chatWithAI(historyMessages, prompts, content, aiModel);
 
             return response;
@@ -77,7 +87,7 @@ public class ChatBot implements Bot {
 
             // 2. 获取主任务ID和Prompt
             // String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
-            List<PromptTexts> prompts = promptService.getPrompts(botType.getId(), botInstance.getId());
+            List<PromptTexts> prompts = promptService.getPrompts(this);
 
             // 3. 第一次调用需要保存prompt消息
             boolean isFirstCall = genericCqnService.isFirstCall(botInstance.getId());

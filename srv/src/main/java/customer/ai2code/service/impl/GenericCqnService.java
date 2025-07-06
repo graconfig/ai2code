@@ -1,28 +1,49 @@
+      
 package customer.ai2code.service.impl;
 
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.cds.CdsVector;
+import com.sap.cds.Result;
+import com.sap.cds.Row;
+import com.sap.cds.ql.CQL;
+import com.sap.cds.ql.Delete;
 import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnSelect;
+import com.sap.cds.ql.cqn.CqnVector;
 
 import cds.gen.configservice.ConfigService;
 import cds.gen.configservice.ModelConfigs;
 import cds.gen.configservice.ModelConfigs_;
+import cds.gen.ai.orchestration.rag.*;
 import cds.gen.configservice.BotTypes;
 import cds.gen.configservice.BotTypes_;
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstances_;
 import cds.gen.mainservice.BotMessages;
 import cds.gen.mainservice.BotMessages_;
+import cds.gen.mainservice.CDSViewFiles;
+import cds.gen.mainservice.CDSViewFiles_;
+import cds.gen.mainservice.CDSViews;
+import cds.gen.mainservice.CDSViews_;
+import cds.gen.mainservice.BusinessScenarios_;
 import cds.gen.mainservice.Tasks;
 import cds.gen.mainservice.Tasks_;
+import cds.gen.mainservice.Viewfields;
+import cds.gen.mainservice.Viewfields_;
 import cds.gen.mainservice.ContextNodes;
 import cds.gen.mainservice.ContextNodes_;
 import cds.gen.mainservice.MainService;
 import cds.gen.configservice.PromptTexts;
 import cds.gen.configservice.PromptTexts_;
 
-import java.util.List;
-import java.util.UUID;
+import javax.print.DocFlavor.STRING;
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import customer.ai2code.exception.BusinessException;
 
@@ -32,6 +53,8 @@ public class GenericCqnService {
     private final MainService mainService;
     private final ConfigService configService;
     private final EntityService entityService;
+    private final ObjectMapper objectMapper;
+    private final DataSource dataSource;
 
     private final TaskBotCacheManager cacheManager;
 
@@ -39,11 +62,15 @@ public class GenericCqnService {
             EntityService entityService,
             MainService mainService,
             ConfigService configService,
-            TaskBotCacheManager cacheManager) {
+            TaskBotCacheManager cacheManager,
+            ObjectMapper objectMapper,
+            DataSource dataSource) {
         this.entityService = entityService;
         this.mainService = mainService;
         this.configService = configService;
         this.cacheManager = cacheManager;
+        this.dataSource = dataSource;
+        this.objectMapper = objectMapper;
     }
 
     // 原有查询方法...
@@ -163,20 +190,20 @@ public class GenericCqnService {
         entityService.update(mainService, null, BotInstances_.class, botInstance, true);
     }
 
-    public void updateBotInstanceStatus(String botInstanceId, String statusCode) {
-        BotInstances botInstance = getBotInstanceById(botInstanceId);
+    public void updateBotInstanceStatus(BotInstances botInstance, String statusCode) {
+        // BotInstances botInstance = getBotInstanceById(botInstanceId);
         botInstance.setStatusCode(statusCode);
         updateBotInstance(botInstance);
     }
 
-    public void updateBotInstanceResult(String botInstanceId, String result) {
-        BotInstances botInstance = getBotInstanceById(botInstanceId);
+    public void updateBotInstanceResult(BotInstances botInstance, String result) {
+        // BotInstances botInstance = getBotInstanceById(botInstanceId);
         botInstance.setResult(result);
         updateBotInstance(botInstance);
     }
 
-    public void updateBotInstanceStatusAndResult(String botInstanceId, String statusCode, String result) {
-        BotInstances botInstance = getBotInstanceById(botInstanceId);
+    public void updateBotInstanceStatusAndResult(BotInstances botInstance, String statusCode, String result) {
+        // BotInstances botInstance = getBotInstanceById(botInstanceId);
         botInstance.setStatusCode(statusCode);
         botInstance.setResult(result);
         updateBotInstance(botInstance);
@@ -194,6 +221,55 @@ public class GenericCqnService {
                 .where(c -> c.task_ID().eq(taskId).and(c.path().eq(contextPath)));
         return entityService.selectSingle(mainService, select, ContextNodes.class,
                 "ContextNode not found for task: " + taskId + ", path: " + contextPath);
+    }
+
+    /**
+     * 根据任务ID和路径模式查询ContextNodes
+     * 支持通配符模式，如: subtask[*].a.property 匹配 subtask[0].a.property, subtask[123].a.property 等
+     */
+    public List<ContextNodes> getContextNodesByTaskAndPathPattern(String taskId, String contextPath) {
+        // 将通配符模式转换为正则表达式
+        // 例如: subtask[*].a.property -> subtask\[\d+\]\.a\.property
+        String regexPattern = convertWildcardToRegex(contextPath);
+
+        var select = Select.from(ContextNodes_.class)
+                .where(c -> c.task_ID().eq(taskId).and(c.path().matchesPattern(regexPattern)));
+        return entityService.selectList(mainService, select, ContextNodes.class);
+    }
+    
+    /**
+     * 将通配符模式转换为正则表达式
+     * 例如: subtask[*].a.property -> subtask\[\d+\]\.a\.property
+     */
+    private String convertWildcardToRegex(String wildcardPattern) {
+        if (wildcardPattern == null) {
+            return null;
+        }
+        
+        // 首先处理特殊的通配符模式 [*]，避免被后续的转义影响
+        String regex = wildcardPattern.replace("[*]", "PLACEHOLDER_FOR_DIGITS");
+        
+        // 转义正则表达式特殊字符
+        regex = regex
+                .replace("\\", "\\\\")    // 转义反斜杠
+                .replace(".", "\\.")      // 转义点号
+                .replace("(", "\\(")      // 转义左括号
+                .replace(")", "\\)")      // 转义右括号
+                .replace("+", "\\+")      // 转义加号
+                .replace("^", "\\^")      // 转义尖角号
+                .replace("$", "\\$")      // 转义美元符号
+                .replace("|", "\\|")      // 转义管道符
+                .replace("?", "\\?")      // 转义问号
+                .replace("*", "\\*")      // 转义星号（但不是在[]内的）
+                .replace("{", "\\{")      // 转义左大括号
+                .replace("}", "\\}")      // 转义右大括号
+                .replace("[", "\\[")      // 转义左中括号
+                .replace("]", "\\]");     // 转义右中括号
+        
+        // 最后将占位符替换为正确的数字匹配模式
+        regex = regex.replace("PLACEHOLDER_FOR_DIGITS", "\\[\\d+\\]");
+        
+        return regex;
     }
 
     // 更新ContextNode的业务方法
@@ -332,6 +408,21 @@ public class GenericCqnService {
     }
 
     /**
+     * 创建并插入单条BotMessage（指定角色）
+     */
+    public BotMessages createAndInsertBotMessage(String botInstanceId, String message, String ragContent, String role) {
+        BotMessages botMessage = BotMessages.create();
+        botMessage.setId(UUID.randomUUID().toString());
+        botMessage.setBotInstanceId(botInstanceId);
+        botMessage.setMessage(message);
+        botMessage.setRagData(ragContent);
+        botMessage.setRole(role);
+
+        entityService.insert(mainService, null, BotMessages_.class, botMessage, true);
+        return botMessage;
+    }
+
+    /**
      * 判断是否是第一次调用
      */
     public boolean isFirstCall(String botInstanceId) {
@@ -408,11 +499,13 @@ public class GenericCqnService {
                 .where(b -> b.ID().eq(botInstanceId));
 
         // 查询结果列表
-        BotInstances instance = entityService.selectSingle(mainService, select, BotInstances.class,String.format("Parent task not found for bot instance %s", botInstanceId));
+        BotInstances instance = entityService.selectSingle(mainService, select, BotInstances.class,
+                String.format("Parent task not found for bot instance %s", botInstanceId));
 
         // 检查并返回结果
         // if (instance.isEmpty() || instances.get(0).getTaskId() == null) {
-        //     throw new IllegalStateException("No taskId found for botInstanceId: " + botInstanceId);
+        // throw new IllegalStateException("No taskId found for botInstanceId: " +
+        // botInstanceId);
         // }
 
         return instance.getTaskId();
@@ -434,11 +527,12 @@ public class GenericCqnService {
             Tasks currentTask = getTaskById(taskId);
 
             // 4. 如果当前任务有父任务ID，则获取父任务
-            // if (currentTask.getParentTaskId() != null && !currentTask.getParentTaskId().isEmpty()) {
-            //     return getTaskById(currentTask.getParentTaskId());
+            // if (currentTask.getParentTaskId() != null &&
+            // !currentTask.getParentTaskId().isEmpty()) {
+            // return getTaskById(currentTask.getParentTaskId());
             // } else {
-            //     // 5. 如果没有父任务，返回当前任务本身
-            //     return currentTask;
+            // // 5. 如果没有父任务，返回当前任务本身
+            // return currentTask;
             // }
             return currentTask;
 
@@ -447,4 +541,399 @@ public class GenericCqnService {
         }
     }
 
+    // /**
+    // * 执行原生SQL查询，返回结果列表（Map形式）
+    // */
+    // public List<Map<String, Object>> execNativeSql(String sql) throws
+    // SQLException {
+    // try (Connection conn = dataSource.getConnection();
+    // PreparedStatement stmt = conn.prepareStatement(sql);
+    // ResultSet rs = stmt.executeQuery()) {
+
+    // List<Map<String, Object>> results = new ArrayList<>();
+    // ResultSetMetaData meta = rs.getMetaData();
+    // int colCount = meta.getColumnCount();
+
+    // while (rs.next()) {
+    // Map<String, Object> row = new LinkedHashMap<>();
+    // for (int i = 1; i <= colCount; i++) {
+    // Object val = rs.getObject(i);
+    // row.put(meta.getColumnLabel(i), val);
+    // }
+    // results.add(row);
+    // }
+    // return results;
+    // }
+    // }
+
+    public String findMatchingViewsByScenario(String ragSource, int ragTopK, String query,
+            Locale language, double threshold) {
+        // 1.构建向量
+        CqnVector vector = CQL.vector(query);
+        var similarity = CQL.cosineSimilarity(CQL.get("embeddings"), vector);
+        // 2.查询 BusinessScenarios 表，获取符合条件的场景
+        CqnSelect selectScenario = Select.from(BusinessScenarios_.class)
+                .columns(b -> b.get("scenario"), b -> b.get("description"), b -> b.get("viewCategory"),
+                        b -> similarity.as("similarity"))
+                .where(b -> similarity.gt(threshold))
+                .orderBy(b -> similarity.desc())
+                .limit(ragTopK);
+
+        List<Row> scenarioRows = mainService.run(selectScenario).listOf(Row.class);
+        if (scenarioRows.isEmpty()) {
+            return "[]"; // 如果没有匹配的场景，返回空数组
+        }
+        // 3.提取 viewCategory 并展开
+        Set<String> categories = new LinkedHashSet<>();
+        for (Row row : scenarioRows) {
+            String viewCategory = (String) row.get("viewCategory");
+            if (viewCategory != null) {
+                String[] parts = viewCategory.split("/");
+                for (String part : parts) {
+                    categories.add(part.trim());
+                }
+            }
+        }
+
+        if (categories.isEmpty())
+            return "[]";
+
+        // Step 4: 查询 CDSViews 表中符合条件的 view
+        CqnSelect selectViews = Select.from(CDSViews_.class)
+                .columns("viewName", "viewDesc", "viewCategory")
+                .where(c -> CQL.get("viewCategory").in(categories)
+                        .and(CQL.get("isActive").eq(true)));
+
+        List<Row> viewRows = mainService.run(selectViews).listOf(Row.class);
+
+        // Step 5: 返回 JSON 格式
+        return rowsToJson(viewRows);
+
+    }
+
+    public String findViewFieldsByViewNames(List<String> viewList, int ragTopK, Locale language) {
+
+        CqnSelect select = Select.from(Viewfields_.class)
+                .columns(f -> f.get("tableName"), f -> f.get("tableDesc"), f -> f.get("content"))
+                .where(f -> f.get("category").in(viewList).and(f.get("langu").eq(language.getLanguage())))
+                .limit(ragTopK);
+
+        List<Row> rows = mainService.run(select).listOf(Row.class);
+        return rowsToJson(rows);
+
+    }
+
+    public String findJoinConditionsByViewNames(List<String> viewList) {
+        CqnSelect select = Select.from(RagJoinCond_.class)
+                .columns(c -> c.get("tableFirst"), c -> c.get("tableSecond"), c -> c.get("tableJoin"))
+                .where(c -> c.get("tableFirst").in(viewList).or(c.get("tableSecond").in(viewList)));
+
+        List<Row> rows = mainService.run(select).listOf(Row.class);
+        return rowsToJson(rows);
+    }
+
+    private String rowsToJson(List<Row> rows) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Row row : rows) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            for (String column : row.keySet()) {
+                map.put(column, row.get(column));
+            }
+            result.add(map);
+        }
+
+        try {
+            return objectMapper.writeValueAsString(result);
+        } catch (Exception e) {
+            return "[{\"error\":\"Failed to convert result to JSON\"}]";
+        }
+    }
+
+    
+    // 在GenericCqnService中添加这个方法
+    public void updateBotInstanceContextNodeId(BotInstances botInstance, String contextNodeId) {
+        // Update updateQuery = Update.entity(BotInstances_.class)
+        // .where(b -> b.ID().eq(botInstanceId))
+        // .data(BotInstances.CONTEXT_NODE_ID, contextNodeId);
+
+        // persistenceService.run(updateQuery);
+        botInstance.setContextID(contextNodeId);
+        // entityService.update(mainService, null, BotInstances_.class, botInstance,
+        // true);
+        updateBotInstance(botInstance);
+    }
+
+
+    // ========== 新增CDSViews插入方法 ==========
+    /**
+     * 插入CDSViews实体（基于viewName主键）
+     * 
+     * @param view CDSViews实体（需包含viewName）
+     */
+    public void insertCDSViews(CDSViews view) {
+        // 校验必填字段（viewName）
+        if (view.getViewName() == null || view.getViewName().isEmpty()) {
+            throw new IllegalArgumentException("CDSViews.viewName不能为空");
+        }
+
+        entityService.insert(
+                mainService, // 使用MainService作为服务上下文
+                null, // 无事务上下文
+                CDSViews_.class,
+                view,
+                true // 自动生成审计字段（managed aspect）
+        );
+    }
+
+    // ========== 新增Viewfields插入方法 ==========
+    /**
+     * 插入Viewfields实体（带ID主键）
+     * 
+     * @param field Viewfields实体（需包含ID或自动生成）
+     */
+    public void insertViewfields(Viewfields field) {
+        // 自动生成ID（如果未设置）
+        if (field.getId() == null) {
+            field.setId(UUID.randomUUID().toString());
+        }
+
+        // 调用entityService插入
+        entityService.insert(
+                mainService,
+                null,
+                Viewfields_.class,
+                field,
+                true);
+    }
+
+    // ========== 新增CDSViewFiles插入方法 ==========
+    /**
+     * 插入CDSViewFiles实体
+     * @param file CDSViewFiles实体（需包含fileName）
+     */
+    public void insertCDSViewFiles(CDSViewFiles file) {
+        // 校验必填字段
+        if (file.getFileName() == null || file.getFileName().isEmpty()) {
+            throw new IllegalArgumentException("CDSViewFiles.fileName不能为空");
+        }
+        
+        // 自动生成ID（如果未设置）
+        if (file.getId() == null) {
+            file.setId(UUID.randomUUID().toString());
+        }
+        
+        try {
+            // 调用entityService插入
+        entityService.insert(
+            mainService,
+            null,
+            CDSViewFiles_.class,
+            file,
+            true
+        );
+        } catch (Exception e) {
+            // TODO: handle exception
+            throw new BusinessException("CDS视图上传失败543: " + e.getMessage(), e);
+        }
+        
+    }
+
+    public void deleteCDSViewsByNames(List<String> viewNames) {
+        if (viewNames == null || viewNames.isEmpty()) return;
+        // 使用entityService的delete方法
+        for (String viewName : viewNames) {
+            CDSViews view = CDSViews.create();
+            view.setViewName(viewName);
+            entityService.delete(mainService, null, CDSViews_.class, view, true);
+        }
+    }
+
+    public void deleteViewFieldsByTableAndLangu(String tableName, String langu) {
+        // 使用entityService的delete方法
+        Viewfields field = Viewfields.create();
+        field.setTableName(tableName);
+        field.setLangu(langu);
+        entityService.delete(mainService, null, Viewfields_.class, field, true);
+    }
+    
+    /**
+     * 批量插入CDSViews实体
+     * @param views CDSViews实体列表
+     */
+    public void batchInsertCDSViews(List<CDSViews> views) {
+        if (views == null || views.isEmpty()) return;
+        
+        // 检查每个视图是否有viewName
+        for (CDSViews view : views) {
+            if (view.getViewName() == null || view.getViewName().isEmpty()) {
+                throw new IllegalArgumentException("CDSViews的viewName不能为空");
+            }
+        }
+        
+        // 使用EntityService的批量插入方法
+        entityService.batchInsert(
+            mainService, 
+            null, 
+            CDSViews_.class, 
+            views, 
+            null,  // 没有reportId
+            true   // 非草稿模式
+        );
+    }
+
+    /**
+     * 批量插入Viewfields实体
+     * @param fields Viewfields实体列表
+     */
+    public void batchInsertViewfields(List<Viewfields> fields) {
+        if (fields == null || fields.isEmpty()) return;
+        
+        // 为每个字段生成ID（如果未设置）
+        for (Viewfields field : fields) {
+            if (field.getId() == null) {
+                field.setId(UUID.randomUUID().toString());
+            }
+        }
+        
+        // 使用EntityService的批量插入方法
+        entityService.batchInsert(
+            mainService, 
+            null, 
+            Viewfields_.class, 
+            fields, 
+            null,  // 没有reportId
+            true   // 非草稿模式
+        );
+    }
+
+    /**
+     * 批量查询CDSViews（根据viewName列表）
+     * @param viewNames 视图名称列表
+     * @return CDSViews实体列表
+     */
+    public List<CDSViews> batchSelectCDSViews(List<String> viewNames) {
+        if (viewNames == null || viewNames.isEmpty()) {
+            return Collections.emptyList();
+        }
+        
+        CqnSelect select = Select.from(CDSViews_.class)
+                .where(v -> v.viewName().in(viewNames));
+        
+        return entityService.selectList(mainService, select, CDSViews.class);
+    }
+
+    /**
+     * 批量查询Viewfields（根据ID列表）
+     * @param fieldIds 字段ID列表
+     * @return Viewfields实体列表
+     */
+    public List<Viewfields> batchSelectViewfields(List<String> fieldIds) {
+        if (fieldIds == null || fieldIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        
+        CqnSelect select = Select.from(Viewfields_.class)
+                .where(f -> f.ID().in(fieldIds));
+        
+        return entityService.selectList(mainService, select, Viewfields.class);
+    }
+
+    /**
+     * 根据表名和语言批量查询Viewfields
+     * @param tableNames 表名列表
+     * @param language 语言代码
+     * @return Viewfields实体列表
+     */
+    public List<Viewfields> batchSelectViewfieldsByTable(List<String> tableNames, String language) {
+        if (tableNames == null || tableNames.isEmpty()) {
+            return Collections.emptyList();
+        }
+        
+        CqnSelect select = Select.from(Viewfields_.class)
+                .where(f -> f.tableName().in(tableNames)
+                        .and(f.langu().eq(language)));
+        
+        return entityService.selectList(mainService, select, Viewfields.class);
+    }
+
+    // ========== 批量更新方法 ==========
+
+    /**
+     * 批量更新CDSViews
+     * @param views 需要更新的视图实体列表
+     */
+    public void batchUpdateCDSViews(List<CDSViews> views) {
+        if (views == null || views.isEmpty()) return;
+        
+        views.forEach(view -> {
+            // 校验必要字段
+            if (view.getViewName() == null) {
+                throw new IllegalArgumentException("CDSViews必须包含viewName");
+            }
+            
+            // 执行单个更新
+            entityService.update(
+                mainService, 
+                null, 
+                CDSViews_.class, 
+                view, 
+                true
+            );
+        });
+    }
+
+    /**
+     * 批量更新Viewfields
+     * @param fields 需要更新的字段实体列表
+     */
+    public void batchUpdateViewfields(List<Viewfields> fields) {
+        if (fields == null || fields.isEmpty()) return;
+        
+        fields.forEach(field -> {
+            // 校验必要字段
+            if (field.getId() == null) {
+                field.setId(UUID.randomUUID().toString());
+            }
+            
+            // 执行单个更新
+            entityService.update(
+                mainService, 
+                null, 
+                Viewfields_.class, 
+                field, 
+                true
+            );
+        });
+    }
+
+    /**
+     * 根据表名和语言批量更新Viewfields
+     * @param tableName 表名
+     * @param language 语言代码
+     * @param updateData 更新数据（不包含ID）
+     */
+    public void batchUpdateViewfieldsByTable(String tableName, String language, Viewfields updateData) {
+        // 1. 查询符合条件的字段
+        List<Viewfields> fields = batchSelectViewfieldsByTable(
+            Collections.singletonList(tableName), 
+            language
+        );
+        
+        // 2. 应用更新数据
+        fields.forEach(field -> {
+            // 复制更新数据到实体
+            if (updateData.getTableDesc() != null) {
+                field.setTableDesc(updateData.getTableDesc());
+            }
+            if (updateData.getContent() != null) {
+                field.setContent(updateData.getContent());
+            }
+        });
+        
+        // 3. 批量更新
+        batchUpdateViewfields(fields);
+    }
+
 }
+
+    

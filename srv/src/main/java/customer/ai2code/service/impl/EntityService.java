@@ -155,13 +155,13 @@ public class EntityService {
 
     // /* Get current user using SecurityContextHolder */
     // public String getCurrentUser() {
-    //     // Get the current user from the SecurityContextHolder
-    //     SecurityContext securityContext = SecurityContextHolder.getContext();
-    //     Authentication authentication = securityContext.getAuthentication();
-    //     String username = authentication.getName();
-    //     // .getAttribute("user", RequestAttributes.SCOPE_REQUEST);
-    //     // return user != null ? user.getName() : null;
-    //     return username;
+    // // Get the current user from the SecurityContextHolder
+    // SecurityContext securityContext = SecurityContextHolder.getContext();
+    // Authentication authentication = securityContext.getAuthentication();
+    // String username = authentication.getName();
+    // // .getAttribute("user", RequestAttributes.SCOPE_REQUEST);
+    // // return user != null ? user.getName() : null;
+    // return username;
     // }
 
     // Insert operations
@@ -175,6 +175,19 @@ public class EntityService {
             return service.run(Insert.into(entityClass).entry(entity));
         } else {
             return serviceDraft.newDraft(Insert.into(entityClass).entry(entity));
+        }
+    }
+
+    public <T extends CdsData, E extends StructuredType<E>> Result bulkInsert(
+            CqnService service,
+            DraftService serviceDraft,
+            Class<E> entityClass,
+            List<T> entities,
+            Boolean isActiveEntity) {
+        if (isActiveEntity) {
+            return service.run(Insert.into(entityClass).entries(entities));
+        } else {
+            return serviceDraft.newDraft(Insert.into(entityClass).entries(entities));
         }
     }
 
@@ -263,18 +276,21 @@ public class EntityService {
             List<T> entities,
             String reportId,
             Boolean isActiveEntity) {
-        entities.forEach(entity -> {
-            // Use reflection to set common properties
-            try {
-                entity.getClass().getMethod("setReportId", String.class)
-                        .invoke(entity, reportId);
-                entity.getClass().getMethod("setIsActiveEntity", Boolean.class)
-                        .invoke(entity, isActiveEntity);
-            } catch (Exception e) {
-                throw new BusinessException("Failed_To_Set_Entity_Properties", e); // Changed exception type
-            }
-            insert(service, serviceDraft, entityClass, entity, isActiveEntity);
-        });
+                
+        bulkInsert(service, serviceDraft, entityClass, entities, isActiveEntity);
+        // entities.forEach(entity -> {
+        //     // Use reflection to set common properties
+        //     // try {
+        //     // entity.getClass().getMethod("setReportId", String.class)
+        //     // .invoke(entity, reportId);
+        //     // entity.getClass().getMethod("setIsActiveEntity", Boolean.class)
+        //     // .invoke(entity, isActiveEntity);
+        //     // } catch (Exception e) {
+        //     // throw new BusinessException("Failed_To_Set_Entity_Properties", e); // Changed
+        //     // exception type
+        //     // }
+        //     insert(service, serviceDraft, entityClass, entity, isActiveEntity);
+        // });
     }
 
     // private <T extends CdsData> void insertEntity(

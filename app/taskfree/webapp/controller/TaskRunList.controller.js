@@ -302,6 +302,7 @@ sap.ui.define(
           oContextBinding.setParameter("name", oNewTask.name);
           oContextBinding.setParameter("description", oNewTask.description);
           oContextBinding.setParameter("typeId", oNewTask.type_ID);
+          this.getView().setBusy(true);
           oContextBinding
             .invoke()
             .then(
@@ -316,6 +317,11 @@ sap.ui.define(
             .catch(
               function (oError) {
                 MessageToast.show("Error creating task: " + oError.message);
+              }.bind(this)
+            )
+            .finally(
+              function () {
+                this.getView().setBusy(false);
               }.bind(this)
             );
         },

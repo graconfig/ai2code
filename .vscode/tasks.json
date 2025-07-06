@@ -6,6 +6,12 @@
       "type": "shell",
       "command": "cds bind --exec '--' node ./writecfenv.js",
       "isBackground": false,
+      "options": {
+        "shell": {
+          "executable": "powershell.exe",
+          "args": ["-Command"]
+        }
+      }
     }
   ]
 }

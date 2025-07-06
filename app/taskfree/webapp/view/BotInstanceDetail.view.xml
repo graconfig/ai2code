@@ -3,57 +3,43 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.ui.layout.form"
-    height="100%">
-	<Page id="botInstanceDetailPage" showHeader="true" title="Bot Instance Detail">
-		<landmarkInfo>
-			<PageAccessibleLandmarkInfo
-				id="botInstanceDetailPageLandmarkInfo"
-				rootRole="Region"
-				rootLabel="Bot Instance Detail"
-				contentRole="Main"
-				contentLabel="Bot Instance Detail Content"/>
-		</landmarkInfo>
-		<headerContent>
-			<Button id="aiChatButton" text="AI Chat" icon="sap-icon://da-2" press="onAIChatPress" visible="false"/>
-		</headerContent>
-		<content>
-			<ObjectHeader
-				id="botInstanceObjectHeader"
-				title="{type/name}"
-				number="{sequence}"
-				numberUnit="Sequence">
-				<attributes>
-					<ObjectAttribute id="botInstanceStatusAttr" title="Status" text="{status_code}"/>
-					<ObjectAttribute id="botInstanceTypeAttr" title="Type" text="{type/name}"/>
-				</attributes>
-			</ObjectHeader>
-			
-			<f:SimpleForm
-				id="botInstanceDetailsForm"
-				editable="false"
-				layout="ResponsiveGridLayout"
-				title="Bot Instance Information"
-				adjustLabelSpan="false"
-				singleContainerFullSize="false">
-				<f:content>
-					<Label id="botInstanceSeqLabel" text="Sequence"/>
-					<Text id="botInstanceSeqText" text="{sequence}"/>
-					<Label id="botInstanceTypeLabel" text="Type"/>
-					<Text id="botInstanceTypeText" text="{type/name}"/>
-					<Label id="botInstanceStatusLabel" text="Status"/>
-					<Text id="botInstanceStatusText" text="{status_code}"/>
-					<Label id="botInstanceResultLabel" text="Result"/>
-					<Text id="botInstanceResultText" text="{result}" maxLines="5"/>
-					<Label id="botInstanceCreatedLabel" text="Created At"/>
-					<Text id="botInstanceCreatedText" text="{createdAt}"/>
-					<Label id="botInstanceModifiedLabel" text="Modified At"/>
-					<Text id="botInstanceModifiedText" text="{modifiedAt}"/>
-				</f:content>
-			</f:SimpleForm>
-			
-			<Panel id="messagesPanel" headerText="Messages" expandable="true" expanded="true">
-				<Text id="messagesPlaceholder" text="Messages will be loaded here"/>
-			</Panel>
-		</content>
-	</Page>
-</mvc:View> 
+    height="100%"
+>
+    <Page
+        id="botInstanceDetailPage"
+        showHeader="true"
+        title="Bot Instance Detail"
+    >
+        <landmarkInfo>
+            <PageAccessibleLandmarkInfo
+                id="botInstanceDetailPageLandmarkInfo"
+                rootRole="Region"
+                rootLabel="Bot Instance Detail"
+                contentRole="Main"
+                contentLabel="Bot Instance Detail Content"
+            />
+        </landmarkInfo>
+        <headerContent>
+            <Button
+                id="aiChatButton"
+                text="AI Chat"
+                icon="sap-icon://da-2"
+                press="onAIChatPress"
+                visible="false"
+            />
+            <Button
+                id="executeButton"
+                text="Execute"
+                type="Emphasized"
+                press="onExecuteButtonPress"
+            />
+        </headerContent>
+        <content>
+            <Text
+                id="botInstanceResultText"
+                text="{result}"
+                maxLines="5"
+            />
+        </content>
+    </Page>
+</mvc:View>

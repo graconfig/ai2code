@@ -248,12 +248,67 @@ annotate service.BotTypes with @(
             },
             {
                 $Type: 'UI.DataField',
+                Value: ragParameter,
+                Label: '{i18n>RagParameter}',
+            },
+            {
+                $Type: 'UI.DataField',
+                Value: ragOutputContextPath,
+                Label: '{i18n>RagOutputContextPath}',
+            },
+            {
+                $Type: 'UI.DataField',
                 Value: sequence,
                 Label: '{i18n>Sequence}',
             },
         ],
     },
 );
+
+annotate service.BotTypes with {
+    implementationClass @(
+        Common.Text                    : implementationClass,
+        Common.ValueList               : {
+            $Type         : 'Common.ValueListType',
+            CollectionPath: 'BotExecutionClass',
+            Parameters    : [
+                {
+                    $Type            : 'Common.ValueListParameterInOut',
+                    LocalDataProperty: implementationClass,
+                    ValueListProperty: 'Name',
+                },
+                {
+                    $Type            : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty: 'Description',
+                },
+            ],
+        },
+        Common.ValueListWithFixedValues: false,
+    )
+};
+
+annotate service.BotTypes with {
+    ragClass @(
+        Common.Text                    : ragClass,
+        Common.ValueList               : {
+            $Type         : 'Common.ValueListType',
+            CollectionPath: 'RAGExtractorClass',
+            Parameters    : [
+                {
+                    $Type            : 'Common.ValueListParameterInOut',
+                    LocalDataProperty: ragClass,
+                    ValueListProperty: 'Name',
+                },
+                {
+                    $Type            : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty: 'Description',
+                },
+            ],
+        },
+        Common.ValueListWithFixedValues: false,
+    )
+};
+
 
 annotate service.BotTypes with {
     functionType @(

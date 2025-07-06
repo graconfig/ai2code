@@ -3,6 +3,7 @@ package customer.ai2code.model.bot;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -31,6 +32,7 @@ public class FunctionCallingBot implements Bot {
     private BotInstances botInstance;
     private AIModel aiModel;
     private BotTypes botType;
+    private Locale locale;
 
     // 服务依赖（通过构造函数注入）
     private GenericCqnService genericCqnService;
@@ -52,12 +54,10 @@ public class FunctionCallingBot implements Bot {
             // 1. 根据AIModel类型，获取到不同AIService服务
             AIService aiService = aiModelResolver.resolveAIService(aiModel.getModelConfigs());
 
-
             // 2. 使用genericCqnService.getMainTaskId，再获取Prompt
             // String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
 
-
-            prompts = promptService.getPrompts(botType.getId(),  botInstance.getId());
+            prompts = promptService.getPrompts(this);
             System.out.println("- Retrieved " + prompts.size() + " prompts for execution");
 
             // 3. 获取历史消息
@@ -66,7 +66,6 @@ public class FunctionCallingBot implements Bot {
 
             // 4. 根据botType.getImplementationClass()获取到函数调用的实现类
             String implementationClass = botType.getImplementationClass();
-
 
             // 使用工厂服务创建 BotExecution 实例
             BotExecution botExecution = botExecutionFactoryService.createBotExecutionInstance(implementationClass);
@@ -100,24 +99,27 @@ public class FunctionCallingBot implements Bot {
             BotInstancesExecuteContext.ReturnType returnResult = BotInstancesExecuteContext.ReturnType.create();
 
             // 判断是否为Collection<String> tasks
-            if (result instanceof Collection<?>) {
-                Collection<?> tasks = (Collection<?>) result;
-                if (!tasks.isEmpty() && tasks.iterator().next() instanceof String) {
-                    List<String> taskList = new ArrayList<>();
-                    for (Object task : tasks) {
-                        taskList.add((String) task);
-                    }
-                    returnResult.setTasks(taskList);
-                    System.out.println("- Function call returned " + taskList.size() + " tasks");
-                } 
-            }
+            // deprecated: 不再返回Collection形式的内容
+            // if (result instanceof Collection<?>) {
+            // Collection<?> tasks = (Collection<?>) result;
+            // if (!tasks.isEmpty() && tasks.iterator().next() instanceof String) {
+            // List<String> taskList = new ArrayList<>();
+            // for (Object task : tasks) {
+            // taskList.add((String) task);
+            // }
+            // // returnResult.setTasks(taskList);
+            // // returnResult.setResult();
 
-            if (result instanceof String) {
-                String resultString = convertResultToString(result);
-                returnResult.setResult(resultString);
-                System.out.println("- Execution result processed successfully");
-                System.out.println("- Result length: " + resultString.length() + " characters");
-            }
+            // System.out.println("- Function call returned " + taskList.size() + " tasks");
+            // }
+            // }
+
+            // if (result instanceof String) {
+            String resultString = convertResultToString(result);
+            returnResult.setResult(resultString);
+            System.out.println("- Execution result processed successfully");
+            System.out.println("- Result length: " + resultString.length() + " characters");
+            // }
 
             return returnResult;
 
@@ -190,11 +192,13 @@ public class FunctionCallingBot implements Bot {
 
     @Override
     public SseEmitter chatInStreaming(String content) {
-        throw new UnsupportedOperationException("FunctionCallingBot does not support chatInStreaming method directly. Use execute() instead.");
+        throw new UnsupportedOperationException(
+                "FunctionCallingBot does not support chatInStreaming method directly. Use execute() instead.");
     }
 
     @Override
     public String chat(String content) {
-        throw new UnsupportedOperationException("FunctionCallingBot does not support chat method directly. Use execute() instead.");
+        throw new UnsupportedOperationException(
+                "FunctionCallingBot does not support chat method directly. Use execute() instead.");
     }
 }

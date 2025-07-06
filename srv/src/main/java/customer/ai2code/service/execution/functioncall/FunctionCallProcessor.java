@@ -28,7 +28,6 @@ public class FunctionCallProcessor {
     private final ApplicationContext applicationContext;
     private final ObjectMapper objectMapper;
 
-    @Autowired
     public FunctionCallProcessor(ApplicationContext applicationContext, ObjectMapper objectMapper) {
         this.applicationContext = applicationContext;
         this.objectMapper = objectMapper;
