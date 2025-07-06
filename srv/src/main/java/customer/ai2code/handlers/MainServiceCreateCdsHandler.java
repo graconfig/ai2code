@@ -28,64 +28,64 @@ import customer.ai2code.service.impl.GenericCqnService;
 @Component
 @ServiceName(MainService_.CDS_NAME)
 public class MainServiceCreateCdsHandler implements EventHandler {
-    private final GenericCqnService genericCqnService;
-    private final V0001 zsrvdGenddls;
-    private CreateCdsOdataBotExecution callodata = null;
+    // private final GenericCqnService genericCqnService;
+    // private final V0001 zsrvdGenddls;
+    // private CreateCdsOdataBotExecution callodata = null;
 
     MainServiceCreateCdsHandler(GenericCqnService genericCqnService, V0001 zsrvdGenddls) {
-        this.callodata = new CreateCdsOdataBotExecution(genericCqnService, zsrvdGenddls);
-        this.genericCqnService = genericCqnService;
-        this.zsrvdGenddls = zsrvdGenddls;
+        // this.callodata = new CreateCdsOdataBotExecution(genericCqnService, zsrvdGenddls);
+        // this.genericCqnService = genericCqnService;
+        // this.zsrvdGenddls = zsrvdGenddls;
     }
 
     @On(event = CqnService.EVENT_READ, entity = CreateCds_.CDS_NAME)
     public void Read(CdsReadEventContext context) throws IOException {
-        ZcGenddlsPAutoActiveCDSContext AutoActiveCDSContext = ZcGenddlsPAutoActiveCDSContext.create();
-        CqnSelect select = (CqnSelect) Select.from(ZcGenddlsP_.CDS_NAME);
-        AutoActiveCDSContext.setCqn(select);
-        AutoActiveCDSContext.setProjname("TESTO703_01");
-        AutoActiveCDSContext.setProjdesc("test report222");
-        AutoActiveCDSContext.setWithadditionalsave(false);
-        AutoActiveCDSContext.setWithdraft(false);
-        AutoActiveCDSContext.setTrkorr("DM2K900068");
-        AutoActiveCDSContext.setDevclass("ZAIREPORT");
-        Collection<ZsgenDdlsSourceList> Sources = new ArrayList<>();
-        ZsgenDdlsSourceList source = ZsgenDdlsSourceList.create();
-        source.setViewname("ZI_TEST2_12");
-        source.setViewdesc("interface view ZI TEST2 1");
-        source.setReference("test.context");
-        source.setSourcecode("@AccessControl.authorizationCheck: #NOT_REQUIRED \\n" +
-        //
-                "@EndUserText.label: 'ZI_TEST2_12' \\n" + //
-                "@Metadata.ignorePropagatedAnnotations: true\\n" + //
-                "@Metadata.allowExtensions: true\\n" + //
-                "@AbapCatalog.viewEnhancementCategory: [#NONE]\\n" + //
-                "define root view entity ZI_TEST2_12\\n" + //
-                " as select from I_PurchaseOrderAPI01 as ds1\\n" + //
-                " composition [0..*] of ZI_Z0810E001_002 as _item\\n" + //
-                "{\\n" + //
-                " key ds1.PurchaseOrder,\\n" + //
-                " ds1.PurchasingOrganization,\\n" + //
-                " ds1.PurchaseOrderType,\\n" + //
-                " ds1.Supplier,\\n" + //
-                " _item\\n" + //
-                "}");
-        Sources.add(source);
-        AutoActiveCDSContext.setSource(Sources);
-        System.out.println("CdsSource=" + source.toString());
-        Collection<ZtgenddlsL> Results = new ArrayList<>();
-        Results = callodata.execute("botid", AutoActiveCDSContext);
-        for (ZtgenddlsL item : Results) {
-            String type = item.getType();
-            String message = item.getMessage();
-            String REFERENCE = item.getReference();
-            System.out.println("Result=" + item.toString());
+        // ZcGenddlsPAutoActiveCDSContext AutoActiveCDSContext = ZcGenddlsPAutoActiveCDSContext.create();
+        // CqnSelect select = (CqnSelect) Select.from(ZcGenddlsP_.CDS_NAME);
+        // AutoActiveCDSContext.setCqn(select);
+        // AutoActiveCDSContext.setProjname("TESTO703_01");
+        // AutoActiveCDSContext.setProjdesc("test report222");
+        // AutoActiveCDSContext.setWithadditionalsave(false);
+        // AutoActiveCDSContext.setWithdraft(false);
+        // AutoActiveCDSContext.setTrkorr("DM2K900068");
+        // AutoActiveCDSContext.setDevclass("ZAIREPORT");
+        // Collection<ZsgenDdlsSourceList> Sources = new ArrayList<>();
+        // ZsgenDdlsSourceList source = ZsgenDdlsSourceList.create();
+        // source.setViewname("ZI_TEST2_12");
+        // source.setViewdesc("interface view ZI TEST2 1");
+        // source.setReference("test.context");
+        // source.setSourcecode("@AccessControl.authorizationCheck: #NOT_REQUIRED \\n" +
+        // //
+        //         "@EndUserText.label: 'ZI_TEST2_12' \\n" + //
+        //         "@Metadata.ignorePropagatedAnnotations: true\\n" + //
+        //         "@Metadata.allowExtensions: true\\n" + //
+        //         "@AbapCatalog.viewEnhancementCategory: [#NONE]\\n" + //
+        //         "define root view entity ZI_TEST2_12\\n" + //
+        //         " as select from I_PurchaseOrderAPI01 as ds1\\n" + //
+        //         " composition [0..*] of ZI_Z0810E001_002 as _item\\n" + //
+        //         "{\\n" + //
+        //         " key ds1.PurchaseOrder,\\n" + //
+        //         " ds1.PurchasingOrganization,\\n" + //
+        //         " ds1.PurchaseOrderType,\\n" + //
+        //         " ds1.Supplier,\\n" + //
+        //         " _item\\n" + //
+        //         "}");
+        // Sources.add(source);
+        // AutoActiveCDSContext.setSource(Sources);
+        // System.out.println("CdsSource=" + source.toString());
+        // Collection<ZtgenddlsL> Results = new ArrayList<>();
+        // Results = callodata.execute("botid", AutoActiveCDSContext);
+        // for (ZtgenddlsL item : Results) {
+        //     String type = item.getType();
+        //     String message = item.getMessage();
+        //     String REFERENCE = item.getReference();
+        //     System.out.println("Result=" + item.toString());
 
-            System.out.println("type=" + type);
-            System.out.println("message=" + message);
-            System.out.println("REFERENCE=" + REFERENCE);
+        //     System.out.println("type=" + type);
+        //     System.out.println("message=" + message);
+        //     System.out.println("REFERENCE=" + REFERENCE);
 
-        }
+        // }
 
     }
 

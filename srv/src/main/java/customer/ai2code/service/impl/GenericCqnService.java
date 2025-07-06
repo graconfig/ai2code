@@ -1,4 +1,4 @@
-      
+
 package customer.ai2code.service.impl;
 
 import org.springframework.stereotype.Service;
@@ -225,7 +225,8 @@ public class GenericCqnService {
 
     /**
      * 根据任务ID和路径模式查询ContextNodes
-     * 支持通配符模式，如: subtask[*].a.property 匹配 subtask[0].a.property, subtask[123].a.property 等
+     * 支持通配符模式，如: subtask[*].a.property 匹配 subtask[0].a.property,
+     * subtask[123].a.property 等
      */
     public List<ContextNodes> getContextNodesByTaskAndPathPattern(String taskId, String contextPath) {
         // 将通配符模式转换为正则表达式
@@ -236,7 +237,7 @@ public class GenericCqnService {
                 .where(c -> c.task_ID().eq(taskId).and(c.path().matchesPattern(regexPattern)));
         return entityService.selectList(mainService, select, ContextNodes.class);
     }
-    
+
     /**
      * 将通配符模式转换为正则表达式
      * 例如: subtask[*].a.property -> subtask\[\d+\]\.a\.property
@@ -245,30 +246,30 @@ public class GenericCqnService {
         if (wildcardPattern == null) {
             return null;
         }
-        
+
         // 首先处理特殊的通配符模式 [*]，避免被后续的转义影响
         String regex = wildcardPattern.replace("[*]", "PLACEHOLDER_FOR_DIGITS");
-        
+
         // 转义正则表达式特殊字符
         regex = regex
-                .replace("\\", "\\\\")    // 转义反斜杠
-                .replace(".", "\\.")      // 转义点号
-                .replace("(", "\\(")      // 转义左括号
-                .replace(")", "\\)")      // 转义右括号
-                .replace("+", "\\+")      // 转义加号
-                .replace("^", "\\^")      // 转义尖角号
-                .replace("$", "\\$")      // 转义美元符号
-                .replace("|", "\\|")      // 转义管道符
-                .replace("?", "\\?")      // 转义问号
-                .replace("*", "\\*")      // 转义星号（但不是在[]内的）
-                .replace("{", "\\{")      // 转义左大括号
-                .replace("}", "\\}")      // 转义右大括号
-                .replace("[", "\\[")      // 转义左中括号
-                .replace("]", "\\]");     // 转义右中括号
-        
+                .replace("\\", "\\\\") // 转义反斜杠
+                .replace(".", "\\.") // 转义点号
+                .replace("(", "\\(") // 转义左括号
+                .replace(")", "\\)") // 转义右括号
+                .replace("+", "\\+") // 转义加号
+                .replace("^", "\\^") // 转义尖角号
+                .replace("$", "\\$") // 转义美元符号
+                .replace("|", "\\|") // 转义管道符
+                .replace("?", "\\?") // 转义问号
+                .replace("*", "\\*") // 转义星号（但不是在[]内的）
+                .replace("{", "\\{") // 转义左大括号
+                .replace("}", "\\}") // 转义右大括号
+                .replace("[", "\\[") // 转义左中括号
+                .replace("]", "\\]"); // 转义右中括号
+
         // 最后将占位符替换为正确的数字匹配模式
         regex = regex.replace("PLACEHOLDER_FOR_DIGITS", "\\[\\d+\\]");
-        
+
         return regex;
     }
 
@@ -290,6 +291,13 @@ public class GenericCqnService {
 
         entityService.update(mainService, null, ContextNodes_.class, existingNode, true);
         return existingNode;
+    }
+
+    public ContextNodes updateContextNodeAdditionalInfo(String mainTaskId, String contextPath, String additionalInfo) {
+        ContextNodes contextNodes = getContextNodeByTaskAndPath(mainTaskId, contextPath);
+        contextNodes.setAdditionalInfo(additionalInfo);
+        entityService.update(mainService, null, ContextNodes_.class, contextNodes, true);
+        return contextNodes;
     }
 
     // 根据path生成友好的label
@@ -649,7 +657,6 @@ public class GenericCqnService {
         }
     }
 
-    
     // 在GenericCqnService中添加这个方法
     public void updateBotInstanceContextNodeId(BotInstances botInstance, String contextNodeId) {
         // Update updateQuery = Update.entity(BotInstances_.class)
@@ -662,7 +669,6 @@ public class GenericCqnService {
         // true);
         updateBotInstance(botInstance);
     }
-
 
     // ========== 新增CDSViews插入方法 ==========
     /**
@@ -709,6 +715,7 @@ public class GenericCqnService {
     // ========== 新增CDSViewFiles插入方法 ==========
     /**
      * 插入CDSViewFiles实体
+     * 
      * @param file CDSViewFiles实体（需包含fileName）
      */
     public void insertCDSViewFiles(CDSViewFiles file) {
@@ -716,30 +723,30 @@ public class GenericCqnService {
         if (file.getFileName() == null || file.getFileName().isEmpty()) {
             throw new IllegalArgumentException("CDSViewFiles.fileName不能为空");
         }
-        
+
         // 自动生成ID（如果未设置）
         if (file.getId() == null) {
             file.setId(UUID.randomUUID().toString());
         }
-        
+
         try {
             // 调用entityService插入
-        entityService.insert(
-            mainService,
-            null,
-            CDSViewFiles_.class,
-            file,
-            true
-        );
+            entityService.insert(
+                    mainService,
+                    null,
+                    CDSViewFiles_.class,
+                    file,
+                    true);
         } catch (Exception e) {
             // TODO: handle exception
             throw new BusinessException("CDS视图上传失败543: " + e.getMessage(), e);
         }
-        
+
     }
 
     public void deleteCDSViewsByNames(List<String> viewNames) {
-        if (viewNames == null || viewNames.isEmpty()) return;
+        if (viewNames == null || viewNames.isEmpty())
+            return;
         // 使用entityService的delete方法
         for (String viewName : viewNames) {
             CDSViews view = CDSViews.create();
@@ -755,59 +762,64 @@ public class GenericCqnService {
         field.setLangu(langu);
         entityService.delete(mainService, null, Viewfields_.class, field, true);
     }
-    
+
     /**
      * 批量插入CDSViews实体
+     * 
      * @param views CDSViews实体列表
      */
     public void batchInsertCDSViews(List<CDSViews> views) {
-        if (views == null || views.isEmpty()) return;
-        
+        if (views == null || views.isEmpty())
+            return;
+
         // 检查每个视图是否有viewName
         for (CDSViews view : views) {
             if (view.getViewName() == null || view.getViewName().isEmpty()) {
                 throw new IllegalArgumentException("CDSViews的viewName不能为空");
             }
         }
-        
+
         // 使用EntityService的批量插入方法
         entityService.batchInsert(
-            mainService, 
-            null, 
-            CDSViews_.class, 
-            views, 
-            null,  // 没有reportId
-            true   // 非草稿模式
+                mainService,
+                null,
+                CDSViews_.class,
+                views,
+                null, // 没有reportId
+                true // 非草稿模式
         );
     }
 
     /**
      * 批量插入Viewfields实体
+     * 
      * @param fields Viewfields实体列表
      */
     public void batchInsertViewfields(List<Viewfields> fields) {
-        if (fields == null || fields.isEmpty()) return;
-        
+        if (fields == null || fields.isEmpty())
+            return;
+
         // 为每个字段生成ID（如果未设置）
         for (Viewfields field : fields) {
             if (field.getId() == null) {
                 field.setId(UUID.randomUUID().toString());
             }
         }
-        
+
         // 使用EntityService的批量插入方法
         entityService.batchInsert(
-            mainService, 
-            null, 
-            Viewfields_.class, 
-            fields, 
-            null,  // 没有reportId
-            true   // 非草稿模式
+                mainService,
+                null,
+                Viewfields_.class,
+                fields,
+                null, // 没有reportId
+                true // 非草稿模式
         );
     }
 
     /**
      * 批量查询CDSViews（根据viewName列表）
+     * 
      * @param viewNames 视图名称列表
      * @return CDSViews实体列表
      */
@@ -815,15 +827,16 @@ public class GenericCqnService {
         if (viewNames == null || viewNames.isEmpty()) {
             return Collections.emptyList();
         }
-        
+
         CqnSelect select = Select.from(CDSViews_.class)
                 .where(v -> v.viewName().in(viewNames));
-        
+
         return entityService.selectList(mainService, select, CDSViews.class);
     }
 
     /**
      * 批量查询Viewfields（根据ID列表）
+     * 
      * @param fieldIds 字段ID列表
      * @return Viewfields实体列表
      */
@@ -831,28 +844,29 @@ public class GenericCqnService {
         if (fieldIds == null || fieldIds.isEmpty()) {
             return Collections.emptyList();
         }
-        
+
         CqnSelect select = Select.from(Viewfields_.class)
                 .where(f -> f.ID().in(fieldIds));
-        
+
         return entityService.selectList(mainService, select, Viewfields.class);
     }
 
     /**
      * 根据表名和语言批量查询Viewfields
+     * 
      * @param tableNames 表名列表
-     * @param language 语言代码
+     * @param language   语言代码
      * @return Viewfields实体列表
      */
     public List<Viewfields> batchSelectViewfieldsByTable(List<String> tableNames, String language) {
         if (tableNames == null || tableNames.isEmpty()) {
             return Collections.emptyList();
         }
-        
+
         CqnSelect select = Select.from(Viewfields_.class)
                 .where(f -> f.tableName().in(tableNames)
                         .and(f.langu().eq(language)));
-        
+
         return entityService.selectList(mainService, select, Viewfields.class);
     }
 
@@ -860,65 +874,67 @@ public class GenericCqnService {
 
     /**
      * 批量更新CDSViews
+     * 
      * @param views 需要更新的视图实体列表
      */
     public void batchUpdateCDSViews(List<CDSViews> views) {
-        if (views == null || views.isEmpty()) return;
-        
+        if (views == null || views.isEmpty())
+            return;
+
         views.forEach(view -> {
             // 校验必要字段
             if (view.getViewName() == null) {
                 throw new IllegalArgumentException("CDSViews必须包含viewName");
             }
-            
+
             // 执行单个更新
             entityService.update(
-                mainService, 
-                null, 
-                CDSViews_.class, 
-                view, 
-                true
-            );
+                    mainService,
+                    null,
+                    CDSViews_.class,
+                    view,
+                    true);
         });
     }
 
     /**
      * 批量更新Viewfields
+     * 
      * @param fields 需要更新的字段实体列表
      */
     public void batchUpdateViewfields(List<Viewfields> fields) {
-        if (fields == null || fields.isEmpty()) return;
-        
+        if (fields == null || fields.isEmpty())
+            return;
+
         fields.forEach(field -> {
             // 校验必要字段
             if (field.getId() == null) {
                 field.setId(UUID.randomUUID().toString());
             }
-            
+
             // 执行单个更新
             entityService.update(
-                mainService, 
-                null, 
-                Viewfields_.class, 
-                field, 
-                true
-            );
+                    mainService,
+                    null,
+                    Viewfields_.class,
+                    field,
+                    true);
         });
     }
 
     /**
      * 根据表名和语言批量更新Viewfields
-     * @param tableName 表名
-     * @param language 语言代码
+     * 
+     * @param tableName  表名
+     * @param language   语言代码
      * @param updateData 更新数据（不包含ID）
      */
     public void batchUpdateViewfieldsByTable(String tableName, String language, Viewfields updateData) {
         // 1. 查询符合条件的字段
         List<Viewfields> fields = batchSelectViewfieldsByTable(
-            Collections.singletonList(tableName), 
-            language
-        );
-        
+                Collections.singletonList(tableName),
+                language);
+
         // 2. 应用更新数据
         fields.forEach(field -> {
             // 复制更新数据到实体
@@ -929,11 +945,9 @@ public class GenericCqnService {
                 field.setContent(updateData.getContent());
             }
         });
-        
+
         // 3. 批量更新
         batchUpdateViewfields(fields);
     }
 
 }
-
-    

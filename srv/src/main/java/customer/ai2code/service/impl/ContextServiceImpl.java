@@ -202,8 +202,8 @@ public class ContextServiceImpl implements ContextService {
 
     @Override
     public void updateAdditionInfo(String botInstanceId, String contextPath, String additionalInfo) {
-         String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
-        //  genericCqnService.updateContextNodeAdditionalInfo(); 
+        String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
+        genericCqnService.updateContextNodeAdditionalInfo(mainTaskId, contextPath, additionalInfo);
     }
 
     /**
