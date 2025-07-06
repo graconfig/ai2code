@@ -12,7 +12,9 @@ sap.ui.define(
     "sap/m/Input",
     "sap/m/TextArea",
     "sap/m/DialogType",
-    "sap/ui/core/Element"
+    "sap/ui/core/Element",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
   ],
   /**
    * @param {typeof sap.ui.core.mvc.Controller} Controller
@@ -30,7 +32,9 @@ sap.ui.define(
     Input,
     TextArea,
     DialogType,
-    Element
+    Element,
+    Filter,
+    FilterOperator
   ) {
     "use strict";
 
@@ -224,6 +228,7 @@ sap.ui.define(
                 title: "Select Task Type",
                 items: {
                   path: "/TaskType",
+                  filters: [new Filter("isMain", FilterOperator.EQ, true)],
                   template: new sap.m.StandardListItem({
                     title: "{name}",
                     description: "{description}",
