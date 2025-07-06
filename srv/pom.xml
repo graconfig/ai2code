@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>ai2code-parent</artifactId>
@@ -95,6 +98,10 @@
 			<artifactId>poi-ooxml</artifactId>
 			<version>5.2.3</version>
 		</dependency>
+		<dependency>
+			<groupId>com.sap.cloud.sdk.datamodel</groupId>
+			<artifactId>odata-v4-core</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>${project.artifactId}</finalName>
@@ -159,7 +166,7 @@
 						<configuration>
 							<commands>
 								<command>build --for java</command>
-								<command>deploy --to hana:ai2code-db  --dry --out
+								<command>deploy --to hana:ai2code-db --dry --out
 									"${project.basedir}/src/main/resources/schema.sql"</command>
 							</commands>
 						</configuration>
@@ -215,6 +222,35 @@
 								<!-- new: remove unassigned components -->
 								<removeUnusedComponents>true</removeUnusedComponents>
 							</additionalProperties>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.sap.cloud.sdk.datamodel</groupId>
+				<artifactId>odata-v4-generator-maven-plugin</artifactId>
+				<!-- Please use the latest version here-->
+				<executions>
+					<execution>
+						<id>generate-s4_create_cds</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputDirectory>${project.basedir}/src/main/resources/spec/</inputDirectory>
+							<outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+							<deleteOutputDirectory>false</deleteOutputDirectory>
+							<packageName>customer.ai2code.model.s4</packageName>
+							<defaultBasePath>odata/v4/</defaultBasePath>
+							<compileScope>COMPILE</compileScope>
+							<serviceMethodsPerEntitySet>true</serviceMethodsPerEntitySet>
+							<!-- (Optional) You can add a custom copyright header:
+		        <copyrightHeader>Copyright (c) this year, my company</copyrightHeader>
+
+		        Or use the SAP copyright header:
+		        <sapCopyrightHeader>true</sapCopyrightHeader>
+		        -->
 						</configuration>
 					</execution>
 				</executions>
