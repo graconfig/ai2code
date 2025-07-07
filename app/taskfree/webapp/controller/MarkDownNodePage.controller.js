@@ -55,7 +55,8 @@ sap.ui.define([
                 if (oData.type === "markdown") {
                     //var htmlContent = window.marked ? window.marked.parse(oData.value || "") : (oData.value || "");
                     var htmlContent = marked.parse(oData.value);
-                    oController.getView().byId("markdownContent").setContent(htmlContent);
+                    // oController.getView().byId("markdownContent").setContent(htmlContent);
+                    oController.getView().byId("idRichTextEditor").setValue(htmlContent);
 
                 }
                 oViewModel.setProperty("/busy", false);
