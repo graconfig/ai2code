@@ -270,6 +270,11 @@ annotate service.BotTypes with @(
             },
             {
                 $Type: 'UI.DataField',
+                Value: ragThreshold,
+                Label: '{i18n>RagThreshold}',
+            },
+            {
+                $Type: 'UI.DataField',
                 Value: ragParameter,
                 Label: '{i18n>RagParameter}',
             },
