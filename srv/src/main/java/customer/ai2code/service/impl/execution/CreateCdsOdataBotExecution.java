@@ -3,10 +3,14 @@ package customer.ai2code.service.impl.execution;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.commons.lang3.ObjectUtils.Null;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnSelect;
+import com.sap.cds.services.ServiceException;
+import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataResponseException;
 
 import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.V0001;
 import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZcGenddlsPAutoActiveCDSContext;
@@ -41,7 +45,7 @@ public class CreateCdsOdataBotExecution implements BotExecution {
 
     // String DestinationName,String Request,String Response,，List<ContextNodes>
     @ExecuteMethod
-    public Collection<ZtgenddlsL> execute(
+    public String execute(
             @ExecuteParameter(name = "botInstanceId", description = "Bot Instance") String botInstanceId,
             @ExecuteParameter(description = "ZcGenddlsPAutoActiveCDSContext", name = "ZcGenddlsPAutoActiveCDSContext") ZcGenddlsPAutoActiveCDSContext AutoActiveCDSContext) {
         // zsrvdGenddls.run();
@@ -89,9 +93,10 @@ public class CreateCdsOdataBotExecution implements BotExecution {
         // AutoActiveCDSContext.setWithdraft(false);
         // AutoActiveCDSContext.setTrkorr("DM2K900068");
         // AutoActiveCDSContext.setDevclass("ZAIREPORT");
-        Collection<ZtgenddlsL> Results = new ArrayList<>();// 返回结果
+        String Result = "";// 返回结果
         // 打印CDS
-        // System.out.println("CdsSource=" + AutoActiveCDSContextNew.getSource().toString());
+        // System.out.println("CdsSource=" +
+        // AutoActiveCDSContextNew.getSource().toString());
         try {
             System.out.println("CdsSource=" + objectMapper.writeValueAsString(AutoActiveCDSContextNew.getSource()));
         } catch (JsonProcessingException e) {
@@ -101,13 +106,29 @@ public class CreateCdsOdataBotExecution implements BotExecution {
 
         // 调用action
         try {
-            zsrvdGenddls.emit(AutoActiveCDSContextNew);
-        } catch (Exception e) {
-            // TODO: handle exception
-            e.printStackTrace();
+            zsrvdGenddls.emit(AutoActiveCDSContext);
+        } catch (ServiceException e) {
+            ODataResponseException odataexce = (ODataResponseException) e.getCause().getCause();
+            int statusCode = odataexce.getHttpCode();
+            String errorMessage = (String) odataexce.getHttpBody().getOrElse("");
+            System.err.println("statusCode=" + statusCode);
+            System.err.println("errorMessage=" + errorMessage);
+            Result = errorMessage;
+            return Result;
         }
 
+        Collection<ZtgenddlsL> Results = new ArrayList<>();// 返回结果
         Results = AutoActiveCDSContextNew.getResult();
+        if (Results == null) {
+            Result = "Results is null";
+            return Result;
+        }
+        try {
+            Result = objectMapper.writeValueAsString(Results);
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         // 打印返回消息
         for (ZtgenddlsL item : Results) {
             String type = item.getType();
@@ -129,29 +150,13 @@ public class CreateCdsOdataBotExecution implements BotExecution {
             }
 
         }
-
-        // return
-        // // 更新context
-        // String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
-
-        // for (ZtgenddlsL item : Results) {
-        // String type = item.getType();
-        // String message = item.getMessage();
-        // String REFERENCE = item.getReference();
-        // ContextNodes contextnodes =
-        // genericCqnService.getContextNodeByTaskAndPath(mainTaskId, REFERENCE);
-        // // ContextNodes existingNode, String label, String type, String contextValue)
-        // {
-        // // genericCqnService.updateContextNode(contextnodes,label,type,contextValue);
-
-        // }
-        return Results;
+        return Result;
 
     }
 
-    private Object safeGetStringFromProxy(Object valueFromGetter, ZcGenddlsPAutoActiveCDSContext context, String fieldName) {
+    private Object safeGetStringFromProxy(Object valueFromGetter, ZcGenddlsPAutoActiveCDSContext context,
+            String fieldName) {
         // 1. 首先尝试 getter 方法
-
 
         // 2. 如果 getter 返回 null，尝试从 toString() 解析
         if (valueFromGetter == null) {
