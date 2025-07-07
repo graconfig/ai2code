@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0"
+    xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx"
+    xmlns="http://docs.oasis-open.org/odata/ns/edm">
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMUNICATION',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Communication.v1" Alias="Communication"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_PERSONALDATA',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.PersonalData.v1" Alias="PersonalData"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_ANALYTICS',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Analytics.v1" Alias="Analytics"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMON',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="SAP__common"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_MEASURES',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="Org.OData.Measures.V1" Alias="SAP__measures"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_CORE',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="Org.OData.Core.V1" Alias="SAP__core"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_CAPABILITIES',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="Org.OData.Capabilities.V1" Alias="SAP__capabilities"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_AGGREGATION',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="Org.OData.Aggregation.V1" Alias="SAP__aggregation"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_VALIDATION',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="Org.OData.Validation.V1" Alias="SAP__validation"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_CODELIST',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.CodeList.v1" Alias="SAP__CodeList"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_UI',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.UI.v1" Alias="SAP__UI"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_HTML5',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.HTML5.v1" Alias="SAP__HTML5"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_PDF',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.PDF.v1" Alias="SAP__PDF"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_SESSION',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Session.v1" Alias="SAP__session"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_HIERARCHY',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Hierarchy.v1" Alias="SAP__hierarchy"/>
+    </edmx:Reference>
+    <edmx:DataServices>
+        <Schema Namespace="com.sap.gateway.srvd.zsrvd_gentabl.v0001" Alias="SAP__self">
+            <Annotation Term="SAP__core.SchemaVersion" String="1.0.0"/>
+            <EntityType Name="zc_gentabl_fType">
+                <Key>
+                    <PropertyRef Name="Tabname"/>
+                    <PropertyRef Name="FieldName"/>
+                    <PropertyRef Name="IsActiveEntity"/>
+                </Key>
+                <Property Name="Tabname" Type="Edm.String" Nullable="false" MaxLength="16"/>
+                <Property Name="FieldName" Type="Edm.String" Nullable="false" MaxLength="30"/>
+                <Property Name="KeyFlag" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="DataElement" Type="Edm.String" Nullable="false" MaxLength="30"/>
+                <Property Name="DataType" Type="Edm.String" Nullable="false" MaxLength="4"/>
+                <Property Name="Length" Type="Edm.String" Nullable="false" MaxLength="6"/>
+                <Property Name="Decimals" Type="Edm.String" Nullable="false" MaxLength="6"/>
+                <Property Name="Description" Type="Edm.String" Nullable="false" MaxLength="60"/>
+                <Property Name="Groupname" Type="Edm.String" Nullable="false" MaxLength="30"/>
+                <Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
+                <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="LocalLastChangedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
+                <Property Name="LocalLastChangedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="HasDraftEntity" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="DraftEntityCreationDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="DraftEntityLastChangeDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="HasActiveEntity" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="IsActiveEntity" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="__EntityControl" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.EntityControl"/>
+                <Property Name="SAP__Messages" Type="Collection(com.sap.gateway.srvd.zsrvd_gentabl.v0001.SAP__Message)" Nullable="false"/>
+                <NavigationProperty Name="DraftAdministrativeData" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.I_DraftAdministrativeDataType"/>
+                <NavigationProperty Name="SiblingEntity" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_fType"/>
+                <NavigationProperty Name="_tabl_t" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType" Nullable="false" Partner="_tabl_f">
+                    <ReferentialConstraint Property="Tabname" ReferencedProperty="Tabname"/>
+                </NavigationProperty>
+            </EntityType>
+            <EntityType Name="zc_gentabl_lType">
+                <Key>
+                    <PropertyRef Name="Tabname"/>
+                    <PropertyRef Name="UUID"/>
+                    <PropertyRef Name="IsActiveEntity"/>
+                </Key>
+                <Property Name="Tabname" Type="Edm.String" Nullable="false" MaxLength="16"/>
+                <Property Name="UUID" Type="Edm.Guid" Nullable="false"/>
+                <Property Name="Reference" Type="Edm.String" Nullable="false" MaxLength="40"/>
+                <Property Name="Message" Type="Edm.String" Nullable="false" MaxLength="220"/>
+                <Property Name="Type" Type="Edm.String" Nullable="false" MaxLength="1"/>
+                <Property Name="Msgid" Type="Edm.String" Nullable="false" MaxLength="20"/>
+                <Property Name="MessageV1" Type="Edm.String" Nullable="false" MaxLength="50"/>
+                <Property Name="MessageV2" Type="Edm.String" Nullable="false" MaxLength="50"/>
+                <Property Name="MessageV3" Type="Edm.String" Nullable="false" MaxLength="50"/>
+                <Property Name="MessageV4" Type="Edm.String" Nullable="false" MaxLength="50"/>
+                <Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
+                <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="LocalLastChangedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
+                <Property Name="LocalLastChangedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="HasDraftEntity" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="DraftEntityCreationDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="DraftEntityLastChangeDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="HasActiveEntity" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="IsActiveEntity" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="__EntityControl" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.EntityControl"/>
+                <Property Name="SAP__Messages" Type="Collection(com.sap.gateway.srvd.zsrvd_gentabl.v0001.SAP__Message)" Nullable="false"/>
+                <NavigationProperty Name="DraftAdministrativeData" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.I_DraftAdministrativeDataType"/>
+                <NavigationProperty Name="SiblingEntity" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_lType"/>
+                <NavigationProperty Name="_tabl_t" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType" Nullable="false" Partner="_log">
+                    <ReferentialConstraint Property="Tabname" ReferencedProperty="Tabname"/>
+                </NavigationProperty>
+            </EntityType>
+     
+            <EntityType Name="zc_gentabl_tType">
+                <Key>
+                    <PropertyRef Name="Tabname"/>
+                    <PropertyRef Name="IsActiveEntity"/>
+                </Key>
+                <Property Name="Tabname" Type="Edm.String" Nullable="false" MaxLength="16"/>
+                <Property Name="Tabdesc" Type="Edm.String" Nullable="false" MaxLength="60"/>
+                <Property Name="Contflag" Type="Edm.String" Nullable="false" MaxLength="1"/>
+                <Property Name="Mainflag" Type="Edm.String" Nullable="false" MaxLength="10"/>
+                <Property Name="Devclass" Type="Edm.String" Nullable="false" MaxLength="30"/>
+                <Property Name="Trkorr" Type="Edm.String" Nullable="false" MaxLength="20"/>
+                <Property Name="Status" Type="Edm.String" Nullable="false" MaxLength="1"/>
+                <Property Name="Reference" Type="Edm.String" Nullable="false" MaxLength="40"/>
+                <Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
+                <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="LocalLastChangedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
+                <Property Name="LocalLastChangedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="HasDraftEntity" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="DraftEntityCreationDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="DraftEntityLastChangeDateTime" Type="Edm.DateTimeOffset" Precision="7"/>
+                <Property Name="HasActiveEntity" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="IsActiveEntity" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="__CreateByAssociationControl" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tCbAControl"/>
+                <Property Name="__EntityControl" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.EntityControl"/>
+                <Property Name="__OperationControl" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tOperationControl"/>
+                <Property Name="SAP__Messages" Type="Collection(com.sap.gateway.srvd.zsrvd_gentabl.v0001.SAP__Message)" Nullable="false"/>
+                <NavigationProperty Name="DraftAdministrativeData" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.I_DraftAdministrativeDataType"/>
+                <NavigationProperty Name="SiblingEntity" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType"/>
+                <NavigationProperty Name="_log" Type="Collection(com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_lType)" Partner="_tabl_t">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_tabl_f" Type="Collection(com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_fType)" Partner="_tabl_t">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+            </EntityType>
+            <ComplexType Name="zc_gentabl_tCbAControl">
+                <Property Name="_log" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="_tabl_f" Type="Edm.Boolean" Nullable="false"/>
+            </ComplexType>
+            <ComplexType Name="zc_gentabl_tOperationControl">
+                <Property Name="activeTabel" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="Edit" Type="Edm.Boolean" Nullable="false"/>
+            </ComplexType>
+            <ComplexType Name="EntityControl">
+                <Property Name="Deletable" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="Updatable" Type="Edm.Boolean" Nullable="false"/>
+            </ComplexType>
+            <ComplexType Name="SAP__Message">
+                <Property Name="code" Type="Edm.String" Nullable="false"/>
+                <Property Name="message" Type="Edm.String" Nullable="false"/>
+                <Property Name="target" Type="Edm.String"/>
+                <Property Name="additionalTargets" Type="Collection(Edm.String)" Nullable="false"/>
+                <Property Name="transition" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="numericSeverity" Type="Edm.Byte" Nullable="false"/>
+                <Property Name="longtextUrl" Type="Edm.String"/>
+            </ComplexType>
+            <Action Name="Resume" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType" Nullable="false"/>
+            </Action>
+            <Action Name="activeTabel" EntitySetPath="_it" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType" Nullable="false"/>
+                <ReturnType Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType" Nullable="false"/>
+            </Action>
+            <Action Name="Edit" EntitySetPath="_it" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType" Nullable="false"/>
+                <Parameter Name="PreserveChanges" Type="Edm.Boolean" Nullable="false"/>
+                <ReturnType Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType" Nullable="false"/>
+            </Action>
+            <Action Name="Discard" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType" Nullable="false"/>
+            </Action>
+            <Action Name="Activate" EntitySetPath="_it" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType" Nullable="false"/>
+                <ReturnType Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType" Nullable="false"/>
+            </Action>
+            <Action Name="Prepare" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType" Nullable="false"/>
+            </Action>
+            <EntityContainer Name="Container">
+                <EntitySet Name="I_DraftAdministrativeData" EntityType="com.sap.gateway.srvd.zsrvd_gentabl.v0001.I_DraftAdministrativeDataType"/>
+                <EntitySet Name="zc_gentabl_f" EntityType="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_fType">
+                    <NavigationPropertyBinding Path="DraftAdministrativeData" Target="I_DraftAdministrativeData"/>
+                    <NavigationPropertyBinding Path="SiblingEntity" Target="zc_gentabl_f"/>
+                    <NavigationPropertyBinding Path="_tabl_t" Target="zc_gentabl_t"/>
+                </EntitySet>
+                <EntitySet Name="zc_gentabl_l" EntityType="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_lType">
+                    <NavigationPropertyBinding Path="DraftAdministrativeData" Target="I_DraftAdministrativeData"/>
+                    <NavigationPropertyBinding Path="SiblingEntity" Target="zc_gentabl_l"/>
+                    <NavigationPropertyBinding Path="_tabl_t" Target="zc_gentabl_t"/>
+                </EntitySet>
+                <EntitySet Name="zc_gentabl_t" EntityType="com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType">
+                    <NavigationPropertyBinding Path="DraftAdministrativeData" Target="I_DraftAdministrativeData"/>
+                    <NavigationPropertyBinding Path="SiblingEntity" Target="zc_gentabl_t"/>
+                    <NavigationPropertyBinding Path="_log" Target="zc_gentabl_l"/>
+                    <NavigationPropertyBinding Path="_tabl_f" Target="zc_gentabl_f"/>
+                </EntitySet>
+            </EntityContainer>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

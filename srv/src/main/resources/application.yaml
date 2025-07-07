@@ -6,6 +6,22 @@ cds:
   sql.hana.search:
     fuzzy: true
     fuzzinessThreshold: 0.9
+  remote:
+    services:
+      '[zsrvd_gentabl]':
+        destination:
+          name: zsrvd_gentabl
+        type: odata-v4
+      '[zsrvd_genddls]':
+        destination:
+          name: zsrvd_genddls
+        http:
+          service: zsrvd_genddls/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_genddls/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_genddls.v0001
+        type: odata-v4
 
 ---
 spring:
@@ -29,5 +45,4 @@ management:
     defaults.enabled: false
     ping.enabled: true
     db.enabled: true
-
 

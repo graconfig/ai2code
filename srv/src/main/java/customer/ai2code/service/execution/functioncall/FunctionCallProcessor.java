@@ -12,7 +12,6 @@ import customer.ai2code.service.execution.BotExecution;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -188,146 +187,156 @@ public class FunctionCallProcessor {
 
         var builder = ParameterTypeInfo.builder();
 
+        System.out.println("Extracting parameter type info for: " + parameterType.getName() +
+                ", genericType: " + genericType);
+
         // 处理基本类型
         if (parameterType == String.class) {
             builder.jsonSchemaType("string");
+            System.out.println("Detected as string type");
         } else if (parameterType == Integer.class || parameterType == int.class) {
             builder.jsonSchemaType("integer");
+            System.out.println("Detected as integer type");
         } else if (parameterType == Boolean.class || parameterType == boolean.class) {
             builder.jsonSchemaType("boolean");
+            System.out.println("Detected as boolean type");
         } else if (parameterType == Double.class || parameterType == double.class ||
                 parameterType == Float.class || parameterType == float.class) {
             builder.jsonSchemaType("number");
+            System.out.println("Detected as number type");
         }
-        // 处理 List 类型
-        else if (List.class.isAssignableFrom(parameterType)) {
+        // 处理 Collection 类型（包括 List, Set 等）
+        else if (Collection.class.isAssignableFrom(parameterType)) {
             builder.jsonSchemaType("array");
+            System.out.println("Detected as Collection/array type");
 
             // 提取泛型参数类型
             if (genericType instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) genericType;
                 Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                System.out.println("Found " + actualTypeArguments.length + " generic type arguments");
 
                 if (actualTypeArguments.length > 0) {
                     Type itemType = actualTypeArguments[0];
+                    System.out.println("First generic type argument: " + itemType);
+
                     if (itemType instanceof Class) {
                         Class<?> itemClass = (Class<?>) itemType;
                         builder.itemType(itemClass);
+                        System.out.println("Item class: " + itemClass.getName() +
+                                ", isComplexType: " + isComplexType(itemClass));
 
-                        // 如果是复杂对象，提取其属性
+                        // 如果是复杂对象（包括 CDS 接口），递归提取其属性
                         if (isComplexType(itemClass)) {
-                            Map<String, Object> itemProperties = extractObjectProperties(itemClass);
+                            System.out.println("Extracting properties for complex item type: " + itemClass.getName());
+                            Map<String, Object> itemProperties = extractObjectPropertiesWithDepth(itemClass, 0);
                             builder.itemProperties(itemProperties);
+                            System.out.println("Extracted " + itemProperties.size() + " properties for item type");
+                        } else {
+                            System.out.println("Item type is simple, no properties to extract");
                         }
+                    } else {
+                        System.out.println("Item type is not a simple Class, type: " + itemType.getClass().getName());
                     }
                 }
+            } else {
+                System.out.println("Generic type is not ParameterizedType, cannot extract item type");
             }
         }
         // 处理 Map 类型
         else if (Map.class.isAssignableFrom(parameterType)) {
             builder.jsonSchemaType("object");
+            System.out.println("Detected as Map/object type");
         }
-        // 处理复杂对象类型
+        // 处理复杂对象类型（包括 CDS 接口）
         else if (isComplexType(parameterType)) {
             builder.jsonSchemaType("object");
-            Map<String, Object> properties = extractObjectProperties(parameterType);
+            System.out.println("Detected as complex object type: " + parameterType.getName());
+            Map<String, Object> properties = extractObjectPropertiesWithDepth(parameterType, 0);
             builder.properties(properties);
+            System.out.println("Extracted " + properties.size() + " properties for complex type");
         }
         // 默认处理为字符串
         else {
             builder.jsonSchemaType("string");
+            System.out.println("Detected as default string type");
         }
 
-        return builder.build();
+        var result = builder.build();
+        System.out.println("Final parameter type info - jsonSchemaType: " + result.getJsonSchemaType() +
+                ", hasProperties: " + (result.getProperties() != null && !result.getProperties().isEmpty()) +
+                ", hasItemProperties: "
+                + (result.getItemProperties() != null && !result.getItemProperties().isEmpty()));
+        return result;
     }
 
     /**
      * 判断是否为复杂类型（非基本类型、非Java内置类型）
      */
     private boolean isComplexType(Class<?> clazz) {
-        return !clazz.isPrimitive() &&
-                !clazz.getName().startsWith("java.lang") &&
-                !clazz.getName().startsWith("java.util") &&
-                !clazz.getName().startsWith("java.time") &&
-                clazz != Object.class;
+        boolean isPrimitive = clazz.isPrimitive();
+        boolean isJavaLang = clazz.getName().startsWith("java.lang");
+        boolean isJavaUtil = clazz.getName().startsWith("java.util");
+        boolean isJavaTime = clazz.getName().startsWith("java.time");
+        boolean isObject = clazz == Object.class;
+
+        // 特别检查 CDS 生成的接口
+        boolean isCdsInterface = clazz.isInterface() && clazz.getName().startsWith("cds.gen");
+
+        boolean isComplex = !isPrimitive && !isJavaLang && !isJavaUtil && !isJavaTime && !isObject;
+
+        System.out.println("Checking if complex type - class: " + clazz.getName() +
+                ", isPrimitive: " + isPrimitive +
+                ", isJavaLang: " + isJavaLang +
+                ", isJavaUtil: " + isJavaUtil +
+                ", isJavaTime: " + isJavaTime +
+                ", isObject: " + isObject +
+                ", isCdsInterface: " + isCdsInterface +
+                ", isComplex: " + isComplex);
+
+        return isComplex;
     }
 
     /**
-     * 提取复杂对象的属性信息
+     * 提取复杂对象的属性信息 - 带深度控制的版本，支持嵌套 CDS 接口解析
      */
-    private Map<String, Object> extractObjectProperties(Class<?> clazz) {
+    private Map<String, Object> extractObjectPropertiesWithDepth(Class<?> clazz, int depth) {
+        // 防止无限递归，设置最大深度
+        final int MAX_DEPTH = 5;
+        if (depth > MAX_DEPTH) {
+            System.out.println("Max depth reached for class: " + clazz.getName() + ", returning simple object type");
+            return Map.of("type", "object", "description", "Complex nested object (depth limit reached)");
+        }
+
         Map<String, Object> properties = new HashMap<>();
 
         try {
-            // 使用 Jackson 的 ObjectMapper 来分析对象结构
-            var jsonSchema = objectMapper.getTypeFactory().constructType(clazz);
+            // 检查是否为 CDS 生成的接口
+            boolean isCdsInterface = clazz.isInterface() && clazz.getName().startsWith("cds.gen");
 
-            // 通过反射获取字段信息
-            java.lang.reflect.Field[] fields = clazz.getDeclaredFields();
-            for (java.lang.reflect.Field field : fields) {
-                // 跳过静态字段和 serialVersionUID
-                if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) ||
-                        "serialVersionUID".equals(field.getName())) {
-                    continue;
-                }
+            System.out.println("Extracting properties for class: " + clazz.getName() +
+                    ", isInterface: " + clazz.isInterface() +
+                    ", isCdsInterface: " + isCdsInterface +
+                    ", depth: " + depth);
 
-                String fieldName = field.getName();
-                Class<?> fieldType = field.getType();
+            if (isCdsInterface) {
+                // 对于 CDS 接口，主要通过 getter 方法提取属性
+                System.out.println("Processing CDS interface, extracting from methods...");
 
-                Map<String, Object> fieldSchema = new HashMap<>();
+                // 同时也提取字段信息（CDS 接口的字段通常是常量定义）
+                extractFieldsFromCdsInterface(clazz, properties, depth + 1);
 
-                // 设置字段类型
-                if (fieldType == String.class) {
-                    fieldSchema.put("type", "string");
-                } else if (fieldType == Integer.class || fieldType == int.class) {
-                    fieldSchema.put("type", "integer");
-                } else if (fieldType == Boolean.class || fieldType == boolean.class) {
-                    fieldSchema.put("type", "boolean");
-                } else if (fieldType == Double.class || fieldType == double.class ||
-                        fieldType == Float.class || fieldType == float.class) {
-                    fieldSchema.put("type", "number");
-                } else if (List.class.isAssignableFrom(fieldType)) {
-                    fieldSchema.put("type", "array");
+                // extractPropertiesFromMethodsWithDepth(clazz, properties, depth + 1);
 
-                    // 处理 List 的泛型类型
-                    Type genericFieldType = field.getGenericType();
-                    if (genericFieldType instanceof ParameterizedType) {
-                        ParameterizedType paramType = (ParameterizedType) genericFieldType;
-                        Type[] actualTypes = paramType.getActualTypeArguments();
-                        if (actualTypes.length > 0 && actualTypes[0] instanceof Class) {
-                            Class<?> itemClass = (Class<?>) actualTypes[0];
-                            if (isComplexType(itemClass)) {
-                                fieldSchema.put("items", Map.of("type", "object"));
-                            } else {
-                                fieldSchema.put("items", Map.of("type", getJsonSchemaType(itemClass)));
-                            }
-                        }
-                    }
-                } else if (isComplexType(fieldType)) {
-                    fieldSchema.put("type", "object");
-                } else {
-                    fieldSchema.put("type", "string");
-                }
+            } else {
+                // 对于普通类，先处理字段
+                extractPropertiesFromFieldsWithDepth(clazz, properties, depth + 1);
 
-                // 添加字段描述（如果有注解的话）
-                addFieldDescription(field, fieldSchema);
-
-                properties.put(fieldName, fieldSchema);
+                // 然后检查 getter 方法（for Lombok generated getters）
+                extractPropertiesFromMethodsWithDepth(clazz, properties, depth + 1);
             }
 
-            // 也检查 getter 方法（for Lombok generated getters）
-            Method[] methods = clazz.getDeclaredMethods();
-            for (Method method : methods) {
-                if (isGetterMethod(method)) {
-                    String propertyName = getPropertyNameFromGetter(method);
-                    if (!properties.containsKey(propertyName)) {
-                        Class<?> returnType = method.getReturnType();
-                        Map<String, Object> propertySchema = new HashMap<>();
-                        propertySchema.put("type", getJsonSchemaType(returnType));
-                        properties.put(propertyName, propertySchema);
-                    }
-                }
-            }
+            System.out.println("Extracted " + properties.size() + " properties: " + properties.keySet());
 
         } catch (Exception e) {
             System.err.println(
@@ -335,6 +344,135 @@ public class FunctionCallProcessor {
         }
 
         return properties;
+    }
+
+    /**
+     * 提取复杂对象的属性信息 - 保持原有接口兼容性
+     */
+    /**
+     * 从字段中提取属性信息（用于普通类）- 带深度控制
+     */
+    private void extractPropertiesFromFieldsWithDepth(Class<?> clazz, Map<String, Object> properties, int depth) {
+        java.lang.reflect.Field[] fields = clazz.getDeclaredFields();
+        for (java.lang.reflect.Field field : fields) {
+            // 跳过静态字段和 serialVersionUID
+            if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) ||
+                    "serialVersionUID".equals(field.getName())) {
+                continue;
+            }
+
+            String fieldName = field.getName();
+            Class<?> fieldType = field.getType();
+
+            Map<String, Object> fieldSchema = createFieldSchemaWithDepth(fieldType, field.getGenericType(), field,
+                    depth);
+            properties.put(fieldName, fieldSchema);
+        }
+    }
+
+    /**
+     * 从方法中提取属性信息 - 带深度控制
+     */
+    private void extractPropertiesFromMethodsWithDepth(Class<?> clazz, Map<String, Object> properties, int depth) {
+        Method[] methods = clazz.getDeclaredMethods();
+        System.out.println(
+                "Checking " + methods.length + " methods in class: " + clazz.getName() + " at depth: " + depth);
+
+        for (Method method : methods) {
+            if (isGetterMethod(method)) {
+                String propertyName = getPropertyNameFromGetter(method);
+                System.out.println("Found getter method: " + method.getName() + " -> property: " + propertyName);
+
+                if (!properties.containsKey(propertyName)) {
+                    Class<?> returnType = method.getReturnType();
+                    Map<String, Object> propertySchema = createFieldSchemaWithDepth(returnType,
+                            method.getGenericReturnType(), null, depth);
+                    properties.put(propertyName, propertySchema);
+                } else {
+                    System.out.println("Property " + propertyName + " already exists, skipping...");
+                }
+            }
+        }
+    }
+
+    /**
+     * 从 CDS 接口的字段中提取常量定义
+     */
+    private void extractFieldsFromCdsInterface(Class<?> clazz, Map<String, Object> properties, int depth) {
+        Method[] methods = clazz.getDeclaredMethods();
+        System.out.println(
+                "Checking " + methods.length + " methods in class: " + clazz.getName() + " at depth: " + depth);
+
+        for (Method method : methods) {
+            if (isGetterMethod(method)) {
+                String propertyName = getPropertyNameFromAnnotation(method);
+                System.out.println("Found getter method: " + method.getName() + " -> property: " + propertyName);
+
+                if (!properties.containsKey(propertyName)) {
+                    Class<?> returnType = method.getReturnType();
+                    Map<String, Object> propertySchema = createFieldSchemaWithDepth(returnType,
+                            method.getGenericReturnType(), null, depth);
+                    properties.put(propertyName, propertySchema);
+                } else {
+                    System.out.println("Property " + propertyName + " already exists, skipping...");
+                }
+            }
+        }
+    }
+
+    /**
+     * 创建字段的 schema 信息 - 带深度控制，支持嵌套 CDS 接口解析
+     */
+    private Map<String, Object> createFieldSchemaWithDepth(Class<?> fieldType, Type genericType,
+            java.lang.reflect.Field field, int depth) {
+        Map<String, Object> fieldSchema = new HashMap<>();
+
+        // 设置字段类型
+        if (fieldType == String.class) {
+            fieldSchema.put("type", "string");
+        } else if (fieldType == Integer.class || fieldType == int.class) {
+            fieldSchema.put("type", "integer");
+        } else if (fieldType == Boolean.class || fieldType == boolean.class) {
+            fieldSchema.put("type", "boolean");
+        } else if (fieldType == Double.class || fieldType == double.class ||
+                fieldType == Float.class || fieldType == float.class) {
+            fieldSchema.put("type", "number");
+        } else if (Collection.class.isAssignableFrom(fieldType)) {
+            fieldSchema.put("type", "array");
+
+            // 处理 Collection 的泛型类型
+            if (genericType instanceof ParameterizedType) {
+                ParameterizedType paramType = (ParameterizedType) genericType;
+                Type[] actualTypes = paramType.getActualTypeArguments();
+                if (actualTypes.length > 0 && actualTypes[0] instanceof Class) {
+                    Class<?> itemClass = (Class<?>) actualTypes[0];
+                    if (isComplexType(itemClass)) {
+                        // 递归解析嵌套的复杂类型（包括 CDS 接口）
+                        Map<String, Object> itemProperties = extractObjectPropertiesWithDepth(itemClass, depth + 1);
+                        fieldSchema.put("items", Map.of("type", "object", "properties", itemProperties));
+                    } else {
+                        fieldSchema.put("items", Map.of("type", getJsonSchemaType(itemClass)));
+                    }
+                }
+            }
+        } else if (isComplexType(fieldType)) {
+            fieldSchema.put("type", "object");
+
+            // 对于复杂类型（包括嵌套的 CDS 接口），递归解析其属性
+            Map<String, Object> nestedProperties = extractObjectPropertiesWithDepth(fieldType, depth + 1);
+            if (!nestedProperties.isEmpty()) {
+                fieldSchema.put("properties", nestedProperties);
+            }
+        } else {
+            fieldSchema.put("type", "string");
+        }
+
+        // 添加字段描述（如果有注解的话）
+        if (field != null) {
+            addFieldDescription(field, fieldSchema);
+        }
+
+        return fieldSchema;
     }
 
     /**
@@ -373,6 +511,44 @@ public class FunctionCallProcessor {
         return methodName;
     }
 
+    /**
+     * 从 CDS Interface getter 方法的注解中提取属性名
+     * CDS 接口使用 @CdsName 注解来标识属性名
+     */
+    private String getPropertyNameFromAnnotation(Method method) {
+        try {
+            // 检查是否有 @CdsName 注解
+            com.sap.cds.ql.CdsName cdsNameAnnotation = method.getAnnotation(com.sap.cds.ql.CdsName.class);
+            if (cdsNameAnnotation != null) {
+                String annotationValue = cdsNameAnnotation.value();
+                if (annotationValue != null && !annotationValue.trim().isEmpty()) {
+                    // 直接返回注解值，不做任何转换
+                    System.out.println("Found @CdsName annotation: " + annotationValue);
+                    return annotationValue;
+                }
+            }
+            
+            // 如果没有 @CdsName 注解，也检查 @JsonProperty 注解作为备用
+            com.fasterxml.jackson.annotation.JsonProperty jsonProperty = method.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class);
+            if (jsonProperty != null) {
+                String annotationValue = jsonProperty.value();
+                if (annotationValue != null && !annotationValue.trim().isEmpty()) {
+                    System.out.println("Found @JsonProperty annotation: " + annotationValue);
+                    return annotationValue;
+                }
+            }
+            
+            // 如果都没有注解，回退到方法名解析
+            System.out.println("No CDS annotation found, falling back to method name parsing");
+            return getPropertyNameFromGetter(method);
+            
+        } catch (Exception e) {
+            System.err.println("Error extracting property name from annotation: " + e.getMessage());
+            // 出错时回退到方法名解析
+            return getPropertyNameFromGetter(method);
+        }
+    }
+    
     /**
      * 获取 JSON Schema 类型
      */
@@ -504,6 +680,8 @@ public class FunctionCallProcessor {
                 } else {
                     return Double.parseDouble(argumentValue.toString());
                 }
+            } else if (parameterType instanceof Class) {
+                return convertToSpecificType(argumentValue, parameterType);
             }
 
             // 如果参数类型就是期望的类型，直接返回
@@ -590,6 +768,43 @@ public class FunctionCallProcessor {
                 return ((Number) value).doubleValue();
             } else {
                 return Double.parseDouble(value.toString());
+            }
+        } else if (targetType.getName().contains("cds.gen")) {
+            // 处理 CDS 生成的接口类型
+            // 直接调用 targetType 中定义的静态方法 create()
+            try {
+                java.lang.reflect.Method createMethod = targetType.getMethod("create");
+                Object structInstance = createMethod.invoke(null);
+                
+                // 使用 structInstance.put 方法将 value 中的内容传递过去
+                if (value instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> valueMap = (Map<String, Object>) value;
+                    
+                    // 通过反射调用 put 方法
+                    java.lang.reflect.Method putMethod = structInstance.getClass().getMethod("put", String.class, Object.class);
+                    
+                    for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
+                        putMethod.invoke(structInstance, entry.getKey(), entry.getValue());
+                    }
+                } else {
+                    // 如果 value 不是 Map，尝试转换为 Map
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> valueMap = objectMapper.convertValue(value, Map.class);
+                    
+                    // 通过反射调用 put 方法
+                    java.lang.reflect.Method putMethod = structInstance.getClass().getMethod("put", String.class, Object.class);
+                    
+                    for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
+                        putMethod.invoke(structInstance, entry.getKey(), entry.getValue());
+                    }
+                }
+
+
+                return structInstance;
+            } catch (Exception e) {
+                throw new BusinessException("Failed to convert value to CDS Struct type: " + targetType.getName() +
+                        ", value: " + value, e);
             }
         }
 

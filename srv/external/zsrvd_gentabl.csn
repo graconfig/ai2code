@@ -1,0 +1,538 @@
+{
+ "meta": {
+  "creator": "cds-dk 8.9.3"
+ },
+ "$version": "2.0",
+ "definitions": {
+  "zsrvd_gentabl.zc_gentabl_tCbAControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "_log": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "_tabl_f": {
+     "type": "cds.Boolean",
+     "notNull": true
+    }
+   }
+  },
+  "zsrvd_gentabl.zc_gentabl_tOperationControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "activeTabel": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "Edit": {
+     "type": "cds.Boolean",
+     "notNull": true
+    }
+   }
+  },
+  "zsrvd_gentabl.EntityControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "Deletable": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "Updatable": {
+     "type": "cds.Boolean",
+     "notNull": true
+    }
+   }
+  },
+  "zsrvd_gentabl.SAP__Message": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "code": {
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "message": {
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "target": {
+     "type": "cds.LargeString"
+    },
+    "additionalTargets": {
+     "items": {
+      "type": "cds.LargeString",
+      "notNull": true
+     }
+    },
+    "transition": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "numericSeverity": {
+     "type": "cds.Integer",
+     "@odata.Type": "Edm.Byte",
+     "notNull": true
+    },
+    "longtextUrl": {
+     "type": "cds.LargeString"
+    }
+   }
+  },
+  "zsrvd_gentabl": {
+   "kind": "service",
+   "@cds.external": true
+  },
+  "zsrvd_gentabl.zc_gentabl_f": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Tabname": {
+     "key": true,
+     "type": "cds.String",
+     "length": 16,
+     "notNull": true
+    },
+    "FieldName": {
+     "key": true,
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true
+    },
+    "KeyFlag": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "DataElement": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true
+    },
+    "DataType": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true
+    },
+    "Length": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true
+    },
+    "Decimals": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true
+    },
+    "Description": {
+     "type": "cds.String",
+     "length": 60,
+     "notNull": true
+    },
+    "Groupname": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "LocalLastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "LocalLastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "__EntityControl": {
+     "type": "zsrvd_gentabl.EntityControl"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "zsrvd_gentabl.SAP__Message",
+      "notNull": true
+     }
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "zsrvd_gentabl.zc_gentabl_f",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_tabl_t": {
+     "type": "cds.Association",
+     "target": "zsrvd_gentabl.zc_gentabl_t",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    }
+   }
+  },
+  "zsrvd_gentabl.zc_gentabl_l": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Tabname": {
+     "key": true,
+     "type": "cds.String",
+     "length": 16,
+     "notNull": true
+    },
+    "UUID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true
+    },
+    "Reference": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true
+    },
+    "Message": {
+     "type": "cds.String",
+     "length": 220,
+     "notNull": true
+    },
+    "Type": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true
+    },
+    "Msgid": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true
+    },
+    "MessageV1": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true
+    },
+    "MessageV2": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true
+    },
+    "MessageV3": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true
+    },
+    "MessageV4": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "LocalLastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "LocalLastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "__EntityControl": {
+     "type": "zsrvd_gentabl.EntityControl"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "zsrvd_gentabl.SAP__Message",
+      "notNull": true
+     }
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "zsrvd_gentabl.zc_gentabl_l",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_tabl_t": {
+     "type": "cds.Association",
+     "target": "zsrvd_gentabl.zc_gentabl_t",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    }
+   }
+  },
+  "zsrvd_gentabl.zc_gentabl_t": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Tabname": {
+     "key": true,
+     "type": "cds.String",
+     "length": 16,
+     "notNull": true
+    },
+    "Tabdesc": {
+     "type": "cds.String",
+     "length": 60,
+     "notNull": true
+    },
+    "Contflag": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true
+    },
+    "Mainflag": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true
+    },
+    "Devclass": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true
+    },
+    "Trkorr": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true
+    },
+    "Status": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true
+    },
+    "Reference": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "LocalLastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true
+    },
+    "LocalLastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "__CreateByAssociationControl": {
+     "type": "zsrvd_gentabl.zc_gentabl_tCbAControl"
+    },
+    "__EntityControl": {
+     "type": "zsrvd_gentabl.EntityControl"
+    },
+    "__OperationControl": {
+     "type": "zsrvd_gentabl.zc_gentabl_tOperationControl"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "zsrvd_gentabl.SAP__Message",
+      "notNull": true
+     }
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "zsrvd_gentabl.zc_gentabl_t",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_log": {
+     "type": "cds.Composition",
+     "target": "zsrvd_gentabl.zc_gentabl_l",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    },
+    "_tabl_f": {
+     "type": "cds.Composition",
+     "target": "zsrvd_gentabl.zc_gentabl_f",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    }
+   },
+   "actions": {
+    "Resume": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     }
+    },
+    "activeTabel": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "zsrvd_gentabl.zc_gentabl_t",
+      "notNull": true
+     }
+    },
+    "Edit": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "PreserveChanges": {
+       "type": "cds.Boolean",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "zsrvd_gentabl.zc_gentabl_t",
+      "notNull": true
+     }
+    },
+    "Discard": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     }
+    },
+    "Activate": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "zsrvd_gentabl.zc_gentabl_t",
+      "notNull": true
+     }
+    },
+    "Prepare": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     }
+    }
+   }
+  }
+ }
+}

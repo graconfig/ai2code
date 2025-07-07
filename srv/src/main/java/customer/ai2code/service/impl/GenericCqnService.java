@@ -302,6 +302,13 @@ public class GenericCqnService {
         return existingNode;
     }
 
+    public ContextNodes updateContextNodeAdditionalInfo(String mainTaskId, String contextPath, String additionalInfo) {
+        ContextNodes contextNodes = getContextNodeByTaskAndPath(mainTaskId, contextPath);
+        contextNodes.setAdditionalInfo(additionalInfo);
+        entityService.update(mainService, null, ContextNodes_.class, contextNodes, true);
+        return contextNodes;
+    }
+
     // 根据path生成友好的label
     public String generateLabelFromPath(String contextPath) {
         if (contextPath == null || contextPath.isEmpty()) {
