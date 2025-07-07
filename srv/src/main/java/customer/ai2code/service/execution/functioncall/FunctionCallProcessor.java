@@ -189,8 +189,8 @@ public class FunctionCallProcessor {
 
         var builder = ParameterTypeInfo.builder();
 
-        System.out.println("Extracting parameter type info for: " + parameterType.getName() + 
-                         ", genericType: " + genericType);
+        System.out.println("Extracting parameter type info for: " + parameterType.getName() +
+                ", genericType: " + genericType);
 
         // 处理基本类型
         if (parameterType == String.class) {
@@ -221,12 +221,12 @@ public class FunctionCallProcessor {
                 if (actualTypeArguments.length > 0) {
                     Type itemType = actualTypeArguments[0];
                     System.out.println("First generic type argument: " + itemType);
-                    
+
                     if (itemType instanceof Class) {
                         Class<?> itemClass = (Class<?>) itemType;
                         builder.itemType(itemClass);
-                        System.out.println("Item class: " + itemClass.getName() + 
-                                         ", isComplexType: " + isComplexType(itemClass));
+                        System.out.println("Item class: " + itemClass.getName() +
+                                ", isComplexType: " + isComplexType(itemClass));
 
                         // 如果是复杂对象（包括 CDS 接口），递归提取其属性
                         if (isComplexType(itemClass)) {
@@ -265,9 +265,10 @@ public class FunctionCallProcessor {
         }
 
         var result = builder.build();
-        System.out.println("Final parameter type info - jsonSchemaType: " + result.getJsonSchemaType() + 
-                         ", hasProperties: " + (result.getProperties() != null && !result.getProperties().isEmpty()) +
-                         ", hasItemProperties: " + (result.getItemProperties() != null && !result.getItemProperties().isEmpty()));
+        System.out.println("Final parameter type info - jsonSchemaType: " + result.getJsonSchemaType() +
+                ", hasProperties: " + (result.getProperties() != null && !result.getProperties().isEmpty()) +
+                ", hasItemProperties: "
+                + (result.getItemProperties() != null && !result.getItemProperties().isEmpty()));
         return result;
     }
 
@@ -280,21 +281,21 @@ public class FunctionCallProcessor {
         boolean isJavaUtil = clazz.getName().startsWith("java.util");
         boolean isJavaTime = clazz.getName().startsWith("java.time");
         boolean isObject = clazz == Object.class;
-        
+
         // 特别检查 CDS 生成的接口
         boolean isCdsInterface = clazz.isInterface() && clazz.getName().startsWith("cds.gen");
-        
+
         boolean isComplex = !isPrimitive && !isJavaLang && !isJavaUtil && !isJavaTime && !isObject;
-        
-        System.out.println("Checking if complex type - class: " + clazz.getName() + 
-                         ", isPrimitive: " + isPrimitive +
-                         ", isJavaLang: " + isJavaLang + 
-                         ", isJavaUtil: " + isJavaUtil +
-                         ", isJavaTime: " + isJavaTime +
-                         ", isObject: " + isObject +
-                         ", isCdsInterface: " + isCdsInterface +
-                         ", isComplex: " + isComplex);
-        
+
+        System.out.println("Checking if complex type - class: " + clazz.getName() +
+                ", isPrimitive: " + isPrimitive +
+                ", isJavaLang: " + isJavaLang +
+                ", isJavaUtil: " + isJavaUtil +
+                ", isJavaTime: " + isJavaTime +
+                ", isObject: " + isObject +
+                ", isCdsInterface: " + isCdsInterface +
+                ", isComplex: " + isComplex);
+
         return isComplex;
     }
 
@@ -314,27 +315,29 @@ public class FunctionCallProcessor {
         try {
             // 检查是否为 CDS 生成的接口
             boolean isCdsInterface = clazz.isInterface() && clazz.getName().startsWith("cds.gen");
-            
-            System.out.println("Extracting properties for class: " + clazz.getName() + 
-                             ", isInterface: " + clazz.isInterface() + 
-                             ", isCdsInterface: " + isCdsInterface + 
-                             ", depth: " + depth);
-            
+
+            System.out.println("Extracting properties for class: " + clazz.getName() +
+                    ", isInterface: " + clazz.isInterface() +
+                    ", isCdsInterface: " + isCdsInterface +
+                    ", depth: " + depth);
+
             if (isCdsInterface) {
                 // 对于 CDS 接口，主要通过 getter 方法提取属性
                 System.out.println("Processing CDS interface, extracting from methods...");
-                extractPropertiesFromMethodsWithDepth(clazz, properties, depth + 1);
-                
+
                 // 同时也提取字段信息（CDS 接口的字段通常是常量定义）
-                extractFieldsFromCdsInterface(clazz, properties);
+                extractFieldsFromCdsInterface(clazz, properties, depth + 1);
+
+                extractPropertiesFromMethodsWithDepth(clazz, properties, depth + 1);
+
             } else {
                 // 对于普通类，先处理字段
                 extractPropertiesFromFieldsWithDepth(clazz, properties, depth + 1);
-                
+
                 // 然后检查 getter 方法（for Lombok generated getters）
                 extractPropertiesFromMethodsWithDepth(clazz, properties, depth + 1);
             }
-            
+
             System.out.println("Extracted " + properties.size() + " properties: " + properties.keySet());
 
         } catch (Exception e) {
@@ -367,7 +370,8 @@ public class FunctionCallProcessor {
             String fieldName = field.getName();
             Class<?> fieldType = field.getType();
 
-            Map<String, Object> fieldSchema = createFieldSchemaWithDepth(fieldType, field.getGenericType(), field, depth);
+            Map<String, Object> fieldSchema = createFieldSchemaWithDepth(fieldType, field.getGenericType(), field,
+                    depth);
             properties.put(fieldName, fieldSchema);
         }
     }
@@ -384,16 +388,18 @@ public class FunctionCallProcessor {
      */
     private void extractPropertiesFromMethodsWithDepth(Class<?> clazz, Map<String, Object> properties, int depth) {
         Method[] methods = clazz.getDeclaredMethods();
-        System.out.println("Checking " + methods.length + " methods in class: " + clazz.getName() + " at depth: " + depth);
-        
+        System.out.println(
+                "Checking " + methods.length + " methods in class: " + clazz.getName() + " at depth: " + depth);
+
         for (Method method : methods) {
             if (isGetterMethod(method)) {
                 String propertyName = getPropertyNameFromGetter(method);
                 System.out.println("Found getter method: " + method.getName() + " -> property: " + propertyName);
-                
+
                 if (!properties.containsKey(propertyName)) {
                     Class<?> returnType = method.getReturnType();
-                    Map<String, Object> propertySchema = createFieldSchemaWithDepth(returnType, method.getGenericReturnType(), null, depth);
+                    Map<String, Object> propertySchema = createFieldSchemaWithDepth(returnType,
+                            method.getGenericReturnType(), null, depth);
                     properties.put(propertyName, propertySchema);
                 } else {
                     System.out.println("Property " + propertyName + " already exists, skipping...");
@@ -412,23 +418,33 @@ public class FunctionCallProcessor {
     /**
      * 从 CDS 接口的字段中提取常量定义
      */
-    private void extractFieldsFromCdsInterface(Class<?> clazz, Map<String, Object> properties) {
-        java.lang.reflect.Field[] fields = clazz.getDeclaredFields();
-        for (java.lang.reflect.Field field : fields) {
-            // CDS 接口的字段通常是表示列名的常量，可以用于文档目的
-            if ("serialVersionUID".equals(field.getName())) {
-                continue;
-            }
+    private void extractFieldsFromCdsInterface(Class<?> clazz, Map<String, Object> properties, int depth) {
+        Method[] methods = clazz.getDeclaredMethods();
+        System.out.println(
+                "Checking " + methods.length + " methods in class: " + clazz.getName() + " at depth: " + depth);
 
-            // CDS 接口的字段通常是常量定义，这里暂时跳过
-            // 如果需要提取这些常量信息，可以在这里添加相应的逻辑
+        for (Method method : methods) {
+            if (isGetterMethod(method)) {
+                String propertyName = getPropertyNameFromAnnotation(method);
+                System.out.println("Found getter method: " + method.getName() + " -> property: " + propertyName);
+
+                if (!properties.containsKey(propertyName)) {
+                    Class<?> returnType = method.getReturnType();
+                    Map<String, Object> propertySchema = createFieldSchemaWithDepth(returnType,
+                            method.getGenericReturnType(), null, depth);
+                    properties.put(propertyName, propertySchema);
+                } else {
+                    System.out.println("Property " + propertyName + " already exists, skipping...");
+                }
+            }
         }
     }
 
     /**
      * 创建字段的 schema 信息 - 带深度控制，支持嵌套 CDS 接口解析
      */
-    private Map<String, Object> createFieldSchemaWithDepth(Class<?> fieldType, Type genericType, java.lang.reflect.Field field, int depth) {
+    private Map<String, Object> createFieldSchemaWithDepth(Class<?> fieldType, Type genericType,
+            java.lang.reflect.Field field, int depth) {
         Map<String, Object> fieldSchema = new HashMap<>();
 
         // 设置字段类型
@@ -461,7 +477,7 @@ public class FunctionCallProcessor {
             }
         } else if (isComplexType(fieldType)) {
             fieldSchema.put("type", "object");
-            
+
             // 对于复杂类型（包括嵌套的 CDS 接口），递归解析其属性
             Map<String, Object> nestedProperties = extractObjectPropertiesWithDepth(fieldType, depth + 1);
             if (!nestedProperties.isEmpty()) {
@@ -514,6 +530,18 @@ public class FunctionCallProcessor {
      * 从 getter 方法名提取属性名
      */
     private String getPropertyNameFromGetter(Method method) {
+        String methodName = method.getName();
+        if (methodName.startsWith("get") && methodName.length() > 3) {
+            String propertyName = methodName.substring(3);
+            return Character.toLowerCase(propertyName.charAt(0)) + propertyName.substring(1);
+        }
+        return methodName;
+    }
+
+    /**
+     * 从 getter 方法名提取属性名
+     */
+    private String getPropertyNameFromAnnotation(Method method) {
         String methodName = method.getName();
         if (methodName.startsWith("get") && methodName.length() > 3) {
             String propertyName = methodName.substring(3);
@@ -653,10 +681,9 @@ public class FunctionCallProcessor {
                 } else {
                     return Double.parseDouble(argumentValue.toString());
                 }
-            } else if (parameterType instanceof Class){
+            } else if (parameterType instanceof Class) {
                 return convertToSpecificType(argumentValue, parameterType);
             }
-            
 
             // 如果参数类型就是期望的类型，直接返回
             if (parameterType.isAssignableFrom(argumentValue.getClass())) {
@@ -743,21 +770,20 @@ public class FunctionCallProcessor {
             } else {
                 return Double.parseDouble(value.toString());
             }
-        }
-        else if (targetType.getName().contains("cds.gen")){
+        } else if (targetType.getName().contains("cds.gen")) {
             // 处理 CDS 生成的接口类型
             // 先使用 Struct.create 创建一个实例
             Object structInstance = Struct.create(targetType);
-            
+
             // 使用 ObjectMapper 将 value 的数据转换并填充到 structInstance 中
             try {
                 // 先将 value 转换为 JSON 字符串
                 String jsonString = objectMapper.writeValueAsString(value);
-                
+
                 // 再将 JSON 字符串反序列化到 structInstance 中
                 // 注意：这里需要更新 structInstance 的内容，而不是创建新对象
                 objectMapper.readerForUpdating(structInstance).readValue(jsonString);
-                
+
                 return structInstance;
             } catch (Exception e) {
                 throw new BusinessException("Failed to convert value to CDS Struct type: " + targetType.getName() +
