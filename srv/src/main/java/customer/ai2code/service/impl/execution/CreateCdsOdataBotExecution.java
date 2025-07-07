@@ -57,10 +57,13 @@ public class CreateCdsOdataBotExecution implements BotExecution {
         AutoActiveCDSContext.getSource().forEach(
                 source -> {
                     ZsgenDdlsSourceList sourceNew = ZsgenDdlsSourceList.create();
-                    sourceNew.setViewname(String.valueOf(source.get("viewname")));
-                    sourceNew.setViewdesc(String.valueOf(source.get("viewdesc")));
-                    sourceNew.setReference(String.valueOf(source.get("reference")));
-                    sourceNew.setSourcecode(String.valueOf(source.get("sourcecode")));
+                    // sourceNew.setViewname(String.valueOf(source.get("viewname")));
+                    sourceNew.setViewname(source.getViewname());
+                    sourceNew.setViewdesc(source.getViewdesc());
+                    sourceNew.setReference(source.getReference());
+                    sourceNew.setSourcecode(source.getSourcecode());
+                    // sourceNew.setReference(String.valueOf(source.get("reference")));
+                    // sourceNew.setSourcecode(String.valueOf(source.get("sourcecode")));
 
                     Sources.add(sourceNew);
                 });
@@ -90,7 +93,7 @@ public class CreateCdsOdataBotExecution implements BotExecution {
         // 打印CDS
         // System.out.println("CdsSource=" + AutoActiveCDSContextNew.getSource().toString());
         try {
-            System.out.println("CdsSource=" + objectMapper.writeValueAsString(AutoActiveCDSContextNew));
+            System.out.println("CdsSource=" + objectMapper.writeValueAsString(AutoActiveCDSContextNew.getSource()));
         } catch (JsonProcessingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

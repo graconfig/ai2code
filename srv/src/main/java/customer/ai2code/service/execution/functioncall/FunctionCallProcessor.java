@@ -10,10 +10,8 @@ import customer.ai2code.model.execution.functioncall.ParameterTypeInfo;
 import customer.ai2code.service.execution.BotExecution;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sap.cds.Struct;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -328,7 +326,7 @@ public class FunctionCallProcessor {
                 // 同时也提取字段信息（CDS 接口的字段通常是常量定义）
                 extractFieldsFromCdsInterface(clazz, properties, depth + 1);
 
-                extractPropertiesFromMethodsWithDepth(clazz, properties, depth + 1);
+                // extractPropertiesFromMethodsWithDepth(clazz, properties, depth + 1);
 
             } else {
                 // 对于普通类，先处理字段
@@ -351,10 +349,6 @@ public class FunctionCallProcessor {
     /**
      * 提取复杂对象的属性信息 - 保持原有接口兼容性
      */
-    private Map<String, Object> extractObjectProperties(Class<?> clazz) {
-        return extractObjectPropertiesWithDepth(clazz, 0);
-    }
-
     /**
      * 从字段中提取属性信息（用于普通类）- 带深度控制
      */
@@ -374,13 +368,6 @@ public class FunctionCallProcessor {
                     depth);
             properties.put(fieldName, fieldSchema);
         }
-    }
-
-    /**
-     * 从字段中提取属性信息（用于普通类）- 保持兼容性
-     */
-    private void extractPropertiesFromFields(Class<?> clazz, Map<String, Object> properties) {
-        extractPropertiesFromFieldsWithDepth(clazz, properties, 0);
     }
 
     /**
@@ -406,13 +393,6 @@ public class FunctionCallProcessor {
                 }
             }
         }
-    }
-
-    /**
-     * 从方法中提取属性信息 - 保持兼容性
-     */
-    private void extractPropertiesFromMethods(Class<?> clazz, Map<String, Object> properties) {
-        extractPropertiesFromMethodsWithDepth(clazz, properties, 0);
     }
 
     /**
@@ -496,13 +476,6 @@ public class FunctionCallProcessor {
     }
 
     /**
-     * 创建字段的 schema 信息 - 保持兼容性
-     */
-    private Map<String, Object> createFieldSchema(Class<?> fieldType, Type genericType, java.lang.reflect.Field field) {
-        return createFieldSchemaWithDepth(fieldType, genericType, field, 0);
-    }
-
-    /**
      * 为字段添加描述信息
      */
     private void addFieldDescription(java.lang.reflect.Field field, Map<String, Object> fieldSchema) {
@@ -539,17 +512,43 @@ public class FunctionCallProcessor {
     }
 
     /**
-     * 从 getter 方法名提取属性名
+     * 从 CDS Interface getter 方法的注解中提取属性名
+     * CDS 接口使用 @CdsName 注解来标识属性名
      */
     private String getPropertyNameFromAnnotation(Method method) {
-        String methodName = method.getName();
-        if (methodName.startsWith("get") && methodName.length() > 3) {
-            String propertyName = methodName.substring(3);
-            return Character.toLowerCase(propertyName.charAt(0)) + propertyName.substring(1);
+        try {
+            // 检查是否有 @CdsName 注解
+            com.sap.cds.ql.CdsName cdsNameAnnotation = method.getAnnotation(com.sap.cds.ql.CdsName.class);
+            if (cdsNameAnnotation != null) {
+                String annotationValue = cdsNameAnnotation.value();
+                if (annotationValue != null && !annotationValue.trim().isEmpty()) {
+                    // 直接返回注解值，不做任何转换
+                    System.out.println("Found @CdsName annotation: " + annotationValue);
+                    return annotationValue;
+                }
+            }
+            
+            // 如果没有 @CdsName 注解，也检查 @JsonProperty 注解作为备用
+            com.fasterxml.jackson.annotation.JsonProperty jsonProperty = method.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class);
+            if (jsonProperty != null) {
+                String annotationValue = jsonProperty.value();
+                if (annotationValue != null && !annotationValue.trim().isEmpty()) {
+                    System.out.println("Found @JsonProperty annotation: " + annotationValue);
+                    return annotationValue;
+                }
+            }
+            
+            // 如果都没有注解，回退到方法名解析
+            System.out.println("No CDS annotation found, falling back to method name parsing");
+            return getPropertyNameFromGetter(method);
+            
+        } catch (Exception e) {
+            System.err.println("Error extracting property name from annotation: " + e.getMessage());
+            // 出错时回退到方法名解析
+            return getPropertyNameFromGetter(method);
         }
-        return methodName;
     }
-
+    
     /**
      * 获取 JSON Schema 类型
      */
@@ -772,17 +771,35 @@ public class FunctionCallProcessor {
             }
         } else if (targetType.getName().contains("cds.gen")) {
             // 处理 CDS 生成的接口类型
-            // 先使用 Struct.create 创建一个实例
-            Object structInstance = Struct.create(targetType);
-
-            // 使用 ObjectMapper 将 value 的数据转换并填充到 structInstance 中
+            // 直接调用 targetType 中定义的静态方法 create()
             try {
-                // 先将 value 转换为 JSON 字符串
-                String jsonString = objectMapper.writeValueAsString(value);
+                java.lang.reflect.Method createMethod = targetType.getMethod("create");
+                Object structInstance = createMethod.invoke(null);
+                
+                // 使用 structInstance.put 方法将 value 中的内容传递过去
+                if (value instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> valueMap = (Map<String, Object>) value;
+                    
+                    // 通过反射调用 put 方法
+                    java.lang.reflect.Method putMethod = structInstance.getClass().getMethod("put", String.class, Object.class);
+                    
+                    for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
+                        putMethod.invoke(structInstance, entry.getKey(), entry.getValue());
+                    }
+                } else {
+                    // 如果 value 不是 Map，尝试转换为 Map
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> valueMap = objectMapper.convertValue(value, Map.class);
+                    
+                    // 通过反射调用 put 方法
+                    java.lang.reflect.Method putMethod = structInstance.getClass().getMethod("put", String.class, Object.class);
+                    
+                    for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
+                        putMethod.invoke(structInstance, entry.getKey(), entry.getValue());
+                    }
+                }
 
-                // 再将 JSON 字符串反序列化到 structInstance 中
-                // 注意：这里需要更新 structInstance 的内容，而不是创建新对象
-                objectMapper.readerForUpdating(structInstance).readValue(jsonString);
 
                 return structInstance;
             } catch (Exception e) {
