@@ -97,10 +97,10 @@ public class PromptServiceImpl implements PromptService {
                 String ragInputStatement = parse(ragInput, context);
 
                 // 5.2 与content合并成新的RAG输入语句
-                String combinedRagInput = ragInputStatement + " " + query;
+                String combinedRagInput = ragInputStatement + "/" + query;
 
                 // 5.3 获取botType.implementationClass,ragTopK,ragThreshold
-                String implementationClass = botType.getImplementationClass();
+                String implementationClass = botType.getRagClass();
                 Integer ragTopK = botType.getRagTopK();
                 double ragThreshold = botType.getRagThreshold();
                 String ragSource = botType.getRagSource();
