@@ -36,9 +36,15 @@ class RAGCDSViewExtractorImplTest {
         // 测试使用有效查询"采购订单"
         String ragSource = ""; // 空字符串，使用默认值
         int ragTopK = 10;
-        String query = "采购订单";
+        String query = "{\"createdAt\":\"2025-07-08T08:52:18.056572200Z\",\"path\":\"subtask[0].description\",\"createdBy\":\"system\",\"modifiedAt\":\"2025-07-08T08:52:18.056572200Z\",\"additionalInfo\":null,\"modifiedBy\":\"system\",\"task_ID\":\"7ad36e51-8036-4993-9a5e-6f7962d38cda\",\"ID\":\"08660337-fb3e-409d-96aa-b704903203c9\",\"label\":\"Description\",\"type\":\"STRING\",\"value\":\"**项目ID：ZTEST001\\n" + //
+                        "**层级级别：0\\n" + //
+                        "**数据来源：EKKO\\n" + //
+                        "**主键字段：采购订单编号\\n" + //
+                        "**选择项目：采购订单编号，公司代码，采购订单类型\\n" + //
+                        "**一览项目：采购订单编号，采购组织，采购组，采购订单类型，公司代码，供应商，订单日期\\n" + //
+                        "**抬头项目：采购订单编号，采购组织，采购组，采购订单类型，公司代码\"}/";
         Locale language = Locale.CHINESE;
-        double threshold = 0.75;
+        double threshold = 0.65;
 
         String result = ragExtractor.extract(ragSource, ragTopK, query, language, threshold);
 
