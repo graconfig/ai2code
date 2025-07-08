@@ -259,11 +259,13 @@ public class SAPOpenAIServiceImpl implements AIService {
                                                 Map<String, Object> parameters = (Map<String, Object>) parametersObj;
                                                 function.setParameters(parameters);
                                         }
+                                        params.setToolChoiceFunction((String)functionDef.get("name"));
                                         return new OpenAiChatCompletionTool().setType(ToolType.FUNCTION)
                                                         .setFunction(function);
                                 }).toList();
 
                 params.setTools(tools);
+                // params.setToolChoiceFunction(func)
 
                 // 4. 调用 OpenAI API
                 OpenAiClient aiClient = getAiClientbyModelUsingBTPDestination(
