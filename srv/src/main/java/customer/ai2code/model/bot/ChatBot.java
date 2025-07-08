@@ -46,17 +46,20 @@ public class ChatBot implements Bot {
             // 1. 根据AIModel类型，获取到不同AIService服务
             AIService aiService = aiModelResolver.resolveAIService(aiModel.getModelConfigs());
 
-            // 2. 第一次chat需要保存prompt消息
-            boolean isFirstCall = genericCqnService.isFirstCall(botInstance.getId());
-            if (isFirstCall) {
-                // 3. 使用genericCqnService.getMainTaskId，再获取Prompt
-                // String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
-                List<PromptTexts> retrievedPrompts = promptService.getPrompts(this);
-                if (retrievedPrompts != null && !retrievedPrompts.isEmpty()) {
-                    prompts = retrievedPrompts;
-                    savePromptMessages(prompts);
-                }
+            // 获取prompts
+            List<PromptTexts> retrievedPrompts = promptService.getPrompts(this);
+            if (retrievedPrompts != null && !retrievedPrompts.isEmpty()) {
+                prompts = retrievedPrompts;
             }
+
+            // 2. 第一次chat需要保存prompt消息
+            // boolean isFirstCall = genericCqnService.isFirstCall(botInstance.getId());
+            // if (isFirstCall) {
+            // // 3. 使用genericCqnService.getMainTaskId，再获取Prompt
+            // // String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
+            // savePromptMessages(prompts);
+
+            // }
 
             // 4. 获取历史消息
             List<BotMessages> historyMessages = genericCqnService.getBotMessagesByBotInstanceId(botInstance.getId());
