@@ -105,8 +105,24 @@ public class PromptServiceImpl implements PromptService {
 
                 // 5.3 获取botType.implementationClass,ragTopK,ragThreshold
                 String implementationClass = botType.getRagClass();
-                Integer ragTopK = botType.getRagTopK();
-                double ragThreshold = botType.getRagThreshold();
+                Integer ragTopK;
+                double ragThreshold;
+                try{
+                    ragThreshold = botType.getRagThreshold();
+                } catch (Exception e) {
+                    // System.err.println("Failed to get RAG threshold: " + e.getMessage());
+                    ragThreshold = 0.65; // 默认值
+                }
+                try {
+                    ragTopK = botType.getRagTopK();
+                } catch (Exception e) {
+                    // TODO: handle exception
+                    ragTopK = 5; // 默认值
+                }
+                if (ragTopK == null || ragTopK <= 0) {
+                    ragTopK = 5; // 默认值
+                }
+                
                 String ragSource = botType.getRagSource();
 
                 // 5.4 通过接口RAGExtractor实例化implementationClass

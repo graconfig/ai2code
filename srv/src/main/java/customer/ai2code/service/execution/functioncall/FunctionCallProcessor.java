@@ -305,7 +305,10 @@ public class FunctionCallProcessor {
         final int MAX_DEPTH = 5;
         if (depth > MAX_DEPTH) {
             System.out.println("Max depth reached for class: " + clazz.getName() + ", returning simple object type");
-            return Map.of("type", "object", "description", "Complex nested object (depth limit reached)");
+            return Map.of("dummy", Map.of("type", "string", "description",
+                    "Complex nested object (depth limit reached)"));
+            // return Map.of("type", "string", "description", "Complex nested object (depth
+            // limit reached)");
         }
 
         Map<String, Object> properties = new HashMap<>();
@@ -527,9 +530,10 @@ public class FunctionCallProcessor {
                     return annotationValue;
                 }
             }
-            
+
             // 如果没有 @CdsName 注解，也检查 @JsonProperty 注解作为备用
-            com.fasterxml.jackson.annotation.JsonProperty jsonProperty = method.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class);
+            com.fasterxml.jackson.annotation.JsonProperty jsonProperty = method
+                    .getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class);
             if (jsonProperty != null) {
                 String annotationValue = jsonProperty.value();
                 if (annotationValue != null && !annotationValue.trim().isEmpty()) {
@@ -537,18 +541,18 @@ public class FunctionCallProcessor {
                     return annotationValue;
                 }
             }
-            
+
             // 如果都没有注解，回退到方法名解析
             System.out.println("No CDS annotation found, falling back to method name parsing");
             return getPropertyNameFromGetter(method);
-            
+
         } catch (Exception e) {
             System.err.println("Error extracting property name from annotation: " + e.getMessage());
             // 出错时回退到方法名解析
             return getPropertyNameFromGetter(method);
         }
     }
-    
+
     /**
      * 获取 JSON Schema 类型
      */
@@ -775,15 +779,22 @@ public class FunctionCallProcessor {
             try {
                 java.lang.reflect.Method createMethod = targetType.getMethod("create");
                 Object structInstance = createMethod.invoke(null);
-                
+
                 // 使用 structInstance.put 方法将 value 中的内容传递过去
                 if (value instanceof Map) {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> valueMap = (Map<String, Object>) value;
-                    
+
                     // 通过反射调用 put 方法
-                    java.lang.reflect.Method putMethod = structInstance.getClass().getMethod("put", String.class, Object.class);
-                    
+                    java.lang.reflect.Method putMethod;
+                    try {
+                        putMethod = structInstance.getClass().getMethod("put", String.class,
+                                Object.class);
+                    } catch (NoSuchMethodException e) {
+                        putMethod = structInstance.getClass().getMethod("put",
+                                Object.class, Object.class);
+                    }
+
                     for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
                         putMethod.invoke(structInstance, entry.getKey(), entry.getValue());
                     }
@@ -791,15 +802,21 @@ public class FunctionCallProcessor {
                     // 如果 value 不是 Map，尝试转换为 Map
                     @SuppressWarnings("unchecked")
                     Map<String, Object> valueMap = objectMapper.convertValue(value, Map.class);
-                    
+
                     // 通过反射调用 put 方法
-                    java.lang.reflect.Method putMethod = structInstance.getClass().getMethod("put", String.class, Object.class);
+                    java.lang.reflect.Method putMethod;
+                    try {
+                        putMethod = structInstance.getClass().getMethod("put", String.class,
+                                Object.class);
+                    } catch (NoSuchMethodException e) {
+                        putMethod = structInstance.getClass().getMethod("put",
+                                Object.class, Object.class);
+                    }
                     
                     for (Map.Entry<String, Object> entry : valueMap.entrySet()) {
                         putMethod.invoke(structInstance, entry.getKey(), entry.getValue());
                     }
                 }
-
 
                 return structInstance;
             } catch (Exception e) {
