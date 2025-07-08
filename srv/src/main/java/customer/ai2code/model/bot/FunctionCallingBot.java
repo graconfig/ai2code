@@ -73,6 +73,12 @@ public class FunctionCallingBot implements Bot {
             System.out.println("- Created bot execution instance: " + implementationClass);
             System.out.println(botExecutionFactoryService.getBotExecutionInstanceInfo(botExecution));
 
+            // 4.1 添加rag功能
+            PromptTexts ragPrompt = promptService.getRagAsPrompts(this, "");
+            if (ragPrompt != null) {
+                prompts.add(ragPrompt);
+            }
+
             // 5. 调用 AI Function Calling
             System.out.println("- Calling AI service function calling...");
             Object result = aiService.functionCalling(messages, prompts, botExecution, aiModel);
