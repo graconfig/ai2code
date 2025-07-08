@@ -133,7 +133,22 @@ public class SAPOpenAIServiceImpl implements AIService {
 
                 // Create streaming chat completion request
                 OpenAiChatCompletionParameters params = new OpenAiChatCompletionParameters();
-                // history messages
+                // 1. add prompts
+                // prompts.stream()
+                //                 .map(PromptTexts::getContent)
+                //                 .filter(prompt -> prompt != null && !prompt.isBlank())
+                //                 .forEach(prompt -> params
+                //                                 .addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage()
+                //                                                 .setContent(prompt)));
+                //将prompt合并成一个system消息
+                StringBuilder promptContent = new StringBuilder();
+                prompts.stream()
+                                .map(PromptTexts::getContent)
+                                .filter(prompt -> prompt != null && !prompt.isBlank())
+                                .forEach(promptContent::append);
+                params.addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage().setContent(promptContent.toString()));
+
+                // 2. history messages
                 messages.stream()
                                 .map(msg -> switch (msg.getRole()) {
                                         case AIConstants.Roles.SYSTEM ->
@@ -145,13 +160,7 @@ public class SAPOpenAIServiceImpl implements AIService {
                                         default -> throw new BusinessException(AIConstants.Messages.UNEXPECTED_ROLE +
                                                         msg.getRole());
                                 }).forEach(params::addMessages);
-                // add prompts
-                prompts.stream()
-                                .map(PromptTexts::getContent)
-                                .filter(prompt -> prompt != null && !prompt.isBlank())
-                                .forEach(prompt -> params
-                                                .addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage()
-                                                                .setContent(prompt)));
+
 
                 // add user message
                 if (content != null && !content.isBlank()) {
@@ -203,6 +212,21 @@ public class SAPOpenAIServiceImpl implements AIService {
                 // 2. 构建 OpenAI Chat Completion 参数
                 OpenAiChatCompletionParameters params = new OpenAiChatCompletionParameters();
 
+                // add prompts
+                // prompts.stream()
+                //                 .map(PromptTexts::getContent)
+                //                 .filter(prompt -> prompt != null && !prompt.isBlank())
+                //                 .forEach(prompt -> params
+                //                                 .addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage()
+                //                                                 .setContent(prompt)));
+                //将prompt合并成一个system消息
+                StringBuilder promptContent = new StringBuilder();
+                prompts.stream()
+                                .map(PromptTexts::getContent)
+                                .filter(prompt -> prompt != null && !prompt.isBlank())
+                                .forEach(promptContent::append);
+                params.addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage().setContent(promptContent.toString()));
+
                 // history messages
                 messages.stream()
                                 .map(msg -> switch (msg.getRole()) {
@@ -216,13 +240,7 @@ public class SAPOpenAIServiceImpl implements AIService {
                                                         msg.getRole());
                                 }).forEach(params::addMessages);
 
-                // add prompts
-                prompts.stream()
-                                .map(PromptTexts::getContent)
-                                .filter(prompt -> prompt != null && !prompt.isBlank())
-                                .forEach(prompt -> params
-                                                .addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage()
-                                                                .setContent(prompt)));
+
 
                 // 3. 转换为 OpenAI Function Calling 格式并添加到参数中
                 List<Map<String, Object>> openAIFunctions = openAIFunctionCallAdapter
