@@ -56,43 +56,23 @@ public class CreateCdsOdataBotExecution implements BotExecution {
         AutoActiveCDSContextNew.setProjdesc(AutoActiveCDSContext.getProjdesc());
         AutoActiveCDSContextNew.setWithadditionalsave(AutoActiveCDSContext.getWithadditionalsave());
         AutoActiveCDSContextNew.setWithdraft(AutoActiveCDSContext.getWithdraft());
-        // AutoActiveCDSContextNew.setSource(AutoActiveCDSContext.getSource());
         Collection<ZsgenDdlsSourceList> Sources = new ArrayList<>();
         AutoActiveCDSContext.getSource().forEach(
                 source -> {
                     ZsgenDdlsSourceList sourceNew = ZsgenDdlsSourceList.create();
-                    // sourceNew.setViewname(String.valueOf(source.get("viewname")));
                     sourceNew.setViewname(source.getViewname());
                     sourceNew.setViewdesc(source.getViewdesc());
                     sourceNew.setReference(source.getReference());
                     sourceNew.setSourcecode(source.getSourcecode());
-                    // sourceNew.setReference(String.valueOf(source.get("reference")));
-                    // sourceNew.setSourcecode(String.valueOf(source.get("sourcecode")));
-
                     Sources.add(sourceNew);
                 });
-        // .setSourcecode(source.getSourcecode()));
-        // ZtgenddlsL sourceItem = ZtgenddlsL.create();
-        // sourceItem.setViewname(source.getViewname());
-        // sourceItem.setViewdesc(source.getViewdesc());
-        // sourceItem.setReference(source.getReference());
-        // sourceItem.setSourcecode(source.getSourcecode());
-        // AutoActiveCDSContextNew.addSource(sourceItem);
-        // AutoActiveCDSContextNew.set
-        // }
-        // );
+
         AutoActiveCDSContextNew.setSource(Sources);
 
         AutoActiveCDSContextNew.setTrkorr(AutoActiveCDSContext.getTrkorr());
         AutoActiveCDSContextNew.setDevclass(AutoActiveCDSContext.getDevclass());
 
-        // AutoActiveCDSContext.setCqn(select);
-        // AutoActiveCDSContext.setProjname("TESTO703_01");
-        // AutoActiveCDSContext.setProjdesc("test report222");
-        // AutoActiveCDSContext.setWithadditionalsave(false);
-        // AutoActiveCDSContext.setWithdraft(false);
-        // AutoActiveCDSContext.setTrkorr("DM2K900068");
-        // AutoActiveCDSContext.setDevclass("ZAIREPORT");
+
         String Result = "";// 返回结果
         // 打印CDS
         // System.out.println("CdsSource=" +

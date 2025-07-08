@@ -9,6 +9,7 @@ import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotInstances;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.service.PromptService;
+import customer.ai2code.service.impl.rag.RAGExtractionFactoryService;
 import customer.ai2code.service.rag.RAGExtraction;
 import customer.ai2code.service.variable.VariableContext;
 import customer.ai2code.service.variable.VariableParsingService;
@@ -18,11 +19,14 @@ public class PromptServiceImpl implements PromptService {
 
     private final GenericCqnService genericCqnService;
     private final VariableParsingService variableParsingService;
+    private final RAGExtractionFactoryService ragExtractionFactoryService;
 
     public PromptServiceImpl(GenericCqnService genericCqnService,
-            VariableParsingService variableParsingService) {
+            VariableParsingService variableParsingService,
+            RAGExtractionFactoryService ragExtractionFactoryService) {
         this.genericCqnService = genericCqnService;
         this.variableParsingService = variableParsingService;
+        this.ragExtractionFactoryService = ragExtractionFactoryService;
     }
 
     @Override
@@ -106,8 +110,9 @@ public class PromptServiceImpl implements PromptService {
                 String ragSource = botType.getRagSource();
 
                 // 5.4 通过接口RAGExtractor实例化implementationClass
-                Class<?> clazz = Class.forName(implementationClass);
-                RAGExtraction ragExtraction = (RAGExtraction) clazz.getDeclaredConstructor().newInstance();
+                // Class<?> clazz = Class.forName(implementationClass);
+                // RAGExtraction ragExtraction = (RAGExtraction) clazz.getDeclaredConstructor().newInstance();
+                RAGExtraction ragExtraction = ragExtractionFactoryService.createRAGExtractionInstance(implementationClass);
 
                 // 5.5 调用RAGExtractor.extract方法获取RAG结果
                 String ragContent = ragExtraction.extract(ragSource, ragTopK, combinedRagInput, bot.getLocale(),

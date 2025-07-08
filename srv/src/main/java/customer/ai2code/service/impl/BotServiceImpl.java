@@ -1,18 +1,13 @@
 package customer.ai2code.service.impl;
 
 import cds.gen.mainservice.BotInstances;
-import cds.gen.mainservice.BotInstances_;
 import cds.gen.mainservice.BotMessages;
 import cds.gen.mainservice.BotMessagesAdoptContext;
 import cds.gen.mainservice.ContextNodes;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 import cds.gen.mainservice.BotInstancesChatCompletionContext;
-import cds.gen.mainservice.MainService;
-import cds.gen.mainservice.Tasks;
-import cds.gen.configservice.ConfigService;
-import cds.gen.ai.orchestration.BotMessage;
+
 import cds.gen.configservice.BotTypes;
-import cds.gen.configservice.BotTypes_;
 import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.model.bot.ChatBot;
@@ -25,41 +20,14 @@ import customer.ai2code.service.BotService;
 import customer.ai2code.service.ContextService;
 
 import customer.ai2code.service.PromptService;
-import customer.ai2code.service.constant.AIConstants;
 
-// import customer.ai2code.service.AIService;
-import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.AnalysisResult;
 import com.sap.cds.ql.cqn.CqnAnalyzer;
-import com.sap.cds.ql.cqn.CqnStatement;
-import com.sap.cds.ql.cqn.ResolvedRefItem;
-
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.xml.transform.Result;
-
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-
-import cds.gen.mainservice.BotMessages;
-
-import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import cds.gen.mainservice.BotMessages;
-
-import cds.gen.mainservice.BotMessages;
 
 @Service
 public class BotServiceImpl implements BotService {
@@ -224,6 +192,36 @@ public class BotServiceImpl implements BotService {
             // 更新result字段
             updateBotInstanceResult(bot, result.getResult());
 
+            // 如果维护了outputContextPath，则更新
+            String outputContextPath = genericCqnService.getOutputContextPathByBotInstanceId(botInstanceId);
+            if (outputContextPath != null && outputContextPath.isBlank() != true) {
+                // 5. 获取绝对的 outputContextPath
+                String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, outputContextPath);
+                // 6. 调用 ContextService 的 upsertContext 方法存储并返回 ContextNodes
+                ContextNodes node = contextService.upsertContext(botInstanceId, absoluteOutputContextPath,
+                        result.getResult(),
+                        bot.getBotType().getContextTypeCode());
+
+                // 6.1 将 ContextNode 的 ID 设置到 BotInstance 中
+                updateBotInstanceContextNodeId(bot, node.getId());
+
+            }
+            //
+            // 7. 检查botType的ragOutputContextPath，有维护值的情况下写入一条新的ContextNode
+            // String ragOutputContextPath = bot.getBotType().getRagOutputContextPath();
+            // if (ragOutputContextPath != null && !ragOutputContextPath.isBlank()) {
+            //     // 获取绝对的 RAG 输出上下文路径
+            //     String absoluteRagOutputContextPath = contextService.getContextFullPath(botInstanceId,
+            //             ragOutputContextPath);
+            //     // 获取最新一条用户消息的 RAG 数据
+            //     BotMessages latestUserMessage = genericCqnService.getLatestUserMessage(botInstanceId);
+            //     // 将RAG输出上下文路径和消息文本存储到新的ContextNode中
+            //     contextService.upsertContext(botInstanceId, absoluteRagOutputContextPath,
+            //             latestUserMessage.getRagData(),
+            //             "text");
+            // }
+
+
             return result;
 
         } catch (Exception e) {
@@ -337,8 +335,10 @@ public class BotServiceImpl implements BotService {
             // 获取绝对的 RAG 输出上下文路径
             String absoluteRagOutputContextPath = contextService.getContextFullPath(botInstanceId,
                     ragOutputContextPath);
+            // 获取最新一条用户消息的 RAG 数据
+            BotMessages latestUserMessage = genericCqnService.getLatestUserMessage(botInstanceId);
             // 将RAG输出上下文路径和消息文本存储到新的ContextNode中
-            contextService.upsertContext(botInstanceId, absoluteRagOutputContextPath, botMessage.getRagData(),
+            contextService.upsertContext(botInstanceId, absoluteRagOutputContextPath, latestUserMessage.getRagData(),
                     "text");
         }
 

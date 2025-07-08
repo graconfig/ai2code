@@ -17,11 +17,11 @@ import customer.ai2code.model.config.AIModelResolver;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.PromptService;
 import customer.ai2code.service.impl.GenericCqnService;
+import customer.ai2code.service.impl.rag.RAGExtractionFactoryService;
+import customer.ai2code.service.rag.RAGExtraction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -37,6 +37,7 @@ public class ChatBot implements Bot {
     private GenericCqnService genericCqnService;
     private PromptService promptService;
     private AIModelResolver aiModelResolver;
+    // private RAGExtractionFactoryService ragExtractionFactoryService;
 
     @Override
     public String chat(String content) {
@@ -50,8 +51,9 @@ public class ChatBot implements Bot {
             if (isFirstCall) {
                 // 3. 使用genericCqnService.getMainTaskId，再获取Prompt
                 // String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
-                prompts = promptService.getPrompts(this);
-                if (prompts != null && !prompts.isEmpty()) {
+                List<PromptTexts> retrievedPrompts = promptService.getPrompts(this);
+                if (retrievedPrompts != null && !retrievedPrompts.isEmpty()) {
+                    prompts = retrievedPrompts;
                     savePromptMessages(prompts);
                 }
             }
@@ -63,10 +65,11 @@ public class ChatBot implements Bot {
             PromptTexts ragPrompt = promptService.getRagAsPrompts(this, content);
 
             // 6.将用户的聊天内容存储到表中
-            BotMessages userMessage = genericCqnService.createAndInsertBotMessage(botInstance.getId(), content,
-                    ragPrompt.getContent(), "user");
+            genericCqnService.createAndInsertBotMessage(botInstance.getId(), content, ragPrompt.getContent(), "user");
 
-            prompts.add(ragPrompt);
+            if (ragPrompt != null) {
+                prompts.add(ragPrompt);
+            }
 
             // 7. 真正调用chat服务
             String response = aiService.chatWithAI(historyMessages, prompts, content, aiModel);

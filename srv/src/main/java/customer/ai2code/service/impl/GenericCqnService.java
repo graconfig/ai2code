@@ -1,4 +1,3 @@
-
 package customer.ai2code.service.impl;
 
 import org.springframework.stereotype.Service;
@@ -461,6 +460,25 @@ public class GenericCqnService {
                 .where(b -> b.botInstance_ID().eq(botInstanceId))
                 .orderBy(b -> b.createdAt().asc());
         return entityService.selectList(mainService, select, BotMessages.class);
+    }
+
+    /**
+     * 根据BotInstance ID获取最新的用户消息
+     */
+    public BotMessages getLatestUserMessage(String botInstanceId) {
+        CqnSelect select = Select.from(BotMessages_.class)
+                .where(b -> b.botInstance_ID().eq(botInstanceId)
+                        .and(b.role().eq("user")))
+                .orderBy(b -> b.createdAt().desc())
+                .limit(1);
+        
+        List<BotMessages> messages = entityService.selectList(mainService, select, BotMessages.class);
+        
+        if (messages.isEmpty()) {
+            return null; // 如果没有找到用户消息，返回 null
+        }
+        
+        return messages.get(0);
     }
 
     /**
