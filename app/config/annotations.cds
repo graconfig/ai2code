@@ -40,7 +40,7 @@ annotate service.TaskTypes with @(
             $Type : 'UI.ReferenceFacet',
             Label : '{i18n>BotTypes}',
             ID    : 'BotTypes',
-            Target: 'botTypes/@UI.LineItem#BotTypes',
+            Target: 'botTypes/@UI.PresentationVariant#BotTypes',
         },
     ],
     UI.LineItem                  : [
@@ -152,6 +152,19 @@ annotate service.BotTypes with @(
             Label: '{i18n>ImplementationClass}',
         },
     ],
+    UI.PresentationVariant #BotTypes : {
+        $Type : 'UI.PresentationVariantType',
+        Visualizations : [
+            '@UI.LineItem#BotTypes'
+        ],
+        SortOrder : [
+            {
+                $Type : 'Common.SortOrderType',
+                Property : sequence,
+                Descending : false
+            }
+        ]
+    },
     UI.HeaderInfo         : {
         Title         : {
             $Type: 'UI.DataField',
@@ -267,6 +280,11 @@ annotate service.BotTypes with @(
                 $Type: 'UI.DataField',
                 Value: ragTopK,
                 Label: '{i18n>RagTopk}',
+            },
+            {
+                $Type: 'UI.DataField',
+                Value: ragThreshold,
+                Label: '{i18n>RagThreshold}',
             },
             {
                 $Type: 'UI.DataField',
