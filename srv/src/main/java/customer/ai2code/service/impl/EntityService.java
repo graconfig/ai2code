@@ -52,6 +52,15 @@ public class EntityService {
         if (result.rowCount() == 0) {
             throw new BusinessException(errorMessage); // Changed exception type
         }
+        // 修正某些Entity草稿模式下返回多条的情况
+        if (result.rowCount() > 1) {
+            // throw new BusinessException("Multiple_Records_Found", "Expected a single
+            // record, but found multiple.");
+            return result.stream().filter(r -> (Boolean) r.getOrDefault("isActiveEntity", true)).findAny()
+                    .map(r -> r.as(type))
+                    .orElseThrow(() -> new BusinessException("Expected a single record, but found multiple."));
+
+        }
         return result.single(type);
     }
 
@@ -276,20 +285,21 @@ public class EntityService {
             List<T> entities,
             String reportId,
             Boolean isActiveEntity) {
-                
+
         bulkInsert(service, serviceDraft, entityClass, entities, isActiveEntity);
         // entities.forEach(entity -> {
-        //     // Use reflection to set common properties
-        //     // try {
-        //     // entity.getClass().getMethod("setReportId", String.class)
-        //     // .invoke(entity, reportId);
-        //     // entity.getClass().getMethod("setIsActiveEntity", Boolean.class)
-        //     // .invoke(entity, isActiveEntity);
-        //     // } catch (Exception e) {
-        //     // throw new BusinessException("Failed_To_Set_Entity_Properties", e); // Changed
-        //     // exception type
-        //     // }
-        //     insert(service, serviceDraft, entityClass, entity, isActiveEntity);
+        // // Use reflection to set common properties
+        // // try {
+        // // entity.getClass().getMethod("setReportId", String.class)
+        // // .invoke(entity, reportId);
+        // // entity.getClass().getMethod("setIsActiveEntity", Boolean.class)
+        // // .invoke(entity, isActiveEntity);
+        // // } catch (Exception e) {
+        // // throw new BusinessException("Failed_To_Set_Entity_Properties", e); //
+        // Changed
+        // // exception type
+        // // }
+        // insert(service, serviceDraft, entityClass, entity, isActiveEntity);
         // });
     }
 
