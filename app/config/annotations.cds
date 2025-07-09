@@ -128,6 +128,11 @@ annotate service.BotTypes with @(
         },
         {
             $Type: 'UI.DataField',
+            Value: subTaskType_ID,
+            Label: '{i18n>subTaskType}',
+        },
+        {
+            $Type: 'UI.DataField',
             Value: isRAGEnabled,
             Label: '{i18n>IsRagenabled}',
         },
@@ -246,6 +251,11 @@ annotate service.BotTypes with @(
                 $Type: 'UI.DataField',
                 Value: contextType_code,
                 Label: '{i18n>ContextType}',
+            },
+             {
+                $Type: 'UI.DataField',
+                Value: subTaskType_ID,
+                Label: '{i18n>subTaskType}',
             },
             {
                 $Type: 'UI.DataField',
@@ -422,6 +432,29 @@ annotate service.BotTypes with {
         Common.ValueListWithFixedValues: false,
     )
 };
+
+annotate service.BotTypes with {
+    subTaskType @(
+        Common.Text                    : subTaskType.description,
+        Common.ValueList               : {
+            $Type         : 'Common.ValueListType',
+            CollectionPath: 'TaskTypes',
+            Parameters    : [
+                {
+                    $Type            : 'Common.ValueListParameterInOut',
+                    LocalDataProperty: subTaskType_ID,
+                    ValueListProperty: 'ID',
+                },
+                {
+                    $Type            : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty: 'name',
+                },
+            ],
+        },
+        Common.ValueListWithFixedValues: false,
+    )
+};
+
 
 annotate service.ContextTypes with {
     code @Common.Text: descr
