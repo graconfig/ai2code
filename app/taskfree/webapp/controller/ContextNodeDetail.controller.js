@@ -1,101 +1,122 @@
 sap.ui.define(
-  ["sap/ui/core/mvc/Controller", "sap/m/MessageToast"],
+  ["sap/ui/core/mvc/Controller", "sap/m/MessageToast", "sap/ui/model/json/JSONModel"],
   /**
    * @param {typeof sap.ui.core.mvc.Controller} Controller
    */
-  function (Controller, MessageToast) {
+  function (Controller, MessageToast, JSONModel) {
     "use strict";
 
     return Controller.extend(
       "ai.orchestration.taskfree.controller.ContextNodeDetail",
       {
         onInit: function () {
+          // 创建 viewModel 用于页面数据绑定
+          var oViewModel = new JSONModel({
+            value: "",
+            title: "Context Node",
+            type: "",
+            htmlValue: "",
+            busy: false
+          });
+          this.getView().setModel(oViewModel, "viewModel");
+
           const oRouter = this.getOwnerComponent().getRouter();
-          oRouter.attachRouteMatched(this._onRouteMatched.bind(this));
+          oRouter.getRoute("RouteContextNodeDetail").attachPatternMatched(this._onRouteMatched, this);
         },
 
-        _onRouteMatched: function(oEvent) {
-          const sRouteName = oEvent.getParameter("name");
+        _onRouteMatched: function (oEvent) {
           const oArguments = oEvent.getParameter("arguments");
-          
-          if (sRouteName === "RouteContextNodeDetail" && oArguments.contextNodeId) {
-            // Remove quotes if present and validate ID
-            const sContextNodeId = oArguments.contextNodeId.replace(/'/g, '');
-            
-            if (sContextNodeId && sContextNodeId.trim() !== '') {
-              // Clear previous binding context to force refresh
-              this.getView().setBindingContext(null);
-              
-              // Force immediate loading with slight delay to prevent request collision
-              setTimeout(() => {
-                this._loadContextNodeDetail(sContextNodeId);
-              }, 50);
-            } else {
-              MessageToast.show("Invalid Context Node ID: " + oArguments.contextNodeId);
-            }
-          }
-        },
+          var oViewModel = this.getView().getModel("viewModel");
+          var oContextNodeId = oArguments && oArguments.contextNodeId;
+          var oController = this;
 
-        _loadContextNodeDetail: function(sContextNodeId) {
-          var oModel = this.getOwnerComponent().getModel();
-          var that = this;
-          
-          // Set busy state
-          that.getView().setBusy(true);
-          
-          // Validate GUID format
-          var guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-          if (!guidPattern.test(sContextNodeId)) {
-            that.getView().setBusy(false);
-            MessageToast.show("Invalid GUID format for Context Node ID: " + sContextNodeId);
+          oController.getView().setBusy(true);
+
+          if (!oContextNodeId) {
+            MessageToast.show("No context node id provided");
+            oViewModel.setProperty("/title", "Context Node");
+            oViewModel.setProperty("/busy", false);
             return;
           }
-          
-          // For cuid (GUID) primary keys in OData V4, don't use quotes
-          var sPath = "/ContextNodes(" + sContextNodeId + ")";
-          
-          var oBinding = oModel.bindContext(sPath, null, {
-            $expand: "task"
+
+          var oModel = this.getView().getModel();
+          var sPath = "/ContextNodes(" + oContextNodeId + ")";
+          oModel.bindContext(sPath).requestObject().then(function (oData) {
+            oController.getView().setBusy(false);
+            oViewModel.setProperty("/value", oData.value);
+            oViewModel.setProperty("/title", oData.label);
+          }).catch(function () {
+            oController.getView().setBusy(false);
+            oViewModel.setProperty("/value", "加载失败");
+            oViewModel.setProperty("/title", "Context Node");
+            oViewModel.setProperty("/type", "");
+            oViewModel.setProperty("/busy", false);
+            MessageToast.show("加载失败");
           });
-          
-          oBinding.attachDataReceived(function(oEvent) {
-            that.getView().setBusy(false);
-            try {
-              var oBoundContext = oBinding.getBoundContext();
-              if (oBoundContext) {
-                var oData = oBoundContext.getObject();
-                if (oData) {
-                  // Bind the view to the context
-                  that.getView().setBindingContext(oBoundContext);
-                  
-                  // Update page title if needed
-                  var sTitle = oData.label || "Context Node Detail";
-                  that.byId("contextNodeDetailPage").setTitle(sTitle);
-                } else {
-                  MessageToast.show("No data found for Context Node");
-                }
-              } else {
-                MessageToast.show("Failed to load Context Node data");
-              }
-            } catch (error) {
-              MessageToast.show("Error processing Context Node data: " + error.message);
+        },
+
+        onReturnToBot: function () {
+          // 从路由获取contextNodeId
+          var oRouter = this.getOwnerComponent().getRouter();
+          var oCurrentRoute = oRouter.getHashChanger().getHash();
+          var oRouteInfo = oRouter.getRouteInfoByHash(oCurrentRoute);
+          var sContextNodeId = oRouteInfo && oRouteInfo.arguments && oRouteInfo.arguments.contextNodeId;
+
+          if (!sContextNodeId) {
+            MessageToast.show("ContextNode ID not available");
+            return;
+          }
+
+          // 根据数据模型关联关系：通过ContextNode的botInstances导航属性获取关联的BotInstance
+          var oModel = this.getView().getModel();
+          var sContextNodePath = "/ContextNodes(" + sContextNodeId + ")";
+
+          var that = this;
+          oModel.bindContext(sContextNodePath, null, {
+            $expand: "botInstances"
+          }).requestObject().then(function (oContextNode) {
+
+            if (!oContextNode) {
+              MessageToast.show("ContextNode not found");
+              return;
             }
-          });
-          
-          // Enhanced error handling
-          oBinding.attachEvent("dataReceived", function(oEvent) {
-            that.getView().setBusy(false);
-            var oParameters = oEvent.getParameters();
-            if (oParameters && oParameters.error) {
-              MessageToast.show("Error loading Context Node: " + oParameters.error.message);
+
+            if (!oContextNode.botInstances || oContextNode.botInstances.length === 0) {
+              MessageToast.show("No associated BotInstance found for this ContextNode");
+              return;
             }
+
+            // 在BotInstances中找到contextID等于sContextNodeId的特定记录
+            var oBotInstance = oContextNode.botInstances.find(function (botInstance) {
+              return botInstance.contextID === sContextNodeId;
+            });
+
+            if (!oBotInstance) {
+              MessageToast.show("No matching BotInstance found with contextID: " + sContextNodeId);
+              return;
+            }
+            var sBotInstanceId = oBotInstance.ID;
+
+            // 跳转到BotInstance页面
+            oRouter.navTo("RouteBotInstanceDetail", {
+              botInstanceId: sBotInstanceId
+            });
+
+          }).catch(function (oError) {
+            MessageToast.show("Error loading BotInstance: " + (oError.message || oError.toString()));
           });
-          
-          // Request data with proper error handling
-          oBinding.requestObject().catch(function(oError) {
-            that.getView().setBusy(false);
-            MessageToast.show("Failed to load Context Node data: " + (oError.message || oError.toString()));
-          });
+        },
+
+        onExit: function () {
+          var oViewModel = this.getView().getModel("viewModel");
+          if (oViewModel) {
+            oViewModel.setProperty("/title", "");
+            oViewModel.setProperty("/value", "");
+            oViewModel.setProperty("/busy", false);
+          }
+          if (this._oVBox) {
+            this._oVBox.removeAllItems();
+          }
         }
       }
     );

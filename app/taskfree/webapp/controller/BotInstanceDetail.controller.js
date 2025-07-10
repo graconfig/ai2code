@@ -19,18 +19,18 @@ sap.ui.define(
           oRouter.attachRouteMatched(this._onRouteMatched.bind(this));
         },
 
-        _onRouteMatched: function(oEvent) {
+        _onRouteMatched: function (oEvent) {
           const sRouteName = oEvent.getParameter("name");
           const oArguments = oEvent.getParameter("arguments");
-          
+
           if (sRouteName === "RouteBotInstanceDetail" && oArguments.botInstanceId) {
             // Remove quotes if present and validate ID
             const sBotInstanceId = oArguments.botInstanceId.replace(/'/g, '');
-            
+
             if (sBotInstanceId && sBotInstanceId.trim() !== '') {
               // Clear previous binding context to force refresh
               this.getView().setBindingContext(null);
-              
+
               // Force immediate loading with slight delay to prevent request collision
               setTimeout(() => {
                 this._loadBotInstanceDetail(sBotInstanceId);
@@ -41,42 +41,42 @@ sap.ui.define(
           }
         },
 
-        _loadBotInstanceDetail: function(sBotInstanceId) {
+        _loadBotInstanceDetail: function (sBotInstanceId) {
           var oModel = this.getOwnerComponent().getModel();
           var that = this;
-          
+
           // Validate GUID format
           var guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
           if (!guidPattern.test(sBotInstanceId)) {
             MessageToast.show("Invalid GUID format for Bot Instance ID: " + sBotInstanceId);
             return;
           }
-          
+
           // For cuid (GUID) primary keys in OData V4, don't use quotes
           var sPath = "/BotInstances(" + sBotInstanceId + ")";
-          
 
-          
+
+
           var oBinding = oModel.bindContext(sPath, null, {
             $expand: "type,messages"
           });
-          
-          oBinding.attachDataReceived(function(oEvent) {
+
+          oBinding.attachDataReceived(function (oEvent) {
             try {
               var oBoundContext = oBinding.getBoundContext();
               if (oBoundContext) {
                 var oData = oBoundContext.getObject();
                 if (oData) {
 
-                  
+
                   // Bind the view to the context
                   that.getView().setBindingContext(oBoundContext);
-                  
+
                   // Update page title
                   var sTitle = (oData.type && oData.type.name) ? oData.type.name : "Bot Instance Detail";
                   that.byId("botInstanceDetailPage").setTitle(sTitle);
                   that._updateAIChatButtonVisibility(oData);
-                  
+
                   // Store the binding context for AI conversation
                   that.oContext = oBoundContext;
                   that.bindingmodel = that.oContext;
@@ -91,22 +91,22 @@ sap.ui.define(
               MessageToast.show("Error processing Bot Instance data: " + error.message);
             }
           });
-          
+
           // Enhanced error handling
-          oBinding.attachEvent("dataReceived", function(oEvent) {
+          oBinding.attachEvent("dataReceived", function (oEvent) {
             var oParameters = oEvent.getParameters();
             if (oParameters && oParameters.error) {
               MessageToast.show("Error loading Bot Instance: " + oParameters.error.message);
             }
           });
-          
+
           // Request data with proper error handling
-          oBinding.requestObject().catch(function(oError) {
+          oBinding.requestObject().catch(function (oError) {
             MessageToast.show("Failed to load Bot Instance data: " + (oError.message || oError.toString()));
           });
         },
 
-        _updateAIChatButtonVisibility: function(oBotInstanceData) {
+        _updateAIChatButtonVisibility: function (oBotInstanceData) {
           var oAIChatButton = this.byId("aiChatButton");
           if (oAIChatButton && oBotInstanceData && oBotInstanceData.type && oBotInstanceData.type.name) {
             // Show AI Chat button only if BotInstance type name starts with "Chat"
@@ -115,7 +115,7 @@ sap.ui.define(
           }
         },
 
-        onAIChatPress: function() {
+        onAIChatPress: function () {
           // Same functionality as onBotInstancePress
           this.onBotInstancePress();
         },
@@ -124,7 +124,7 @@ sap.ui.define(
             MessageToast.show("No bot instance data available");
             return;
           }
-          
+
           // Load and open the AI conversation dialog
           this.pDialog ??= this.loadFragment({
             name: "ai.orchestration.taskfree.view.fragment.AIConversation",
@@ -138,14 +138,14 @@ sap.ui.define(
             oDialog.setBindingContext(that.oContext);
             that._dialog = oDialog;
             oDialog.open();
-            
+
             // Add list data loading event handler
             const messageList = oDialog.getContent()[0].getContent()[0].getItems()[0];
             messageList.getBinding("items").attachDataReceived(() => {
               this.scrollToListEnd();
             });
           });
-          
+
           // Define dialog event handlers
           this.onAIConversationClose = function (oEvent) {
             this.pDialog.then((oDialog) => oDialog.close());
@@ -175,29 +175,29 @@ sap.ui.define(
           this.onBtnAdoptPress = function (event) {
             event.getSource().setBusy(true);
             var context = event.getSource().getBindingContext();
-            
+
             if (!context) {
               MessageToast.show("No message context available");
               event.getSource().setBusy(false);
               return;
             }
-            
+
             // Get the message ID and construct the correct path
             var oData = context.getObject();
             var sMessageId = oData.ID;
             var oModel = this.getView().getModel();
-            
+
             // Try using the context's canonical path first
             try {
               var sPath = context.getCanonicalPath();
               var contextBinding = oModel.bindContext(sPath + "/MainService.adopt(...)");
-              
+
               contextBinding.invoke().then(() => {
                 MessageToast.show("Message adopted successfully");
-                
+
                 // Notify navigation controller that ContextNode data has changed
                 sap.ui.getCore().getEventBus().publish("DataUpdate", "ContextNodeChanged");
-                
+
                 // Refresh the messages list to reflect changes
                 var messageList = this._dialog.getContent()[0].getContent()[0].getItems()[0];
                 if (messageList && messageList.getBinding("items")) {
@@ -223,7 +223,7 @@ sap.ui.define(
               this.getView().getBindingContext().refresh();
             });
           };
-          
+
           this.scrollToListEnd = function () {
             if (!this._dialog) {
               return;
@@ -238,26 +238,26 @@ sap.ui.define(
             }
           };
         },
-        
+
         // Reserved method for execute functionality - to be implemented later
-        onExecutePress: function() {
+        onExecutePress: function () {
           var oContext = this.getView().getBindingContext();
           if (!oContext) {
             MessageToast.show("No bot instance context available");
             return;
           }
-          
+
           // TODO: Implement execute functionality
           // When implemented, add this after successful execution:
           // sap.ui.getCore().getEventBus().publish("DataUpdate", "TaskChanged");
-          
+
           MessageToast.show("Execute functionality not yet implemented");
         },
 
-        onExecuteButtonPress: function(oEvent) {
+        onExecuteButtonPress: function (oEvent) {
           oEvent.getSource().setBusy(true);
           var context = oEvent.getSource().getBindingContext();
-          
+
           if (!context) {
             MessageToast.show("No message context available");
             oEvent.getSource().setBusy(false);
@@ -267,30 +267,30 @@ sap.ui.define(
           var contextBinding = this.getView().getModel().bindContext("MainService.execute(...)", context);
           var that = this;
 
-          contextBinding.invoke().then(function(result) {
+          contextBinding.invoke().then(function (result) {
             MessageToast.show("Message execute successfully");
-            
+
             // Get BotInstance ID and notify navigation controller
             var oBotInstanceContext = that.getView().getBindingContext();
             var sBotInstanceId = oBotInstanceContext ? oBotInstanceContext.getProperty("ID") : null;
-            
+
             // Notify navigation controller that BotInstance data has changed with new tasks
             sap.ui.getCore().getEventBus().publish("DataUpdate", "BotInstanceChanged", { botInstanceId: sBotInstanceId });
-            
+
             if (oBotInstanceContext) {
               oBotInstanceContext.refresh();
             }
-            
-          }).catch(function(error) {
+
+          }).catch(function (error) {
             MessageToast.show("Error executing message: " + (error.message || error.toString()));
-            
-          }).finally(function() {
+
+          }).finally(function () {
             oEvent.getSource().setBusy(false);
           });
 
         },
 
-        onGotoContextPress: function() {
+        onGotoContextPress: function () {
           var oBindingContext = this.getView().getBindingContext();
           if (!oBindingContext) {
             MessageToast.show("No BotInstance context available");
@@ -298,21 +298,21 @@ sap.ui.define(
           }
 
           var oBotInstance = oBindingContext.getObject();
-          
+
           // 检查BotInstance是否有关联的ContextNode
-          if (!oBotInstance.contextID) {  
-            MessageToast.show("No ContextNode associated with this BotInstance. Please adopt a message first to create the context.");
+          if (!oBotInstance.contextID) {
+            MessageToast.show("No ContextNode associated with this BotInstance.");
             return;
           }
-          
+
           var sContextNodeId = oBotInstance.contextID;
-          
+
           // 获取ContextNode的详细信息以确定类型
           var oModel = this.getView().getModel();
           var sContextPath = "/ContextNodes(" + sContextNodeId + ")";
-          
+
           var that = this;
-          oModel.bindContext(sContextPath).requestObject().then(function(oContextNode) {
+          oModel.bindContext(sContextPath).requestObject().then(function (oContextNode) {
             if (!oContextNode) {
               MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
               return;
@@ -321,9 +321,9 @@ sap.ui.define(
             // 切换左侧导航到ContextNodes视图
 
 
-            var sType = (oContextNode.type || "string").toLowerCase();
+            var sType = (oContextNode.type)?.toLowerCase();
             var oRouter = that.getOwnerComponent().getRouter();
-            
+
             // 根据类型跳转到对应的页面
             var sRouteName;
             switch (sType) {
@@ -335,16 +335,18 @@ sap.ui.define(
                 sRouteName = "RouteMarkDownNodePage";
                 break;
               case "string":
-              default:
                 sRouteName = "RouteTextNodePage";
                 break;
+              default:
+                sRouteName = "RouteContextNodeDetail";
+                break;
             }
-            
+
             oRouter.navTo(sRouteName, {
               contextNodeId: sContextNodeId
             });
-            
-          }).catch(function(oError) {
+
+          }).catch(function (oError) {
             MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
           });
         }

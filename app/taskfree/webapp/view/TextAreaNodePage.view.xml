@@ -12,7 +12,7 @@
                 </contentLeft>
                 <contentRight>
                     <Button id="returnToConversationBtn" 
-                            text="Return To Conversation" 
+                            text="Return To Bot" 
                             type="Emphasized"
                             press="onReturnToConversation"
                             visible="{viewModel>/showReturnButton}"/>

@@ -1,13 +1,29 @@
 <mvc:View
-    controllerName="ai.orchestration.taskfree.controller.ContextNodeDetail"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:f="sap.ui.layout.form"
-    height="100%">
+	controllerName="ai.orchestration.taskfree.controller.ContextNodeDetail"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:f="sap.ui.layout.form"
+	height="100%">
 	<Page id="contextNodeDetailPage" showHeader="true" title="Context Node Detail">
+		<customHeader>
+			<Bar id="contextNodePageHeader">
+				<contentLeft>
+					<Title id="contextNodePageTitle" text="{viewModel>/title}" level="H2" />
+				</contentLeft>
+				<contentRight>
+					<Button id="contextNodereturnBtn"
+						text="Return To Bot"
+						type="Emphasized"
+						press="onReturnToBot"
+						visible="true" />
+				</contentRight>
+			</Bar>
+		</customHeader>
+
 		<content>
 			<VBox id="contextNodeValueContainer" class="sapUiMediumMargin">
-				<Text id="contextNodeValueText" text="{value}" wrapping="true" class="sapUiLargeText"/>
+				<Text id="contextNodeValueText" text="{viewModel>/value}" wrapping="true"
+					class="sapUiLargeText" />
 			</VBox>
 		</content>
 	</Page>
