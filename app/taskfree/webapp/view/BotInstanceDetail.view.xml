@@ -33,6 +33,14 @@
                 type="Emphasized"
                 press="onExecuteButtonPress"
             />
+            
+            <Button
+                id="gotoContextButton"
+                text="Go To Context"
+                press="onGotoContextPress"
+                tooltip="{i18n>clearButtonTooltip}"
+                type="Emphasized"
+            />
         </headerContent>
         <content>
             <Text
