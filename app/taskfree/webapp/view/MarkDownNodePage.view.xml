@@ -5,7 +5,7 @@
   xmlns="sap.m"
   xmlns:u="sap.ui.richtexteditor"
   xmlns:c="sap.ui.core">
-  <Page id="MarkDownNodePage" title="{viewModel>/title}">
+  <Page id="MarkDownNodePage">
   		<customHeader>
 			<Bar id="markdownNodePageHeader">
 				<contentLeft>

@@ -25,7 +25,6 @@ sap.ui.define([
             var oViewModel = this.getView().getModel("viewModel");
             var oController = this;
 
-            // 立即 busy，立即移除 HTML 控件
             oController.getView().setBusy(true);
 
             if (!contextNodeId) {
@@ -40,7 +39,6 @@ sap.ui.define([
             var sPath = "/ContextNodes(" + contextNodeId + ")";
             oModel.bindContext(sPath).requestObject().then(function (oData) {
                 oController.getView().setBusy(false);
-                //oViewModel.setProperty("/value", oData.value);
                 oViewModel.setProperty("/title", oData.label);
 
                 var htmlContent = marked.parse(oData.value);
