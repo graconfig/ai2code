@@ -78,34 +78,42 @@
                     </OverflowToolbar>
                 </headerToolbar>
                 
-                <columns>
-                    <Column id="nameColumn">
-                        <Text id="nameHeader" text="Main Task"/>
-                    </Column>
-                    <Column id="descriptionColumn" width="25%">
-                        <Text id="descriptionHeader" text="Description"/>
-                    </Column>
-                    <Column id="typeName" width="25%">
-                        <Text id="typeNameHeader" text="Task Type"/>
-                    </Column>
-                    <Column id="typeDesc" width="25%">
-                        <Text id="typeDescHeader" text="Type Description"/>
-                    </Column>
-                </columns>
+                                  <columns>
+                      <Column id="nameColumn">
+                         <Text id="nameHeader" text="Main Task"/>
+                      </Column>
+                      <Column id="descriptionColumn" width="20%">
+                         <Text id="descriptionHeader" text="Description"/>
+                      </Column>
+                      <Column id="typeName" width="15%">
+                         <Text id="typeNameHeader" text="Task Type"/>
+                      </Column>
+                      <Column id="typeDesc" width="20%">
+                         <Text id="typeDescHeader" text="Type Description"/>
+                      </Column>
+                      <Column id="createdBy" width="12%">
+                         <Text id="createdByHeader" text="Created By"/>
+                      </Column>
+                      <Column id="createdAt" width="13%">
+                         <Text id="createdAtHeader" text="Created At"/>
+                      </Column>
+                  </columns>
                 
                 <items>
                     <ColumnListItem 
                         id="taskTableItem"
                         press="onItemPress"
                         type="Navigation">
-                        <cells>
-                            <VBox id="nameCell">
-                                <Text id="nameText" text="{name}" wrapping="false" class="sapUiTinyMarginBottom"/>
-                            </VBox>
-                            <Text id="descriptionText" text="{description}" wrapping="true" maxLines="3"/>
-                            <Text id="typeNameText" text="{type/name}" wrapping="false"/>
-                            <Text id="typeDescText" text="{type/description}" wrapping="false"/>
-                        </cells>
+                                                 <cells>
+                             <VBox id="nameCell">
+                                 <Text id="nameText" text="{name}" wrapping="false" class="sapUiTinyMarginBottom"/>
+                             </VBox>
+                             <Text id="descriptionText" text="{description}" wrapping="true" maxLines="3"/>
+                             <Text id="typeNameText" text="{type/name}" wrapping="false"/>
+                             <Text id="typeDescText" text="{type/description}" wrapping="false"/>
+                             <Text id="createdByText" text="{createdBy}" wrapping="false"/>
+                             <Text id="createdAtText" text="{createdAt}" wrapping="false"/>
+                         </cells>
                     </ColumnListItem>
                 </items>
             </Table>
