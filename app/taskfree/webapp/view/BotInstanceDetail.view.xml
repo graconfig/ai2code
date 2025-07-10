@@ -3,11 +3,12 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.ui.layout.form"
+    xmlns:codeeditor="sap.ui.codeeditor"
     height="100%"
 >
     <Page
         id="botInstanceDetailPage"
-        showHeader="true"
+        showHeader="true"   
         title="Bot Instance Detail"
     >
         <landmarkInfo>
@@ -42,11 +43,21 @@
             />
         </headerContent>
         <content>
+            <!--
             <Text
                 id="botInstanceResultText"
                 text="{result}"
                 maxLines="5"
             />
+            -->
+            <codeeditor:CodeEditor
+                id="botInstanceResultCodeEditor"
+                lineNumbers="true"
+                syntaxHints="true"
+                type="markdown"
+                value="{result}"
+                editable="false"
+                height="95%" />
         </content>
     </Page>
 </mvc:View>

@@ -22,7 +22,7 @@ sap.ui.define(
   /**
    * @param {typeof sap.ui.core.mvc.Controller} Controller
    */
-  function (Controller, MessageToast, Helper, ChatService, NewMessageHandler, UIHelper, JSONModel, ResponsivePopover, MessagePopover, ActionSheet, Button, Link, NotificationListItem, MessageItem, CustomData, Device, syncStyleClass, mobileLibrary,IconPool,BusyIndicator) {
+  function (Controller, MessageToast, Helper, ChatService, NewMessageHandler, UIHelper, JSONModel, ResponsivePopover, MessagePopover, ActionSheet, Button, Link, NotificationListItem, MessageItem, CustomData, Device, syncStyleClass, mobileLibrary, IconPool, BusyIndicator) {
     "use strict";
 
     // shortcuts for sap.m library types
@@ -57,27 +57,27 @@ sap.ui.define(
           this.getOwnerComponent().getRouter().attachRouteMatched(this.onRouteChange.bind(this));
         },
 
-        _initIcon:function() {
-            var b = [];
-            var c = {};
-            //Fiori Theme font family and URI
-            var t = {
-              fontFamily: "SAP-icons-TNT",
-              fontURI: sap.ui.require.toUrl("sap/tnt/themes/base/fonts/")
-            };
-            //Registering to the icon pool
-            IconPool.registerFont(t);
-            b.push(IconPool.fontLoaded("SAP-icons-TNT"));
-            c["SAP-icons-TNT"] = t;
-            //SAP Business Suite Theme font family and URI
-            var B = {
-              fontFamily: "BusinessSuiteInAppSymbols",
-              fontURI: sap.ui.require.toUrl("sap/ushell/themes/base/fonts/")
-            };
-            //Registering to the icon pool
-            IconPool.registerFont(B);
-            b.push(IconPool.fontLoaded("BusinessSuiteInAppSymbols"));
-            c["BusinessSuiteInAppSymbols"] = B;
+        _initIcon: function () {
+          var b = [];
+          var c = {};
+          //Fiori Theme font family and URI
+          var t = {
+            fontFamily: "SAP-icons-TNT",
+            fontURI: sap.ui.require.toUrl("sap/tnt/themes/base/fonts/")
+          };
+          //Registering to the icon pool
+          IconPool.registerFont(t);
+          b.push(IconPool.fontLoaded("SAP-icons-TNT"));
+          c["SAP-icons-TNT"] = t;
+          //SAP Business Suite Theme font family and URI
+          var B = {
+            fontFamily: "BusinessSuiteInAppSymbols",
+            fontURI: sap.ui.require.toUrl("sap/ushell/themes/base/fonts/")
+          };
+          //Registering to the icon pool
+          IconPool.registerFont(B);
+          b.push(IconPool.fontLoaded("BusinessSuiteInAppSymbols"));
+          c["BusinessSuiteInAppSymbols"] = B;
         },
 
         _initDataCache: function () {
@@ -106,7 +106,7 @@ sap.ui.define(
         },
 
         onRouteChange: function (oEvent) {
-          
+
           var sRouteName = oEvent.getParameter('name');
           var oArguments = oEvent.getParameter('arguments');
 
@@ -131,7 +131,7 @@ sap.ui.define(
 
             // Check if we need to load data for a new task
             if (!this._dataCache.currentTask || this._dataCache.currentTask.ID !== sTaskId) {
-              this._preloadTaskData(sTaskId,"X");
+              this._preloadTaskData(sTaskId, "X");
             } else {
               this._buildNavigationFromCache();
             }
@@ -168,7 +168,7 @@ sap.ui.define(
                   return;
                 } else if (sRootTaskId && sRootTaskId !== sExtractedTaskId) {
                   // It's a subTask but not of current hierarchy, load the root task
-                  this._preloadTaskData(sRootTaskId,"");
+                  this._preloadTaskData(sRootTaskId, "");
                   return;
                 }
               } else {
@@ -180,7 +180,7 @@ sap.ui.define(
 
             // If we found a task ID and don't have navigation data, load it
             if (sExtractedTaskId && (!this._dataCache.isLoaded || this._dataCache.currentTask?.ID !== sExtractedTaskId)) {
-              this._preloadTaskData(sExtractedTaskId,"");
+              this._preloadTaskData(sExtractedTaskId, "");
             }
           }
 
@@ -229,12 +229,12 @@ sap.ui.define(
           this.getView().setModel(oNavigationModel, "side");
         },
 
-        _preloadTaskData: function (sTaskId,isBusy) {
+        _preloadTaskData: function (sTaskId, isBusy) {
           var oModel = this.getOwnerComponent().getModel();
           var that = this;
 
           //加载busy
-          if ( isBusy === "X" ) {
+          if (isBusy === "X") {
             BusyIndicator.show();
           }
           // Create binding with comprehensive $expand to get all related data in one request
@@ -349,12 +349,12 @@ sap.ui.define(
         },
 
         _buildTaskItemRecursively: function (oTask) {
-            
+
           var icon = "";
-          if(oTask.isMain === true){
-              icon = "sap-icon://menu2";
-          }else{
-              icon = "sap-icon://task";
+          if (oTask.isMain === true) {
+            icon = "sap-icon://menu2";
+          } else {
+            icon = "sap-icon://task";
           }
 
           var oTaskItem = {
@@ -369,10 +369,10 @@ sap.ui.define(
           // Add BotInstances as child items
           if (oTask.botInstances && Array.isArray(oTask.botInstances)) {
             // Sort botInstances by sequence before processing
-            var aSortedBotInstances = oTask.botInstances.slice().sort(function(a, b) {
+            var aSortedBotInstances = oTask.botInstances.slice().sort(function (a, b) {
               return (a.sequence || 0) - (b.sequence || 0);
             });
-            
+
             aSortedBotInstances.forEach(function (oBotInstance) {
               var oBotInstanceItem = this._buildBotInstanceItem(oBotInstance);
               oTaskItem.items.push(oBotInstanceItem);
@@ -384,12 +384,11 @@ sap.ui.define(
 
         _buildBotInstanceItem: function (oBotInstance) {
           var icon = "";
-          var functionType_code = oBotInstance.type && oBotInstance.type.functionType_code ;
-          if( functionType_code && functionType_code === "A")
-          {
-             icon = "sap-icon://SAP-icons-TNT/robot";
-          }else{
-             icon = "sap-icon://activities";
+          var functionType_code = oBotInstance.type && oBotInstance.type.functionType_code;
+          if (functionType_code && functionType_code === "A") {
+            icon = "sap-icon://SAP-icons-TNT/robot";
+          } else {
+            icon = "sap-icon://activities";
           }
 
           var sDisplayName = oBotInstance.type && oBotInstance.type.name ?
@@ -408,10 +407,10 @@ sap.ui.define(
           // Add sub-tasks recursively
           if (oBotInstance.tasks && Array.isArray(oBotInstance.tasks)) {
             // Sort sub-tasks by sequence before processing
-            var aSortedSubTasks = oBotInstance.tasks.slice().sort(function(a, b) {
+            var aSortedSubTasks = oBotInstance.tasks.slice().sort(function (a, b) {
               return (a.sequence || 0) - (b.sequence || 0);
             });
-            
+
             aSortedSubTasks.forEach(function (oSubTask) {
               var oSubTaskItem = this._buildTaskItemRecursively(oSubTask);
               oBotInstanceItem.items.push(oSubTaskItem);
@@ -426,10 +425,10 @@ sap.ui.define(
           var aNavigationData = [];
 
           var Taskicon = "";
-          if(oTask.isMain === true){
-              Taskicon = "sap-icon://menu2";
-          }else{
-              Taskicon = "sap-icon://task";
+          if (oTask.isMain === true) {
+            Taskicon = "sap-icon://menu2";
+          } else {
+            Taskicon = "sap-icon://task";
           }
 
           var contextNodeIcon = "sap-icon://document-text";
@@ -451,7 +450,7 @@ sap.ui.define(
                 key: "contextnode_" + oContextNode.ID,
                 type: "ContextNode",
                 data: oContextNode,
-                icon: contextNodeIcon,  
+                icon: contextNodeIcon,
                 items: []
               });
             });
@@ -471,7 +470,7 @@ sap.ui.define(
 
           // Check if cache is invalidated and refresh if needed
           if (this._dataCache.invalidated && this._dataCache.isLoaded && this._dataCache.currentTask) {
-            this._preloadTaskData(this._dataCache.currentTask.ID,"");
+            this._preloadTaskData(this._dataCache.currentTask.ID, "");
           } else if (this._dataCache.isLoaded) {
             this._buildNavigationFromCache();
           }
@@ -565,15 +564,17 @@ sap.ui.define(
               var sContextNodeId = oItemData.data.ID;
               var sNodeType = (oItemData.data.type || "").toLowerCase();
               if (sContextNodeId) {
-                if (sNodeType === "string" ){
-                   oRouter.navTo("RouteTextNodePage", { contextNodeId: sContextNodeId });
-                }else if(sNodeType === "markdown"){
-                   oRouter.navTo("RouteMarkDownNodePage", { contextNodeId: sContextNodeId });
-                } else if( sNodeType === "code" || sNodeType === "json" ) {
+                if (sNodeType === "string") {
+                  //oRouter.navTo("RouteTextNodePage", { contextNodeId: sContextNodeId });
+                  oRouter.navTo("RouteTextAreaNodePage", { contextNodeId: sContextNodeId });
+                } else if (sNodeType === "markdown") {
+                  oRouter.navTo("RouteMarkDownNodePage", { contextNodeId: sContextNodeId });
+                } else if (sNodeType === "code" || sNodeType === "json") {
                   oRouter.navTo("RouteTextAreaNodePage", { contextNodeId: sContextNodeId });
                 } else {
                   // 默认跳转
-                  oRouter.navTo("RouteContextNodeDetail", { contextNodeId: sContextNodeId });
+                  //oRouter.navTo("RouteContextNodeDetail", { contextNodeId: sContextNodeId });
+                  oRouter.navTo("RouteTextAreaNodePage", { contextNodeId: sContextNodeId });
                 }
               } else {
                 MessageToast.show("Context Node ID not available");
@@ -745,14 +746,14 @@ sap.ui.define(
                 that._updateNavigationSelection(sTaskId);
               } else {
                 // This is likely a root task, load it directly
-                that._preloadTaskData(sTaskId,"");
+                that._preloadTaskData(sTaskId, "");
               }
             }
           });
 
           oBinding.requestObject().catch(function (oError) {
             // Fallback: try loading as root task
-            that._preloadTaskData(sTaskId,"");
+            that._preloadTaskData(sTaskId, "");
           });
         },
 

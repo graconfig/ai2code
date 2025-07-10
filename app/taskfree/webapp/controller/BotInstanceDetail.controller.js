@@ -335,10 +335,10 @@ sap.ui.define(
                 sRouteName = "RouteMarkDownNodePage";
                 break;
               case "string":
-                sRouteName = "RouteTextNodePage";
+                sRouteName = "RouteTextAreaNodePage";
                 break;
               default:
-                sRouteName = "RouteContextNodeDetail";
+                sRouteName = "RouteTextAreaNodePage";
                 break;
             }
 

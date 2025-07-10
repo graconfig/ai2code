@@ -23,7 +23,9 @@
         <content>
             <codeeditor:CodeEditor
                 id="textAreaCodeEditor"
-                type="{viewModel>/editorType}"
+                lineNumbers="true"
+                syntaxHints="true"
+                type="{viewModel>/type}"
                 value="{viewModel>/value}"
                 editable="false"
                 height="95%" />
