@@ -11,7 +11,7 @@ sap.ui.define(
       {
         onInit: function () {
           const oRouter = this.getOwnerComponent().getRouter();
-          oRouter.attachRouteMatched(this._onRouteMatched.bind(this));
+         oRouter.getRoute("RouteTaskDetail").attachPatternMatched(this._onRouteMatched, this);
         },
 
         _onRouteMatched: function(oEvent) {
@@ -39,18 +39,7 @@ sap.ui.define(
         _loadTaskDetail: function(sTaskId) {
           var oModel = this.getOwnerComponent().getModel();
           var that = this;
-          
-          // Validate GUID format
-          var guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-          if (!guidPattern.test(sTaskId)) {
-            MessageToast.show("Invalid GUID format for Task ID: " + sTaskId);
-            return;
-          }
-          
-          // For cuid (GUID) primary keys in OData V4, don't use quotes
           var sPath = "/Tasks(" + sTaskId + ")";
-          
-
           
           var oBinding = oModel.bindContext(sPath, null, {
             $expand: "type,botInstances($expand=type),contextNodes"

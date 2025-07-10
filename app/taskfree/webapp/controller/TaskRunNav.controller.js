@@ -1,34 +1,15 @@
 sap.ui.define(
   ["sap/ui/core/mvc/Controller", "sap/m/MessageToast",
-    "ai/orchestration/taskfree/util/Helper",
-    "ai/orchestration/taskfree/service/ChatService",
-    "ai/orchestration/taskfree/service/NewMessageHandler",
-    "ai/orchestration/taskfree/util/UIHelper",
     "sap/ui/model/json/JSONModel",
-    "sap/m/ResponsivePopover",
-    "sap/m/MessagePopover",
-    "sap/m/ActionSheet",
-    "sap/m/Button",
-    "sap/m/Link",
-    "sap/m/NotificationListItem",
-    "sap/m/MessageItem",
-    "sap/ui/core/CustomData",
     "sap/ui/Device",
-    "sap/ui/core/syncStyleClass",
-    "sap/m/library",
     "sap/ui/core/IconPool",
     'sap/ui/core/BusyIndicator'
   ],
   /**
    * @param {typeof sap.ui.core.mvc.Controller} Controller
    */
-  function (Controller, MessageToast, Helper, ChatService, NewMessageHandler, UIHelper, JSONModel, ResponsivePopover, MessagePopover, ActionSheet, Button, Link, NotificationListItem, MessageItem, CustomData, Device, syncStyleClass, mobileLibrary, IconPool, BusyIndicator) {
+  function (Controller, MessageToast, JSONModel, Device, IconPool, BusyIndicator) {
     "use strict";
-
-    // shortcuts for sap.m library types
-    var PlacementType = mobileLibrary.PlacementType;
-    var VerticalPlacementType = mobileLibrary.VerticalPlacementType;
-    var ButtonType = mobileLibrary.ButtonType;
 
     return Controller.extend(
       "ai.orchestration.taskfree.controller.TaskRunNav",
@@ -95,6 +76,7 @@ sap.ui.define(
           sap.ui.getCore().getEventBus().subscribe("DataUpdate", "ContextNodeChanged", this._onDataUpdated, this);
           sap.ui.getCore().getEventBus().subscribe("DataUpdate", "BotInstanceChanged", this._onBotInstanceUpdated, this);
           sap.ui.getCore().getEventBus().subscribe("DataUpdate", "TaskChanged", this._onDataUpdated, this);
+          sap.ui.getCore().getEventBus().subscribe("TaskRun", "TaskSelectionChanged", this._onTaskSelectionChanged, this);
         },
 
         onExit: function () {
@@ -103,6 +85,16 @@ sap.ui.define(
           sap.ui.getCore().getEventBus().unsubscribe("DataUpdate", "ContextNodeChanged", this._onDataUpdated, this);
           sap.ui.getCore().getEventBus().unsubscribe("DataUpdate", "BotInstanceChanged", this._onBotInstanceUpdated, this);
           sap.ui.getCore().getEventBus().unsubscribe("DataUpdate", "TaskChanged", this._onDataUpdated, this);
+          sap.ui.getCore().getEventBus().unsubscribe("TaskRun", "TaskSelectionChanged", this._onTaskSelectionChanged, this);
+        },
+
+        _onTaskSelectionChanged: function (sChannel, sEvent, oData) {
+          var sNewTaskId = oData.taskId;
+          // Invalidate cache if the new task is different from the current one
+          if (!this._dataCache.currentTask || this._dataCache.currentTask.ID !== sNewTaskId) {
+              this._dataCache.isLoaded = false;
+              this._dataCache.currentTask = null;
+          }
         },
 
         onRouteChange: function (oEvent) {
@@ -593,9 +585,17 @@ sap.ui.define(
         },
 
         getCachedTask: function (sTaskId) {
+          // If no ID is provided, return the main task
           if (!sTaskId) {
             return this._dataCache.currentTask;
           }
+          
+          // First, check if the requested ID matches the main task
+          if (this._dataCache.currentTask && this._dataCache.currentTask.ID === sTaskId) {
+            return this._dataCache.currentTask;
+          }
+          
+          // If not the main task, search in the sub-tasks
           return this._dataCache.subTasks ? this._dataCache.subTasks.get(sTaskId) : null;
         },
 
