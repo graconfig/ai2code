@@ -619,10 +619,9 @@ public class GenericCqnService {
         // List<Row> scenarioRows = mainService.run(selectScenario).listOf(Row.class);
         CqnSelect selectScenario = Select.from(BusinessScenarios_.class)
                 .columns(s -> s.scenario(), s -> s.description(), s -> s.viewCategory())
-                .where(b -> CQL.cosineSimilarity(b.embeddings(),
+                .orderBy(b -> CQL.cosineSimilarity(b.embeddings(),
                         CQL.func("VECTOR_EMBEDDING", CQL.constant(query), CQL.constant("QUERY"),
-                                CQL.constant("SAP_NEB.20240715")))
-                        .gt(threshold))
+                                CQL.constant("SAP_NEB.20240715"))).desc())
                 .limit(ragTopK);
         List<BusinessScenarios> scenarioRows = persistenceService.run(selectScenario).listOf(BusinessScenarios.class);
 

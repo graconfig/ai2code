@@ -245,56 +245,60 @@ sap.ui.define(
             MessageToast.show("No BotInstance context available");
             return;
           }
-
-          var oBotInstance = oBindingContext.getObject();
-          
-          // 检查BotInstance是否有关联的ContextNode
-          if (!oBotInstance.context || !oBotInstance.context.ID) {
-            MessageToast.show("No ContextNode associated with this BotInstance. Please adopt a message first to create the context.");
-            return;
-          }
-          
-          var sContextNodeId = oBotInstance.context.ID;
-          
-          // 获取ContextNode的详细信息以确定类型
-          var oModel = this.getView().getModel();
-          var sContextPath = "/ContextNodes(" + sContextNodeId + ")";
           
           var that = this;
-          oModel.bindContext(sContextPath).requestObject().then(function(oContextNode) {
-            if (!oContextNode) {
-              MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
+          
+          // 重新获取最新的BotInstance数据
+          oBindingContext.requestObject().then(function(oBotInstance) {
+            // 检查BotInstance是否有关联的ContextNode
+            if (!oBotInstance.context || !oBotInstance.context.ID) {
+              MessageToast.show("No ContextNode associated with this BotInstance. Please adopt a message first to create the context.");
               return;
             }
-
-            // 切换左侧导航到ContextNodes视图
-
-
-            var sType = (oContextNode.type || "string").toLowerCase();
-            var oRouter = that.getOwnerComponent().getRouter();
             
-            // 根据类型跳转到对应的页面
-            var sRouteName;
-            switch (sType) {
-              case "code":
-              case "json":
-                sRouteName = "RouteTextAreaNodePage";
-                break;
-              case "markdown":
-                sRouteName = "RouteMarkDownNodePage";
-                break;
-              case "string":
-              default:
-                sRouteName = "RouteTextNodePage";
-                break;
-            }
+            var sContextNodeId = oBotInstance.context.ID;
             
-            oRouter.navTo(sRouteName, {
-              contextNodeId: sContextNodeId
+            // 获取ContextNode的详细信息以确定类型
+            var oModel = that.getView().getModel();
+            var sContextPath = "/ContextNodes(" + sContextNodeId + ")";
+            
+            oModel.bindContext(sContextPath).requestObject().then(function(oContextNode) {
+              if (!oContextNode) {
+                MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
+                return;
+              }
+
+              // 切换左侧导航到ContextNodes视图
+
+              var sType = (oContextNode.type || "string").toLowerCase();
+              var oRouter = that.getOwnerComponent().getRouter();
+              
+              // 根据类型跳转到对应的页面
+              var sRouteName;
+              switch (sType) {
+                case "code":
+                case "json":
+                  sRouteName = "RouteTextAreaNodePage";
+                  break;
+                case "markdown":
+                  sRouteName = "RouteMarkDownNodePage";
+                  break;
+                case "string":
+                default:
+                  sRouteName = "RouteTextNodePage";
+                  break;
+              }
+              
+              oRouter.navTo(sRouteName, {
+                contextNodeId: sContextNodeId
+              });
+              
+            }).catch(function(oError) {
+              MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
             });
-            
+
           }).catch(function(oError) {
-            MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
+            MessageToast.show("Error loading BotInstance: " + (oError.message || oError.toString()));
           });
         },
 

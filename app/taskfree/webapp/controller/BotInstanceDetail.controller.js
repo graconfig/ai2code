@@ -45,17 +45,8 @@ sap.ui.define(
           var oModel = this.getOwnerComponent().getModel();
           var that = this;
 
-          // Validate GUID format
-          var guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-          if (!guidPattern.test(sBotInstanceId)) {
-            MessageToast.show("Invalid GUID format for Bot Instance ID: " + sBotInstanceId);
-            return;
-          }
-
           // For cuid (GUID) primary keys in OData V4, don't use quotes
           var sPath = "/BotInstances(" + sBotInstanceId + ")";
-
-
 
           var oBinding = oModel.bindContext(sPath, null, {
             $expand: "type,messages"
@@ -297,57 +288,61 @@ sap.ui.define(
             return;
           }
 
-          var oBotInstance = oBindingContext.getObject();
-
-          // 检查BotInstance是否有关联的ContextNode
-          if (!oBotInstance.contextID) {
-            MessageToast.show("No ContextNode associated with this BotInstance.");
-            return;
-          }
-
-          var sContextNodeId = oBotInstance.contextID;
-
-          // 获取ContextNode的详细信息以确定类型
-          var oModel = this.getView().getModel();
-          var sContextPath = "/ContextNodes(" + sContextNodeId + ")";
-
           var that = this;
-          oModel.bindContext(sContextPath).requestObject().then(function (oContextNode) {
-            if (!oContextNode) {
-              MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
+          
+          // 重新获取最新的BotInstance数据
+          oBindingContext.requestObject().then(function(oBotInstance) {
+            // 检查BotInstance是否有关联的ContextNode
+            if (!oBotInstance.contextID) {
+              MessageToast.show("No ContextNode associated with this BotInstance.");
               return;
             }
 
-            // 切换左侧导航到ContextNodes视图
+            var sContextNodeId = oBotInstance.contextID;
 
+            // 获取ContextNode的详细信息以确定类型
+            var oModel = that.getView().getModel();
+            var sContextPath = "/ContextNodes(" + sContextNodeId + ")";
 
-            var sType = (oContextNode.type)?.toLowerCase();
-            var oRouter = that.getOwnerComponent().getRouter();
+            oModel.bindContext(sContextPath).requestObject().then(function (oContextNode) {
+              if (!oContextNode) {
+                MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
+                return;
+              }
 
-            // 根据类型跳转到对应的页面
-            var sRouteName;
-            switch (sType) {
-              case "code":
-              case "json":
-                sRouteName = "RouteTextAreaNodePage";
-                break;
-              case "markdown":
-                sRouteName = "RouteMarkDownNodePage";
-                break;
-              case "string":
-                sRouteName = "RouteTextAreaNodePage";
-                break;
-              default:
-                sRouteName = "RouteTextAreaNodePage";
-                break;
-            }
+              // 切换左侧导航到ContextNodes视图
 
-            oRouter.navTo(sRouteName, {
-              contextNodeId: sContextNodeId
+              var sType = (oContextNode.type)?.toLowerCase();
+              var oRouter = that.getOwnerComponent().getRouter();
+
+              // 根据类型跳转到对应的页面
+              var sRouteName;
+              switch (sType) {
+                case "code":
+                case "json":
+                  sRouteName = "RouteTextAreaNodePage";
+                  break;
+                case "markdown":
+                  sRouteName = "RouteMarkDownNodePage";
+                  break;
+                case "string":
+                  sRouteName = "RouteTextAreaNodePage";
+                  break;
+                default:
+                  sRouteName = "RouteTextAreaNodePage";
+                  break;
+              }
+
+              oRouter.navTo(sRouteName, {
+                contextNodeId: sContextNodeId
+              });
+
+            }).catch(function (oError) {
+              MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
             });
 
-          }).catch(function (oError) {
-            MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
+          }).catch(function(oError) {
+            MessageToast.show("Error loading BotInstance: " + (oError.message || oError.toString()));
           });
         }
       }
