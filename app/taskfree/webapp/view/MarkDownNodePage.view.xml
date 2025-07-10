@@ -6,6 +6,21 @@
   xmlns:u="sap.ui.richtexteditor"
   xmlns:c="sap.ui.core">
   <Page id="MarkDownNodePage" title="{viewModel>/title}">
+  		<customHeader>
+			<Bar id="markdownNodePageHeader">
+				<contentLeft>
+					<Title id="markdownNodePageTitle" text="{viewModel>/title}" level="H2" />
+				</contentLeft>
+				<contentRight>
+					<Button id="markdownNodeReturnBtn"
+						text="Return To Bot"
+						type="Emphasized"
+						press="onReturnToBot"
+						visible="true" />
+				</contentRight>
+			</Bar>
+		</customHeader>
+
     <content>
       <!-- <c:HTML id="markdownContent"></c:HTML> -->
       <u:RichTextEditor 
