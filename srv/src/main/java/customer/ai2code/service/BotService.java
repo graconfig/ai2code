@@ -10,9 +10,19 @@ import cds.gen.mainservice.ContextNodes;
 import customer.ai2code.model.bot.Bot;
 
 public interface BotService {
-
+    /**
+     * Get Current Bot(with subtasks) by botInstanceId.
+     * @param botInstanceId
+     * @return
+     */
     public Bot getCurrentBot(String botInstanceId);
 
+    /**
+     * Get Current Bot(no subtasks) by taskId(as parent) and sequence.
+     * @param taskId
+     * @param sequence
+     * @return
+     */
     public Bot getCurrentBot(String taskId, int sequence);
 
     public BotMessages chat(BotInstancesChatCompletionContext context);

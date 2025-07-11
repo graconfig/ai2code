@@ -42,8 +42,8 @@ import cds.gen.configservice.PromptTexts;
 import cds.gen.configservice.PromptTexts_;
 // import cds.gen.mainservice.BusinessScenarios_;
 // import cds.gen.mainservice.BusinessScenarios;
-import  cds.gen.ai.orchestration.rag.BusinessScenarios_;
-import  cds.gen.ai.orchestration.rag.BusinessScenarios;
+import cds.gen.ai.orchestration.rag.BusinessScenarios_;
+import cds.gen.ai.orchestration.rag.BusinessScenarios;
 
 import javax.print.DocFlavor.STRING;
 import javax.sql.DataSource;
@@ -95,6 +95,13 @@ public class GenericCqnService {
                 "BotInstance not found: " + botInstanceId);
     }
 
+    public BotInstances getBotInstanceAndSubtasksById(String botInstanceId) {
+        var select = Select.from(BotInstances_.class).columns(b -> b._all(), b -> b.tasks().expand())
+                .where(b -> b.ID().eq(botInstanceId));
+        return entityService.selectSingle(mainService, select, BotInstances.class,
+                "BotInstance not found with subtasks: " + botInstanceId);
+    }
+
     public BotInstances getBotInstanceByTaskAndSequence(String taskId, int sequence) {
         var select = Select.from(BotInstances_.class)
                 .where(b -> b.task_ID().eq(taskId).and(b.sequence().eq(sequence)));
@@ -119,6 +126,13 @@ public class GenericCqnService {
         var select = Select.from(Tasks_.class).where(t -> t.ID().eq(taskId));
         return entityService.selectSingle(mainService, select, Tasks.class,
                 "Task not found: " + taskId);
+    }
+
+    public Tasks getTaskAndSubBotsById(String taskId) {
+        var select = Select.from(Tasks_.class).columns(t -> t._all(), t -> t.botInstances().expand())
+                .where(t -> t.ID().eq(taskId));
+        return entityService.selectSingle(mainService, select, Tasks.class,
+                "Task not found with bots: " + taskId);
     }
 
     public Tasks getTaskByBotInstanceAndSequence(String botInstanceId, int sequence) {
@@ -471,13 +485,13 @@ public class GenericCqnService {
                         .and(b.role().eq("user")))
                 .orderBy(b -> b.createdAt().desc())
                 .limit(1);
-        
+
         List<BotMessages> messages = entityService.selectList(mainService, select, BotMessages.class);
-        
+
         if (messages.isEmpty()) {
             return null; // 如果没有找到用户消息，返回 null
         }
-        
+
         return messages.get(0);
     }
 
@@ -621,7 +635,8 @@ public class GenericCqnService {
                 .columns(s -> s.scenario(), s -> s.description(), s -> s.viewCategory())
                 .orderBy(b -> CQL.cosineSimilarity(b.embeddings(),
                         CQL.func("VECTOR_EMBEDDING", CQL.constant(query), CQL.constant("QUERY"),
-                                CQL.constant("SAP_NEB.20240715"))).desc())
+                                CQL.constant("SAP_NEB.20240715")))
+                        .desc())
                 .limit(ragTopK);
         List<BusinessScenarios> scenarioRows = persistenceService.run(selectScenario).listOf(BusinessScenarios.class);
 
@@ -640,7 +655,7 @@ public class GenericCqnService {
             }
         }
 
-        if (categories.isEmpty())   
+        if (categories.isEmpty())
             return "[]";
 
         // Step 4: 查询 CDSViews 表中符合条件的 view

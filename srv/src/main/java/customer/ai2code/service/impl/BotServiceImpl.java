@@ -65,7 +65,8 @@ public class BotServiceImpl implements BotService {
         }
 
         // 从数据库查询BotInstance
-        BotInstances botInstance = genericCqnService.getBotInstanceById(botInstanceId);
+        BotInstances botInstance = genericCqnService.getBotInstanceAndSubtasksById(botInstanceId);
+        // BotInstances botInstance = genericCqnService.getBotInstanceById(botInstanceId);
 
         // 查询关联的BotType
         BotTypes botType = genericCqnService.getBotTypeById(botInstance.getTypeId());

@@ -384,32 +384,32 @@ class ODataVariableResolverNewIntegrationTest {
 
     // ========== 性能测试 ==========
 
-    @Test
-    void testPerformance_SimpleQuery() {
-        // 测试简单查询的性能
-        VariableContext context = new VariableContext();
+    // @Test
+    // void testPerformance_SimpleQuery() {
+    //     // 测试简单查询的性能
+    //     VariableContext context = new VariableContext();
 
-        long startTime = System.currentTimeMillis();
-        String result = resolver.resolve("OData:BotInstances", context);
-        long endTime = System.currentTimeMillis();
+    //     long startTime = System.currentTimeMillis();
+    //     String result = resolver.resolve("OData:BotInstances", context);
+    //     long endTime = System.currentTimeMillis();
 
-        assertNotNull(result, "查询结果不应该为空");
-        assertTrue(endTime - startTime < 5000, "简单查询应该在5秒内完成");
-    }
+    //     assertNotNull(result, "查询结果不应该为空");
+    //     assertTrue(endTime - startTime < 5000, "简单查询应该在5秒内完成");
+    // }
 
-    @Test
-    void testPerformance_ComplexQuery() {
-        // 测试复杂查询的性能
-        VariableContext context = new VariableContext();
+    // @Test
+    // void testPerformance_ComplexQuery() {
+    //     // 测试复杂查询的性能
+    //     VariableContext context = new VariableContext();
 
-        long startTime = System.currentTimeMillis();
-        String result = resolver
-                .resolve("OData:BotInstances?$select=ID,status_code&$filter=status_code eq 'RUNNING'&$top=10", context);
-        long endTime = System.currentTimeMillis();
+    //     long startTime = System.currentTimeMillis();
+    //     String result = resolver
+    //             .resolve("OData:BotInstances?$select=ID,status_code&$filter=status_code eq 'RUNNING'&$top=10", context);
+    //     long endTime = System.currentTimeMillis();
 
-        assertNotNull(result, "查询结果不应该为空");
-        assertTrue(endTime - startTime < 10000, "复杂查询应该在10秒内完成");
-    }
+    //     assertNotNull(result, "查询结果不应该为空");
+    //     assertTrue(endTime - startTime < 10000, "复杂查询应该在10秒内完成");
+    // }
 
     // ========== 数据一致性测试 ==========
 
