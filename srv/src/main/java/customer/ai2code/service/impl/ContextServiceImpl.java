@@ -1,62 +1,124 @@
 package customer.ai2code.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import cds.gen.mainservice.ContextNodes;
 import cds.gen.mainservice.Tasks;
 import customer.ai2code.exception.BusinessException;
+import customer.ai2code.model.tree.ContextTreeNode;
 import customer.ai2code.service.ContextService;
+import customer.ai2code.util.PathParser;
 
 @Service
 public class ContextServiceImpl implements ContextService {
 
     private final GenericCqnService genericCqnService;
+    private final PathParser pathParser;
 
-    public ContextServiceImpl(GenericCqnService genericCqnService) {
+    public ContextServiceImpl(GenericCqnService genericCqnService, PathParser pathParser) {
         this.genericCqnService = genericCqnService;
+        this.pathParser = pathParser;
     }
 
+//     @Override
+//     public List<Map<String, Object>> buildContextAsHierarchy(List<ContextNodes> contextNodes) {
+//         Map<String, Map<String, Object>> nodeMap = new HashMap<>();
+//         List<Map<String, Object>> rootNodes = new ArrayList<>();
+// 
+//         // 第一步：创建所有节点对象
+//         for (ContextNodes node : contextNodes) {
+//             Map<String, Object> treeNode = new HashMap<>();
+//             treeNode.put("id", node.getId());
+//             treeNode.put("path", node.getPath());
+//             treeNode.put("label", node.getLabel());
+//             treeNode.put("type", node.getType());
+//             treeNode.put("value", node.getValue());
+//             treeNode.put("children", new ArrayList<Map<String, Object>>());
+//             treeNode.put("taskId", node.getTask() != null ? node.getTask().getId() : node.getTaskId());
+// 
+//             nodeMap.put(node.getPath(), treeNode);
+//         }
+// 
+//         // 第二步：建立父子关系
+//         for (ContextNodes node : contextNodes) {
+//             String parentPath = getParentPath(node.getPath());
+// 
+//             if (parentPath != null && nodeMap.containsKey(parentPath)) {
+//                 // 有父节点，添加到父节点的children中
+//                 Map<String, Object> parentNode = nodeMap.get(parentPath);
+//                 @SuppressWarnings("unchecked")
+//                 List<Map<String, Object>> children = (List<Map<String, Object>>) parentNode.get("children");
+//                 children.add(nodeMap.get(node.getPath()));
+//             } else {
+//                 // 没有父节点，是根节点
+//                 rootNodes.add(nodeMap.get(node.getPath()));
+//             }
+//         }
+// 
+//         return rootNodes;
+//     }
+    // 重写buildContextAsHierarchy - context tree
     @Override
     public List<Map<String, Object>> buildContextAsHierarchy(List<ContextNodes> contextNodes) {
-        Map<String, Map<String, Object>> nodeMap = new HashMap<>();
-        List<Map<String, Object>> rootNodes = new ArrayList<>();
+        if (contextNodes == null || contextNodes.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-        // 第一步：创建所有节点对象
+        // 1. 创建所有节点
+        Map<String, ContextTreeNode> nodeMap = new HashMap<>();
         for (ContextNodes node : contextNodes) {
-            Map<String, Object> treeNode = new HashMap<>();
-            treeNode.put("id", node.getId());
-            treeNode.put("path", node.getPath());
-            treeNode.put("label", node.getLabel());
-            treeNode.put("type", node.getType());
-            treeNode.put("value", node.getValue());
-            treeNode.put("children", new ArrayList<Map<String, Object>>());
-            treeNode.put("taskId", node.getTask() != null ? node.getTask().getId() : node.getTaskId());
-
+            ContextTreeNode treeNode = new ContextTreeNode(node);
             nodeMap.put(node.getPath(), treeNode);
         }
 
-        // 第二步：建立父子关系
-        for (ContextNodes node : contextNodes) {
-            String parentPath = getParentPath(node.getPath());
-
-            if (parentPath != null && nodeMap.containsKey(parentPath)) {
-                // 有父节点，添加到父节点的children中
-                Map<String, Object> parentNode = nodeMap.get(parentPath);
-                @SuppressWarnings("unchecked")
-                List<Map<String, Object>> children = (List<Map<String, Object>>) parentNode.get("children");
-                children.add(nodeMap.get(node.getPath()));
-            } else {
-                // 没有父节点，是根节点
-                rootNodes.add(nodeMap.get(node.getPath()));
+        // 2. 构建树结构
+        for (ContextTreeNode node : nodeMap.values()) {
+            String parentPath = pathParser.getParentPath(node.getPath());
+            if (parentPath != null) {
+                ContextTreeNode parentNode = nodeMap.get(parentPath);
+                if (parentNode != null) {
+                    parentNode.addChild(node);
+                }
             }
         }
 
-        return rootNodes;
+        // 3. 提取根节点
+        List<ContextTreeNode> rootNodes = nodeMap.values().stream()
+                .filter(node -> node.getParent() == null)
+                .collect(Collectors.toList());
+
+        // 4. 转换为Map结构返回
+        return convertToMapList(rootNodes);
+    }
+
+    // 新增convertToMapList - context tree
+    private List<Map<String, Object>> convertToMapList(List<ContextTreeNode> nodes) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (ContextTreeNode node : nodes) {
+            Map<String, Object> mapNode = new HashMap<>();
+            mapNode.put("id", node.getContextNode().getId());
+            mapNode.put("path", node.getPath());
+            mapNode.put("label", node.getContextNode().getLabel());
+            mapNode.put("type", node.getContextNode().getType());
+            mapNode.put("value", node.getContextNode().getValue());
+            mapNode.put("taskId", node.getContextNode().getTaskId());
+            
+            // 递归处理子节点
+            List<Map<String, Object>> children = convertToMapList(node.getChildren());
+            if (!children.isEmpty()) {
+                mapNode.put("children", children);
+            }
+            
+            result.add(mapNode);
+        }
+        return result;
     }
 
     @Override
