@@ -6,6 +6,7 @@ service MainService {
     entity Tasks             as projection on db.Task
         actions {
             function getHierarchy() returns String;
+            function getContextHierarchy() returns String;
         }
 
     entity ContextNodes      as projection on db.ContextNode;

@@ -261,6 +261,17 @@ public class GenericCqnService {
     }
 
     /**
+     * 根据主任务ID查询所有上下文节点
+     * @param mainTaskId
+     * @return
+     */
+    public List<ContextNodes> getContextNodesByMainTaskId(String mainTaskId) {
+        var select = Select.from(ContextNodes_.class)
+                .where(c -> c.task_ID().eq(mainTaskId));
+        return entityService.selectList(mainService, select, ContextNodes.class);
+    }
+
+    /**
      * 将通配符模式转换为正则表达式
      * 例如: subtask[*].a.property -> subtask\[\d+\]\.a\.property
      */
