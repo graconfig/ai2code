@@ -4,13 +4,16 @@ import java.util.List;
 import java.util.Map;
 
 import cds.gen.mainservice.ContextNodes;
+import cds.gen.mainservice.TasksGetContextHierarchyContext;
 
 public interface ContextService {
 
     /**
      * 将上下文节点列表构建为层次结构
      */
-    public List<Map<String, Object>> buildContextAsHierarchy(List<ContextNodes> contextNodes);
+    public String buildContextAsHierarchy(String mainTaskId);
+
+    public String buildContextAsHierarchy(TasksGetContextHierarchyContext context);
 
     /**
      * 获取完整的上下文路径（处理SubContext相对路径）
