@@ -71,7 +71,7 @@ sap.ui.define(
         _waitForCacheLoad: function(sTaskRunId) {
           var that = this;
           var iRetryCount = 0;
-          var iMaxRetries = 50; // 最多等待5秒 (50 * 100ms)
+          var iMaxRetries = 150; // 最多等待15秒 (150 * 100ms)
           
           var fnCheckCache = function() {
             var oTaskRunNavController = that._getTaskRunNavController();

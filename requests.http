@@ -10,5 +10,9 @@ GET http://localhost:8080/odata/v4/ConfigService/BotExecutionClass?$filter=conta
 Accept:application/json
 
 ###
-GET http://localhost:8080/odata/v4/MainService/Tasks
+GET http://localhost:8080/odata/v4/MainService/Tasks(c4f4bec5-9795-4400-84ac-ae85711015b8)/MainService.getHierarchy()
+Authorization: Basic system:
+
+###
+GET http://localhost:8080/odata/v4/MainService/Tasks(1d7fc9c3-2db9-4ab5-8130-c19793fa688c)/MainService.getHierarchy()
 Authorization: Basic system:
