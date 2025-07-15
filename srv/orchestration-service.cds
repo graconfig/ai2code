@@ -3,22 +3,22 @@ using ai.orchestration.config as config from '../db/orchestration-config-model';
 using ai.orchestration.rag as rag from '../db/orchestration-rag-model';
 
 service MainService {
-    entity Tasks        as projection on db.Task;
-    entity ContextNodes as projection on db.ContextNode;
-    entity TaskType as projection on config.TaskType;
+    entity Tasks             as projection on db.Task;
+    entity ContextNodes      as projection on db.ContextNode;
+    entity TaskType          as projection on config.TaskType;
 
 
     //entity SubTasks      as projection on db.SubTask;
-    entity BotInstances as projection on db.BotInstance
+    entity BotInstances      as projection on db.BotInstance
         actions {
-            action execute() returns {
+            action execute()                             returns {
                 result : String;
-                // tasks  : array of UUID;
+            // tasks  : array of UUID;
             };
-            action chatCompletion(content: LargeString) returns BotMessages;
+            action chatCompletion(content : LargeString) returns BotMessages;
         }
 
-    entity BotMessages  as projection on db.BotMessage
+    entity BotMessages       as projection on db.BotMessage
         actions {
             action adopt() returns ContextNodes;
         }
@@ -26,26 +26,39 @@ service MainService {
     // Unbound actions
     action createTaskWithBots(name : String,
                               description : String,
-                              typeId : UUID) returns Tasks;
-      //Create CDS
-      entity CreateCds as projection on db.CreateCds;
-    entity BusinessScenarios as projection on rag.BusinessScenarios excluding {
+                              typeId : UUID)                                              returns Tasks;
+
+    //Create CDS
+    entity CreateCds         as projection on db.CreateCds;
+    //Create and Activate Service Definition & Service Binding
+    entity CreateServiceDefinition        as projection on db.CreateServiceDefinition;
+    //Create and Activate Service Binding
+    entity CreateServiceBinding        as projection on db.CreateServiceBinding;
+    
+
+    entity BusinessScenarios as
+        projection on rag.BusinessScenarios
+        excluding {
             embeddings,
             embeddings_ai
         };
+
     entity CDSViews          as projection on rag.CDSViews;
     //按场景查询匹配的CDS Views
     // action cdsViewsSearch(question : String, threshold : Decimal(5, 2))  returns array of CDSViews;
 
 
-    entity CDSViewFiles      as projection on rag.CDSViewFiles actions {
-            action generateEmbeddings()  returns String;
-            action deleteEmbeddings()    returns String;
+    entity CDSViewFiles      as projection on rag.CDSViewFiles
+        actions {
+            action generateEmbeddings() returns String;
+            action deleteEmbeddings()   returns String;
         };
-    entity Viewfields       as projection on rag.Viewfields 
-            excluding {
-                    embeddings
-                };
+
+    entity Viewfields        as
+        projection on rag.Viewfields
+        excluding {
+            embeddings
+        };
 
     entity RagJoinCond       as projection on rag.RagJoinCond;
 
@@ -53,18 +66,18 @@ service MainService {
     @odata.singleton
     entity Excelupload {
         @Core.MediaType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        excel : LargeBinary;
+        excel         : LargeBinary;
 
         @Core.MediaType: 'text/plain'
         txtViewFields : LargeBinary;
     };
-    
+
     //查询CDS View的Fields 也可直接查询db
     action viewFieldsSearch(question : String, threshold : Decimal(5, 2), langu : String) returns array of Viewfields;
-    action viewJoinSearch() returns array of RagJoinCond;
+    action viewJoinSearch()                                                               returns array of RagJoinCond;
 
     // 新增上传动作
-    action uploadCDSViews(excel: LargeString, filename: String) returns String;
-    action uploadCDSViewFields(txt: LargeString, langu: String, filename: String) returns String;
-    
+    action uploadCDSViews(excel : LargeString, filename : String)                         returns String;
+    action uploadCDSViewFields(txt : LargeString, langu : String, filename : String)      returns String;
+
 }

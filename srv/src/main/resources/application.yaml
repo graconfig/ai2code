@@ -14,6 +14,10 @@ cds:
       enabled: false
   remote:
     services:
+      '[zsrvd_gensrvb]':
+        destination:
+          name: zsrvd_gensrvb
+        type: odata-v4
       '[zsrvd_gentabl]':
         destination:
           name: zsrvd_gentabl

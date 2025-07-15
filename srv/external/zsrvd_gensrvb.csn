@@ -1,0 +1,1320 @@
+{
+ "meta": {
+  "creator": "cds-dk 9.1.1"
+ },
+ "$version": "2.0",
+ "definitions": {
+  "zsrvd_gensrvb.zc_gensrvb_tCbAControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "_log": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dynamic CbA-Control",
+     "@Common.Heading": "Dynamic Create by Association Control",
+     "@Common.QuickInfo": "Dynamic Create via Association Control Property"
+    }
+   }
+  },
+  "zsrvd_gensrvb.zc_gensrvb_tOperationControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "activeSRVB": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Action Control",
+     "@Common.Heading": "Dynamic Action Control",
+     "@Common.QuickInfo": "Dynamic Action Property"
+    },
+    "Edit": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Action Control",
+     "@Common.Heading": "Dynamic Action Control",
+     "@Common.QuickInfo": "Dynamic Action Property"
+    }
+   }
+  },
+  "zsrvd_gensrvb.ZTGENSRVB_L": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "MANDT": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.Label": "客户端",
+     "@Common.Heading": "类"
+    },
+    "SRVBNAME": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.Label": "Object name",
+     "@Common.QuickInfo": "XCO CDS: Object name"
+    },
+    "UUID": {
+     "type": "cds.UUID",
+     "@Common.Label": "UUID",
+     "@Common.QuickInfo": "16 Byte UUID in 16 Bytes (Raw Format)"
+    },
+    "REFERENCE": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Common.Label": "Reference"
+    },
+    "MESSAGE": {
+     "type": "cds.String",
+     "length": 220,
+     "notNull": true,
+     "@Common.Label": "消息文本"
+    },
+    "TYPE": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.Label": "信息类型",
+     "@Common.Heading": "消息类",
+     "@Common.QuickInfo": "消息类型: S 成功,E 错误,W 警告,I 信息,A 中断"
+    },
+    "ID": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true,
+     "@Common.Label": "消息类",
+     "@Common.Heading": "消息标识"
+    },
+    "MESSAGE_V1": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.Label": "消息变量"
+    },
+    "MESSAGE_V2": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.Label": "消息变量"
+    },
+    "MESSAGE_V3": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.Label": "消息变量"
+    },
+    "MESSAGE_V4": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.Label": "消息变量"
+    },
+    "CREATED_BY": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.Label": "创建人",
+     "@Common.QuickInfo": "创建人用户"
+    },
+    "CREATED_AT": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "创建日期",
+     "@Common.QuickInfo": "创建日期时间"
+    },
+    "LOCAL_LAST_CHANGED_BY": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.Label": "更改者",
+     "@Common.QuickInfo": "本地实例最后更改用户"
+    },
+    "LOCAL_LAST_CHANGED_AT": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "更改日期",
+     "@Common.QuickInfo": "本地实例最后更改日期时间"
+    }
+   }
+  },
+  "zsrvd_gensrvb.EntityControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "Deletable": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Method Control",
+     "@Common.Heading": "Dynamic Method Control",
+     "@Common.QuickInfo": "Dynamic Method Property"
+    },
+    "Updatable": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Method Control",
+     "@Common.Heading": "Dynamic Method Control",
+     "@Common.QuickInfo": "Dynamic Method Property"
+    }
+   }
+  },
+  "zsrvd_gensrvb.SAP__Message": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "code": {
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "message": {
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "target": {
+     "type": "cds.LargeString"
+    },
+    "additionalTargets": {
+     "items": {
+      "type": "cds.LargeString",
+      "notNull": true
+     }
+    },
+    "transition": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "numericSeverity": {
+     "type": "cds.Integer",
+     "@odata.Type": "Edm.Byte",
+     "notNull": true
+    },
+    "longtextUrl": {
+     "type": "cds.LargeString"
+    }
+   }
+  },
+  "zsrvd_gensrvb": {
+   "kind": "service",
+   "@cds.external": true,
+   "@Aggregation.ApplySupported": {
+    "Transformations": [
+     "aggregate",
+     "groupby",
+     "filter"
+    ],
+    "Rollup": {
+     "#": "None"
+    }
+   },
+   "@Common.ApplyMultiUnitBehaviorForSortingAndFiltering": true,
+   "@UI.LeadingEntitySet": "zc_gensrvb_t",
+   "@Capabilities.FilterFunctions": [
+    "eq",
+    "ne",
+    "gt",
+    "ge",
+    "lt",
+    "le",
+    "and",
+    "or",
+    "contains",
+    "startswith",
+    "endswith",
+    "any",
+    "all"
+   ],
+   "@Capabilities.SupportedFormats": [
+    "application/json",
+    "application/pdf"
+   ],
+   "@PDF.Features": {
+    "DocumentDescriptionReference": "../../../../default/iwbep/common/0001/$metadata",
+    "DocumentDescriptionCollection": "MyDocumentDescriptions",
+    "ArchiveFormat": true,
+    "Border": true,
+    "CoverPage": true,
+    "FitToPage": true,
+    "FontName": true,
+    "FontSize": true,
+    "Margin": true,
+    "Padding": true,
+    "Signature": true,
+    "HeaderFooter": true,
+    "ResultSizeDefault": 9000,
+    "ResultSizeMaximum": 9000
+   },
+   "@Capabilities.KeyAsSegmentSupported": true,
+   "@Capabilities.AsynchronousRequestsSupported": true
+  },
+  "zsrvd_gensrvb.I_DraftAdministrativeData": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "DraftUUID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "草稿（技术标识）"
+    },
+    "DraftEntityType": {
+     "key": true,
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "草稿实体标识"
+    },
+    "CreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "草稿创建日期"
+    },
+    "CreatedByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.Text": {
+      "=": "CreatedByUserDescription"
+     },
+     "@Common.IsUpperCase": true,
+     "@Common.ValueListReferences": [
+      "../../../../srvd_f4/sap/i_draftadministrativeuservh/0001;ps='srvd-zsrvd_gensrvb-0001';va='com.sap.gateway.srvd.zsrvd_gensrvb.v0001.et-i_draftadministrativedata.createdbyuser'/$metadata"
+     ],
+     "@Common.Label": "草稿创建人"
+    },
+    "LastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "草稿上次更改日期"
+    },
+    "LastChangedByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.Text": {
+      "=": "LastChangedByUserDescription"
+     },
+     "@Common.IsUpperCase": true,
+     "@Common.ValueListReferences": [
+      "../../../../srvd_f4/sap/i_draftadministrativeuservh/0001;ps='srvd-zsrvd_gensrvb-0001';va='com.sap.gateway.srvd.zsrvd_gensrvb.v0001.et-i_draftadministrativedata.lastchangedbyuser'/$metadata"
+     ],
+     "@Common.Label": "草稿上次更改人"
+    },
+    "DraftAccessType": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "草稿访问类型"
+    },
+    "ProcessingStartDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@UI.Hidden": true,
+     "@Common.Label": "草稿处理中状态自"
+    },
+    "InProcessByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.Text": {
+      "=": "InProcessByUserDescription"
+     },
+     "@Common.IsUpperCase": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "正在处理草稿的用户"
+    },
+    "DraftIsKeptByUser": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "已由用户保留",
+     "@Common.Heading": "已由用户保留草稿",
+     "@Common.QuickInfo": "已由用户保留草稿"
+    },
+    "EnqueueStartDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@UI.Hidden": true,
+     "@Common.Label": "草稿锁定自"
+    },
+    "DraftIsCreatedByMe": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "由我创建草稿"
+    },
+    "DraftIsLastChangedByMe": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "由我最后更改草稿"
+    },
+    "DraftIsProcessedByMe": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "正在由我处理草稿"
+    },
+    "CreatedByUserDescription": {
+     "type": "cds.String",
+     "length": 80,
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "草稿创建人（描述）"
+    },
+    "LastChangedByUserDescription": {
+     "type": "cds.String",
+     "length": 80,
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "草稿最后更改人（描述）"
+    },
+    "InProcessByUserDescription": {
+     "type": "cds.String",
+     "length": 80,
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "草稿处理人（描述）"
+    }
+   },
+   "@Common.Label": "草稿管理数据",
+   "@Capabilities.SearchRestrictions.Searchable": true,
+   "@Capabilities.SearchRestrictions.UnsupportedExpressions": {
+    "#": "phrase"
+   },
+   "@Capabilities.FilterRestrictions.Filterable": true,
+   "@Capabilities.FilterRestrictions.FilterExpressionRestrictions": [
+    {
+     "Property": {
+      "=": "CreationDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    },
+    {
+     "Property": {
+      "=": "LastChangeDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    }
+   ],
+   "@Capabilities.InsertRestrictions.Insertable": false,
+   "@Capabilities.DeleteRestrictions.Deletable": false,
+   "@Capabilities.UpdateRestrictions.Updatable": false,
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
+  },
+  "zsrvd_gensrvb.zc_gensrvb_l": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Srvbname": {
+     "key": true,
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Object name",
+     "@Common.QuickInfo": "XCO CDS: Object name"
+    },
+    "Uuid": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "UUID",
+     "@Common.QuickInfo": "16 Byte UUID in 16 Bytes (Raw Format)"
+    },
+    "Reference": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Common.Label": "Reference"
+    },
+    "Message": {
+     "type": "cds.String",
+     "length": 220,
+     "notNull": true,
+     "@Common.Label": "Message",
+     "@Common.IsUpperCase": true,
+     "@Common.QuickInfo": "消息文本"
+    },
+    "Type": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.Label": "Message Type",
+     "@Common.IsUpperCase": true,
+     "@Common.Heading": "消息类",
+     "@Common.QuickInfo": "消息类型: S 成功,E 错误,W 警告,I 信息,A 中断"
+    },
+    "Id": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true,
+     "@Common.Label": "Message ID",
+     "@Common.IsUpperCase": true,
+     "@Common.Heading": "消息标识",
+     "@Common.QuickInfo": "消息类"
+    },
+    "MessageV1": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "消息变量"
+    },
+    "MessageV2": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "消息变量"
+    },
+    "MessageV3": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "消息变量"
+    },
+    "MessageV4": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "消息变量"
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "创建人",
+     "@Common.QuickInfo": "创建人用户"
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "创建日期",
+     "@Common.QuickInfo": "创建日期时间"
+    },
+    "LocalLastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "更改者",
+     "@Common.QuickInfo": "本地实例最后更改用户"
+    },
+    "LocalLastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "更改日期",
+     "@Common.QuickInfo": "本地实例最后更改日期时间"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "有草稿",
+     "@Common.QuickInfo": "草稿 - 指示器 - 具有草稿文档"
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "草稿创建日期"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "草稿上次更改日期"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "具有活动文档",
+     "@Common.Heading": "有活动文档",
+     "@Common.QuickInfo": "草稿 - 指示器 - 具有活动文档"
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "处于活动状态",
+     "@Common.Heading": "是活动文档",
+     "@Common.QuickInfo": "草稿 - 指示器 - 是活动文档"
+    },
+    "__EntityControl": {
+     "type": "zsrvd_gensrvb.EntityControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Dyn. Method Control",
+     "@Common.Heading": "Dynamic Method Control",
+     "@Common.QuickInfo": "Dynamic Method Property"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "zsrvd_gensrvb.SAP__Message",
+      "notNull": true
+     }
+    },
+    "DraftAdministrativeData": {
+     "type": "cds.Association",
+     "target": "zsrvd_gensrvb.I_DraftAdministrativeData",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "zsrvd_gensrvb.zc_gensrvb_l",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_tech": {
+     "type": "cds.Association",
+     "target": "zsrvd_gensrvb.zc_gensrvb_t",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    }
+   },
+   "@Common.Label": "Consumption view for generate srvb -log",
+   "@UI.Facets": [
+    {
+     "$Type": "SAP__UI.ReferenceFacet",
+     "Label": "Active Logs",
+     "ID": "logs",
+     "Target": {
+      "=": "@UI.Identification"
+     }
+    }
+   ],
+   "@UI.Identification": [
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Reference"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Message"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Type"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Id"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV1"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV2"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV3"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV4"
+     }
+    }
+   ],
+   "@UI.LineItem": [
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Reference"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Message"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Type"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Id"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV1"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV2"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV3"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV4"
+     }
+    }
+   ],
+   "@Common.Messages": {
+    "=": "SAP__Messages"
+   },
+   "@Capabilities.NavigationRestrictions.RestrictedProperties": [
+    {
+     "NavigationProperty": {
+      "=": "_tech"
+     },
+     "InsertRestrictions": {
+      "Insertable": false
+     }
+    }
+   ],
+   "@Common.DraftActivationVia": [
+    "SAP__self.Container/zc_gensrvb_t"
+   ],
+   "@Capabilities.SearchRestrictions.Searchable": false,
+   "@Capabilities.FilterRestrictions.Filterable": true,
+   "@Capabilities.FilterRestrictions.FilterExpressionRestrictions": [
+    {
+     "Property": {
+      "=": "DraftEntityCreationDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    },
+    {
+     "Property": {
+      "=": "DraftEntityLastChangeDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    }
+   ],
+   "@Capabilities.FilterRestrictions.NonFilterableProperties": [
+    "__EntityControl"
+   ],
+   "@Capabilities.SortRestrictions.NonSortableProperties": [
+    "__EntityControl"
+   ],
+   "@Capabilities.InsertRestrictions.Insertable": false,
+   "@Capabilities.DeleteRestrictions.Deletable": {
+    "=": "__EntityControl/Deletable"
+   },
+   "@Capabilities.UpdateRestrictions.Updatable": {
+    "=": "__EntityControl/Updatable"
+   },
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
+  },
+  "zsrvd_gensrvb.zc_gensrvb_t": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Srvbname": {
+     "key": true,
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.Label": "Service binding name",
+     "@Core.Immutable": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Heading": "Object name",
+     "@Common.QuickInfo": "XCO CDS: Object name"
+    },
+    "Srvbdesc": {
+     "type": "cds.String",
+     "length": 60,
+     "notNull": true,
+     "@Common.Label": "Service binding description",
+     "@Common.Heading": "Short description",
+     "@Common.QuickInfo": "XCO ABAP Dictionary: Short description"
+    },
+    "Srvdname": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Object name",
+     "@Common.QuickInfo": "XCO CDS: Object name"
+    },
+    "BindingType": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Service binding type"
+    },
+    "Devclass": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Package",
+     "@Common.QuickInfo": "XCO Package: Package"
+    },
+    "Trkorr": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Transport",
+     "@Common.QuickInfo": "XCO: Transport"
+    },
+    "Status": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.Label": "Active status",
+     "@Core.Computed": true
+    },
+    "Reference": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Common.Label": "Reference"
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "创建人",
+     "@Common.QuickInfo": "创建人用户"
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "创建日期",
+     "@Common.QuickInfo": "创建日期时间"
+    },
+    "LocalLastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "更改者",
+     "@Common.QuickInfo": "本地实例最后更改用户"
+    },
+    "LocalLastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "更改日期",
+     "@Common.QuickInfo": "本地实例最后更改日期时间"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "有草稿",
+     "@Common.QuickInfo": "草稿 - 指示器 - 具有草稿文档"
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "草稿创建日期"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "草稿上次更改日期"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "具有活动文档",
+     "@Common.Heading": "有活动文档",
+     "@Common.QuickInfo": "草稿 - 指示器 - 具有活动文档"
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "处于活动状态",
+     "@Common.Heading": "是活动文档",
+     "@Common.QuickInfo": "草稿 - 指示器 - 是活动文档"
+    },
+    "__CreateByAssociationControl": {
+     "type": "zsrvd_gensrvb.zc_gensrvb_tCbAControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Dynamic CbA-Control",
+     "@Common.Heading": "Dynamic Create by Association Control",
+     "@Common.QuickInfo": "Dynamic Create via Association Control Property"
+    },
+    "__EntityControl": {
+     "type": "zsrvd_gensrvb.EntityControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Dyn. Method Control",
+     "@Common.Heading": "Dynamic Method Control",
+     "@Common.QuickInfo": "Dynamic Method Property"
+    },
+    "__OperationControl": {
+     "type": "zsrvd_gensrvb.zc_gensrvb_tOperationControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Dyn. Action Control",
+     "@Common.Heading": "Dynamic Action Control",
+     "@Common.QuickInfo": "Dynamic Action Property"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "zsrvd_gensrvb.SAP__Message",
+      "notNull": true
+     }
+    },
+    "DraftAdministrativeData": {
+     "type": "cds.Association",
+     "target": "zsrvd_gensrvb.I_DraftAdministrativeData",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "zsrvd_gensrvb.zc_gensrvb_t",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_log": {
+     "type": "cds.Composition",
+     "target": "zsrvd_gensrvb.zc_gensrvb_l",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": [],
+     "@Common.Composition": true
+    }
+   },
+   "actions": {
+    "Prepare": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     }
+    },
+    "Discard": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     }
+    },
+    "Edit": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "PreserveChanges": {
+       "type": "cds.Boolean",
+       "notNull": true,
+       "@Common.Label": "正确",
+       "@Common.QuickInfo": "域BOOLE的数据要素: 真 (='X')， 假 (=' ')"
+      }
+     },
+     "returns": {
+      "type": "zsrvd_gensrvb.zc_gensrvb_t",
+      "notNull": true
+     },
+     "@Core.OperationAvailable": {
+      "=": "_it/__OperationControl/Edit"
+     }
+    },
+    "Activate": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "zsrvd_gensrvb.zc_gensrvb_t",
+      "notNull": true
+     }
+    },
+    "autoActiveSRVB": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "items": {
+        "type": "$self",
+        "notNull": true
+       }
+      },
+      "SRVBNAME": {
+       "type": "cds.String",
+       "length": 30,
+       "notNull": true,
+       "@Common.Label": "Object name",
+       "@Common.QuickInfo": "XCO CDS: Object name"
+      },
+      "SRVBDESC": {
+       "type": "cds.String",
+       "length": 60,
+       "notNull": true,
+       "@Common.Label": "Short descr.",
+       "@Common.Heading": "Short description",
+       "@Common.QuickInfo": "XCO ABAP Dictionary: Short description"
+      },
+      "SRVDNAME": {
+       "type": "cds.String",
+       "length": 30,
+       "notNull": true,
+       "@Common.Label": "Object name",
+       "@Common.QuickInfo": "XCO CDS: Object name"
+      },
+      "BINDING_TYPE": {
+       "type": "cds.String",
+       "length": 20,
+       "notNull": true,
+       "@Common.Label": "Service binding type"
+      },
+      "DEVCLASS": {
+       "type": "cds.String",
+       "length": 30,
+       "notNull": true,
+       "@Common.Label": "Package",
+       "@Common.QuickInfo": "XCO Package: Package"
+      },
+      "TRKORR": {
+       "type": "cds.String",
+       "length": 20,
+       "notNull": true,
+       "@Common.Label": "Transport",
+       "@Common.QuickInfo": "XCO: Transport"
+      },
+      "REFERENCE": {
+       "type": "cds.String",
+       "length": 40,
+       "notNull": true,
+       "@Common.Label": "Reference"
+      }
+     },
+     "returns": {
+      "items": {
+       "type": "zsrvd_gensrvb.ZTGENSRVB_L"
+      }
+     }
+    },
+    "Resume": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     }
+    },
+    "activeSRVB": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "zsrvd_gensrvb.zc_gensrvb_t",
+      "notNull": true
+     },
+     "@Core.OperationAvailable": {
+      "=": "_it/__OperationControl/activeSRVB"
+     }
+    }
+   },
+   "@Common.Label": "Consumption view for generate srvb -tech",
+   "@UI.Facets": [
+    {
+     "$Type": "SAP__UI.ReferenceFacet",
+     "Label": "Basic info",
+     "ID": "basicinfo",
+     "Target": {
+      "=": "@UI.Identification"
+     }
+    },
+    {
+     "$Type": "SAP__UI.ReferenceFacet",
+     "Label": "Active Logs",
+     "ID": "loginfo",
+     "Target": {
+      "=": "_log.@UI.LineItem"
+     }
+    }
+   ],
+   "@UI.Identification": [
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Srvbname"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataFieldForAction",
+     "Label": "Active",
+     "Action": "zsrvd_gensrvb.activeSRVB(zsrvd_gensrvb.zc_gensrvb_tType)",
+     "InvocationGrouping": {
+      "#": "ChangeSet"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Srvbdesc"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Srvdname"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "BindingType"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Devclass"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Trkorr"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Status"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Reference"
+     }
+    }
+   ],
+   "@UI.LineItem": [
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Srvbname"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataFieldForAction",
+     "Label": "autoActive",
+     "Action": "zsrvd_gensrvb.autoActiveSRVB(Collection(zsrvd_gensrvb.zc_gensrvb_tType))",
+     "InvocationGrouping": {
+      "#": "ChangeSet"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Srvbdesc"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Srvdname"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "BindingType"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Devclass"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Trkorr"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Status"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Reference"
+     }
+    }
+   ],
+   "@UI.SelectionFields": [
+    "Srvbname",
+    "Status"
+   ],
+   "@Common.Messages": {
+    "=": "SAP__Messages"
+   },
+   "@Capabilities.NavigationRestrictions.RestrictedProperties": [
+    {
+     "NavigationProperty": {
+      "=": "_log"
+     },
+     "InsertRestrictions": {
+      "Insertable": {
+       "=": "__CreateByAssociationControl/_log"
+      }
+     }
+    }
+   ],
+   "@Common.DraftRoot": {
+    "PreparationAction": "zsrvd_gensrvb.Prepare",
+    "DiscardAction": "zsrvd_gensrvb.Discard",
+    "EditAction": "zsrvd_gensrvb.Edit",
+    "ActivationAction": "zsrvd_gensrvb.Activate"
+   },
+   "@Capabilities.SearchRestrictions.Searchable": false,
+   "@Capabilities.FilterRestrictions.Filterable": true,
+   "@Capabilities.FilterRestrictions.FilterExpressionRestrictions": [
+    {
+     "Property": {
+      "=": "DraftEntityCreationDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    },
+    {
+     "Property": {
+      "=": "DraftEntityLastChangeDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    }
+   ],
+   "@Capabilities.FilterRestrictions.NonFilterableProperties": [
+    "__CreateByAssociationControl",
+    "__EntityControl",
+    "__OperationControl"
+   ],
+   "@Capabilities.SortRestrictions.NonSortableProperties": [
+    "__CreateByAssociationControl",
+    "__EntityControl",
+    "__OperationControl"
+   ],
+   "@Capabilities.DeleteRestrictions.Deletable": {
+    "=": "__EntityControl/Deletable"
+   },
+   "@Capabilities.UpdateRestrictions.Updatable": {
+    "=": "__EntityControl/Updatable"
+   },
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
+  }
+ }
+}

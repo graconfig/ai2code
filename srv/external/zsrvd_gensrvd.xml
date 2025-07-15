@@ -471,16 +471,6 @@
             </Annotations>
             <Annotations Target="SAP__self.activeSRVD(SAP__self.zc_gensrvd_tType)">
                 <Annotation Term="SAP__core.OperationAvailable" Path="_it/__OperationControl/activeSRVD"/>
-                <Annotation Term="SAP__common.SideEffects" Qualifier="SAP__Action_activeSRVD">
-                    <Record Type="SAP__common.SideEffectsType">
-                        <PropertyValue Property="TargetEntities">
-                            <Collection>
-                                <NavigationPropertyPath/>
-                                <NavigationPropertyPath>_it/_log</NavigationPropertyPath>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
             </Annotations>
             <Annotations Target="SAP__self.Edit(SAP__self.zc_gensrvd_tType)">
                 <Annotation Term="SAP__core.OperationAvailable" Path="_it/__OperationControl/Edit"/>
