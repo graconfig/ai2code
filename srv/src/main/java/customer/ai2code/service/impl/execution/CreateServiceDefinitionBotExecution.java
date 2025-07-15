@@ -56,15 +56,15 @@ public class CreateServiceDefinitionBotExecution implements BotExecution {
             return returnMessage;
         }
 
-        results = autoActiveSRVDSRVBContext.getResult();// 返回结果
-        if (results == null || results.isEmpty()) {
-            returnMessage = "Results is null";
-            return returnMessage;
-        }
-        
+        // 结果返回
         try {
-            returnMessage = objectMapper.writeValueAsString(results);
-        } catch (JsonProcessingException e) {
+            results = autoActiveSRVDSRVBContext.getResult();
+            if (results == null) {
+                returnMessage = "OData Response is null";
+            } else {
+                returnMessage = objectMapper.writeValueAsString(results);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
