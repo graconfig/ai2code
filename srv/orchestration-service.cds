@@ -1,6 +1,8 @@
 using ai.orchestration as db from '../db/orchestration-model';
 using ai.orchestration.config as config from '../db/orchestration-config-model';
 using ai.orchestration.rag as rag from '../db/orchestration-rag-model';
+using {zsrvd_gensrvd} from './external/zsrvd_gensrvd';
+using {zsrvd_gensrvb} from './external/zsrvd_gensrvb';
 
 service MainService {
     entity Tasks             as projection on db.Task;
@@ -31,9 +33,9 @@ service MainService {
     //Create CDS
     entity CreateCds         as projection on db.CreateCds;
     //Create and Activate Service Definition & Service Binding
-    entity CreateServiceDefinition        as projection on db.CreateServiceDefinition;
+    entity CreateServiceDefinition        as projection on zsrvd_gensrvd.zc_gensrvd_t;
     //Create and Activate Service Binding
-    entity CreateServiceBinding        as projection on db.CreateServiceBinding;
+    entity CreateServiceBinding        as projection on zsrvd_gensrvb.zc_gensrvb_t;
     
 
     entity BusinessScenarios as

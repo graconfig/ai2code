@@ -12,3 +12,7 @@ Accept:application/json
 ###
 GET http://localhost:8080/odata/v4/MainService/Tasks
 Authorization: Basic system:
+
+###
+GET http://localhost:8080/odata/v4/MainService/CreateServiceDefinition
+Authorization: Basic system:

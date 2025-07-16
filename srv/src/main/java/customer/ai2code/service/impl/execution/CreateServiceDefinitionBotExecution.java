@@ -3,9 +3,12 @@ package customer.ai2code.service.impl.execution;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cds.services.ServiceException;
+import com.sap.cds.services.request.ParameterInfo;
 import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataResponseException;
 
 import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.V0001;
@@ -19,12 +22,14 @@ import customer.ai2code.model.execution.annotation.ExecuteParameter;
 import customer.ai2code.service.ContextService;
 import customer.ai2code.service.execution.BotExecution;
 
-@BotExecutor(name = "Call Remote Odata", description = "Implementation for Call S4/HANA OP Odata", version = "1.0", enabled = true)
+@BotExecutor(name = "Call Remote OData", description = "Implementation for Call S4/HANA OP OData", version = "1.0", enabled = true)
 public class CreateServiceDefinitionBotExecution implements BotExecution {
 
     private final ContextService contextService;
     private final ZsrvdGensrvd zsrvdGensrvd;
     private final ObjectMapper objectMapper;
+    @Autowired
+    private ParameterInfo parameterInfo;
 
     // 默认构造函数
     public CreateServiceDefinitionBotExecution(ContextService contextService,

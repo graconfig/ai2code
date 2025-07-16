@@ -9,8 +9,6 @@ using {
     ai.orchestration.config.BotInstanceStatus as BotInstanceStatus
 } from './orchestration-config-model';
 
-using {zsrvd_gensrvd} from '../srv/external/zsrvd_gensrvd';
-using {zsrvd_gensrvb} from '../srv/external/zsrvd_gensrvb';
 using {zsrvd_gentabl as zsrvd_gentabl} from '../srv/external/zsrvd_gentabl';
 using {com.sap.gateway.srvd.zsrvd_genddls.v0001 as zsrvd_genddls} from '../srv/external/zsrvd_genddls';
 
@@ -71,16 +69,8 @@ entity BotMessage : cuid, managed {
 }
 
 
-
 entity CreateCds as
     projection on zsrvd_genddls.zc_genddls_p {
         key Projname,
             Projdesc
     }
-
-//Service Definition
-entity CreateServiceDefinition as projection on zsrvd_gensrvd.zc_gensrvd_t;
-//Service Binding
-entity CreateServiceBinding as projection on zsrvd_gensrvb.zc_gensrvb_t;
-
-
