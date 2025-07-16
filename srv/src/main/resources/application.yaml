@@ -29,8 +29,6 @@ cds:
       '[zsrvd_gensrvd]':
         destination:
           name: zsrvd_gensrvd
-          # properties:
-          #   url: https://192.168.11.90:44310/sap/opu/odata4/sap/zsrvb_gensrvd/srvd/sap/zsrvd_gensrvd/0001
         http:
           service: zsrvd_gensrvd/0001
           csrf:
