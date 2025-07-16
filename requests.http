@@ -14,5 +14,16 @@ GET http://localhost:8080/odata/v4/MainService/Tasks
 Authorization: Basic system:
 
 ###
-GET http://localhost:8080/odata/v4/MainService/CreateServiceDefinition
+POST  http://localhost:8080/odata/v4/MainService/CreateServiceDefinition
 Authorization: Basic system:
+Content-Type: application/json
+
+{
+    "Srvdname": "ZSRVD_TEST006",
+    "Srvddesc": "SRVD Description",
+    "Labeltext": "SRVD Labletext",
+    "LeadingEntity": "ZC_RAP100_ATRA2390",
+    "Devclass": "ZAIREPORT",
+    "Trkorr": "DM2K900068",
+    "Reference": "ZTESTSRVD0006",
+}
