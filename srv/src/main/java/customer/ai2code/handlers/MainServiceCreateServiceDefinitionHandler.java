@@ -12,11 +12,9 @@ import com.sap.cds.ql.cqn.CqnSelect;
 import com.sap.cds.services.cds.CdsCreateEventContext;
 import com.sap.cds.services.cds.CdsReadEventContext;
 import com.sap.cds.services.cds.CqnService;
-import com.sap.cds.services.handler.annotations.Before;
 import com.sap.cds.services.handler.annotations.On;
 import com.sap.cds.services.handler.annotations.ServiceName;
 
-import cds.gen.mainservice.CreateCds_;
 import cds.gen.mainservice.CreateServiceDefinition_;
 import cds.gen.mainservice.MainService_;
 import cds.gen.zsrvd_gensrvd.ZcGensrvdTAutoActiveSRVDSRVBContext;
