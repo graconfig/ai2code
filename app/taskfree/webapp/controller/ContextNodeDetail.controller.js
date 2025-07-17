@@ -10,7 +10,6 @@ sap.ui.define(
       "ai.orchestration.taskfree.controller.ContextNodeDetail",
       {
         onInit: function () {
-          // 创建 viewModel 用于页面数据绑定
           var oViewModel = new JSONModel({
             value: "",
             title: "Context Node",

@@ -9,12 +9,10 @@ sap.ui.define([
 
     return Controller.extend("ai.orchestration.taskfree.controller.TextNodePage", {
         onInit: function () {
-            // 创建 viewModel 用于页面数据绑定
             var oViewModel = new JSONModel({
                 value: "",
-                title: "Text Node",
-                type: "",
-                htmlValue: "" // 新增
+                title: "Context Node",
+                type: ""
             });
             this.getView().setModel(oViewModel, "viewModel");
 
@@ -29,10 +27,9 @@ sap.ui.define([
             var contextNodeId = oArgs && oArgs.contextNodeId;
             var oViewModel = this.getView().getModel("viewModel");
             if (oViewModel) {
-                oViewModel.setProperty("/htmlValue", "");
                 oViewModel.setProperty("/value", "");
+                oViewModel.setProperty("/title", "");
             }
-
 
             var oController = this;
             if (!contextNodeId) {
@@ -45,16 +42,14 @@ sap.ui.define([
             // Set busy state
             oController.getView().setBusy(true);
 
-            // 直接查OData
+            //获取OData
             var oModel = this.getView().getModel();
-            // 如果 contextNodeId 是字符串主键，需要加引号
             var sPath = "/ContextNodes(" + contextNodeId + ")";
+
             oModel.bindContext(sPath).requestObject().then(function (oData) {
                 oController.getView().setBusy(false);
                 oViewModel.setProperty("/value", oData.value);
-                oViewModel.setProperty("/title", oData.title);
-
-
+                oViewModel.setProperty("/title", oData.label);
             }).catch(function () {
                 oController.getView().setBusy(false);
                 oViewModel.setProperty("/value", "加载失败");
@@ -62,19 +57,11 @@ sap.ui.define([
                 MessageToast.show("加载失败");
             });
         },
-
-        _setMarkdownContent: function (markdownText) {
-            var oViewModel = this.getView().getModel("viewModel");
-            var htmlContent = window.marked ? window.marked.parse(markdownText || "") : (markdownText || "");
-            //console.log("setMarkdownContent called. markdownText:", markdownText, "htmlContent:", htmlContent);
-            oViewModel.setProperty("/htmlValue", htmlContent);
-        },
         onExit: function () {
             var oViewModel = this.getView().getModel("viewModel");
             if (oViewModel) {
-                oViewModel.setProperty("/htmlValue", "");
                 oViewModel.setProperty("/value", "");
-                oViewModel.setProperty("/type", "");
+                oViewModel.setProperty("/title", "");
             }
         }
     });
