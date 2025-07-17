@@ -11,11 +11,9 @@ import com.sap.cds.services.ServiceException;
 import com.sap.cds.services.request.ParameterInfo;
 import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataResponseException;
 
-import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.V0001;
-import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZcGenddlsPAutoActiveCDSContext;
-import cds.gen.zsrvd_gensrvd.ZcGensrvdTAutoActiveSRVDSRVBContext;
-import cds.gen.zsrvd_gensrvd.ZsrvdGensrvd;
-import cds.gen.zsrvd_gensrvd.ZtgensrvdL;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.V0001;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.ZcGensrvdTAutoActiveSRVDSRVBContext;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.ZtgensrvdL;
 import customer.ai2code.model.execution.annotation.BotExecutor;
 import customer.ai2code.model.execution.annotation.ExecuteMethod;
 import customer.ai2code.model.execution.annotation.ExecuteParameter;
@@ -26,16 +24,16 @@ import customer.ai2code.service.execution.BotExecution;
 public class CreateServiceDefinitionBotExecution implements BotExecution {
 
     private final ContextService contextService;
-    private final ZsrvdGensrvd zsrvdGensrvd;
+    private final V0001 zsrvdGensrvd;
     private final ObjectMapper objectMapper;
     @Autowired
     private ParameterInfo parameterInfo;
 
     // 默认构造函数
     public CreateServiceDefinitionBotExecution(ContextService contextService,
-            ZsrvdGensrvd zsrvdGensrvd, ObjectMapper objectMapper) {
+            V0001 zsrvdGensrvd2, ObjectMapper objectMapper) {
         this.contextService = contextService;
-        this.zsrvdGensrvd = zsrvdGensrvd;
+        this.zsrvdGensrvd = zsrvdGensrvd2;
         this.objectMapper = objectMapper;
     }
 

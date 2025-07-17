@@ -9,9 +9,6 @@ using {
     ai.orchestration.config.BotInstanceStatus as BotInstanceStatus
 } from './orchestration-config-model';
 
-using {zsrvd_gentabl as zsrvd_gentabl} from '../srv/external/zsrvd_gentabl';
-using {com.sap.gateway.srvd.zsrvd_genddls.v0001 as zsrvd_genddls} from '../srv/external/zsrvd_genddls';
-
 namespace ai.orchestration;
 
 /** Task entity, supports multi-level sub-tasks, recorded in context. */
@@ -67,10 +64,3 @@ entity BotMessage : cuid, managed {
     ragData     : LargeString; // RAG result data (optional)
     botInstance : Association to BotInstance;
 }
-
-
-entity CreateCds as
-    projection on zsrvd_genddls.zc_genddls_p {
-        key Projname,
-            Projdesc
-    }

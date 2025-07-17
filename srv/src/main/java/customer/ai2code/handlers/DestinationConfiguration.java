@@ -51,6 +51,22 @@ public class DestinationConfiguration implements EventHandler {
 			loader.registerDestination(httpDestination);
 			DestinationAccessor.prependDestinationLoader(loader);
 
+			loader = new DefaultDestinationLoader();
+			loader.registerDestination(httpDestination);
+			DestinationAccessor.prependDestinationLoader(loader);
+
+			httpDestination = DefaultHttpDestination
+					.builder(
+							"https://handsap01.hand-china.com")
+					.header("Authorization", auth)
+					.property("sap-client", "310")
+					.property("sap-language", "en")
+					.name("zsrvd_gensrvd").build();
+
+			loader = new DefaultDestinationLoader();
+			loader.registerDestination(httpDestination);
+			DestinationAccessor.prependDestinationLoader(loader);
+
 		}
 
 	}

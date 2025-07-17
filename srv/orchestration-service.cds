@@ -1,17 +1,18 @@
 using ai.orchestration as db from '../db/orchestration-model';
 using ai.orchestration.config as config from '../db/orchestration-config-model';
 using ai.orchestration.rag as rag from '../db/orchestration-rag-model';
-using {zsrvd_gensrvd} from './external/zsrvd_gensrvd';
-using {zsrvd_gensrvb} from './external/zsrvd_gensrvb';
+
+using {com.sap.gateway.srvd.zsrvd_gensrvd.v0001 as zsrvd_gensrvd} from './external/zsrvd_gensrvd';
+using {com.sap.gateway.srvd.zsrvd_genddls.v0001 as zsrvd_genddls} from './external/zsrvd_genddls';
 
 service MainService {
-    entity Tasks             as projection on db.Task;
-    entity ContextNodes      as projection on db.ContextNode;
-    entity TaskType          as projection on config.TaskType;
+    entity Tasks                   as projection on db.Task;
+    entity ContextNodes            as projection on db.ContextNode;
+    entity TaskType                as projection on config.TaskType;
 
 
     //entity SubTasks      as projection on db.SubTask;
-    entity BotInstances      as projection on db.BotInstance
+    entity BotInstances            as projection on db.BotInstance
         actions {
             action execute()                             returns {
                 result : String;
@@ -20,7 +21,7 @@ service MainService {
             action chatCompletion(content : LargeString) returns BotMessages;
         }
 
-    entity BotMessages       as projection on db.BotMessage
+    entity BotMessages             as projection on db.BotMessage
         actions {
             action adopt() returns ContextNodes;
         }
@@ -31,38 +32,36 @@ service MainService {
                               typeId : UUID)                                              returns Tasks;
 
     //Create CDS
-    entity CreateCds         as projection on db.CreateCds;
+    entity CreateCds               as projection on zsrvd_genddls.zc_genddls_p;
     //Create and Activate Service Definition & Service Binding
-    entity CreateServiceDefinition        as projection on zsrvd_gensrvd.zc_gensrvd_t;
-    //Create and Activate Service Binding
-    entity CreateServiceBinding        as projection on zsrvd_gensrvb.zc_gensrvb_t;
-    
+    entity CreateServiceDefinition as projection on zsrvd_gensrvd.zc_gensrvd_t;
 
-    entity BusinessScenarios as
+
+    entity BusinessScenarios       as
         projection on rag.BusinessScenarios
         excluding {
             embeddings,
             embeddings_ai
         };
 
-    entity CDSViews          as projection on rag.CDSViews;
+    entity CDSViews                as projection on rag.CDSViews;
     //按场景查询匹配的CDS Views
     // action cdsViewsSearch(question : String, threshold : Decimal(5, 2))  returns array of CDSViews;
 
 
-    entity CDSViewFiles      as projection on rag.CDSViewFiles
+    entity CDSViewFiles            as projection on rag.CDSViewFiles
         actions {
             action generateEmbeddings() returns String;
             action deleteEmbeddings()   returns String;
         };
 
-    entity Viewfields        as
+    entity Viewfields              as
         projection on rag.Viewfields
         excluding {
             embeddings
         };
 
-    entity RagJoinCond       as projection on rag.RagJoinCond;
+    entity RagJoinCond             as projection on rag.RagJoinCond;
 
     @cds.persistence.skip: true
     @odata.singleton
