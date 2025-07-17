@@ -17,6 +17,7 @@ import cds.gen.mainservice.ContextNodes;
 import cds.gen.mainservice.Tasks;
 import cds.gen.mainservice.TasksGetContextHierarchyContext;
 import customer.ai2code.exception.BusinessException;
+import customer.ai2code.model.bot.Bot;
 import customer.ai2code.model.tree.ContextTreeNode;
 import customer.ai2code.service.ContextService;
 import customer.ai2code.util.PathParser;
@@ -27,11 +28,13 @@ public class ContextServiceImpl implements ContextService {
     private final GenericCqnService genericCqnService;
     private final ObjectMapper objectMapper;
     private final PathParser pathParser;
+    private final TaskBotCacheManager cacheManager;
 
-    public ContextServiceImpl(GenericCqnService genericCqnService, ObjectMapper objectMapper, PathParser pathParser) {
+    public ContextServiceImpl(GenericCqnService genericCqnService, ObjectMapper objectMapper, PathParser pathParser, TaskBotCacheManager cacheManager) {
         this.genericCqnService = genericCqnService;
         this.objectMapper = objectMapper;
         this.pathParser = pathParser;
+        this.cacheManager = cacheManager;
     }
 
 //     @Override
@@ -166,10 +169,12 @@ public class ContextServiceImpl implements ContextService {
     }
     
     @Override
-    public String getContextFullPath(String botInstanceId, String subPath) {
+    public String getContextFullPath(Bot bot, String subPath) {
         if (subPath.startsWith("SubContext:")) {
             // 处理SubContext:的情况，需要获取任务的上下文路径并拼接
-            Tasks task = genericCqnService.getParentTaskByBotInstance(botInstanceId);
+            // Tasks task = genericCqnService.getParentTaskByBotInstance(botInstanceId);
+            Tasks task = cacheManager.getParentTaskByBotInstance(bot.getBotInstance().getId()).getTask();
+            // bot
             String taskContextPath = task.getContextPath();
             String relativePath = subPath.replace("SubContext:", "");
 
@@ -194,11 +199,12 @@ public class ContextServiceImpl implements ContextService {
     }
 
     @Override
-    public ContextNodes upsertContext(String botInstanceId, String contextPath, String contextValue,
+    public ContextNodes upsertContext(Bot bot, String contextPath, String contextValue,
             String contextType) {
         // try {
         // 1. 通过botInstanceId获取mainTaskId
-        String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
+        // String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
+        String mainTaskId = cacheManager.getMainTaskId(bot.getBotInstance().getId());
         return upsertContextWithMainTaskId(mainTaskId, contextPath, contextValue, contextType);
         // // 2. 查询是否已存在相同mainTaskId和contextPath的记录
         // ContextNodes existingNode = null;
@@ -269,13 +275,13 @@ public class ContextServiceImpl implements ContextService {
     }
 
     @Override
-    public List<ContextNodes> upsertContextBatch(String botInstanceId, Map<String, String> contextPathValueMap,
+    public List<ContextNodes> upsertContextBatch(Bot bot, Map<String, String> contextPathValueMap,
             String contextType) {
         List<ContextNodes> results = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : contextPathValueMap.entrySet()) {
             try {
-                ContextNodes node = upsertContext(botInstanceId, entry.getKey(), entry.getValue(), contextType);
+                ContextNodes node = upsertContext(bot, entry.getKey(), entry.getValue(), contextType);
                 results.add(node);
             } catch (Exception e) {
                 System.err.println("Failed to upsert context node: " + entry.getKey() + ", error: " + e.getMessage());
@@ -286,9 +292,10 @@ public class ContextServiceImpl implements ContextService {
     }
 
     @Override
-    public List<ContextNodes> getContextNodesByPattern(String botInstanceId, String pathPattern) {
+    public List<ContextNodes> getContextNodesByPattern(Bot bot, String pathPattern) {
         try {
-            String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
+            // String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
+            String mainTaskId = cacheManager.getMainTaskId(bot.getBotInstance().getId());
 
             // 处理 [-1] 语法，转换为 SQL LIKE 查询
             if (pathPattern.contains("[-1]")) {
@@ -306,8 +313,9 @@ public class ContextServiceImpl implements ContextService {
     }
 
     @Override
-    public void updateAdditionInfo(String botInstanceId, String contextPath, String additionalInfo) {
-        String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
+    public void updateAdditionInfo(Bot bot, String contextPath, String additionalInfo) {
+        // String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
+        String mainTaskId = cacheManager.getMainTaskId(bot.getBotInstance().getId());
         genericCqnService.updateContextNodeAdditionalInfo(mainTaskId, contextPath, additionalInfo);
     }
 }

@@ -7,9 +7,11 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import cds.gen.mainservice.ContextNodes;
+import cds.gen.mainservice.Tasks;
 import customer.ai2code.service.variable.VariableContext;
 import customer.ai2code.service.variable.VariableResolver;
 import customer.ai2code.service.impl.GenericCqnService;
+import customer.ai2code.service.impl.TaskBotCacheManager;
 
 /**
  * Context 和 SubContext 变量解析器
@@ -21,9 +23,12 @@ public class ContextVariableResolver implements VariableResolver {
 
     private final ObjectMapper objectMapper;
 
-    public ContextVariableResolver(GenericCqnService genericCqnService, ObjectMapper objectMapper) {
+    private final TaskBotCacheManager cacheManager;
+
+    public ContextVariableResolver(GenericCqnService genericCqnService, ObjectMapper objectMapper, TaskBotCacheManager cacheManager) {
         this.genericCqnService = genericCqnService;
         this.objectMapper = objectMapper;
+        this.cacheManager = cacheManager;
     }
 
     @Override
@@ -91,7 +96,8 @@ public class ContextVariableResolver implements VariableResolver {
     private String resolveSubContextPath(String botInstanceId, String relativePath) {
         try {
             // 获取当前BotInstance对应的Task的上下文路径
-            cds.gen.mainservice.Tasks task = genericCqnService.getParentTaskByBotInstance(botInstanceId);
+            Tasks task = cacheManager.getParentTaskByBotInstance(botInstanceId).getTask();
+            // cds.gen.mainservice.Tasks task = genericCqnService.getParentTaskByBotInstance(botInstanceId);
             String taskContextPath = task.getContextPath();
 
             // 如果任务上下文路径为空或null，直接返回相对路径

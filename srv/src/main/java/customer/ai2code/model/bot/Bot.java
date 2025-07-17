@@ -36,4 +36,31 @@ public interface Bot {
     public AIModel getAiModel();
 
     public Locale getLocale();
+    
+    /**
+     * 更新Bot实例状态
+     * @param statusCode 状态代码
+     * @return 更新后的BotInstances
+     */
+    public BotInstances updateStatus(String statusCode);
+    
+    /**
+     * 更新Bot实例执行结果
+     * @param result 执行结果
+     * @return 更新后的BotInstances
+     */
+    public BotInstances updateResult(String result);
+    
+    /**
+     * 更新Bot实例关联的ContextNode ID
+     * @param contextNodeId 上下文节点ID
+     * @return 更新后的BotInstances
+     */
+    public BotInstances updateContextNodeId(String contextNodeId);
+    
+    /**
+     * 更新Bot实例
+     * @return 更新后的BotInstances
+     */
+    public BotInstances update(BotInstances botInstance);
 }

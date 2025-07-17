@@ -9,22 +9,18 @@ import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.config.AIModel;
-import lombok.AllArgsConstructor;
+import customer.ai2code.service.impl.GenericCqnService;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class CodingBot implements Bot {
-    
-    private BotInstances botInstance;
-    private AIModel aiModel;
-    private BotTypes botType;
-    private Locale locale;
-    // public CodingBot(BotInstances botInstance, BotTypes botType) {
-    //     //TODO Auto-generated constructor stub
-    // }
+@EqualsAndHashCode(callSuper = true)
+public class CodingBot extends AbstractBot {
+
+    public CodingBot(BotInstances botInstance, AIModel aiModel, BotTypes botType, 
+                    Locale locale, GenericCqnService genericCqnService) {
+        super(botInstance, aiModel, botType, locale, genericCqnService);
+    }
 
     @Override
     public BotInstancesExecuteContext.ReturnType execute() {

@@ -17,27 +17,27 @@ import customer.ai2code.model.config.AIModelResolver;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.PromptService;
 import customer.ai2code.service.impl.GenericCqnService;
-import customer.ai2code.service.impl.rag.RAGExtractionFactoryService;
-import customer.ai2code.service.rag.RAGExtraction;
-import lombok.AllArgsConstructor;
+// import customer.ai2code.service.impl.rag.RAGExtractionFactoryService;
+// import customer.ai2code.service.rag.RAGExtraction;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class ChatBot implements Bot {
-
-    private BotInstances botInstance;
-    private AIModel aiModel;
-    private BotTypes botType;
-    private Locale locale;
+@EqualsAndHashCode(callSuper = true)
+public class ChatBot extends AbstractBot {
 
     // 服务依赖（通过构造函数注入）
-    private GenericCqnService genericCqnService;
     private PromptService promptService;
     private AIModelResolver aiModelResolver;
     // private RAGExtractionFactoryService ragExtractionFactoryService;
+    
+    public ChatBot(BotInstances botInstance, AIModel aiModel, BotTypes botType, 
+                  Locale locale, GenericCqnService genericCqnService,
+                  PromptService promptService, AIModelResolver aiModelResolver) {
+        super(botInstance, aiModel, botType, locale, genericCqnService);
+        this.promptService = promptService;
+        this.aiModelResolver = aiModelResolver;
+    }
 
     @Override
     public String chat(String content) {
@@ -160,25 +160,15 @@ public class ChatBot implements Bot {
         return true; // 返回是否成功
     }
 
-    @Override
-    public BotInstances getBotInstance() {
-        return botInstance;
-    }
-
+    // 使用AbstractBot中的实现，不需要在这里重写
     // @Override
     // public BotInstances getBotInstance() {
-    // // 返回当前Bot实例信息
-    // return null; // 需要实现具体的返回逻辑
+    //     return botInstance;
     // }
 
     // @Override
-    // public AIModel getAIModel() {
-    // // TODO Auto-generated method stub
-    // throw new UnsupportedOperationException("Unimplemented method 'getAIModel'");
+    // public AIModel getAiModel() {
+    //     return aiModel;
     // }
-
-    public AIModel getAiModel() {
-        return aiModel;
-    }
 
 }

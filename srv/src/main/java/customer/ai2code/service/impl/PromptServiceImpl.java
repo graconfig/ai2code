@@ -57,7 +57,7 @@ public class PromptServiceImpl implements PromptService {
             List<PromptTexts> prompts = genericCqnService.getPromptTextsByBotType(bot.getBotType().getId());
 
             // 2. 构建变量解析上下文
-            VariableContext context = buildVariableContext(bot.getBotInstance().getId());
+            VariableContext context = buildVariableContext(bot);
 
             // 3. 解析每个PromptTexts的内容
             for (PromptTexts prompt : prompts) {
@@ -93,7 +93,7 @@ public class PromptServiceImpl implements PromptService {
                 // 5.1 读取botType.ragParameter,再通过promptService.parse获取配置好的表达式，作为RAG输入语句
                 String ragParameter = botType.getRagParameter();
                 // 2. 构建变量解析上下文
-                VariableContext context = buildVariableContext(bot.getBotInstance().getId());
+                VariableContext context = buildVariableContext(bot);
 
                 PromptTexts ragInput = PromptTexts.create();
                 ragInput.setContent(ragParameter);
@@ -152,9 +152,9 @@ public class PromptServiceImpl implements PromptService {
     /**
      * 解析单个变量表达式（用于调试和测试）
      */
-    public String parseVariableExpression(String expression, String botInstanceId) {
+    public String parseVariableExpression(String expression, Bot bot) {
         try {
-            VariableContext context = buildVariableContext(botInstanceId);
+            VariableContext context = buildVariableContext(bot);
             return variableParsingService.parseVariables("{{" + expression + "}}", context)
                     .replace("{{" + expression + "}}", ""); // 移除包装的大括号
         } catch (Exception e) {
@@ -184,8 +184,8 @@ public class PromptServiceImpl implements PromptService {
     /**
      * 批量解析多个Prompt
      */
-    public List<PromptTexts> parsePrompts(List<PromptTexts> prompts, String botInstanceId) {
-        VariableContext context = buildVariableContext(botInstanceId);
+    public List<PromptTexts> parsePrompts(List<PromptTexts> prompts, Bot bot) {
+        VariableContext context = buildVariableContext(bot);
 
         for (PromptTexts prompt : prompts) {
             if (hasVariables(prompt)) {
@@ -200,31 +200,31 @@ public class PromptServiceImpl implements PromptService {
     /**
      * 构建变量解析上下文
      */
-    private VariableContext buildVariableContext(String botInstanceId) {
+    private VariableContext buildVariableContext(Bot bot) {
         VariableContext.VariableContextBuilder builder = VariableContext.builder()
                 // .taskId(taskId)
-                .botInstanceId(botInstanceId);
+                .botInstanceId(bot.getBotInstance().getId());
 
         try {
             // 获取主任务ID
-            String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
+            String mainTaskId = genericCqnService.getMainTaskId(bot.getBotInstance().getId());
             builder.mainTaskId(mainTaskId);
 
             // 确定当前实例类型和对象
-            Object currentInstance = null;
+            // Object currentInstance = null;
 
-            if (botInstanceId != null) {
-                try {
-                    BotInstances botInstance = genericCqnService.getBotInstanceById(botInstanceId);
-                    if (botInstance != null) {
-                        currentInstance = botInstance;
-                    }
-                } catch (Exception e) {
-                    // BotInstance不存在，尝试Task
-                }
-            }
+            // if (bot.getBotInstance() != null) {
+            //     try {
+            //         BotInstances botInstance = genericCqnService.getBotInstanceById(botInstanceId);
+            //         if (botInstance != null) {
+            //             currentInstance = botInstance;
+            //         }
+            //     } catch (Exception e) {
+            //         // BotInstance不存在，尝试Task
+            //     }
+            // }
 
-            builder.currentInstance(currentInstance);
+            builder.currentInstance(bot.getBotInstance());
 
         } catch (Exception e) {
             System.err.println("Failed to build complete variable context: " + e.getMessage());

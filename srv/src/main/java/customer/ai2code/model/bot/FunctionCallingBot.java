@@ -1,7 +1,6 @@
 package customer.ai2code.model.bot;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -20,25 +19,27 @@ import customer.ai2code.service.impl.BotExecutionFactoryService;
 import customer.ai2code.service.PromptService;
 import customer.ai2code.service.execution.BotExecution;
 import customer.ai2code.service.impl.GenericCqnService;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class FunctionCallingBot implements Bot {
-
-    private BotInstances botInstance;
-    private AIModel aiModel;
-    private BotTypes botType;
-    private Locale locale;
+@EqualsAndHashCode(callSuper = true)
+public class FunctionCallingBot extends AbstractBot {
 
     // 服务依赖（通过构造函数注入）
-    private GenericCqnService genericCqnService;
     private PromptService promptService;
     private AIModelResolver aiModelResolver;
-    private BotExecutionFactoryService botExecutionFactoryService; // 新增：BotExecution 工厂服务
+    private BotExecutionFactoryService botExecutionFactoryService; // BotExecution 工厂服务
+    
+    public FunctionCallingBot(BotInstances botInstance, AIModel aiModel, BotTypes botType,
+                             Locale locale, GenericCqnService genericCqnService,
+                             PromptService promptService, AIModelResolver aiModelResolver,
+                             BotExecutionFactoryService botExecutionFactoryService) {
+        super(botInstance, aiModel, botType, locale, genericCqnService);
+        this.promptService = promptService;
+        this.aiModelResolver = aiModelResolver;
+        this.botExecutionFactoryService = botExecutionFactoryService;
+    }
 
     @Override
     public BotInstancesExecuteContext.ReturnType execute() {
