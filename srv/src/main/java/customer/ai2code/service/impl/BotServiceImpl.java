@@ -20,9 +20,12 @@ import customer.ai2code.service.BotService;
 import customer.ai2code.service.ContextService;
 
 import customer.ai2code.service.PromptService;
+import customer.ai2code.service.websocket.BotInstanceStatusChangedEvent;
 
 import com.sap.cds.ql.cqn.AnalysisResult;
 import com.sap.cds.ql.cqn.CqnAnalyzer;
+
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -40,6 +43,7 @@ public class BotServiceImpl implements BotService {
     private final BotExecutionFactoryService botExecutionFactoryService;
     // 全局Bot缓存链表 - 保留作为备用，主要使用TaskBotCacheManager
     // private final Map<String, Bot> botCache = new ConcurrentHashMap<>();
+    private final ApplicationEventPublisher eventPublisher;
 
     public BotServiceImpl(
             AIModelResolver aiModelResolver,
@@ -47,13 +51,15 @@ public class BotServiceImpl implements BotService {
             TaskBotCacheManager cacheManager,
             PromptService promptService,
             ContextService contextService,
-            BotExecutionFactoryService botExecutionFactoryService) {
+            BotExecutionFactoryService botExecutionFactoryService,
+            ApplicationEventPublisher eventPublisher) {
         this.aiModelResolver = aiModelResolver;
         this.genericCqnService = genericCqnService;
         this.cacheManager = cacheManager;
         this.promptService = promptService;
         this.contextService = contextService;
         this.botExecutionFactoryService = botExecutionFactoryService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -424,10 +430,16 @@ public class BotServiceImpl implements BotService {
 
     private void updateBotInstanceStatus(Bot bot, String status) {
         String botInstanceId = bot.getBotInstance().getId();
+        String oldStatus = bot.getBotInstance().getStatusCode(); // 获取当前状态（旧状态）
         // 使用缓存管理器更新状态
         cacheManager.updateBotStatus(botInstanceId, status);
         // 同时更新数据库
         genericCqnService.updateBotInstanceStatus(bot.getBotInstance(), status);
+
+        // 发布状态变更事件
+        eventPublisher.publishEvent(new BotInstanceStatusChangedEvent(
+            this, botInstanceId, oldStatus, status, bot.getBotInstance().getTaskId()
+        ));
     }
 
     private void updateBotInstanceResult(Bot bot, String result) {

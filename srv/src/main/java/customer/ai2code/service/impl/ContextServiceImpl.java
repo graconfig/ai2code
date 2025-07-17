@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -19,6 +20,7 @@ import cds.gen.mainservice.TasksGetContextHierarchyContext;
 import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.tree.ContextTreeNode;
 import customer.ai2code.service.ContextService;
+import customer.ai2code.service.websocket.ContextNodeChangedEvent;
 import customer.ai2code.util.PathParser;
 
 @Service
@@ -27,11 +29,16 @@ public class ContextServiceImpl implements ContextService {
     private final GenericCqnService genericCqnService;
     private final ObjectMapper objectMapper;
     private final PathParser pathParser;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public ContextServiceImpl(GenericCqnService genericCqnService, ObjectMapper objectMapper, PathParser pathParser) {
+    public ContextServiceImpl(  GenericCqnService genericCqnService, 
+                                ObjectMapper objectMapper, 
+                                PathParser pathParser,
+                                ApplicationEventPublisher eventPublisher) {
         this.genericCqnService = genericCqnService;
         this.objectMapper = objectMapper;
         this.pathParser = pathParser;
+        this.eventPublisher = eventPublisher;
     }
 
 //     @Override
@@ -199,6 +206,19 @@ public class ContextServiceImpl implements ContextService {
         // try {
         // 1. 通过botInstanceId获取mainTaskId
         String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
+
+        ContextNodes node = upsertContextWithMainTaskId(mainTaskId, contextPath, contextValue, contextType);
+        // 发布上下文节点变更事件（包含创建/更新的详细信息）
+        eventPublisher.publishEvent(new ContextNodeChangedEvent(
+            this, 
+            node.getId(), 
+            // 若为更新，需获取旧值；若为创建，旧值为null
+            (node.getValue() != null ? node.getValue() : null), 
+            contextValue, 
+            mainTaskId, 
+            node.getPath()
+        ));
+        
         return upsertContextWithMainTaskId(mainTaskId, contextPath, contextValue, contextType);
         // // 2. 查询是否已存在相同mainTaskId和contextPath的记录
         // ContextNodes existingNode = null;
