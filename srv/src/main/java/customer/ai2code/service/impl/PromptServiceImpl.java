@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 
 import cds.gen.configservice.BotTypes;
 import cds.gen.configservice.PromptTexts;
-import cds.gen.mainservice.BotInstances;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.service.PromptService;
+import customer.ai2code.service.TaskBotDataService;
 import customer.ai2code.service.impl.rag.RAGExtractionFactoryService;
 import customer.ai2code.service.rag.RAGExtraction;
 import customer.ai2code.service.variable.VariableContext;
@@ -20,13 +20,17 @@ public class PromptServiceImpl implements PromptService {
     private final GenericCqnService genericCqnService;
     private final VariableParsingService variableParsingService;
     private final RAGExtractionFactoryService ragExtractionFactoryService;
+    // private final TaskBotDataService taskBotDataService;
 
     public PromptServiceImpl(GenericCqnService genericCqnService,
             VariableParsingService variableParsingService,
-            RAGExtractionFactoryService ragExtractionFactoryService) {
+            RAGExtractionFactoryService ragExtractionFactoryService
+            // ,TaskBotDataService taskBotDataService
+            ) {
         this.genericCqnService = genericCqnService;
         this.variableParsingService = variableParsingService;
         this.ragExtractionFactoryService = ragExtractionFactoryService;
+        // this.taskBotDataService = taskBotDataService;
     }
 
     @Override
@@ -206,7 +210,8 @@ public class PromptServiceImpl implements PromptService {
                 .botInstanceId(bot.getBotInstance().getId());
 
         try {
-            // 获取主任务ID
+            // 获取主任务ID，使用缓存优化
+            // String mainTaskId = taskBotDataService.getMainTaskId(bot.getBotInstance().getId());
             String mainTaskId = genericCqnService.getMainTaskId(bot.getBotInstance().getId());
             builder.mainTaskId(mainTaskId);
 

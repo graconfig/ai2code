@@ -3,6 +3,7 @@ package customer.ai2code.service.impl;
 import customer.ai2code.model.tree.TaskBotNode;
 import customer.ai2code.model.tree.TaskBotNode.NodeType;
 import customer.ai2code.service.PromptService;
+import customer.ai2code.service.TaskBotDataService;
 import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.model.bot.ChatBot;
@@ -13,7 +14,6 @@ import customer.ai2code.model.config.AIModelResolver;
 import customer.ai2code.model.task.GenericTask;
 import customer.ai2code.model.task.Task;
 
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 使用树形结构管理Task和BotInstance的层级关系
  */
 @Service
-public class TaskBotCacheManager {
+public class TaskBotCacheManager implements TaskBotDataService {
 
     // 全局节点缓存：nodeId -> TaskBotNode
     private final Map<String, TaskBotNode> nodeCache = new ConcurrentHashMap<>();

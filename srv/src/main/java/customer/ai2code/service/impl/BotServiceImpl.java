@@ -7,13 +7,13 @@ import cds.gen.mainservice.ContextNodes;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 import cds.gen.mainservice.BotInstancesChatCompletionContext;
 
-import cds.gen.configservice.BotTypes;
+// import cds.gen.configservice.BotTypes;
 import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.model.bot.ChatBot;
-import customer.ai2code.model.bot.CodingBot;
-import customer.ai2code.model.bot.FunctionCallingBot;
-import customer.ai2code.model.config.AIModel;
+// import customer.ai2code.model.bot.CodingBot;
+// import customer.ai2code.model.bot.FunctionCallingBot;
+// import customer.ai2code.model.config.AIModel;
 import customer.ai2code.model.config.AIModelResolver;
 import customer.ai2code.model.tree.TaskBotNode;
 import customer.ai2code.service.BotService;
@@ -23,21 +23,21 @@ import customer.ai2code.service.PromptService;
 
 import com.sap.cds.ql.cqn.AnalysisResult;
 import com.sap.cds.ql.cqn.CqnAnalyzer;
-import org.springframework.context.i18n.LocaleContextHolder;
+// import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.Locale;
+// import java.util.Locale;
 
 @Service
 public class BotServiceImpl implements BotService {
 
-    private final AIModelResolver aiModelResolver;
+    // private final AIModelResolver aiModelResolver;
     private final GenericCqnService genericCqnService;
     private final TaskBotCacheManager cacheManager;
-    private final PromptService promptService;
+    // private final PromptService promptService;
     private final ContextService contextService;
-    private final BotExecutionFactoryService botExecutionFactoryService;
+    // private final BotExecutionFactoryService botExecutionFactoryService;
     // 全局Bot缓存链表 - 保留作为备用，主要使用TaskBotCacheManager
     // private final Map<String, Bot> botCache = new ConcurrentHashMap<>();
 
@@ -48,12 +48,12 @@ public class BotServiceImpl implements BotService {
             PromptService promptService,
             ContextService contextService,
             BotExecutionFactoryService botExecutionFactoryService) {
-        this.aiModelResolver = aiModelResolver;
+        // this.aiModelResolver = aiModelResolver;
         this.genericCqnService = genericCqnService;
         this.cacheManager = cacheManager;
-        this.promptService = promptService;
+        // this.promptService = promptService;
         this.contextService = contextService;
-        this.botExecutionFactoryService = botExecutionFactoryService;
+        // this.botExecutionFactoryService = botExecutionFactoryService;
     }
 
     @Override

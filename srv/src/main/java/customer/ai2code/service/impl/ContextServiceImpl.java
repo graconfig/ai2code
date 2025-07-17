@@ -20,6 +20,7 @@ import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.model.tree.ContextTreeNode;
 import customer.ai2code.service.ContextService;
+import customer.ai2code.service.TaskBotDataService;
 import customer.ai2code.util.PathParser;
 
 @Service
@@ -28,52 +29,57 @@ public class ContextServiceImpl implements ContextService {
     private final GenericCqnService genericCqnService;
     private final ObjectMapper objectMapper;
     private final PathParser pathParser;
-    private final TaskBotCacheManager cacheManager;
+    // private final TaskBotDataService taskBotDataService;
 
-    public ContextServiceImpl(GenericCqnService genericCqnService, ObjectMapper objectMapper, PathParser pathParser, TaskBotCacheManager cacheManager) {
+    public ContextServiceImpl(GenericCqnService genericCqnService, ObjectMapper objectMapper, PathParser pathParser
+    // ,TaskBotDataService taskBotDataService
+    ) {
         this.genericCqnService = genericCqnService;
         this.objectMapper = objectMapper;
         this.pathParser = pathParser;
-        this.cacheManager = cacheManager;
+        // this.taskBotDataService = taskBotDataService;
     }
 
-//     @Override
-//     public List<Map<String, Object>> buildContextAsHierarchy(List<ContextNodes> contextNodes) {
-//         Map<String, Map<String, Object>> nodeMap = new HashMap<>();
-//         List<Map<String, Object>> rootNodes = new ArrayList<>();
-// 
-//         // 第一步：创建所有节点对象
-//         for (ContextNodes node : contextNodes) {
-//             Map<String, Object> treeNode = new HashMap<>();
-//             treeNode.put("id", node.getId());
-//             treeNode.put("path", node.getPath());
-//             treeNode.put("label", node.getLabel());
-//             treeNode.put("type", node.getType());
-//             treeNode.put("value", node.getValue());
-//             treeNode.put("children", new ArrayList<Map<String, Object>>());
-//             treeNode.put("taskId", node.getTask() != null ? node.getTask().getId() : node.getTaskId());
-// 
-//             nodeMap.put(node.getPath(), treeNode);
-//         }
-// 
-//         // 第二步：建立父子关系
-//         for (ContextNodes node : contextNodes) {
-//             String parentPath = getParentPath(node.getPath());
-// 
-//             if (parentPath != null && nodeMap.containsKey(parentPath)) {
-//                 // 有父节点，添加到父节点的children中
-//                 Map<String, Object> parentNode = nodeMap.get(parentPath);
-//                 @SuppressWarnings("unchecked")
-//                 List<Map<String, Object>> children = (List<Map<String, Object>>) parentNode.get("children");
-//                 children.add(nodeMap.get(node.getPath()));
-//             } else {
-//                 // 没有父节点，是根节点
-//                 rootNodes.add(nodeMap.get(node.getPath()));
-//             }
-//         }
-// 
-//         return rootNodes;
-//     }
+    // @Override
+    // public List<Map<String, Object>> buildContextAsHierarchy(List<ContextNodes>
+    // contextNodes) {
+    // Map<String, Map<String, Object>> nodeMap = new HashMap<>();
+    // List<Map<String, Object>> rootNodes = new ArrayList<>();
+    //
+    // // 第一步：创建所有节点对象
+    // for (ContextNodes node : contextNodes) {
+    // Map<String, Object> treeNode = new HashMap<>();
+    // treeNode.put("id", node.getId());
+    // treeNode.put("path", node.getPath());
+    // treeNode.put("label", node.getLabel());
+    // treeNode.put("type", node.getType());
+    // treeNode.put("value", node.getValue());
+    // treeNode.put("children", new ArrayList<Map<String, Object>>());
+    // treeNode.put("taskId", node.getTask() != null ? node.getTask().getId() :
+    // node.getTaskId());
+    //
+    // nodeMap.put(node.getPath(), treeNode);
+    // }
+    //
+    // // 第二步：建立父子关系
+    // for (ContextNodes node : contextNodes) {
+    // String parentPath = getParentPath(node.getPath());
+    //
+    // if (parentPath != null && nodeMap.containsKey(parentPath)) {
+    // // 有父节点，添加到父节点的children中
+    // Map<String, Object> parentNode = nodeMap.get(parentPath);
+    // @SuppressWarnings("unchecked")
+    // List<Map<String, Object>> children = (List<Map<String, Object>>)
+    // parentNode.get("children");
+    // children.add(nodeMap.get(node.getPath()));
+    // } else {
+    // // 没有父节点，是根节点
+    // rootNodes.add(nodeMap.get(node.getPath()));
+    // }
+    // }
+    //
+    // return rootNodes;
+    // }
     private String extractIdFromContext(TasksGetContextHierarchyContext context) {
         // 使用CqnAnalyzer类，从CQN查询中提取ID，需要解析CqnSelect
         CqnAnalyzer cqnAnalyzer = CqnAnalyzer.create(context.getModel());
@@ -82,34 +88,30 @@ public class ContextServiceImpl implements ContextService {
         return result.targetKeys().get("ID").toString();
     }
 
-
     @Override
     public String buildContextAsHierarchy(TasksGetContextHierarchyContext context) {
         String mainTaskId = extractIdFromContext(context);
         return buildContextAsHierarchy(mainTaskId);
     }
 
-
-
-
     // 重写buildContextAsHierarchy - context tree
     @Override
     public String buildContextAsHierarchy(String mainTaskId) {
         List<ContextNodes> contextNodes = genericCqnService.getContextNodesByMainTaskId(mainTaskId);
-        
+
         if (contextNodes == null || contextNodes.isEmpty()) {
             return "[]"; // 返回空的JSON数组表示没有上下文节点
         }
 
         // 1. 创建所有节点，包括中间虚拟节点
         Map<String, ContextTreeNode> nodeMap = new HashMap<>();
-        
+
         // 首先创建所有实际的上下文节点
         for (ContextNodes node : contextNodes) {
             ContextTreeNode treeNode = new ContextTreeNode(node);
             nodeMap.put(node.getPath(), treeNode);
         }
-        
+
         // 然后创建所有必要的中间虚拟节点
         for (ContextNodes node : contextNodes) {
             createIntermediateNodes(node.getPath(), nodeMap);
@@ -138,14 +140,14 @@ public class ContextServiceImpl implements ContextService {
             throw new BusinessException("Failed to convert context tree to JSON", e);
         }
     }
-    
+
     /**
      * 创建中间虚拟节点
      * 例如：对于路径 "subtask[0].cView"，需要创建虚拟节点 "subtask" 和 "subtask[0]"
      */
     private void createIntermediateNodes(String path, Map<String, ContextTreeNode> nodeMap) {
         List<String> pathHierarchy = pathParser.getPathHierarchy(path);
-        
+
         for (String intermediatePath : pathHierarchy) {
             if (!nodeMap.containsKey(intermediatePath)) {
                 // 创建虚拟节点
@@ -155,7 +157,7 @@ public class ContextServiceImpl implements ContextService {
             }
         }
     }
-    
+
     /**
      * 创建虚拟上下文节点
      */
@@ -167,13 +169,14 @@ public class ContextServiceImpl implements ContextService {
         virtualNode.setValue(null);
         return virtualNode;
     }
-    
+
     @Override
     public String getContextFullPath(Bot bot, String subPath) {
         if (subPath.startsWith("SubContext:")) {
             // 处理SubContext:的情况，需要获取任务的上下文路径并拼接
-            // Tasks task = genericCqnService.getParentTaskByBotInstance(botInstanceId);
-            Tasks task = cacheManager.getParentTaskByBotInstance(bot.getBotInstance().getId()).getTask();
+            Tasks task = genericCqnService.getParentTaskByBotInstance(bot.getBotInstance().getId());
+            // Tasks task =
+            // cacheManager.getParentTaskByBotInstance(bot.getBotInstance().getId()).getTask();
             // bot
             String taskContextPath = task.getContextPath();
             String relativePath = subPath.replace("SubContext:", "");
@@ -202,9 +205,10 @@ public class ContextServiceImpl implements ContextService {
     public ContextNodes upsertContext(Bot bot, String contextPath, String contextValue,
             String contextType) {
         // try {
-        // 1. 通过botInstanceId获取mainTaskId
-        // String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
-        String mainTaskId = cacheManager.getMainTaskId(bot.getBotInstance().getId());
+        // 1. 通过botInstanceId获取mainTaskId，使用缓存优化
+        // String mainTaskId =
+        // taskBotDataService.getMainTaskId(bot.getBotInstance().getId());
+        String mainTaskId = genericCqnService.getMainTaskId(bot.getBotInstance().getId());
         return upsertContextWithMainTaskId(mainTaskId, contextPath, contextValue, contextType);
         // // 2. 查询是否已存在相同mainTaskId和contextPath的记录
         // ContextNodes existingNode = null;
@@ -294,8 +298,8 @@ public class ContextServiceImpl implements ContextService {
     @Override
     public List<ContextNodes> getContextNodesByPattern(Bot bot, String pathPattern) {
         try {
-            // String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
-            String mainTaskId = cacheManager.getMainTaskId(bot.getBotInstance().getId());
+            // String mainTaskId = taskBotDataService.getMainTaskId(bot.getBotInstance().getId());
+            String mainTaskId = genericCqnService.getMainTaskId(bot.getBotInstance().getId());
 
             // 处理 [-1] 语法，转换为 SQL LIKE 查询
             if (pathPattern.contains("[-1]")) {
@@ -314,8 +318,8 @@ public class ContextServiceImpl implements ContextService {
 
     @Override
     public void updateAdditionInfo(Bot bot, String contextPath, String additionalInfo) {
-        // String mainTaskId = genericCqnService.getMainTaskId(botInstanceId);
-        String mainTaskId = cacheManager.getMainTaskId(bot.getBotInstance().getId());
+        // String mainTaskId = taskBotDataService.getMainTaskId(bot.getBotInstance().getId());
+        String mainTaskId = genericCqnService.getMainTaskId(bot.getBotInstance().getId());
         genericCqnService.updateContextNodeAdditionalInfo(mainTaskId, contextPath, additionalInfo);
     }
 }
