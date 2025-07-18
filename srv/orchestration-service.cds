@@ -6,13 +6,18 @@ using {com.sap.gateway.srvd.zsrvd_gensrvd.v0001 as zsrvd_gensrvd} from './extern
 using {com.sap.gateway.srvd.zsrvd_genddls.v0001 as zsrvd_genddls} from './external/zsrvd_genddls';
 
 service MainService {
-    entity Tasks                   as projection on db.Task;
-    entity ContextNodes            as projection on db.ContextNode;
-    entity TaskType                as projection on config.TaskType;
+    entity Tasks             as projection on db.Task
+        actions {
+            function getHierarchy() returns String;
+            function getContextHierarchy() returns String;
+        }
+
+    entity ContextNodes      as projection on db.ContextNode;
+    entity TaskType          as projection on config.TaskType;
 
 
     //entity SubTasks      as projection on db.SubTask;
-    entity BotInstances            as projection on db.BotInstance
+    entity BotInstances      as projection on db.BotInstance
         actions {
             action execute()                             returns {
                 result : String;

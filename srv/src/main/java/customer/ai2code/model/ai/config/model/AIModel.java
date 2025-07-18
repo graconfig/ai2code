@@ -1,7 +1,7 @@
-package customer.ai2code.model.config;
+package customer.ai2code.model.ai.config.model;
 
 import cds.gen.configservice.ModelConfigs;
-import customer.ai2code.service.AIService;
+import customer.ai2code.model.ai.config.service.AIServiceConfig;
 
 public interface AIModel {
     // public ModelConfigs modelConfigs;

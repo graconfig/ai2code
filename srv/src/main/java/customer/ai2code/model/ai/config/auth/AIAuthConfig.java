@@ -1,4 +1,4 @@
-package customer.ai2code.model.config;
+package customer.ai2code.model.ai.config.auth;
 
 /**
  * AI服务认证配置接口

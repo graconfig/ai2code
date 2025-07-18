@@ -23,6 +23,8 @@ import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZtgenddlsL;
 import cds.gen.mainservice.CreateCds_;
 import cds.gen.mainservice.MainService_;
 import customer.ai2code.service.ContextService;
+import customer.ai2code.service.impl.GenericCqnService;
+import customer.ai2code.service.impl.TaskBotCacheManager;
 import customer.ai2code.service.impl.execution.CreateCdsOdataBotExecution;
 
 @Component
@@ -30,11 +32,13 @@ import customer.ai2code.service.impl.execution.CreateCdsOdataBotExecution;
 public class MainServiceCreateCdsHandler implements EventHandler {
     private final V0001 zsrvdGenddls;
     private CreateCdsOdataBotExecution callodata = null;
+    private final TaskBotCacheManager taskBotCacheManager;
 
-    MainServiceCreateCdsHandler(ContextService contextService, V0001 zsrvdGenddls, ObjectMapper objectMapper) {
+    MainServiceCreateCdsHandler(ContextService contextService, V0001 zsrvdGenddls, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
         this.callodata = new CreateCdsOdataBotExecution(contextService, zsrvdGenddls,
-                objectMapper);
+                objectMapper, taskBotCacheManager);
         this.zsrvdGenddls = zsrvdGenddls;
+        this.taskBotCacheManager = taskBotCacheManager;
     }
 
     @On(event = CqnService.EVENT_READ, entity = CreateCds_.CDS_NAME)

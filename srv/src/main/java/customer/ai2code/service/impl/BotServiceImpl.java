@@ -1,20 +1,16 @@
 package customer.ai2code.service.impl;
 
-import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotMessages;
 import cds.gen.mainservice.BotMessagesAdoptContext;
 import cds.gen.mainservice.ContextNodes;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 import cds.gen.mainservice.BotInstancesChatCompletionContext;
 
-import cds.gen.configservice.BotTypes;
+// import cds.gen.configservice.BotTypes;
 import customer.ai2code.exception.BusinessException;
+import customer.ai2code.model.ai.config.AIModelResolver;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.model.bot.ChatBot;
-import customer.ai2code.model.bot.CodingBot;
-import customer.ai2code.model.bot.FunctionCallingBot;
-import customer.ai2code.model.config.AIModel;
-import customer.ai2code.model.config.AIModelResolver;
 import customer.ai2code.model.tree.TaskBotNode;
 import customer.ai2code.service.BotService;
 import customer.ai2code.service.ContextService;
@@ -23,21 +19,21 @@ import customer.ai2code.service.PromptService;
 
 import com.sap.cds.ql.cqn.AnalysisResult;
 import com.sap.cds.ql.cqn.CqnAnalyzer;
-import org.springframework.context.i18n.LocaleContextHolder;
+// import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.Locale;
+// import java.util.Locale;
 
 @Service
 public class BotServiceImpl implements BotService {
 
-    private final AIModelResolver aiModelResolver;
+    // private final AIModelResolver aiModelResolver;
     private final GenericCqnService genericCqnService;
     private final TaskBotCacheManager cacheManager;
-    private final PromptService promptService;
+    // private final PromptService promptService;
     private final ContextService contextService;
-    private final BotExecutionFactoryService botExecutionFactoryService;
+    // private final BotExecutionFactoryService botExecutionFactoryService;
     // 全局Bot缓存链表 - 保留作为备用，主要使用TaskBotCacheManager
     // private final Map<String, Bot> botCache = new ConcurrentHashMap<>();
 
@@ -48,51 +44,56 @@ public class BotServiceImpl implements BotService {
             PromptService promptService,
             ContextService contextService,
             BotExecutionFactoryService botExecutionFactoryService) {
-        this.aiModelResolver = aiModelResolver;
+        // this.aiModelResolver = aiModelResolver;
         this.genericCqnService = genericCqnService;
         this.cacheManager = cacheManager;
-        this.promptService = promptService;
+        // this.promptService = promptService;
         this.contextService = contextService;
-        this.botExecutionFactoryService = botExecutionFactoryService;
+        // this.botExecutionFactoryService = botExecutionFactoryService;
     }
 
     @Override
     public Bot getCurrentBot(String botInstanceId) {
         // 先从缓存中查找
         Bot cachedBot = cacheManager.getCachedBot(botInstanceId);
-        if (cachedBot != null) {
-            return cachedBot;
-        }
+        // if (cachedBot != null) {
+        //     return cachedBot;
+        // }
+        return cachedBot;
 
-        // 从数据库查询BotInstance
-        BotInstances botInstance = genericCqnService.getBotInstanceById(botInstanceId);
+        // // 从数据库查询BotInstance
+        // BotInstances botInstance =
+        // genericCqnService.getBotInstanceAndSubtasksById(botInstanceId);
+        // // BotInstances botInstance =
+        // genericCqnService.getBotInstanceById(botInstanceId);
 
-        // 查询关联的BotType
-        BotTypes botType = genericCqnService.getBotTypeById(botInstance.getTypeId());
+        // // 查询关联的BotType
+        // BotTypes botType = genericCqnService.getBotTypeById(botInstance.getTypeId());
 
-        // 获取AI模型
-        AIModel aiModel = aiModelResolver.resolveAIModel(botType.getModelId());
+        // // 获取AI模型
+        // // AIModel aiModel = aiModelResolver.resolveAIModel(botType.getModelId());
 
-        // 根据BotType的functionType创建相应的Bot实例
-        Bot bot = createBotInstance(botInstance, botType, aiModel);
+        // // 根据BotType的functionType创建相应的Bot实例
+        // Bot bot = cacheManager.createBotInstance(botInstance, botType);
 
-        // 放入缓存 - 使用新的缓存管理器
-        cacheManager.addBotInstanceNode(bot);
+        // // 放入缓存 - 使用新的缓存管理器
+        // cacheManager.addBotInstanceNode(bot);
 
-        return bot;
+        // return bot;
     }
 
     @Override
     public Bot getCurrentBot(String taskId, int sequence) {
         // 使用缓存管理器查找
         TaskBotNode botNode = cacheManager.getBotInstanceByTaskAndSequence(taskId, sequence);
-        if (botNode != null) {
-            return botNode.getBotObject();
-        }
+        // if (botNode != null) {
+        return botNode.getBotObject();
+        // }
 
         // 根据taskId和sequence查询BotInstance
-        BotInstances botInstance = genericCqnService.getBotInstanceByTaskAndSequence(taskId, sequence);
-        return getCurrentBot(botInstance.getId());
+        // BotInstances botInstance =
+        // genericCqnService.getBotInstanceByTaskAndSequence(taskId, sequence);
+        // return getCurrentBot(botInstance.getId());
     }
 
     @Override
@@ -193,12 +194,13 @@ public class BotServiceImpl implements BotService {
             updateBotInstanceResult(bot, result.getResult());
 
             // 如果维护了outputContextPath，则更新
-            String outputContextPath = genericCqnService.getOutputContextPathByBotInstanceId(botInstanceId);
+            // String outputContextPath = genericCqnService.getOutputContextPathByBotInstanceId(botInstanceId);
+            String outputContextPath = bot.getBotType().getOutputContextPath();
             if (outputContextPath != null && outputContextPath.isBlank() != true) {
                 // 5. 获取绝对的 outputContextPath
-                String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, outputContextPath);
+                String absoluteOutputContextPath = contextService.getContextFullPath(bot, outputContextPath);
                 // 6. 调用 ContextService 的 upsertContext 方法存储并返回 ContextNodes
-                ContextNodes node = contextService.upsertContext(botInstanceId, absoluteOutputContextPath,
+                ContextNodes node = contextService.upsertContext(bot, absoluteOutputContextPath,
                         result.getResult(),
                         bot.getBotType().getContextTypeCode());
 
@@ -210,17 +212,18 @@ public class BotServiceImpl implements BotService {
             // 7. 检查botType的ragOutputContextPath，有维护值的情况下写入一条新的ContextNode
             // String ragOutputContextPath = bot.getBotType().getRagOutputContextPath();
             // if (ragOutputContextPath != null && !ragOutputContextPath.isBlank()) {
-            //     // 获取绝对的 RAG 输出上下文路径
-            //     String absoluteRagOutputContextPath = contextService.getContextFullPath(botInstanceId,
-            //             ragOutputContextPath);
-            //     // 获取最新一条用户消息的 RAG 数据
-            //     BotMessages latestUserMessage = genericCqnService.getLatestUserMessage(botInstanceId);
-            //     // 将RAG输出上下文路径和消息文本存储到新的ContextNode中
-            //     contextService.upsertContext(botInstanceId, absoluteRagOutputContextPath,
-            //             latestUserMessage.getRagData(),
-            //             "text");
+            // // 获取绝对的 RAG 输出上下文路径
+            // String absoluteRagOutputContextPath =
+            // contextService.getContextFullPath(botInstanceId,
+            // ragOutputContextPath);
+            // // 获取最新一条用户消息的 RAG 数据
+            // BotMessages latestUserMessage =
+            // genericCqnService.getLatestUserMessage(botInstanceId);
+            // // 将RAG输出上下文路径和消息文本存储到新的ContextNode中
+            // contextService.upsertContext(botInstanceId, absoluteRagOutputContextPath,
+            // latestUserMessage.getRagData(),
+            // "text");
             // }
-
 
             return result;
 
@@ -233,24 +236,6 @@ public class BotServiceImpl implements BotService {
             exceptionResult.setResult("Execution failed: " + e.getMessage());
             updateBotInstanceResult(bot, exceptionResult.getResult());
             return exceptionResult;
-        }
-    }
-
-    private Bot createBotInstance(BotInstances botInstance, BotTypes botType, AIModel aiModel) {
-        Locale locale = LocaleContextHolder.getLocale();
-        String functionTypeCode = botType.getFunctionTypeCode();
-
-        switch (functionTypeCode) {
-            case "A": // AI Chat Bot
-                return new ChatBot(botInstance, aiModel, botType, locale, genericCqnService, promptService,
-                        aiModelResolver);
-            case "F": // Function Calling Bot
-                return new FunctionCallingBot(botInstance, aiModel, botType, locale, genericCqnService, promptService,
-                        aiModelResolver, botExecutionFactoryService);
-            case "C": // Coding Bot
-                return new CodingBot(botInstance, aiModel, botType, locale);
-            default:
-                throw new BusinessException("Unsupported bot function type: " + functionTypeCode);
         }
     }
 
@@ -304,7 +289,8 @@ public class BotServiceImpl implements BotService {
         updateBotInstanceStatus(bot, "RUNNING");
 
         // 3. 查询 outputContextPath
-        String outputContextPath = genericCqnService.getOutputContextPathByBotInstanceId(botInstanceId);
+        // String outputContextPath = genericCqnService.getOutputContextPathByBotInstanceId(botInstanceId);
+        String outputContextPath = bot.getBotType().getOutputContextPath();
         if (outputContextPath == null || outputContextPath.isBlank()) {
             updateBotInstanceStatus(bot, "FAILED");
             throw new BusinessException("No outputContextPath configured for botInstance: " + botInstanceId);
@@ -321,9 +307,9 @@ public class BotServiceImpl implements BotService {
         // }
 
         // 5. 获取绝对的 outputContextPath
-        String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, outputContextPath);
+        String absoluteOutputContextPath = contextService.getContextFullPath(bot, outputContextPath);
         // 6. 调用 ContextService 的 upsertContext 方法存储并返回 ContextNodes
-        ContextNodes node = contextService.upsertContext(botInstanceId, absoluteOutputContextPath, messageText,
+        ContextNodes node = contextService.upsertContext(bot, absoluteOutputContextPath, messageText,
                 bot.getBotType().getContextTypeCode());
 
         // 6.1 将 ContextNode 的 ID 设置到 BotInstance 中
@@ -333,12 +319,11 @@ public class BotServiceImpl implements BotService {
         String ragOutputContextPath = bot.getBotType().getRagOutputContextPath();
         if (ragOutputContextPath != null && !ragOutputContextPath.isBlank()) {
             // 获取绝对的 RAG 输出上下文路径
-            String absoluteRagOutputContextPath = contextService.getContextFullPath(botInstanceId,
-                    ragOutputContextPath);
+            String absoluteRagOutputContextPath = contextService.getContextFullPath(bot, ragOutputContextPath);
             // 获取最新一条用户消息的 RAG 数据
             BotMessages latestUserMessage = genericCqnService.getLatestUserMessage(botInstanceId);
             // 将RAG输出上下文路径和消息文本存储到新的ContextNode中
-            contextService.upsertContext(botInstanceId, absoluteRagOutputContextPath, latestUserMessage.getRagData(),
+            contextService.upsertContext(bot, absoluteRagOutputContextPath, latestUserMessage.getRagData(),
                     "text");
         }
 
@@ -410,11 +395,10 @@ public class BotServiceImpl implements BotService {
      */
     private void updateBotInstanceContextNodeId(Bot bot, String contextNodeId) {
         try {
-            // 使用genericCqnService更新数据库中的contextNodeId
-            genericCqnService.updateBotInstanceContextNodeId(bot.getBotInstance(), contextNodeId);
+            // 调用Bot接口的方法更新ContextNodeId，并获取更新后的实例
+            bot.updateContextNodeId(contextNodeId);
             System.out.println(
                     "Updated contextNodeId for botInstance: " + bot.getBotInstance().getId() + " -> " + contextNodeId);
-
         } catch (Exception e) {
             throw new BusinessException(
                     "Failed to update contextNodeId for botInstance: " + bot.getBotInstance().getId(), e);
@@ -425,12 +409,12 @@ public class BotServiceImpl implements BotService {
         String botInstanceId = bot.getBotInstance().getId();
         // 使用缓存管理器更新状态
         cacheManager.updateBotStatus(botInstanceId, status);
-        // 同时更新数据库
-        genericCqnService.updateBotInstanceStatus(bot.getBotInstance(), status);
+        // 调用Bot接口的方法更新状态
+        bot.updateStatus(status);
     }
 
     private void updateBotInstanceResult(Bot bot, String result) {
-        // String botInstanceId = bot.getBotInstance().getId();
-        genericCqnService.updateBotInstanceResult(bot.getBotInstance(), result);
+        // 调用Bot接口的方法更新结果
+        bot.updateResult(result);
     }
 }

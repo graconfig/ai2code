@@ -1,4 +1,6 @@
-package customer.ai2code.model.config;
+package customer.ai2code.model.ai.config.service;
+
+import customer.ai2code.model.ai.config.auth.AIAuthConfig;
 
 /**
  * 通用AI服务配置接口

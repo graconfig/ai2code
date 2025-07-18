@@ -2,6 +2,8 @@ package customer.ai2code.service;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import cds.gen.configservice.BotTypes;
+import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesChatCompletionContext;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 import cds.gen.mainservice.BotMessages;
@@ -10,9 +12,19 @@ import cds.gen.mainservice.ContextNodes;
 import customer.ai2code.model.bot.Bot;
 
 public interface BotService {
-
+    /**
+     * Get Current Bot(with subtasks) by botInstanceId.
+     * @param botInstanceId
+     * @return
+     */
     public Bot getCurrentBot(String botInstanceId);
 
+    /**
+     * Get Current Bot(no subtasks) by taskId(as parent) and sequence.
+     * @param taskId
+     * @param sequence
+     * @return
+     */
     public Bot getCurrentBot(String taskId, int sequence);
 
     public BotMessages chat(BotInstancesChatCompletionContext context);
@@ -32,6 +44,8 @@ public interface BotService {
     public ContextNodes adopt(BotMessagesAdoptContext context);
 
     public ContextNodes adopt(String botInstanceId, String messageId);
+
+    // public Bot createBotInstance(BotInstances botInstance, BotTypes botType);
 
     // /**
     // * 根据BotInstance ID获取主任务ID

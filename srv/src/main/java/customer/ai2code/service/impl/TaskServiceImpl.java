@@ -1,6 +1,7 @@
 package customer.ai2code.service.impl;
 
 import cds.gen.mainservice.Tasks;
+import cds.gen.mainservice.TasksGetHierarchyContext;
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotType;
 import cds.gen.mainservice.CreateTaskWithBotsContext;
@@ -14,9 +15,13 @@ import customer.ai2code.service.BotService;
 import customer.ai2code.service.TaskService;
 import customer.ai2code.service.ContextService;
 
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.cds.ql.cqn.AnalysisResult;
+import com.sap.cds.ql.cqn.CqnAnalyzer;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,6 +31,7 @@ public class TaskServiceImpl implements TaskService {
     private final GenericCqnService genericCqnService;
     private final ContextService contextService;
     private final TaskBotCacheManager cacheManager;
+    private final ObjectMapper objectMapper;
 
     // 全局Task缓存链表
     // private final Map<String, Task> taskCache = new ConcurrentHashMap<>();
@@ -34,12 +40,14 @@ public class TaskServiceImpl implements TaskService {
             BotService botService,
             GenericCqnService genericCqnService,
             ContextService contextService,
-            TaskBotCacheManager cacheManager) {
+            TaskBotCacheManager cacheManager,
+            ObjectMapper objectMapper) {
 
         this.botService = botService;
         this.genericCqnService = genericCqnService;
         this.contextService = contextService;
         this.cacheManager = cacheManager;
+        this.objectMapper = objectMapper;
     }
 
     /*
@@ -53,19 +61,23 @@ public class TaskServiceImpl implements TaskService {
         // 2. 创建主Task
         Tasks newTask = genericCqnService.createAndInsertMainTask(name, description, taskTypeId);
 
-        // 3. 为每个BotType创建BotInstance
-        for (BotTypes botType : botTypes) {
-            genericCqnService.createAndInsertBotInstance(newTask.getId(), botType);
-        }
-
-        // 4. 创建基础ContextNodes
-        createBasicContextNodes(newTask.getId(), name, description);
-
-        // 5.新建Task对象
+        // 3.新建Task对象
         GenericTask task = new GenericTask(newTask);
 
-        // 6. 放入缓存 - 使用新的缓存管理器
+        // 4. 放入缓存 - 使用新的缓存管理器
         cacheManager.addTaskNode(task, null);
+
+        // 5. 为每个BotType创建BotInstance
+        for (BotTypes botType : botTypes) {
+            BotInstances botInstancesNew = genericCqnService.createAndInsertBotInstance(newTask.getId(), botType);
+            // 新建Bot对象
+            Bot bot = cacheManager.createBotInstance(botInstancesNew, botType);
+            // 放入缓存 - 使用新的缓存管理器
+            cacheManager.addBotInstanceNode(bot);
+        }
+
+        // 6. 创建基础ContextNodes
+        createBasicContextNodes(newTask.getId(), name, description);
 
         // 7. 返回新建的Task对象
         return task;
@@ -79,10 +91,8 @@ public class TaskServiceImpl implements TaskService {
             int sequence) {
         // 1. 查询botInstance
         Bot bot = botService.getCurrentBot(botInstanceId);
-        BotInstances PBotInstance = bot.getBotInstance();
 
         // 2. 获取上级BotType
-        // BotType PBotType = PBotInstance.getType();
         BotTypes PBotType = bot.getBotType();
 
         // 3. 获取TaskType
@@ -92,7 +102,8 @@ public class TaskServiceImpl implements TaskService {
         List<BotTypes> botTypes = genericCqnService.getBotTypesByTaskType(PBotType.getSubTaskTypeId());
 
         // 3.2 获取绝对路径
-        String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, contextPath);
+        String absoluteOutputContextPath = contextService.getContextFullPath(bot, contextPath);
+        // String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, contextPath);
         // 4. 创建Task
         Tasks newTask = genericCqnService.createAndInsertSubTask(name, description, absoluteOutputContextPath,
                 sequence, botInstanceId, PBotType.getSubTaskTypeId());
@@ -101,18 +112,22 @@ public class TaskServiceImpl implements TaskService {
         // contextService.upsertContextWithMainTaskId(newTask.getId(),
         // absoluteOutputContextPath + ".description",
         // description, "text");
-        contextService.upsertContext(botInstanceId, absoluteOutputContextPath + ".description", description, "STRING");
-
-        // 5. 为每个BotType创建BotInstance
-        for (BotTypes botType : botTypes) {
-            genericCqnService.createAndInsertBotInstance(newTask.getId(), botType);
-        }
-
-        // 6.新建Task对象
+        // 5.新建Task对象
         Task task = new GenericTask(newTask);
 
-        // 7. 放入缓存 - 使用新的缓存管理器
+        // 6. 放入缓存 - 使用新的缓存管理器
         cacheManager.addTaskNode(task, botInstanceId);
+
+        contextService.upsertContext(bot, absoluteOutputContextPath + ".description", description, "STRING");
+
+        // 7. 为每个BotType创建BotInstance
+        for (BotTypes botType : botTypes) {
+            BotInstances botInstancesNew = genericCqnService.createAndInsertBotInstance(newTask.getId(), botType);
+            // 新建Bot对象
+            Bot botNew = cacheManager.createBotInstance(botInstancesNew, botType);
+            // 放入缓存 - 使用新的缓存管理器
+            cacheManager.addBotInstanceNode(botNew);
+        }
 
         // 8.返回新建的Task对象
         return task;
@@ -147,42 +162,193 @@ public class TaskServiceImpl implements TaskService {
         Task task = createTaskWithBots(context.getName(), context.getDescription(), context.getTypeId());
 
         // 设置context
-        // context.setResult(task.getTask());
         return task;
     }
 
     @Override
     public Task getCurrentTask(String taskId) {
         // 先从缓存中查找 - 使用新的缓存管理器
-        Task cachedTask = cacheManager.getCachedTask(taskId);
-        if (cachedTask != null) {
-            return cachedTask;
-        }
+        TaskBotNode taskNode = cacheManager.getTaskNode(taskId);
+        return taskNode.getTaskObject();
+        // Task cachedTask = cacheManager.getCachedTask(taskId);
+        // if (cachedTask != null) {
+        //     return cachedTask;
+        // }
 
-        // 从数据库查询
-        Tasks taskCDS = genericCqnService.getTaskById(taskId);
-        Task task = new GenericTask(taskCDS);
+        // // 从数据库查询
+        // Tasks taskCDS = genericCqnService.getTaskAndSubBotsById(taskId);
+        // // Tasks taskCDS = genericCqnService.getTaskById(taskId);
+        // Task task = new GenericTask(taskCDS);
 
-        // 放入缓存 - 使用新的缓存管理器
-        cacheManager.addTaskNode(task, taskCDS.getBotInstanceId());
+        // // 放入缓存 - 使用新的缓存管理器
+        // cacheManager.addTaskNode(task, taskCDS.getBotInstanceId());
 
-        return task;
+        // return task;
     }
 
     @Override
     public Task getCurrentTask(String botInstanceId, int sequence) {
         // 使用缓存管理器查找
-        TaskBotNode botNode = cacheManager.getBotInstanceByTaskAndSequence(botInstanceId, sequence);
-        if (botNode != null && botNode.getParent() != null) {
-            TaskBotNode parentTask = botNode.getParent();
-            if (parentTask.getType() == TaskBotNode.NodeType.TASK) {
-                return parentTask.getTaskObject();
+        TaskBotNode taskNode = cacheManager.getTaskByBotInstanceAndSequence(botInstanceId, sequence);
+        return taskNode.getTaskObject();
+        // TaskBotNode botNode =
+        // cacheManager.getBotInstanceByTaskAndSequence(botInstanceId, sequence);
+        // if (botNode != null && botNode.getParent() != null) {
+        // TaskBotNode parentTask = botNode.getParent();
+        // if (parentTask.getType() == TaskBotNode.NodeType.TASK) {
+        // return parentTask.getTaskObject();
+        // }
+        // }
+
+        // // 根据botInstanceId和sequence查询Task
+        // Tasks task = genericCqnService.getTaskByBotInstanceAndSequence(botInstanceId,
+        // sequence);
+        // return getCurrentTask(task.getId());
+    }
+
+    @Override
+    public String getHierarchy(TasksGetHierarchyContext context) {
+        // 从上下文中获取任务ID
+        String taskId = extractTaskIdFromContext(context);
+
+        // 调用getHierarchy方法
+        return getHierarchy(taskId);
+    }
+
+    private String extractTaskIdFromContext(TasksGetHierarchyContext context) {
+        // 从CQN查询中提取消息ID
+        // 使用CqnAnalyzer类，从CQN查询中提取ID，需要解析CqnSelect
+        CqnAnalyzer cqnAnalyzer = CqnAnalyzer.create(context.getModel());
+        AnalysisResult result = cqnAnalyzer.analyze(context.getCqn().ref());
+        // return result.rootKeys().get("message_ID").toString();
+        return result.targetKeys().get("ID").toString();
+
+    }
+
+    @Override
+    public String getHierarchy(String taskId) {
+        try {
+            // 获取根任务
+            Task rootTask = getCurrentTask(taskId);
+            if (rootTask == null) {
+                return "{}";
+            }
+
+            // 构建层次结构
+            HierarchyNode hierarchyNode = buildHierarchy(rootTask);
+
+            // 使用 ObjectMapper 转换为JSON字符串
+            return objectMapper.writeValueAsString(hierarchyNode);
+
+        } catch (Exception e) {
+            System.err.println("Error building hierarchy for task: " + taskId + ", error: " + e.getMessage());
+            return "{}";
+        }
+    }
+
+    @Override
+    public String getMainTaskId(String botInstanceId) {
+        // 使用缓存管理器获取主任务ID
+        // return cacheManager.getMainTaskId(botInstanceId);
+        String mainTaskId = cacheManager.getMainTaskId(botInstanceId);
+        if (mainTaskId != null) {
+            return mainTaskId;
+        }
+        // 如果缓存中没有，执行原有逻辑
+        return genericCqnService.getMainTaskId(botInstanceId);
+    }
+
+    /**
+     * 递归构建任务和Bot的层次结构
+     */
+    private HierarchyNode buildHierarchy(Task task) {
+        Tasks taskCDS = task.getTask();
+
+        // 创建任务节点
+        HierarchyNode taskNode = new HierarchyNode();
+        taskNode.type = "task";
+        taskNode.id = taskCDS.getId();
+        taskNode.name = taskCDS.getName();
+        taskNode.description = taskCDS.getDescription();
+        taskNode.isMain = taskCDS.getIsMain() != null ? taskCDS.getIsMain() : false;
+        taskNode.sequence = taskCDS.getSequence() != null ? taskCDS.getSequence() : 0;
+        // Tasks 没有 status 字段，跳过设置
+
+        // 获取任务下的BotInstances
+        // List<BotInstances> botInstances = taskCDS.getBotInstances();
+        List<TaskBotNode> bots = cacheManager.getChildren(cacheManager.getTaskNode(task));
+        if (bots != null && !bots.isEmpty()) {
+            taskNode.items = new ArrayList<>();
+
+            for (TaskBotNode cachedBot : bots) {
+                try {
+                    // 获取Bot对象
+                    // Bot bot = botService.getCurrentBot(botInstance.getId());
+
+                    // 创建Bot节点
+                    HierarchyNode botNode = new HierarchyNode();
+                    botNode.type = "bot";
+                    botNode.id = cachedBot.getId();
+                    botNode.name = cachedBot.getBotObject().getBotType().getName();
+                    botNode.description = cachedBot.getBotObject().getBotType().getDescription();
+                    botNode.functionType = cachedBot.getBotObject().getBotInstance().getTypeId();
+                    botNode.status = cachedBot.getBotStatus(); // 使用 getStatusCode() 而不是 getStatus()
+                    botNode.sequence = cachedBot.getBotObject().getBotInstance().getSequence() != null ? cachedBot.getBotObject().getBotInstance().getSequence()
+                            : 0;
+
+                    // 获取Bot下的子任务
+                    // List<Tasks> subTasks = bot.getBotInstance().getTasks();
+                    List<TaskBotNode> subTasks = cacheManager.getChildren(cachedBot);
+
+
+                    if (subTasks != null && !subTasks.isEmpty()) {
+                        botNode.items = new ArrayList<>();
+
+                        for (TaskBotNode cachedTask : subTasks) {
+                            try {
+                                // 递归处理子任务
+                                // Task subTask = getCurrentTask(subTask.getId());
+                                HierarchyNode subTaskNode = buildHierarchy(cachedTask.getTaskObject());
+                                botNode.items.add(subTaskNode);
+                            } catch (Exception e) {
+                                System.err.println("Error processing sub-task: " + cachedTask.getId() + ", error: "
+                                        + e.getMessage());
+                            }
+                        }
+                    }
+
+                    taskNode.items.add(botNode);
+
+                } catch (Exception e) {
+                    System.err.println(
+                            "Error processing bot instance: " + cachedBot.getId() + ", error: " + e.getMessage());
+                }
             }
         }
 
-        // 根据botInstanceId和sequence查询Task
-        Tasks task = genericCqnService.getTaskByBotInstanceAndSequence(botInstanceId, sequence);
-        return getCurrentTask(task.getId());
+        return taskNode;
+    }
+
+    /**
+     * 层次结构节点内部类
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class HierarchyNode {
+        public String type; // "task" 或 "bot"
+        public String id;
+        public String name;
+        public String description;
+        public String status;
+        public int sequence;
+
+        // 任务特有属性
+        public Boolean isMain;
+
+        // Bot特有属性
+        public String functionType;
+
+        // 子节点
+        public List<HierarchyNode> items;
     }
 
     private void createBasicContextNodes(String taskId, String name, String description) {
