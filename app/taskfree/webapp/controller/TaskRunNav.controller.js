@@ -126,40 +126,40 @@ sap.ui.define(
             this._currentTaskId = sTaskId;
           }
           // 3. 详情页/子任务导航
-          var sExtractedTaskId = null;
-          if (sRouteName.indexOf("RouteTask") === 0 || sRouteName.indexOf("RouteBotInstance") === 0 || sRouteName.indexOf("RouteContextNode") === 0 || sRouteName.indexOf("RouteAI") === 0) {
-            if (oArguments.taskRunId) {
-              sExtractedTaskId = oArguments.taskRunId;
-            } else if (oArguments.taskId) {
-              sExtractedTaskId = oArguments.taskId;
-            } else {
-              var oRouter = this.getOwnerComponent().getRouter();
-              var sHash = oRouter.getHashChanger().getHash();
-              var aMatches = sHash.match(/Tasks\(([^)]+)\)/);
-              if (aMatches && aMatches[1]) {
-                sExtractedTaskId = aMatches[1].replace(/'/g, '');
-              }
-            }
-            if (sExtractedTaskId) {
-              if (this._dataCache.isLoaded) {
-                var sRootTaskId = this._findRootTaskId(sExtractedTaskId);
-                if (sRootTaskId === this._dataCache.currentTask?.ID) {
-                  this._restoreNavigationState();
-                  this._updateNavigationSelection(sExtractedTaskId);
-                  return;
-                } else if (sRootTaskId && sRootTaskId !== sExtractedTaskId) {
-                  this._preloadTaskData(sRootTaskId, "");
-                  return;
-                }
-              } else {
-                this._loadRootTaskForSubTask(sExtractedTaskId);
-                return;
-              }
-            }
-            if (sExtractedTaskId && (!this._dataCache.isLoaded || this._dataCache.currentTask?.ID !== sExtractedTaskId)) {
-              this._preloadTaskData(sExtractedTaskId, "");
-            }
-          }
+          // var sExtractedTaskId = null;
+          // if (sRouteName.indexOf("RouteTask") === 0 || sRouteName.indexOf("RouteBotInstance") === 0 || sRouteName.indexOf("RouteContextNode") === 0 || sRouteName.indexOf("RouteAI") === 0) {
+          //   if (oArguments.taskRunId) {
+          //     sExtractedTaskId = oArguments.taskRunId;
+          //   } else if (oArguments.taskId) {
+          //     sExtractedTaskId = oArguments.taskId;
+          //   } else {
+          //     var oRouter = this.getOwnerComponent().getRouter();
+          //     var sHash = oRouter.getHashChanger().getHash();
+          //     var aMatches = sHash.match(/Tasks\(([^)]+)\)/);
+          //     if (aMatches && aMatches[1]) {
+          //       sExtractedTaskId = aMatches[1].replace(/'/g, '');
+          //     }
+          //   }
+          //   if (sExtractedTaskId) {
+          //     if (this._dataCache.isLoaded) {
+          //       var sRootTaskId = this._findRootTaskId(sExtractedTaskId);
+          //       if (sRootTaskId === this._dataCache.currentTask?.ID) {
+          //         this._restoreNavigationState();
+          //         this._updateNavigationSelection(sExtractedTaskId);
+          //         return;
+          //       } else if (sRootTaskId && sRootTaskId !== sExtractedTaskId) {
+          //         this._preloadTaskData(sRootTaskId, "");
+          //         return;
+          //       }
+          //     } else {
+          //       this._loadRootTaskForSubTask(sExtractedTaskId);
+          //       return;
+          //     }
+          //   }
+          //   if (sExtractedTaskId && (!this._dataCache.isLoaded || this._dataCache.currentTask?.ID !== sExtractedTaskId)) {
+          //     this._preloadTaskData(sExtractedTaskId, "");
+          //   }
+          // }
           // 4. 详情页选中项恢复
           if (sRouteName === "RouteTaskDetail" && oArguments && oArguments.taskId) {
             this._restoreNavigationState();
