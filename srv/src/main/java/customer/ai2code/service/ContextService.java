@@ -5,6 +5,7 @@ import java.util.Map;
 
 import cds.gen.mainservice.ContextNodes;
 import cds.gen.mainservice.TasksGetContextHierarchyContext;
+import customer.ai2code.model.bot.Bot;
 
 public interface ContextService {
 
@@ -18,12 +19,12 @@ public interface ContextService {
     /**
      * 获取完整的上下文路径（处理SubContext相对路径）
      */
-    public String getContextFullPath(String botInstanceId, String subPath);
+    public String getContextFullPath(Bot bot, String subPath);
 
     /**
      * 创建或更新上下文节点
      */
-    public ContextNodes upsertContext(String botInstanceId, String contextPath, String contextValue,
+    public ContextNodes upsertContext(Bot bot, String contextPath, String contextValue,
             String contextType);
 
     public ContextNodes upsertContextWithMainTaskId(String mainTaskId, String contextPath, String contextValue,
@@ -37,14 +38,14 @@ public interface ContextService {
     /**
      * 批量更新/创建上下文节点
      */
-    public List<ContextNodes> upsertContextBatch(String botInstanceId, Map<String, String> contextPathValueMap,
+    public List<ContextNodes> upsertContextBatch(Bot bot, Map<String, String> contextPathValueMap,
             String contextType);
 
     /**
      * 根据路径模式查询上下文节点（支持数组语法）
      */
-    public List<ContextNodes> getContextNodesByPattern(String botInstanceId, String pathPattern);
+    public List<ContextNodes> getContextNodesByPattern(Bot bot, String pathPattern);
 
-    public void updateAdditionInfo(String botInstanceId,String contextPath,String additionalInfo);
+    public void updateAdditionInfo(Bot bot,String contextPath,String additionalInfo);
 
 }

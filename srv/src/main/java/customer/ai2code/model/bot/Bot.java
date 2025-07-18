@@ -9,8 +9,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import cds.gen.configservice.BotTypes;
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
-// import cds.gen.mainservice.BotType;
-import customer.ai2code.model.config.AIModel;
+import customer.ai2code.model.ai.config.model.AIModel;
 
 public interface Bot {
     // public final Executor executor = null;
@@ -36,4 +35,31 @@ public interface Bot {
     public AIModel getAiModel();
 
     public Locale getLocale();
+    
+    /**
+     * 更新Bot实例状态
+     * @param statusCode 状态代码
+     * @return 更新后的BotInstances
+     */
+    public BotInstances updateStatus(String statusCode);
+    
+    /**
+     * 更新Bot实例执行结果
+     * @param result 执行结果
+     * @return 更新后的BotInstances
+     */
+    public BotInstances updateResult(String result);
+    
+    /**
+     * 更新Bot实例关联的ContextNode ID
+     * @param contextNodeId 上下文节点ID
+     * @return 更新后的BotInstances
+     */
+    public BotInstances updateContextNodeId(String contextNodeId);
+    
+    /**
+     * 更新Bot实例
+     * @return 更新后的BotInstances
+     */
+    public BotInstances update(BotInstances botInstance);
 }

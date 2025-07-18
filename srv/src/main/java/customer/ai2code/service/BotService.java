@@ -2,6 +2,8 @@ package customer.ai2code.service;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import cds.gen.configservice.BotTypes;
+import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesChatCompletionContext;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 import cds.gen.mainservice.BotMessages;
@@ -42,6 +44,8 @@ public interface BotService {
     public ContextNodes adopt(BotMessagesAdoptContext context);
 
     public ContextNodes adopt(String botInstanceId, String messageId);
+
+    // public Bot createBotInstance(BotInstances botInstance, BotTypes botType);
 
     // /**
     // * 根据BotInstance ID获取主任务ID
