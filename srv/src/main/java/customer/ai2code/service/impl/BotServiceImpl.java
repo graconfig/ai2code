@@ -1,6 +1,5 @@
 package customer.ai2code.service.impl;
 
-import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotMessages;
 import cds.gen.mainservice.BotMessagesAdoptContext;
 import cds.gen.mainservice.ContextNodes;
@@ -9,12 +8,9 @@ import cds.gen.mainservice.BotInstancesChatCompletionContext;
 
 // import cds.gen.configservice.BotTypes;
 import customer.ai2code.exception.BusinessException;
+import customer.ai2code.model.ai.config.AIModelResolver;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.model.bot.ChatBot;
-// import customer.ai2code.model.bot.CodingBot;
-// import customer.ai2code.model.bot.FunctionCallingBot;
-// import customer.ai2code.model.config.AIModel;
-import customer.ai2code.model.config.AIModelResolver;
 import customer.ai2code.model.tree.TaskBotNode;
 import customer.ai2code.service.BotService;
 import customer.ai2code.service.ContextService;

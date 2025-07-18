@@ -8,7 +8,7 @@ import cds.gen.configservice.BotTypes;
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 import customer.ai2code.exception.BusinessException;
-import customer.ai2code.model.config.AIModel;
+import customer.ai2code.model.ai.config.model.AIModel;
 import customer.ai2code.service.impl.GenericCqnService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

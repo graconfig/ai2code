@@ -4,7 +4,7 @@ import java.util.Locale;
 
 import cds.gen.configservice.BotTypes;
 import cds.gen.mainservice.BotInstances;
-import customer.ai2code.model.config.AIModel;
+import customer.ai2code.model.ai.config.model.AIModel;
 import customer.ai2code.service.impl.GenericCqnService;
 import lombok.AllArgsConstructor;
 import lombok.Data;

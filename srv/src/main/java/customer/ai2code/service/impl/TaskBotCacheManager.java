@@ -5,12 +5,12 @@ import customer.ai2code.model.tree.TaskBotNode.NodeType;
 import customer.ai2code.service.PromptService;
 import customer.ai2code.service.TaskBotDataService;
 import customer.ai2code.exception.BusinessException;
+import customer.ai2code.model.ai.config.AIModelResolver;
+import customer.ai2code.model.ai.config.model.AIModel;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.model.bot.ChatBot;
 import customer.ai2code.model.bot.CodingBot;
 import customer.ai2code.model.bot.FunctionCallingBot;
-import customer.ai2code.model.config.AIModel;
-import customer.ai2code.model.config.AIModelResolver;
 import customer.ai2code.model.task.GenericTask;
 import customer.ai2code.model.task.Task;
 

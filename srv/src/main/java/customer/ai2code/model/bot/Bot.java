@@ -9,8 +9,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import cds.gen.configservice.BotTypes;
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
-// import cds.gen.mainservice.BotType;
-import customer.ai2code.model.config.AIModel;
+import customer.ai2code.model.ai.config.model.AIModel;
 
 public interface Bot {
     // public final Executor executor = null;

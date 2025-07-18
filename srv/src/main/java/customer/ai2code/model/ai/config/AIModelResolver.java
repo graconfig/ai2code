@@ -1,7 +1,12 @@
-package customer.ai2code.model.config;
+package customer.ai2code.model.ai.config;
 
 import org.springframework.stereotype.Service;
 import cds.gen.configservice.ModelConfigs;
+import customer.ai2code.model.ai.config.model.AIModel;
+import customer.ai2code.model.ai.config.model.SAPAICoreClaudeAI35Sonnet;
+import customer.ai2code.model.ai.config.model.SAPAICoreClaudeAI37Sonnet;
+import customer.ai2code.model.ai.config.model.SAPAICoreOpenAIGPT35;
+import customer.ai2code.model.ai.config.model.SAPAICoreOpenAIgpt4o;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.impl.GenericCqnService;
 import customer.ai2code.service.impl.SAClaudeAIServiceImpl;
