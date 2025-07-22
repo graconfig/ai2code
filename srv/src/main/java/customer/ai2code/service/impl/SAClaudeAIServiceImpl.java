@@ -30,6 +30,7 @@ import customer.ai2code.model.aicore.claude.ConverseRequestAssistantMessage;
 import customer.ai2code.model.aicore.claude.ConverseRequestInferenceConfig;
 import customer.ai2code.model.aicore.claude.ConverseRequestToolConfig;
 import customer.ai2code.model.aicore.claude.ConverseResponse;
+import customer.ai2code.model.aicore.claude.ConverseResponseAssistantMessage;
 import customer.ai2code.model.aicore.claude.ConverseTool;
 import customer.ai2code.model.aicore.claude.ConverseToolChoice;
 import customer.ai2code.model.aicore.claude.SpecificToolChoice;
@@ -306,7 +307,7 @@ public class SAClaudeAIServiceImpl implements AIService {
                 if (response.getOutput() == null) {
                         throw new BusinessException("Response output is null");
                 }
-                ConverseRequestAssistantMessage assistantMessage = (ConverseRequestAssistantMessage) response
+                ConverseResponseAssistantMessage assistantMessage = (ConverseResponseAssistantMessage) response
                                 .getOutput()
                                 .getMessage();
                 ContentBlock toolUseContent = assistantMessage.getContent().stream()
