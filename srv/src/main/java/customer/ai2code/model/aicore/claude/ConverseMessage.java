@@ -45,10 +45,10 @@ import javax.annotation.Nullable;
  * ConverseMessage
  */
 @Beta
-@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "role", visible = true)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = ConverseRequestAssistantMessage.class),
-    @JsonSubTypes.Type(value = ConverseRequestUserMessage.class),
+    @JsonSubTypes.Type(value = ConverseRequestAssistantMessage.class, name = "assistant"),
+    @JsonSubTypes.Type(value = ConverseRequestUserMessage.class, name = "user"),
 })
 
 public interface ConverseMessage  {
