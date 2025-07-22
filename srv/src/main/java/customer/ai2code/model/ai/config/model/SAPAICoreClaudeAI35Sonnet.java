@@ -2,7 +2,7 @@ package customer.ai2code.model.ai.config.model;
 
 import cds.gen.configservice.ModelConfigs;
 import customer.ai2code.model.ai.config.service.AIServiceConfig;
-import customer.ai2code.model.ai.config.service.SAPAICoreConfig;
+import customer.ai2code.model.ai.config.service.SAPAICoreClaudeConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,8 +23,8 @@ public class SAPAICoreClaudeAI35Sonnet implements AIModel {
     @Override
     public AIServiceConfig parseModelConfigs() {
         ObjectMapper mapper = getDefaultObjectMapper();
-        SAPAICoreConfig claudeConfig =
-            mapper.convertValue(modelConfigs.getParameters(), SAPAICoreConfig.class);
+        SAPAICoreClaudeConfig claudeConfig =
+            mapper.convertValue(modelConfigs.getParameters(), SAPAICoreClaudeConfig.class);
         return claudeConfig;
     }
 

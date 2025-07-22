@@ -223,7 +223,7 @@
 								<!-- <excludeProperties>chatCompletionResponseMessage.context
 											createChatCompletionRequest.data_sources</excludeProperties> -->
 								<!-- new: remove unassigned components -->
-								<removeUnusedComponents>true</removeUnusedComponents>
+								<removeUnusedComponents>false</removeUnusedComponents>
 							</additionalProperties>
 						</configuration>
 					</execution>
