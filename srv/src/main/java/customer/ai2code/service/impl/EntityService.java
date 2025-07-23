@@ -56,7 +56,7 @@ public class EntityService {
         if (result.rowCount() > 1) {
             // throw new BusinessException("Multiple_Records_Found", "Expected a single
             // record, but found multiple.");
-            return result.stream().filter(r -> (Boolean) r.getOrDefault("isActiveEntity", true)).findAny()
+            return result.stream().filter(r -> (Boolean) r.getOrDefault("IsActiveEntity", true)).findAny()
                     .map(r -> r.as(type))
                     .orElseThrow(() -> new BusinessException("Expected a single record, but found multiple."));
 
@@ -67,7 +67,7 @@ public class EntityService {
     public <T extends CdsData> List<T> selectList(CqnService service, CqnSelect select, Class<T> type) {
         Result result = service.run(select);
         // 修正某些Entity草稿模式下返回多条的情况
-        return result.streamOf(type).filter(r -> (Boolean) r.getOrDefault("isActiveEntity", true)).toList();
+        return result.streamOf(type).filter(r -> (Boolean) r.getOrDefault("IsActiveEntity", true)).toList();
         // return result.listOf(type);
     }
 
