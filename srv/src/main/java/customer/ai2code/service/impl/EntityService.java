@@ -66,7 +66,9 @@ public class EntityService {
 
     public <T extends CdsData> List<T> selectList(CqnService service, CqnSelect select, Class<T> type) {
         Result result = service.run(select);
-        return result.listOf(type);
+        // 修正某些Entity草稿模式下返回多条的情况
+        return result.streamOf(type).filter(r -> (Boolean) r.getOrDefault("isActiveEntity", true)).toList();
+        // return result.listOf(type);
     }
 
     public Result select(CqnService service, CqnSelect select) {
