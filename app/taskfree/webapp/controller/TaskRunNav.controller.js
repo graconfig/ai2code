@@ -213,6 +213,24 @@ sap.ui.define(
         },
         _cacheTaskData: function (oTaskTree) {
           this._taskTreeData = Array.isArray(oTaskTree) ? oTaskTree : [oTaskTree];
+          // 遍历_taskTreeData中的每个元素的items数组根据id去重
+          this._taskTreeData = this._taskTreeData.map(taskItem => {
+            if (taskItem.items && Array.isArray(taskItem.items)) {
+              const uniqueItems = [];
+              const seenIds = new Set();
+
+              taskItem.items.forEach(subItem => {
+                if (!seenIds.has(subItem.id)) {
+                  seenIds.add(subItem.id);
+                  uniqueItems.push(subItem);
+                }
+              });
+
+              return { ...taskItem, items: uniqueItems };
+            }
+            // 如果没有items数组则直接返回原对象
+            return taskItem;
+          });
           this._adaptTreeNodeText(this._taskTreeData);
           this.getView().getModel("side").setProperty("/navigation", this._taskTreeData);
           this._dataCache.isLoaded = true;
