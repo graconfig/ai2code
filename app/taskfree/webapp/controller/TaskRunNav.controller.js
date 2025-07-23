@@ -295,10 +295,12 @@ sap.ui.define(
 
           this._buildTaskHierarchyMap();
 
+          const [mainTask] = this._taskTreeData;
+          if (mainTask) this._dataCache.currentTask = mainTask;
+
           // const [mainTask] = this._taskTreeData;
           // if (mainTask) {
           //   this._dataCache.currentTask = mainTask;
-
           //   const cacehSubTasks = (node) => {
           //     if (!node) return;
           //     if (node.id && node.id !== this._dataCache.currentTask.ID) {
@@ -310,6 +312,7 @@ sap.ui.define(
           //   mainTask.items?.forEach(cacehSubTasks);
           // }
         },
+
         _cacheContextNodeTree(oContextTree) {
           this._contextNodeTreeData = Array.isArray(oContextTree) ? oContextTree : [oContextTree];
           this._adaptTreeNodeText(this._contextNodeTreeData);
