@@ -43,7 +43,7 @@ sap.ui.define(
         this.oTaskDescriptionInput = null;
       },
 
-      onExit: function () {
+      onExit() {
         if (this.oSubmitDialog) {
           this.oSubmitDialog.destroy();
           this.oSubmitDialog = null;
@@ -58,7 +58,7 @@ sap.ui.define(
         }
       },
 
-      onCreate: function () {
+      onCreate() {
         if (!this.oSubmitDialog) {
           this.oSubmitDialog = new Dialog({
             type: DialogType.Message,
@@ -89,9 +89,9 @@ sap.ui.define(
         this.oSubmitDialog.open();
       },
 
-      onDelete: function (oEvent) {
-        var oTable = this.byId("taskTable");
-        var aSelectedItems = oTable.getSelectedItems();
+      onDelete(oEvent) {
+        const oTable = this.byId("taskTable");
+        const aSelectedItems = oTable.getSelectedItems();
 
         if (aSelectedItems.length === 0) {
           MessageToast.show("No items selected for deletion");
@@ -103,43 +103,45 @@ sap.ui.define(
           "Are you sure you want to delete the selected " + aSelectedItems.length + " item(s)?",
           {
             title: "Confirm Deletion",
-            onClose: function (oAction) {
+            onClose: (oAction) => {
               if (oAction === MessageBox.Action.OK) {
                 this._deleteSelectedItems(aSelectedItems);
               }
-            }.bind(this)
+            }
           }
         );
       },
 
-      _deleteSelectedItems: function (aSelectedItems) {
-        var oTable = this.byId("taskTable");
-        var aPromises = [];
+      _deleteSelectedItems(aSelectedItems) {
+        const oTable = this.byId("taskTable");
+        let aPromises = [];
 
         oTable.setBusy(true);
 
         // Get contexts from selected items and delete them
-        aSelectedItems.forEach(function (oItem) {
-          var oContext = oItem.getBindingContext();
+        aSelectedItems.forEach((oItem) => {
+          const oContext = oItem.getBindingContext();
           if (oContext) {
             aPromises.push(oContext.delete("$auto"));
           }
         });
 
-        Promise.all(aPromises).then(function () {
-          MessageToast.show(aSelectedItems.length + " item(s) deleted successfully");
-          // Clear selection after successful deletion
-          oTable.removeSelections(true);
-        }).catch(function (oError) {
-          MessageToast.show("Error deleting items: " + (oError.message || oError.toString()));
-        }).finally(function () {
-          oTable.setBusy(false);
-        });
+        Promise.all(aPromises)
+          .then(() => {
+            MessageToast.show(aSelectedItems.length + " item(s) deleted successfully");
+            // Clear selection after successful deletion
+            oTable.removeSelections(true);
+          }).catch((oError) => {
+            MessageToast.show("Error deleting items: " + (oError.message || oError.toString()));
+          }).finally(() => {
+            oTable.setBusy(false);
+          });
       },
 
-      onItemPress: function (oEvent) {
+      onItemPress(oEvent) {
         const oItem = oEvent.getSource();
         const oBindingContext = oItem.getBindingContext();
+
         if (oBindingContext) {
           const sTaskRunId = oBindingContext.getProperty("ID");
           if (sTaskRunId) {
@@ -155,7 +157,7 @@ sap.ui.define(
           }
         }
       },
-      _createSelectTaskTypeDialog: function () {
+      _createSelectTaskTypeDialog() {
         return this.oSelectTypeDialog
           ? this.oSelectTypeDialog
           : new SelectDialog({
@@ -170,7 +172,7 @@ sap.ui.define(
                 highlightText: "{ID}",
               }),
             },
-            confirm: function (oEvent) {
+            confirm: (oEvent) => {
               const oSelectedItem = oEvent.getParameter("selectedItem");
               if (oSelectedItem) {
                 const sTaskTypeName = oSelectedItem.getTitle();
@@ -183,21 +185,21 @@ sap.ui.define(
                 // Enable the Create button if task name is now filled
                 this.oSubmitDialog.getBeginButton().setEnabled(sTaskTypeName.length > 0);
               }
-            }.bind(this),
+            },
           });
       },
 
-      _createTaskForm: function () {
+      _createTaskForm() {
         this.oTaskTypeNameInput = new Input({
           showValueHelp: true,
           valueHelpOnly: true,
-          valueHelpRequest: function () {
+          valueHelpRequest: () => {
             this.oSelectTypeDialog = this._createSelectTaskTypeDialog();
             this.oSelectTypeDialog.setModel(
               this.getOwnerComponent().getModel()
             );
             this.oSelectTypeDialog.open();
-          }.bind(this),
+          },
         });
 
         this.oTaskTypeIdInput = new Input({
@@ -208,12 +210,12 @@ sap.ui.define(
         this.oTaskNameInput = new Input({
           placeholder: "Enter task name",
           required: true,
-          liveChange: function (oEvent) {
+          liveChange: (oEvent) => {
             var sText = oEvent.getParameter("value");
             this.oSubmitDialog
               .getBeginButton()
               .setEnabled(sText.length > 0);
-          }.bind(this),
+          },
         });
 
         this.oTaskDescriptionInput = new TextArea({
@@ -234,7 +236,7 @@ sap.ui.define(
         });
       },
 
-      _createTask: function () {
+      _createTask() {
         const sTaskName = this.oTaskNameInput.getValue();
         const sTaskDescription = this.oTaskDescriptionInput.getValue();
         const sTaskTypeId = this.oTaskTypeIdInput.getValue();
@@ -246,34 +248,35 @@ sap.ui.define(
         const oModel = this.getOwnerComponent().getModel();
         const sPath = "/createTaskWithBots(...)";
         const oContextBinding = oModel.bindContext(sPath);
-        oContextBinding.setParameter("name", oNewTask.name);
-        oContextBinding.setParameter("description", oNewTask.description);
-        oContextBinding.setParameter("typeId", oNewTask.type_ID);
+
+        oContextBinding?.setParameter("name", oNewTask.name);
+        oContextBinding?.setParameter("description", oNewTask.description);
+        oContextBinding?.setParameter("typeId", oNewTask.type_ID);
         this.getView().setBusy(true);
         oContextBinding
           .invoke()
           .then(
-            function (oContext) {
+            (oContext) => {
               MessageToast.show("Task created successfully");
               this._navToTaskRunDetail(
                 oContextBinding.getBoundContext().getProperty("ID")
               );
               oModel.refresh();
-            }.bind(this)
+            }
           )
           .catch(
-            function (oError) {
+            (oError) => {
               MessageToast.show("Error creating task: " + oError.message);
-            }.bind(this)
+            }
           )
           .finally(
-            function () {
+            () => {
               this.getView().setBusy(false);
-            }.bind(this)
+            }
           );
       },
 
-      _clearFormFields: function () {
+      _clearFormFields() {
         // Clear all form fields
         if (this.oTaskTypeNameInput) this.oTaskTypeNameInput.setValue("");
         if (this.oTaskTypeIdInput) this.oTaskTypeIdInput.setValue("");
@@ -286,7 +289,7 @@ sap.ui.define(
         }
       },
 
-      _navToTaskRunDetail: function (sTaskRunId) {
+      _navToTaskRunDetail(sTaskRunId) {
         // Publish event to notify other controllers of the task change
         sap.ui.getCore().getEventBus().publish("TaskRun", "TaskSelectionChanged", {
           taskId: sTaskRunId
@@ -297,10 +300,10 @@ sap.ui.define(
         });
       },
 
-      onSearch: function (oEvent) {
-        var sQuery = oEvent.getParameter("query") || oEvent.getParameter("newValue");
-        var oTable = this.byId("taskTable");
-        var oBinding = oTable.getBinding("items");
+      onSearch(oEvent) {
+        const sQuery = oEvent.getParameter("query") || oEvent.getParameter("newValue");
+        const oTable = this.byId("taskTable");
+        const oBinding = oTable.getBinding("items");
 
         if (sQuery && sQuery.length > 0) {
           var oFilter = new sap.ui.model.Filter([

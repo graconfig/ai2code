@@ -248,6 +248,24 @@ sap.ui.define(
 
         _cacheTaskData(oTaskTree) {
           this._taskTreeData = Array.isArray(oTaskTree) ? oTaskTree : [oTaskTree];
+          // 遍历_taskTreeData中的每个元素的items数组根据id去重
+          this._taskTreeData = this._taskTreeData.map(taskItem => {
+            if (taskItem.items && Array.isArray(taskItem.items)) {
+              const uniqueItems = [];
+              const seenIds = new Set();
+
+              taskItem.items.forEach(subItem => {
+                if (!seenIds.has(subItem.id)) {
+                  seenIds.add(subItem.id);
+                  uniqueItems.push(subItem);
+                }
+              });
+
+              return { ...taskItem, items: uniqueItems };
+            }
+            // 如果没有items数组则直接返回原对象
+            return taskItem;
+          });
           this._adaptTreeNodeText(this._taskTreeData);
           this.getView().getModel("side").setProperty("/navigation", this._taskTreeData);
 
@@ -308,8 +326,13 @@ sap.ui.define(
             node.text = node.name || node.label || "undefined";
 
             const nodeType = (node.type || "").toLowerCase();
-            const typeConfig = typeIconMap.get(nodeType) ||
-              { icon: 'sap-icon://syntax', keyPrefix: 'code_', type: 'ContextNode' };
+            // let typeConfig = typeIconMap.get(nodeType) ||
+            //   { icon: 'sap-icon://syntax', keyPrefix: 'code_', type: 'ContextNode' };
+
+            let typeConfig = {
+              ...(typeIconMap.get(nodeType) ||
+                { icon: 'sap-icon://syntax', keyPrefix: 'code_', type: 'ContextNode' })
+            };
 
             // 特殊处理
             if (nodeType === 'task' && node.isMain) {
@@ -467,8 +490,8 @@ sap.ui.define(
         },
 
         _getCurrentTaskRunId() {
-          if (this._currentTaskId) {
-            return this._currentTaskId;
+          if (this.currentTaskId) {
+            return this.currentTaskId;
           }
 
           const oRouter = this.getOwnerComponent().getRouter();
