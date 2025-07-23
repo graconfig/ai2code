@@ -248,24 +248,43 @@ sap.ui.define(
 
         _cacheTaskData(oTaskTree) {
           this._taskTreeData = Array.isArray(oTaskTree) ? oTaskTree : [oTaskTree];
-          // 遍历_taskTreeData中的每个元素的items数组根据id去重
-          this._taskTreeData = this._taskTreeData.map(taskItem => {
-            if (taskItem.items && Array.isArray(taskItem.items)) {
+          // 递归处理单个节点
+          const processNode = (node) => {
+            if (!node || typeof node !== 'object') {
+              return node;
+            }
+
+            // 如果有items数组，进行去重和排序处理
+            if (node.items && Array.isArray(node.items)) {
+              // 去重
               const uniqueItems = [];
               const seenIds = new Set();
 
-              taskItem.items.forEach(subItem => {
-                if (!seenIds.has(subItem.id)) {
-                  seenIds.add(subItem.id);
-                  uniqueItems.push(subItem);
+              node.items.forEach(item => {
+                if (!seenIds.has(item.id)) {
+                  seenIds.add(item.id);
+                  uniqueItems.push(item);
                 }
               });
 
-              return { ...taskItem, items: uniqueItems };
+              // 递归处理每个子节点
+              const processedItems = uniqueItems.map(processNode);
+
+              // 按sequence排序
+              processedItems.sort((a, b) => {
+                return (a.sequence || 0) - (b.sequence || 0);
+              });
+
+              // 返回处理后的节点
+              return { ...node, items: processedItems };
             }
-            // 如果没有items数组则直接返回原对象
-            return taskItem;
-          });
+
+            // 没有items数组则直接返回节点（可能包含其他属性）
+            return { ...node };
+          };
+          // 处理整个任务树
+          this._taskTreeData = this._taskTreeData.map(processNode);
+
           this._adaptTreeNodeText(this._taskTreeData);
           this.getView().getModel("side").setProperty("/navigation", this._taskTreeData);
 

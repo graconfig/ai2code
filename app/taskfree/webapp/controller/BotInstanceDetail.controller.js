@@ -216,7 +216,7 @@ sap.ui.define(
           };
         },
 
-        onExecuteButtonPress: (oEvent) => {
+        onExecuteButtonPress(oEvent) {
           oEvent.getSource().setBusy(true);
           const context = oEvent.getSource().getBindingContext();
 
