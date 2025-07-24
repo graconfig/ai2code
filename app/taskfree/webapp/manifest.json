@@ -24,6 +24,18 @@
           "odataVersion": "4.0"
         }
       }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "taskrun-display": {
+          "semanticObject": "taskrun",
+          "action": "display",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
     }
   },
   "sap.ui": {
@@ -103,47 +115,71 @@
           "pattern": "",
           "target": "TargetTaskRunList"
         },
-                {
+        {
           "name": "RouteTaskRunNav",
           "pattern": "Tasks({taskRunId})",
-          "target": ["TargetTaskRunNav", "TargetTaskRunDetail"]
+          "target": [
+            "TargetTaskRunNav",
+            "TargetTaskRunDetail"
+          ]
         },
         {
           "name": "RouteTaskDetail",
           "pattern": "TaskDetail({taskId})",
-          "target": ["TargetTaskRunNav", "TargetTaskDetail"]
+          "target": [
+            "TargetTaskRunNav",
+            "TargetTaskDetail"
+          ]
         },
         {
           "name": "RouteBotInstanceDetail",
           "pattern": "BotInstanceDetail({botInstanceId})",
-          "target": ["TargetTaskRunNav", "TargetBotInstanceDetail"]
+          "target": [
+            "TargetTaskRunNav",
+            "TargetBotInstanceDetail"
+          ]
         },
         {
           "name": "RouteContextNodeDetail",
           "pattern": "ContextNodeDetail({contextNodeId})",
-          "target": ["TargetTaskRunNav", "TargetContextNodeDetail"]
+          "target": [
+            "TargetTaskRunNav",
+            "TargetContextNodeDetail"
+          ]
         },
         {
           "name": "RouteAIConversation",
           "pattern": "Tasks({taskRunId})/aiConversation({botInstanceId})",
-          "target": ["TargetTaskRunNav", "TargetAIConversation"]
+          "target": [
+            "TargetTaskRunNav",
+            "TargetAIConversation"
+          ]
         },
         {
           "name": "RouteTextNodePage",
           "pattern": "ContextNodeDetail({contextNodeId})/string",
-          "target": ["TargetTaskRunNav", "TargetTextNodePage"]
+          "target": [
+            "TargetTaskRunNav",
+            "TargetTextNodePage"
+          ]
         },
         {
           "name": "RouteTextAreaNodePage",
           "pattern": "ContextNodeDetail({contextNodeId})/code",
-          "target": ["TargetTaskRunNav", "TargetTextAreaNodePage"]
+          "target": [
+            "TargetTaskRunNav",
+            "TargetTextAreaNodePage"
+          ]
         },
         {
           "name": "RouteMarkDownNodePage",
           "pattern": "ContextNodeDetail({contextNodeId})/markdown",
-          "target": ["TargetTaskRunNav", "TargetMarkDownNodePage"]
+          "target": [
+            "TargetTaskRunNav",
+            "TargetMarkDownNodePage"
+          ]
         }
-        ],
+      ],
       "targets": {
         "TargetTaskRunList": {
           "viewType": "XML",
@@ -212,7 +248,8 @@
           "controlId": "navMainContents",
           "parent": "TargetTaskRunNav",
           "clearControlAggregation": true
-        },"TargetMarkDownNodePage": {
+        },
+        "TargetMarkDownNodePage": {
           "viewType": "XML",
           "viewId": "MarkDownNodePage",
           "viewName": "MarkDownNodePage",
@@ -228,5 +265,9 @@
       "async": true,
       "id": "App"
     }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "ai2code.service"
   }
 }

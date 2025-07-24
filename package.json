@@ -18,5 +18,10 @@
   ],
   "dependencies": {
     "ai2code-cds": "file:"
+  },
+  "cds": {
+    "requires": {
+      "workzone": true
+    }
   }
 }

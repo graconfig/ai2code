@@ -5,6 +5,11 @@
   "requires": {
     "[hybrid]": {
       "db": "hana"
-    }
+    },
+    "[production]": {
+      "auth": "xsuaa"
+    },
+    "destinations": true,
+    "html5-runtime": true
   }
 }

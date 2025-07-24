@@ -24,6 +24,18 @@
           "odataVersion": "4.0"
         }
       }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "taskrun-display": {
+          "semanticObject": "taskrun",
+          "action": "display",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
     }
   },
   "sap.ui": {
@@ -73,7 +85,7 @@
           "autoExpandSelect": true,
           "earlyRequests": true
         },
-         "type": "sap.ui.model.odata.v4.ODataModel"
+        "type": "sap.ui.model.odata.v4.ODataModel"
       },
       "@i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
@@ -151,5 +163,9 @@
   "sap.fiori": {
     "registrationIds": [],
     "archeType": "transactional"
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "ai2code.service"
   }
 }

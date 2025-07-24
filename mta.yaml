@@ -1,0 +1,270 @@
+_schema-version: 3.3.0
+ID: ai2code
+version: 1.0.0-SNAPSHOT
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+  deploy_mode: html5-repo
+modules:
+  - name: ai2code-srv
+    type: java
+    path: srv
+    parameters:
+      instances: 1
+      buildpack: sap_java_buildpack_jakarta
+    properties:
+      SPRING_PROFILES_ACTIVE: cloud,sandbox
+      JBP_CONFIG_COMPONENTS: "jres: ['com.sap.xs.java.buildpack.jre.SAPMachineJRE']"
+      JBP_CONFIG_SAP_MACHINE_JRE: '{ version: 21.+ }'
+    build-parameters:
+      builder: custom
+      commands:
+        - mvn clean package -DskipTests=true --batch-mode
+      build-result: target/*-exec.jar
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: ai2code-auth
+      - name: ai2code-destination
+
+  - name: ai2code
+    type: approuter.nodejs
+    path: app/router
+    parameters:
+      keep-existing-routes: true
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api # must be used in xs-app.json as well
+          url: ~{srv-url}
+          forwardAuthToken: true
+      - name: ai2code-auth
+      - name: ai2code-destination
+      - name: ai2code-html5-runtime
+    provides:
+      - name: app-api
+        properties:
+          app-protocol: ${protocol}
+          app-uri: ${default-uri}
+          url: ${default-url}
+
+  - name: ai2code-app-deployer
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: ai2code-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: ai2codecdsviewfields
+          artifacts:
+            - cdsviewfields.zip
+          target-path: resources
+        - name: ai2codecdsviews
+          artifacts:
+            - cdsviews.zip
+          target-path: resources
+        - name: ai2codeconfig
+          artifacts:
+            - config.zip
+          target-path: resources
+        - name: ai2codemodelconfig
+          artifacts:
+            - model-config.zip
+          target-path: resources
+        - name: ai2coderagjoincond
+          artifacts:
+            - ragjoincond.zip
+          target-path: resources
+        - name: ai2codescenarios
+          artifacts:
+            - scenarios.zip
+          target-path: resources
+        - name: ai2codetaskfree
+          artifacts:
+            - taskfree.zip
+          target-path: resources
+        - name: ai2codetaskrun
+          artifacts:
+            - taskrun.zip
+          target-path: resources
+
+  - name: ai2codecdsviewfields
+    type: html5
+    path: app/cdsviewfields
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms:
+        []
+  - name: ai2codecdsviews
+    type: html5
+    path: app/cdsviews
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms:
+        []
+  - name: ai2codeconfig
+    type: html5
+    path: app/config
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms:
+        []
+  - name: ai2codemodelconfig
+    type: html5
+    path: app/model-config
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms:
+        []
+  - name: ai2coderagjoincond
+    type: html5
+    path: app/ragjoincond
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms:
+        []
+  - name: ai2codescenarios
+    type: html5
+    path: app/scenarios
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms:
+        []
+  - name: ai2codetaskfree
+    type: html5
+    path: app/taskfree
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms:
+        []
+  - name: ai2codetaskrun
+    type: html5
+    path: app/taskrun
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms:
+        []
+
+  - name: ai2code-destinations
+    type: com.sap.application.content
+    requires:
+      - name: ai2code-auth
+        parameters:
+          service-key:
+            name: ai2code-auth-key
+      - name: ai2code-html5-repo-host
+        parameters:
+          service-key:
+            name: ai2code-html5-repo-host-key
+      - name: srv-api
+      - name: ai2code-destination
+        parameters:
+          content-target: true
+    build-parameters:
+      no-source: true
+    parameters:
+      content:
+        instance:
+          existing_destinations_policy: update
+          destinations:
+            - Name: ai2code-html5-repository
+              ServiceInstanceName: ai2code-html5-repo-host
+              ServiceKeyName: ai2code-html5-repo-host-key
+              sap.cloud.service: ai2code.service
+            - Name: ai2code-auth
+              Authentication: OAuth2UserTokenExchange
+              ServiceInstanceName: ai2code-auth
+              ServiceKeyName: ai2code-auth-key
+              sap.cloud.service: ai2code.service
+
+resources:
+  - name: ai2code-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: ai2code
+        tenant-mode: dedicated
+        oauth2-configuration:
+          redirect-uris:
+            - https://*~{app-api/app-uri}/**
+    requires:
+      - name: app-api
+  - name: ai2code-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            existing_destinations_policy: update
+            destinations:
+              - Name: srv-api
+                URL: ~{srv-api/srv-url}
+                Authentication: NoAuthentication
+                Type: HTTP
+                ProxyType: Internet
+                HTML5.ForwardAuthToken: true
+                HTML5.DynamicDestination: true
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api # must be used in xs-app.json as well
+          url: ~{srv-url}
+          forwardAuthToken: true
+
+  - name: ai2code-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+  - name: ai2code-html5-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime
