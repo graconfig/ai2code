@@ -548,7 +548,7 @@ sap.ui.define(
 
         _onBotInstanceUpdated(sChannelId, sEventId, oData) {
           if (this._dataCache.isLoaded && this._dataCache.currentTask) {
-            this._preloadTaskData(this._dataCache.currentTask.id, "");
+            this._preloadTaskData(this._dataCache.currentTask.id, true);
           }
         },
 
