@@ -1,0 +1,164 @@
+{
+  "_version": "1.59.0",
+  "sap.app": {
+    "id": "ragscenarios",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:lrop",
+      "version": "1.13.2",
+      "toolsId": "a97db2b7-061a-49b9-b54b-e7fa123db012"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/odata/v4/MainService/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "4.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "ragscenarios-display": {
+          "semanticObject": "ragscenarios",
+          "action": "display",
+          "title": "RAG(Business Scenarios) ",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.136.2",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.ushell": {},
+        "sap.fe.templates": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "ragscenarios.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "@i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "uri": "i18n/i18n.properties"
+      }
+    },
+    "resources": {
+      "css": []
+    },
+    "routing": {
+      "config": {},
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "BusinessScenariosList",
+          "target": "BusinessScenariosList"
+        },
+        {
+          "pattern": "BusinessScenarios({key}):?query:",
+          "name": "BusinessScenariosObjectPage",
+          "target": "BusinessScenariosObjectPage"
+        }
+      ],
+      "targets": {
+        "BusinessScenariosList": {
+          "type": "Component",
+          "id": "BusinessScenariosList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/BusinessScenarios",
+              "variantManagement": "Page",
+              "navigation": {
+                "BusinessScenarios": {
+                  "detail": {
+                    "route": "BusinessScenariosObjectPage"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "BusinessScenariosObjectPage": {
+          "type": "Component",
+          "id": "BusinessScenariosObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/BusinessScenarios",
+              "content": {
+                "body": {
+                  "sections": {
+                    "CDSSection": {
+                      "type": "XMLFragment",
+                      "template": "ragscenarios.ext.fragment.viewcategory",
+                      "title": "View Category",
+                      "position": {
+                        "placement": "After",
+                        "anchor": "Fields"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "sap.fiori": {
+    "registrationIds": [],
+    "archeType": "transactional"
+  }
+}

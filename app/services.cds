@@ -3,10 +3,10 @@ using from './config/annotations';
 
 using from './model-config/annotations';
 
-using from './cdsviews/annotations';
+using from './ragcdsviews/annotations';
 
-using from './scenarios/annotations';
+using from './ragscenarios/annotations';
 
-using from './ragjoincond/annotations';
+using from './ragwithjoincond/annotations';
 
-using from './cdsviewfields/annotations';
+using from './ragcdsviewfields/annotations';
