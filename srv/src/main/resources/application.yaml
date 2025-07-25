@@ -42,33 +42,42 @@ management:
   endpoint:
     health:
       show-components: always
-      probes.enabled: true
+      probes:
+        enabled: true
   endpoints:
     web:
       exposure:
         include: health
   health:
-    defaults.enabled: false
-    ping.enabled: true
-    db.enabled: true
-logging:
-  level:
-    com:
-      sap:
-        cds:
-          remote:
-            odata: DEBUG
----
-management:
-  endpoint:
-    health:
-      show-components: always
-      probes.enabled: true
-  endpoints:
-    web:
-      exposure:
-        include: health
-  health:
-    defaults.enabled: false
-    ping.enabled: true
-    db.enabled: true
+    defaults:
+      enabled: false
+    ping:
+      enabled: true
+    db:
+      enabled: true
+cds:
+  sql.hana.search:
+    fuzzy: true
+    fuzzinessThreshold: 0.9
+  remote:
+    services:
+      '[zsrvd_genddls]':
+        destination:
+          name: zsrvd_genddls
+        http:
+          service: zsrvd_genddls/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_genddls/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_genddls.v0001
+        type: odata-v4
+      '[zsrvd_gensrvd]':
+        destination:
+          name: zsrvd_gensrvd
+        http:
+          service: zsrvd_gensrvd/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_gensrvd/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_gensrvd.v0001
+        type: odata-v4

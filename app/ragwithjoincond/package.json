@@ -22,8 +22,5 @@
         "dependencies": [
             "ui5-task-zipper"
         ]
-    },
-    "dependencies": {
-        "ai2code-cds": "file:../.."
     }
 }

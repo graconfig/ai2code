@@ -10,6 +10,7 @@
       "auth": "xsuaa"
     },
     "destinations": true,
-    "html5-runtime": true
+    "html5-runtime": true,
+    "db": "hana"
   }
 }
