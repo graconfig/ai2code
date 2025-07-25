@@ -24,18 +24,6 @@
           "odataVersion": "4.0"
         }
       }
-    },
-    "crossNavigation": {
-      "inbounds": {
-        "taskrun-display": {
-          "semanticObject": "taskrun",
-          "action": "display",
-          "signature": {
-            "parameters": {},
-            "additionalParameters": "allowed"
-          }
-        }
-      }
     }
   },
   "sap.ui": {

@@ -28,9 +28,9 @@
 
     "crossNavigation": {
       "inbounds": {
-        "ragcdsviewfields-Display": {
+        "ragcdsviewfields-display": {
           "semanticObject": "ragcdsviewfields",
-          "action": "Display",
+          "action": "display",
           "title": "RAG(CDS View Fields) ",
           "signature": {
             "parameters": {},
