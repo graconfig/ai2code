@@ -14,6 +14,13 @@
             "mainClass": "customer.ai2code.Application",
             "projectName": "ai2code",
             "preLaunchTask": "cds_bind"
+        },
+        {
+            "command": "npx cds add workzone",
+            "name": "CDS Add Workzone",
+            "request": "launch",
+            "type": "node-terminal",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
