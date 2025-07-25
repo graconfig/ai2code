@@ -70,7 +70,7 @@ public class ChatBot extends AbstractBot {
             // 6.将用户的聊天内容存储到表中
             genericCqnService.createAndInsertBotMessage(botInstance.getId(), content, ragPrompt.getContent(), "user");
 
-            if (ragPrompt != null) {
+            if (ragPrompt != null && ragPrompt.getContent() != null && !ragPrompt.getContent().isEmpty()) {
                 prompts.add(ragPrompt);
             }
 

@@ -76,7 +76,7 @@ public class FunctionCallingBot extends AbstractBot {
 
             // 4.1 添加rag功能
             PromptTexts ragPrompt = promptService.getRagAsPrompts(this, "");
-            if (ragPrompt != null) {
+            if (ragPrompt != null && ragPrompt.getContent() != null && !ragPrompt.getContent().isEmpty()) {
                 prompts.add(ragPrompt);
             }
 
