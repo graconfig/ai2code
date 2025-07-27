@@ -82,22 +82,20 @@ public class SAClaudeAIServiceImpl implements AIService {
                                 .temperature(aiCoreServiceKeyConfig.getTemperature());
                 request.setInferenceConfig(inferenceConfig);
 
-                // prompts.stream()
-                // .map(PromptTexts::getContent)
-                // .filter(prompt -> prompt != null && !prompt.isBlank())
-                // .forEach(prompt -> params
-                // .addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage()
-                // .setContent(prompt)));
+
                 String systemMessage = prompts.stream()
+                                .filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                                && prompt.getRoleCode() != null
+                                                && AIConstants.Roles.SYSTEM.equals(prompt.getRoleCode()))
                                 .map(PromptTexts::getContent)
-                                .filter(prompt -> prompt != null && !prompt.isBlank())
+
                                 .findFirst()
                                 .orElse("");
 
                 if (systemMessage != null) {
                         request.addSystemItem(messageFactory.createSystemBlock(systemMessage));
                 }
-
+                // history messages
                 messages.stream()
                                 .filter(msg -> !AIConstants.Roles.SYSTEM.equals(msg.getRole()))
                                 .forEach(msg -> {
@@ -113,6 +111,11 @@ public class SAClaudeAIServiceImpl implements AIService {
                                                                 msg.getRole());
                                         }
                                 });
+                // add user prompt
+                prompts.stream().filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                && prompt.getRoleCode() != null && AIConstants.Roles.USER.equals(prompt.getRoleCode()))
+                                .forEach(prompt -> request.addMessagesItem(
+                                                messageFactory.createUserMessage(prompt.getContent())));
 
                 // add user message
                 if (content != null && !content.isBlank()) {
@@ -164,11 +167,14 @@ public class SAClaudeAIServiceImpl implements AIService {
                                 .temperature(aiCoreServiceKeyConfig.getTemperature());
                 request.setInferenceConfig(inferenceConfig);
 
-                // 将prompt合并成一个system消息
+                // 将system prompt合并成一个system消息
                 StringBuilder promptContent = new StringBuilder();
                 prompts.stream()
+                                .filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                                && prompt.getRoleCode() != null
+                                                && AIConstants.Roles.SYSTEM.equals(prompt.getRoleCode()))
                                 .map(PromptTexts::getContent)
-                                .filter(prompt -> prompt != null && !prompt.isBlank())
+
                                 .forEach(promptContent::append);
 
                 request.addSystemItem(messageFactory.createSystemBlock(promptContent.toString()));
@@ -189,6 +195,11 @@ public class SAClaudeAIServiceImpl implements AIService {
                                                                 msg.getRole());
                                         }
                                 });
+                // add user prompt
+                prompts.stream().filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                && prompt.getRoleCode() != null && AIConstants.Roles.USER.equals(prompt.getRoleCode()))
+                                .forEach(prompt -> request.addMessagesItem(
+                                                messageFactory.createUserMessage(prompt.getContent())));
 
                 // 3. 转换为 OpenAI Function Calling 格式并添加到参数中
                 List<Map<String, Object>> function = functionCallAdapter
