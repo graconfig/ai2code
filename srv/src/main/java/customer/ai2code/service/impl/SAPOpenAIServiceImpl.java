@@ -106,7 +106,7 @@ public class SAPOpenAIServiceImpl implements AIService {
                 prompts.stream()
                                 .filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
                                                 && prompt.getRoleCode() != null
-                                                && AIConstants.Roles.USER.equals(prompt.getRoleCode()))
+                                                && AIConstants.Roles.SYSTEM.equals(prompt.getRoleCode()))
                                 .map(PromptTexts::getContent)
 
                                 .forEach(promptContent::append);
@@ -175,8 +175,11 @@ public class SAPOpenAIServiceImpl implements AIService {
                 // 将prompt合并成一个system消息
                 StringBuilder promptContent = new StringBuilder();
                 prompts.stream()
+                                .filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                                && prompt.getRoleCode() != null
+                                                && AIConstants.Roles.SYSTEM.equals(prompt.getRoleCode()))
                                 .map(PromptTexts::getContent)
-                                .filter(prompt -> prompt != null && !prompt.isBlank())
+                                // .filter(prompt -> prompt != null && !prompt.isBlank())
                                 .forEach(promptContent::append);
                 params.addMessages(
                                 messageFactory.createSystemMessage(promptContent.toString()));
