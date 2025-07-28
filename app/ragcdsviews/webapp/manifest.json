@@ -30,7 +30,7 @@
         "ragcdsviews-display": {
           "semanticObject": "ragcdsviews",
           "action": "display",
-          "title": "RAG(CDS Views) ",
+          "title": "AI2Code RAG(CDS Views) ",
           "signature": {
             "parameters": {},
             "additionalParameters": "allowed"
