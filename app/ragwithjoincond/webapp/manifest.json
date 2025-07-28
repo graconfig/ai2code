@@ -30,7 +30,7 @@
         "ragwithjoincond-display": {
           "semanticObject": "ragwithjoincond",
           "action": "display",
-          "title": "AI2Code RAG(Business Scenarios) ",
+          "title": "AI2Code RAG(Join Condition) ",
           "signature": {
             "parameters": {},
             "additionalParameters": "allowed"
