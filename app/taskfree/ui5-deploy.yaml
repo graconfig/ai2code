@@ -18,3 +18,4 @@ builder:
         archiveName: taskfree
         additionalFiles:
           - xs-app.json
+        relativePaths: true

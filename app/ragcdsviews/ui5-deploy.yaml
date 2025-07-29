@@ -18,3 +18,4 @@ builder:
         archiveName: ragcdsviews
         additionalFiles:
           - xs-app.json
+        relativePaths: true

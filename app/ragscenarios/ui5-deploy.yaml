@@ -18,3 +18,4 @@ builder:
         archiveName: ragscenarios
         additionalFiles:
           - xs-app.json
+        relativePaths: true

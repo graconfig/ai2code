@@ -18,3 +18,4 @@ builder:
         archiveName: config
         additionalFiles:
           - xs-app.json
+        relativePaths: true
