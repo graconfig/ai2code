@@ -291,7 +291,8 @@ public class TaskServiceImpl implements TaskService {
                     botNode.id = cachedBot.getId();
                     botNode.name = cachedBot.getBotObject().getBotType().getName();
                     botNode.description = cachedBot.getBotObject().getBotType().getDescription();
-                    botNode.functionType = cachedBot.getBotObject().getBotInstance().getTypeId();
+                    // botNode.functionType = cachedBot.getBotObject().getBotInstance().getTypeId();
+                    botNode.functionType = cachedBot.getBotObject().getBotType().getFunctionTypeCode();
                     botNode.status = cachedBot.getBotStatus(); // 使用 getStatusCode() 而不是 getStatus()
                     botNode.sequence = cachedBot.getBotObject().getBotInstance().getSequence() != null ? cachedBot.getBotObject().getBotInstance().getSequence()
                             : 0;
