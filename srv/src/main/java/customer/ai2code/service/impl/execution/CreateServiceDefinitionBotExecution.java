@@ -19,6 +19,7 @@ import customer.ai2code.model.execution.annotation.ExecuteMethod;
 import customer.ai2code.model.execution.annotation.ExecuteParameter;
 import customer.ai2code.service.ContextService;
 import customer.ai2code.service.execution.BotExecution;
+import customer.ai2code.service.impl.TaskBotCacheManager;
 
 @BotExecutor(name = "Call Remote OData", description = "Implementation for Call S4/HANA OP OData", version = "1.0", enabled = true)
 public class CreateServiceDefinitionBotExecution implements BotExecution {
@@ -26,15 +27,15 @@ public class CreateServiceDefinitionBotExecution implements BotExecution {
     private final ContextService contextService;
     private final V0001 zsrvdGensrvd;
     private final ObjectMapper objectMapper;
-    @Autowired
-    private ParameterInfo parameterInfo;
+    private final TaskBotCacheManager taskBotCacheManager;
 
     // 默认构造函数
     public CreateServiceDefinitionBotExecution(ContextService contextService,
-            V0001 zsrvdGensrvd2, ObjectMapper objectMapper) {
+            V0001 zsrvdGensrvd2, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
         this.contextService = contextService;
         this.zsrvdGensrvd = zsrvdGensrvd2;
         this.objectMapper = objectMapper;
+        this.taskBotCacheManager = taskBotCacheManager;
     }
 
     @ExecuteMethod
@@ -66,7 +67,22 @@ public class CreateServiceDefinitionBotExecution implements BotExecution {
                 returnMessage = "OData Response is null";
             } else {
                 returnMessage = objectMapper.writeValueAsString(results);
+                for (ZtgensrvdL result : results) {
+                    System.out.println("OData Result: " + result.toJson());
+                    // String type = result.getType();
+                    // String message = result.getMessage();
+                    String REFERENCE = result.getReference();
+                    try {
+                        contextService.updateAdditionInfo(taskBotCacheManager.getCachedBot(botInstanceId), REFERENCE,
+                                objectMapper.writeValueAsString(result));
+                    } catch (Exception e) {
+                        // TODO: handle exception
+                        contextService.updateAdditionInfo(taskBotCacheManager.getCachedBot(botInstanceId), REFERENCE,
+                                e.getMessage());
+                    }
+                }
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
