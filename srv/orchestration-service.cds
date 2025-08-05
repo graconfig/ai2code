@@ -4,6 +4,7 @@ using ai.orchestration.rag as rag from '../db/orchestration-rag-model';
 
 using {com.sap.gateway.srvd.zsrvd_gensrvd.v0001 as zsrvd_gensrvd} from './external/zsrvd_gensrvd';
 using {com.sap.gateway.srvd.zsrvd_genddls.v0001 as zsrvd_genddls} from './external/zsrvd_genddls';
+using { com.sap.gateway.srvd.zsrvd_genclas.v0001 as zsrvd_genclas } from './external/zsrvd_genclas';
 
 service MainService {
     entity Tasks             as projection on db.Task
@@ -40,6 +41,9 @@ service MainService {
     entity CreateCds               as projection on zsrvd_genddls.zc_genddls_p;
     //Create and Activate Service Definition & Service Binding
     entity CreateServiceDefinition as projection on zsrvd_gensrvd.zc_gensrvd_t;
+
+    //Create class
+    entity CreateClass             as projection on zsrvd_genclas.zc_genclas_l;
 
 
     entity BusinessScenarios       as
