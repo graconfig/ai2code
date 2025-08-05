@@ -1,0 +1,1754 @@
+{
+ "meta": {
+  "creator": "cds-dk 8.9.4"
+ },
+ "$version": "2.0",
+ "definitions": {
+  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tCbAControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "_log": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dynamic CbA-Control",
+     "@Common.Heading": "Dynamic Create by Association Control",
+     "@Common.QuickInfo": "Dynamic Create via Association Control Property"
+    },
+    "_tabl_f": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dynamic CbA-Control",
+     "@Common.Heading": "Dynamic Create by Association Control",
+     "@Common.QuickInfo": "Dynamic Create via Association Control Property"
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tOperationControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "activeTable": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Action Control",
+     "@Common.Heading": "Dynamic Action Control",
+     "@Common.QuickInfo": "Dynamic Action Property"
+    },
+    "Edit": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Action Control",
+     "@Common.Heading": "Dynamic Action Control",
+     "@Common.QuickInfo": "Dynamic Action Property"
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.za_gen_response_log": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "id": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true,
+     "@Common.Label": "Message Class",
+     "@Common.Heading": "Message ID"
+    },
+    "message": {
+     "type": "cds.String",
+     "length": 220,
+     "notNull": true,
+     "@Common.Label": "Message Text"
+    },
+    "message_v1": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.Label": "Message Variable"
+    },
+    "message_v2": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.Label": "Message Variable"
+    },
+    "message_v3": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.Label": "Message Variable"
+    },
+    "message_v4": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.Label": "Message Variable"
+    },
+    "reference": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Common.Label": "Reference"
+    },
+    "type": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.Label": "Message type",
+     "@Common.Heading": "MsgType",
+     "@Common.QuickInfo": "Message type: S Success, E Error, W Warning, I Info, A Abort"
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.EntityControl": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "Deletable": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Method Control",
+     "@Common.Heading": "Dynamic Method Control",
+     "@Common.QuickInfo": "Dynamic Method Property"
+    },
+    "Updatable": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Dyn. Method Control",
+     "@Common.Heading": "Dynamic Method Control",
+     "@Common.QuickInfo": "Dynamic Method Property"
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.ZSGEN_TABL_FIELD_LIST": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "FIELDPOS": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true
+    },
+    "FIELDNAME": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.Label": "Field name",
+     "@Common.QuickInfo": "XCO ABAP Dictionary: Field name"
+    },
+    "KEYFLAG": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Key field",
+     "@Common.Heading": "Key",
+     "@Common.QuickInfo": "Identifies a key field of a table"
+    },
+    "DATAELEMENT": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.Label": "Object name",
+     "@Common.QuickInfo": "XCO ABAP Dictionary: Object name"
+    },
+    "DATATYPE": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.Label": "Undefined range (can be used for patch levels)"
+    },
+    "LENGTH": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.Label": "No. of Characters",
+     "@Common.Heading": "Length",
+     "@Common.QuickInfo": "Length (No. of Characters)"
+    },
+    "DECIMALS": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.Label": "Decimal Places",
+     "@Common.QuickInfo": "Number of Decimal Places"
+    },
+    "DESCRIPTION": {
+     "type": "cds.String",
+     "length": 60,
+     "notNull": true,
+     "@Common.Label": "Short Description",
+     "@Common.QuickInfo": "Short Description of Repository Objects"
+    },
+    "REFTAB": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.Label": "Reference table",
+     "@Common.QuickInfo": "Reference Table for Field"
+    },
+    "REFFIELD": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.Label": "Ref. field",
+     "@Common.QuickInfo": "Reference Field for Currency and Quantity Fields"
+    },
+    "GROUPNAME": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.Label": "Group name",
+     "@Common.Heading": "Group",
+     "@Common.QuickInfo": "Group name for named includes"
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.SAP__Message": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "code": {
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "message": {
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "target": {
+     "type": "cds.LargeString"
+    },
+    "additionalTargets": {
+     "items": {
+      "type": "cds.LargeString",
+      "notNull": true
+     }
+    },
+    "transition": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "numericSeverity": {
+     "type": "cds.Integer",
+     "@odata.Type": "Edm.Byte",
+     "notNull": true
+    },
+    "longtextUrl": {
+     "type": "cds.LargeString"
+    }
+   }
+  },
+  "com.sap.gateway.srvd.zsrvd_gentabl.v0001": {
+   "kind": "service",
+   "@cds.external": true,
+   "@Aggregation.ApplySupported": {
+    "Transformations": [
+     "aggregate",
+     "groupby",
+     "filter"
+    ],
+    "Rollup": {
+     "#": "None"
+    }
+   },
+   "@Common.ApplyMultiUnitBehaviorForSortingAndFiltering": true,
+   "@UI.LeadingEntitySet": "zc_gentabl_t",
+   "@Capabilities.FilterFunctions": [
+    "eq",
+    "ne",
+    "gt",
+    "ge",
+    "lt",
+    "le",
+    "and",
+    "or",
+    "contains",
+    "startswith",
+    "endswith",
+    "any",
+    "all"
+   ],
+   "@Capabilities.SupportedFormats": [
+    "application/json",
+    "application/pdf"
+   ],
+   "@PDF.Features": {
+    "DocumentDescriptionReference": "../../../../default/iwbep/common/0001/$metadata",
+    "DocumentDescriptionCollection": "MyDocumentDescriptions",
+    "ArchiveFormat": true,
+    "Border": true,
+    "CoverPage": true,
+    "FitToPage": true,
+    "FontName": true,
+    "FontSize": true,
+    "Margin": true,
+    "Padding": true,
+    "Signature": true,
+    "HeaderFooter": true,
+    "ResultSizeDefault": 9000,
+    "ResultSizeMaximum": 9000
+   },
+   "@Capabilities.KeyAsSegmentSupported": true,
+   "@Capabilities.AsynchronousRequestsSupported": true
+  },
+  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.I_DraftAdministrativeData": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "DraftUUID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft (Technical ID)"
+    },
+    "DraftEntityType": {
+     "key": true,
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Entity ID"
+    },
+    "CreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "Draft Created On"
+    },
+    "CreatedByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.Text": {
+      "=": "CreatedByUserDescription"
+     },
+     "@Common.IsUpperCase": true,
+     "@Common.ValueListReferences": [
+      "../../../../srvd_f4/sap/i_draftadministrativeuservh/0001;ps='srvd-zsrvd_gentabl-0001';va='com.sap.gateway.srvd.zsrvd_gentabl.v0001.et-i_draftadministrativedata.createdbyuser'/$metadata"
+     ],
+     "@Common.Label": "Draft Created By"
+    },
+    "LastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "Draft Last Changed On"
+    },
+    "LastChangedByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.Text": {
+      "=": "LastChangedByUserDescription"
+     },
+     "@Common.IsUpperCase": true,
+     "@Common.ValueListReferences": [
+      "../../../../srvd_f4/sap/i_draftadministrativeuservh/0001;ps='srvd-zsrvd_gentabl-0001';va='com.sap.gateway.srvd.zsrvd_gentabl.v0001.et-i_draftadministrativedata.lastchangedbyuser'/$metadata"
+     ],
+     "@Common.Label": "Draft Last Changed By"
+    },
+    "DraftAccessType": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Access Type"
+    },
+    "ProcessingStartDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft In Process Since"
+    },
+    "InProcessByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.Text": {
+      "=": "InProcessByUserDescription"
+     },
+     "@Common.IsUpperCase": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft In Process By"
+    },
+    "DraftIsKeptByUser": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Is Kept By User"
+    },
+    "EnqueueStartDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Locked Since"
+    },
+    "DraftIsCreatedByMe": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Created By Me"
+    },
+    "DraftIsLastChangedByMe": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Last Changed By Me"
+    },
+    "DraftIsProcessedByMe": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft In Process By Me"
+    },
+    "CreatedByUserDescription": {
+     "type": "cds.String",
+     "length": 80,
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Created By (Description)"
+    },
+    "LastChangedByUserDescription": {
+     "type": "cds.String",
+     "length": 80,
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Last Changed By (Description)"
+    },
+    "InProcessByUserDescription": {
+     "type": "cds.String",
+     "length": 80,
+     "notNull": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft In Process By (Description)"
+    }
+   },
+   "@Common.Label": "Draft Administration Data",
+   "@Capabilities.SearchRestrictions.Searchable": true,
+   "@Capabilities.SearchRestrictions.UnsupportedExpressions": {
+    "#": "phrase"
+   },
+   "@Capabilities.FilterRestrictions.Filterable": true,
+   "@Capabilities.FilterRestrictions.FilterExpressionRestrictions": [
+    {
+     "Property": {
+      "=": "CreationDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    },
+    {
+     "Property": {
+      "=": "LastChangeDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    }
+   ],
+   "@Capabilities.InsertRestrictions.Insertable": false,
+   "@Capabilities.DeleteRestrictions.Deletable": false,
+   "@Capabilities.UpdateRestrictions.Updatable": false,
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
+  },
+  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_f": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Tabname": {
+     "key": true,
+     "type": "cds.String",
+     "length": 16,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Object name",
+     "@Common.QuickInfo": "XCO Database table : Object name"
+    },
+    "FieldPos": {
+     "key": true,
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Core.Immutable": true,
+     "@Common.IsDigitSequence": true
+    },
+    "FieldName": {
+     "key": true,
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Core.Immutable": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Field name",
+     "@Common.QuickInfo": "XCO ABAP Dictionary: Field name"
+    },
+    "KeyFlag": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Key field",
+     "@Common.Heading": "Key",
+     "@Common.QuickInfo": "Identifies a key field of a table"
+    },
+    "DataElement": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.Label": "Data Element",
+     "@Common.IsUpperCase": true,
+     "@Common.Heading": "Object name",
+     "@Common.QuickInfo": "XCO ABAP Dictionary: Object name"
+    },
+    "DataType": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.Label": "Data Type"
+    },
+    "Length": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.Label": "Length",
+     "@Common.IsDigitSequence": true,
+     "@Common.Heading": "Length",
+     "@Common.QuickInfo": "Length (No. of Characters)"
+    },
+    "Decimals": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "Decimal Places",
+     "@Common.QuickInfo": "Number of Decimal Places"
+    },
+    "Description": {
+     "type": "cds.String",
+     "length": 60,
+     "notNull": true,
+     "@Common.Label": "Short Description",
+     "@Common.QuickInfo": "Short Description of Repository Objects"
+    },
+    "RefTab": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Reference table",
+     "@Common.QuickInfo": "Reference Table for Field"
+    },
+    "RefField": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Ref. field",
+     "@Common.QuickInfo": "Reference Field for Currency and Quantity Fields"
+    },
+    "Groupname": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Group name",
+     "@Common.Heading": "Group",
+     "@Common.QuickInfo": "Group name for named includes"
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Created By",
+     "@Common.QuickInfo": "Created By User"
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "Created On",
+     "@Common.QuickInfo": "Creation Date Time"
+    },
+    "LocalLastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Changed By",
+     "@Common.QuickInfo": "Local Instance Last Changed By User"
+    },
+    "LocalLastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "Changed On",
+     "@Common.QuickInfo": "Local Instance Last Change Date Time"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Has Draft",
+     "@Common.QuickInfo": "Draft - Indicator - Has draft document"
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Created On"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Last Changed On"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Has active",
+     "@Common.QuickInfo": "Draft - Indicator - Has active document"
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Is active",
+     "@Common.QuickInfo": "Draft - Indicator - Is active document"
+    },
+    "__EntityControl": {
+     "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.EntityControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Dyn. Method Control",
+     "@Common.Heading": "Dynamic Method Control",
+     "@Common.QuickInfo": "Dynamic Method Property"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.SAP__Message",
+      "notNull": true
+     }
+    },
+    "DraftAdministrativeData": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.I_DraftAdministrativeData",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_f",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_tabl_t": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    }
+   },
+   "@Common.Label": "Consumption view for generate table -f",
+   "@UI.Facets": [
+    {
+     "$Type": "SAP__UI.ReferenceFacet",
+     "Label": "Fields details",
+     "ID": "fields",
+     "Target": {
+      "=": "@UI.Identification"
+     }
+    }
+   ],
+   "@UI.Identification": [
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "FieldName"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "KeyFlag"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "DataElement"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "DataType"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Length"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Decimals"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Description"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Groupname"
+     }
+    }
+   ],
+   "@UI.LineItem": [
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "FieldName"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "KeyFlag"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "DataElement"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "DataType"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Length"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Decimals"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Description"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Groupname"
+     }
+    }
+   ],
+   "@Common.Messages": {
+    "=": "SAP__Messages"
+   },
+   "@Capabilities.NavigationRestrictions.RestrictedProperties": [
+    {
+     "NavigationProperty": {
+      "=": "_tabl_t"
+     },
+     "InsertRestrictions": {
+      "Insertable": false
+     }
+    }
+   ],
+   "@Common.DraftActivationVia": [
+    "SAP__self.Container/zc_gentabl_t"
+   ],
+   "@Capabilities.SearchRestrictions.Searchable": false,
+   "@Capabilities.FilterRestrictions.Filterable": true,
+   "@Capabilities.FilterRestrictions.FilterExpressionRestrictions": [
+    {
+     "Property": {
+      "=": "DraftEntityCreationDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    },
+    {
+     "Property": {
+      "=": "DraftEntityLastChangeDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    }
+   ],
+   "@Capabilities.FilterRestrictions.NonFilterableProperties": [
+    "__EntityControl"
+   ],
+   "@Capabilities.SortRestrictions.NonSortableProperties": [
+    "__EntityControl"
+   ],
+   "@Capabilities.InsertRestrictions.Insertable": false,
+   "@Capabilities.DeleteRestrictions.Deletable": {
+    "=": "__EntityControl/Deletable"
+   },
+   "@Capabilities.UpdateRestrictions.Updatable": {
+    "=": "__EntityControl/Updatable"
+   },
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
+  },
+  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_l": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Tabname": {
+     "key": true,
+     "type": "cds.String",
+     "length": 16,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Object name",
+     "@Common.QuickInfo": "XCO Database table : Object name"
+    },
+    "UUID": {
+     "key": true,
+     "type": "cds.UUID",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "UUID",
+     "@Common.QuickInfo": "16 Byte UUID in 16 Bytes (Raw Format)"
+    },
+    "Reference": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Common.Label": "Reference"
+    },
+    "Message": {
+     "type": "cds.String",
+     "length": 220,
+     "notNull": true,
+     "@Common.Label": "Message",
+     "@Common.IsUpperCase": true,
+     "@Common.QuickInfo": "Message Text"
+    },
+    "Type": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.Label": "Message Type",
+     "@Common.IsUpperCase": true,
+     "@Common.Heading": "MsgType",
+     "@Common.QuickInfo": "Message type: S Success, E Error, W Warning, I Info, A Abort"
+    },
+    "Msgid": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true,
+     "@Common.Label": "Message ID",
+     "@Common.IsUpperCase": true,
+     "@Common.Heading": "Message ID",
+     "@Common.QuickInfo": "Message Class"
+    },
+    "MessageV1": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Message Variable"
+    },
+    "MessageV2": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Message Variable"
+    },
+    "MessageV3": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Message Variable"
+    },
+    "MessageV4": {
+     "type": "cds.String",
+     "length": 50,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Message Variable"
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Created By",
+     "@Common.QuickInfo": "Created By User"
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "Created On",
+     "@Common.QuickInfo": "Creation Date Time"
+    },
+    "LocalLastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Changed By",
+     "@Common.QuickInfo": "Local Instance Last Changed By User"
+    },
+    "LocalLastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "Changed On",
+     "@Common.QuickInfo": "Local Instance Last Change Date Time"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Has Draft",
+     "@Common.QuickInfo": "Draft - Indicator - Has draft document"
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Created On"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Last Changed On"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Has active",
+     "@Common.QuickInfo": "Draft - Indicator - Has active document"
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Is active",
+     "@Common.QuickInfo": "Draft - Indicator - Is active document"
+    },
+    "__EntityControl": {
+     "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.EntityControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Dyn. Method Control",
+     "@Common.Heading": "Dynamic Method Control",
+     "@Common.QuickInfo": "Dynamic Method Property"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.SAP__Message",
+      "notNull": true
+     }
+    },
+    "DraftAdministrativeData": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.I_DraftAdministrativeData",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_l",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_tabl_t": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    }
+   },
+   "@Common.Label": "Consumption view for generate table -l",
+   "@UI.Facets": [
+    {
+     "$Type": "SAP__UI.ReferenceFacet",
+     "Label": "Active Logs",
+     "ID": "logs",
+     "Target": {
+      "=": "@UI.Identification"
+     }
+    }
+   ],
+   "@UI.Identification": [
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Reference"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Message"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Type"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Msgid"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV1"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV2"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV3"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV4"
+     }
+    }
+   ],
+   "@UI.LineItem": [
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Reference"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Message"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Type"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Msgid"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV1"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV2"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV3"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "MessageV4"
+     }
+    }
+   ],
+   "@Common.Messages": {
+    "=": "SAP__Messages"
+   },
+   "@Capabilities.NavigationRestrictions.RestrictedProperties": [
+    {
+     "NavigationProperty": {
+      "=": "_tabl_t"
+     },
+     "InsertRestrictions": {
+      "Insertable": false
+     }
+    }
+   ],
+   "@Common.DraftActivationVia": [
+    "SAP__self.Container/zc_gentabl_t"
+   ],
+   "@Capabilities.SearchRestrictions.Searchable": false,
+   "@Capabilities.FilterRestrictions.Filterable": true,
+   "@Capabilities.FilterRestrictions.FilterExpressionRestrictions": [
+    {
+     "Property": {
+      "=": "DraftEntityCreationDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    },
+    {
+     "Property": {
+      "=": "DraftEntityLastChangeDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    }
+   ],
+   "@Capabilities.FilterRestrictions.NonFilterableProperties": [
+    "__EntityControl"
+   ],
+   "@Capabilities.SortRestrictions.NonSortableProperties": [
+    "__EntityControl"
+   ],
+   "@Capabilities.InsertRestrictions.Insertable": false,
+   "@Capabilities.DeleteRestrictions.Deletable": {
+    "=": "__EntityControl/Deletable"
+   },
+   "@Capabilities.UpdateRestrictions.Updatable": {
+    "=": "__EntityControl/Updatable"
+   },
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
+  },
+  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "Tabname": {
+     "key": true,
+     "type": "cds.String",
+     "length": 16,
+     "notNull": true,
+     "@Common.Label": "Table Name",
+     "@Core.Immutable": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Heading": "Object name",
+     "@Common.QuickInfo": "XCO Database table : Object name"
+    },
+    "Tabdesc": {
+     "type": "cds.String",
+     "length": 60,
+     "notNull": true,
+     "@Common.Label": "Short descr.",
+     "@Common.Heading": "Short description",
+     "@Common.QuickInfo": "XCO ABAP Dictionary: Short description"
+    },
+    "Contflag": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.Label": "Delivery Class"
+    },
+    "Mainflag": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.Label": "Table Maintenance"
+    },
+    "Devclass": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Package",
+     "@Common.QuickInfo": "XCO Package: Package"
+    },
+    "Trkorr": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Transport",
+     "@Common.QuickInfo": "XCO: Transport"
+    },
+    "Status": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.Label": "Active Status",
+     "@Core.Computed": true
+    },
+    "Reference": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Common.Label": "Reference"
+    },
+    "CreatedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Created By",
+     "@Common.QuickInfo": "Created By User"
+    },
+    "CreatedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "Created On",
+     "@Common.QuickInfo": "Creation Date Time"
+    },
+    "LocalLastChangedBy": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Changed By",
+     "@Common.QuickInfo": "Local Instance Last Changed By User"
+    },
+    "LocalLastChangedAt": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Common.Label": "Changed On",
+     "@Common.QuickInfo": "Local Instance Last Change Date Time"
+    },
+    "HasDraftEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Has Draft",
+     "@Common.QuickInfo": "Draft - Indicator - Has draft document"
+    },
+    "DraftEntityCreationDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Created On"
+    },
+    "DraftEntityLastChangeDateTime": {
+     "type": "cds.Timestamp",
+     "@odata.Precision": 7,
+     "@odata.Type": "Edm.DateTimeOffset",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Draft Last Changed On"
+    },
+    "HasActiveEntity": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Has active",
+     "@Common.QuickInfo": "Draft - Indicator - Has active document"
+    },
+    "IsActiveEntity": {
+     "key": true,
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Is active",
+     "@Common.QuickInfo": "Draft - Indicator - Is active document"
+    },
+    "__CreateByAssociationControl": {
+     "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tCbAControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Dynamic CbA-Control",
+     "@Common.Heading": "Dynamic Create by Association Control",
+     "@Common.QuickInfo": "Dynamic Create via Association Control Property"
+    },
+    "__EntityControl": {
+     "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.EntityControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Dyn. Method Control",
+     "@Common.Heading": "Dynamic Method Control",
+     "@Common.QuickInfo": "Dynamic Method Property"
+    },
+    "__OperationControl": {
+     "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tOperationControl",
+     "@Core.Computed": true,
+     "@UI.HiddenFilter": true,
+     "@UI.Hidden": true,
+     "@Common.Label": "Dyn. Action Control",
+     "@Common.Heading": "Dynamic Action Control",
+     "@Common.QuickInfo": "Dynamic Action Property"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.SAP__Message",
+      "notNull": true
+     }
+    },
+    "DraftAdministrativeData": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.I_DraftAdministrativeData",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "SiblingEntity": {
+     "type": "cds.Association",
+     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_log": {
+     "type": "cds.Composition",
+     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_l",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": [],
+     "@Common.Composition": true
+    },
+    "_tabl_f": {
+     "type": "cds.Composition",
+     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_f",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": [],
+     "@Common.Composition": true
+    }
+   },
+   "actions": {
+    "Resume": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     }
+    },
+    "Edit": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "PreserveChanges": {
+       "type": "cds.Boolean",
+       "notNull": true,
+       "@Common.Label": "TRUE",
+       "@Common.QuickInfo": "Data element for domain BOOLE: TRUE (='X') and FALSE (=' ')"
+      }
+     },
+     "returns": {
+      "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t",
+      "notNull": true
+     },
+     "@Core.OperationAvailable": {
+      "=": "_it/__OperationControl/Edit"
+     }
+    },
+    "Discard": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     }
+    },
+    "activeTable": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t",
+      "notNull": true
+     },
+     "@Core.OperationAvailable": {
+      "=": "_it/__OperationControl/activeTable"
+     }
+    },
+    "Activate": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t",
+      "notNull": true
+     }
+    },
+    "autoActiveTable": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "items": {
+        "type": "$self",
+        "notNull": true
+       }
+      },
+      "TABNAME": {
+       "type": "cds.String",
+       "length": 16,
+       "notNull": true,
+       "@Common.Label": "Object name",
+       "@Common.QuickInfo": "XCO Database table : Object name"
+      },
+      "TABDESC": {
+       "type": "cds.String",
+       "length": 60,
+       "notNull": true,
+       "@Common.Label": "Short descr.",
+       "@Common.Heading": "Short description",
+       "@Common.QuickInfo": "XCO ABAP Dictionary: Short description"
+      },
+      "CONTFLAG": {
+       "type": "cds.String",
+       "length": 1,
+       "notNull": true
+      },
+      "MAINFLAG": {
+       "type": "cds.String",
+       "length": 10,
+       "notNull": true
+      },
+      "DEVCLASS": {
+       "type": "cds.String",
+       "length": 30,
+       "notNull": true,
+       "@Common.Label": "Package",
+       "@Common.QuickInfo": "XCO Package: Package"
+      },
+      "TRKORR": {
+       "type": "cds.String",
+       "length": 20,
+       "notNull": true,
+       "@Common.Label": "Transport",
+       "@Common.QuickInfo": "XCO: Transport"
+      },
+      "STATUS": {
+       "type": "cds.String",
+       "length": 1,
+       "notNull": true,
+       "@Common.Label": "Status"
+      },
+      "REFERENCE": {
+       "type": "cds.String",
+       "length": 40,
+       "notNull": true,
+       "@Common.Label": "Reference"
+      },
+      "_FIELDS": {
+       "items": {
+        "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.ZSGEN_TABL_FIELD_LIST",
+        "notNull": true
+       }
+      }
+     },
+     "returns": {
+      "items": {
+       "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.za_gen_response_log"
+      }
+     }
+    },
+    "Prepare": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     }
+    }
+   },
+   "@Common.Label": "Consumption view for generate table -t",
+   "@UI.Facets": [
+    {
+     "$Type": "SAP__UI.ReferenceFacet",
+     "Label": "Table setting",
+     "ID": "techinfo",
+     "Target": {
+      "=": "@UI.Identification"
+     }
+    },
+    {
+     "$Type": "SAP__UI.ReferenceFacet",
+     "Label": "Fields info",
+     "ID": "fieldsinfo",
+     "Target": {
+      "=": "_tabl_f.@UI.LineItem"
+     }
+    },
+    {
+     "$Type": "SAP__UI.ReferenceFacet",
+     "Label": "Active Logs",
+     "ID": "loginfo",
+     "Target": {
+      "=": "_log.@UI.LineItem"
+     }
+    }
+   ],
+   "@UI.Identification": [
+    {
+     "$Type": "SAP__UI.DataFieldForAction",
+     "Label": "Active",
+     "Action": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.activeTable(com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType)",
+     "InvocationGrouping": {
+      "#": "ChangeSet"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Tabname"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Tabdesc"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Contflag"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Mainflag"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Devclass"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Trkorr"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Status"
+     }
+    }
+   ],
+   "@UI.LineItem": [
+    {
+     "$Type": "SAP__UI.DataFieldForAction",
+     "Label": "Active",
+     "Action": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.autoActiveTable(Collection(com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType))",
+     "InvocationGrouping": {
+      "#": "ChangeSet"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Tabname"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Tabdesc"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Contflag"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Mainflag"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Devclass"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Trkorr"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Status"
+     }
+    }
+   ],
+   "@UI.SelectionFields": [
+    "Tabname"
+   ],
+   "@Common.Messages": {
+    "=": "SAP__Messages"
+   },
+   "@Capabilities.NavigationRestrictions.RestrictedProperties": [
+    {
+     "NavigationProperty": {
+      "=": "_log"
+     },
+     "InsertRestrictions": {
+      "Insertable": {
+       "=": "__CreateByAssociationControl/_log"
+      }
+     }
+    },
+    {
+     "NavigationProperty": {
+      "=": "_tabl_f"
+     },
+     "InsertRestrictions": {
+      "Insertable": {
+       "=": "__CreateByAssociationControl/_tabl_f"
+      }
+     }
+    }
+   ],
+   "@Common.DraftRoot": {
+    "EditAction": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.Edit",
+    "DiscardAction": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.Discard",
+    "ActivationAction": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.Activate",
+    "PreparationAction": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.Prepare"
+   },
+   "@Capabilities.SearchRestrictions.Searchable": false,
+   "@Capabilities.FilterRestrictions.Filterable": true,
+   "@Capabilities.FilterRestrictions.FilterExpressionRestrictions": [
+    {
+     "Property": {
+      "=": "DraftEntityCreationDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    },
+    {
+     "Property": {
+      "=": "DraftEntityLastChangeDateTime"
+     },
+     "AllowedExpressions": "SingleRange"
+    }
+   ],
+   "@Capabilities.FilterRestrictions.NonFilterableProperties": [
+    "__CreateByAssociationControl",
+    "__EntityControl",
+    "__OperationControl"
+   ],
+   "@Capabilities.SortRestrictions.NonSortableProperties": [
+    "__CreateByAssociationControl",
+    "__EntityControl",
+    "__OperationControl"
+   ],
+   "@Capabilities.DeleteRestrictions.Deletable": {
+    "=": "__EntityControl/Deletable"
+   },
+   "@Capabilities.UpdateRestrictions.Updatable": {
+    "=": "__EntityControl/Updatable"
+   },
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
+  }
+ }
+}
