@@ -73,7 +73,7 @@ public class ClaudeFunctionCallAdapter {
                 parameters.put("required", required);
             }
 
-            function.put("parameters", parameters);
+            function.put("inputSchema", parameters);
             claudeFunctions.add(function);
         }
 
