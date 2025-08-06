@@ -31,7 +31,7 @@
         "ragcdsviewfields-Display": {
           "semanticObject": "ragcdsviewfields",
           "action": "Display",
-          "title": "RAG(CDS View Fields) ",
+          "title": "AI2Code RAG(CDS View Fields) ",
           "signature": {
             "parameters": {},
             "additionalParameters": "allowed"
