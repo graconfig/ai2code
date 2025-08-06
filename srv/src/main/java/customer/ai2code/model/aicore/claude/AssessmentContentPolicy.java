@@ -24,7 +24,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import customer.ai2code.model.aicore.claude.ConverseResponseAssistantMessage;
+import customer.ai2code.model.aicore.claude.Filter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,51 +37,63 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Output container for Converse API responses. IMPORTANT: This is a UNION type - currently only supports &#39;message&#39;. 
+ * AssessmentContentPolicy
  */
 
 @Beta// CHECKSTYLE:OFF
-public class ConverseOutput 
+public class AssessmentContentPolicy 
 // CHECKSTYLE:ON
 {
-  @JsonProperty("message")
-  private ConverseResponseAssistantMessage message;
+  @JsonProperty("filters")
+  private List<Filter> filters = new ArrayList<>();
 
   @JsonAnySetter
   @JsonAnyGetter
   private final Map<String, Object> cloudSdkCustomFields = new LinkedHashMap<>();
 
   /**
-   * Set the message of this {@link ConverseOutput} instance and return the same instance.
+   * Set the filters of this {@link AssessmentContentPolicy} instance and return the same instance.
    *
-   * @param message  The message of this {@link ConverseOutput}
-   * @return The same instance of this {@link ConverseOutput} class
+   * @param filters  The filters of this {@link AssessmentContentPolicy}
+   * @return The same instance of this {@link AssessmentContentPolicy} class
    */
-  @Nonnull public ConverseOutput message( @Nullable final ConverseResponseAssistantMessage message) {
-    this.message = message;
+  @Nonnull public AssessmentContentPolicy filters( @Nullable final List<Filter> filters) {
+    this.filters = filters;
+    return this;
+  }
+  /**
+   * Add one filters instance to this {@link AssessmentContentPolicy}.
+   * @param filtersItem The filters that should be added
+   * @return The same instance of type {@link AssessmentContentPolicy}
+   */
+  @Nonnull public AssessmentContentPolicy addFiltersItem( @Nonnull final Filter filtersItem) {
+    if (this.filters == null) {
+      this.filters = new ArrayList<>();
+    }
+    this.filters.add(filtersItem);
     return this;
   }
 
   /**
-   * Get message
-   * @return message  The message of this {@link ConverseOutput} instance.
+   * Get filters
+   * @return filters  The filters of this {@link AssessmentContentPolicy} instance.
    */
   @Nonnull
-  public ConverseResponseAssistantMessage getMessage() {
-    return message;
+  public List<Filter> getFilters() {
+    return filters;
   }
 
   /**
-   * Set the message of this {@link ConverseOutput} instance.
+   * Set the filters of this {@link AssessmentContentPolicy} instance.
    *
-   * @param message  The message of this {@link ConverseOutput}
+   * @param filters  The filters of this {@link AssessmentContentPolicy}
    */
-  public void setMessage( @Nullable final ConverseResponseAssistantMessage message) {
-    this.message = message;
+  public void setFilters( @Nullable final List<Filter> filters) {
+    this.filters = filters;
   }
 
   /**
-   * Get the names of the unrecognizable properties of the {@link ConverseOutput}.
+   * Get the names of the unrecognizable properties of the {@link AssessmentContentPolicy}.
    * @return The set of properties names
    */
   @JsonIgnore
@@ -88,7 +103,7 @@ public class ConverseOutput
   }
 
   /**
-   * Get the value of an unrecognizable property of this {@link ConverseOutput} instance.
+   * Get the value of an unrecognizable property of this {@link AssessmentContentPolicy} instance.
    * @deprecated Use {@link #toMap()} instead.
    * @param name  The name of the property
    * @return The value of the property
@@ -98,13 +113,13 @@ public class ConverseOutput
   @Deprecated
   public Object getCustomField( @Nonnull final String name ) throws NoSuchElementException {
     if( !cloudSdkCustomFields.containsKey(name) ) {
-        throw new NoSuchElementException("ConverseOutput has no field with name '" + name + "'.");
+        throw new NoSuchElementException("AssessmentContentPolicy has no field with name '" + name + "'.");
     }
     return cloudSdkCustomFields.get(name);
   }
 
   /**
-   * Get the value of all properties of this {@link ConverseOutput} instance including unrecognized properties.
+   * Get the value of all properties of this {@link AssessmentContentPolicy} instance including unrecognized properties.
    *
    * @return The map of all properties
    */
@@ -113,12 +128,12 @@ public class ConverseOutput
   public Map<String, Object> toMap()
   {
     final Map<String, Object> declaredFields = new LinkedHashMap<>(cloudSdkCustomFields);
-    if( message != null ) declaredFields.put("message", message);
+    if( filters != null ) declaredFields.put("filters", filters);
     return declaredFields;
   }
 
   /**
-   * Set an unrecognizable property of this {@link ConverseOutput} instance. If the map previously contained a mapping
+   * Set an unrecognizable property of this {@link AssessmentContentPolicy} instance. If the map previously contained a mapping
    * for the key, the old value is replaced by the specified value.
    * @param customFieldName The name of the property
    * @param customFieldValue The value of the property
@@ -138,21 +153,21 @@ public class ConverseOutput
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final ConverseOutput converseOutput = (ConverseOutput) o;
-    return Objects.equals(this.cloudSdkCustomFields, converseOutput.cloudSdkCustomFields) &&
-        Objects.equals(this.message, converseOutput.message);
+    final AssessmentContentPolicy assessmentContentPolicy = (AssessmentContentPolicy) o;
+    return Objects.equals(this.cloudSdkCustomFields, assessmentContentPolicy.cloudSdkCustomFields) &&
+        Objects.equals(this.filters, assessmentContentPolicy.filters);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(message, cloudSdkCustomFields);
+    return Objects.hash(filters, cloudSdkCustomFields);
   }
 
   @Override
   @Nonnull public String toString() {
     final StringBuilder sb = new StringBuilder();
-    sb.append("class ConverseOutput {\n");
-    sb.append("    message: ").append(toIndentedString(message)).append("\n");
+    sb.append("class AssessmentContentPolicy {\n");
+    sb.append("    filters: ").append(toIndentedString(filters)).append("\n");
     cloudSdkCustomFields.forEach((k,v) -> sb.append("    ").append(k).append(": ").append(toIndentedString(v)).append("\n"));
     sb.append("}");
     return sb.toString();

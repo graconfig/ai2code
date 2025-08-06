@@ -12,6 +12,7 @@ service ConfigService {
   //entity RagFunctions         as projection on cfg.RagFunction;
   entity ContextTypes         as projection on cfg.ContextType;
   entity Languages             as projection on cfg.Languages;
+  entity RoleTypes            as projection on cfg.RoleType;
   entity BotExecutionClass as projection on cfg.BotExecutionClass;
   entity RAGExtractorClass as projection on cfg.RAGExtractorClass;
 }
