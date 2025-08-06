@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -135,9 +136,11 @@ public class SAClaudeAIServiceImpl implements AIService {
         }
 
         @Override
-        public SseEmitter chatWithAIStreaming(List<BotMessages> messages, List<PromptTexts> prompts, String content,
-                        AIModel model, ExecutorService executor,
-                        StreamingCompletedProcessor streamingCompletionProcessor) {
+        public Stream<String> chatWithAIStreaming(List<BotMessages> messages, List<PromptTexts> prompts, String content,
+                        AIModel model
+                        // ExecutorService executor,
+                        // StreamingCompletedProcessor streamingCompletionProcessor
+                        ) {
                 // TODO Auto-generated method stub
                 throw new UnsupportedOperationException("Unimplemented method 'chatWithAIStreaming'");
         }

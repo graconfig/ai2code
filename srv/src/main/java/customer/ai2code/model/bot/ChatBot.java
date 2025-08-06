@@ -119,6 +119,9 @@ public class ChatBot extends AbstractBot {
             if (ragPrompt != null && ragPrompt.getContent() != null && !ragPrompt.getContent().isEmpty()) {
                 prompts.add(ragPrompt);
             }
+            
+            // 创建final变量供lambda使用
+            final List<PromptTexts> finalPrompts = prompts;
 
             // 7. 调用流式聊天服务
             // return aiService.chatWithAIStreaming(historyMessages, prompts, content,
@@ -133,7 +136,7 @@ public class ChatBot extends AbstractBot {
 
             executor.execute(() -> {
                 try {
-                    aiService.chatWithAIStreaming(historyMessages, prompts, content, aiModel)
+                    aiService.chatWithAIStreaming(historyMessages, finalPrompts, content, aiModel)
                             .forEach(delta -> {
                                 // 发送每个delta到SSE emitter
                                 AIService.send(emitter, delta);
@@ -147,7 +150,10 @@ public class ChatBot extends AbstractBot {
                 } finally {
                     BotMessages assistantMessage = genericCqnService.createAndInsertBotMessage(botInstance.getId(), responseBuilder.toString(), AIConstants.Roles.ASSISTANT);
                     // 再以SSE的方式发送BotMessages
-                    
+                    AIService.send(emitter, userMessage.toJson());
+
+                    AIService.send(emitter, assistantMessage.toJson());
+
                     // emitter.send(responseBuilder.toString());
                     emitter.complete();
                     executor.shutdown();
