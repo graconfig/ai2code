@@ -3,6 +3,8 @@ package customer.ai2code.model.bot;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -16,6 +18,7 @@ import customer.ai2code.model.ai.config.AIModelResolver;
 import customer.ai2code.model.ai.config.model.AIModel;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.PromptService;
+import customer.ai2code.service.constant.AIConstants;
 import customer.ai2code.service.impl.GenericCqnService;
 // import customer.ai2code.service.impl.rag.RAGExtractionFactoryService;
 // import customer.ai2code.service.rag.RAGExtraction;
@@ -68,7 +71,7 @@ public class ChatBot extends AbstractBot {
             PromptTexts ragPrompt = promptService.getRagAsPrompts(this, content);
 
             // 6.将用户的聊天内容存储到表中
-            genericCqnService.createAndInsertBotMessage(botInstance.getId(), content, ragPrompt.getContent(), "user");
+            genericCqnService.createAndInsertBotMessage(botInstance.getId(), content, ragPrompt.getContent(), AIConstants.Roles.USER);
 
             if (ragPrompt != null && ragPrompt.getContent() != null && !ragPrompt.getContent().isEmpty()) {
                 prompts.add(ragPrompt);
@@ -87,7 +90,7 @@ public class ChatBot extends AbstractBot {
 
     @Override
     public SseEmitter chatInStreaming(String content) {
-        List<PromptTexts> prompts = new ArrayList<>();
+         List<PromptTexts> prompts = new ArrayList<>();
         try {
             // 1. 根据AIModel类型，获取到不同AIService服务
             AIService aiService = aiModelResolver.resolveAIService(aiModel.getModelConfigs());
@@ -111,18 +114,47 @@ public class ChatBot extends AbstractBot {
             PromptTexts ragPrompt = promptService.getRagAsPrompts(this, content);
 
             // 6.将用户的聊天内容存储到表中
-            genericCqnService.createAndInsertBotMessage(botInstance.getId(), content, ragPrompt.getContent(), "user");
+            BotMessages userMessage = genericCqnService.createAndInsertBotMessage(botInstance.getId(), content, ragPrompt.getContent(), AIConstants.Roles.USER);
 
             if (ragPrompt != null && ragPrompt.getContent() != null && !ragPrompt.getContent().isEmpty()) {
                 prompts.add(ragPrompt);
             }
 
-
             // 7. 调用流式聊天服务
-            return aiService.chatWithAIStreaming(historyMessages, prompts, content, aiModel,
-                    null, // executor - 可以后续添加
-                    null // streamingCompletionProcessor - 可以后续添加
-            );
+            // return aiService.chatWithAIStreaming(historyMessages, prompts, content,
+            // aiModel,
+            // Executors.newCachedThreadPool(), // executor - 可以后续添加
+            // null // streamingCompletionProcessor - 可以后续添加
+            // );
+            SseEmitter emitter = new SseEmitter(20 * 60 * 1000L); // 设置超时时间为20分钟
+
+            final ExecutorService executor = Executors.newCachedThreadPool();
+            final StringBuilder responseBuilder = new StringBuilder();
+
+            executor.execute(() -> {
+                try {
+                    aiService.chatWithAIStreaming(historyMessages, prompts, content, aiModel)
+                            .forEach(delta -> {
+                                // 发送每个delta到SSE emitter
+                                AIService.send(emitter, delta);
+                            });
+                    // 完成后关闭emitter
+                    // emitter.complete();
+                } catch (Exception e) {
+                    System.err.println(
+                            "Streaming chat failed for bot: " + botInstance.getId() + ", error: " + e.getMessage());
+                    emitter.completeWithError(e);
+                } finally {
+                    BotMessages assistantMessage = genericCqnService.createAndInsertBotMessage(botInstance.getId(), responseBuilder.toString(), AIConstants.Roles.ASSISTANT);
+                    // 再以SSE的方式发送BotMessages
+                    
+                    // emitter.send(responseBuilder.toString());
+                    emitter.complete();
+                    executor.shutdown();
+                }
+
+            });
+            return emitter;
 
         } catch (Exception e) {
             System.err.println("Streaming chat failed for bot: " + botInstance.getId() + ", error: " + e.getMessage());
@@ -131,6 +163,8 @@ public class ChatBot extends AbstractBot {
             return emitter;
         }
     }
+
+    // private
 
     /**
      * 保存Prompt消息到BotMessages表
