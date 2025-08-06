@@ -30,10 +30,10 @@ public class ChatBot extends AbstractBot {
     private PromptService promptService;
     private AIModelResolver aiModelResolver;
     // private RAGExtractionFactoryService ragExtractionFactoryService;
-    
-    public ChatBot(BotInstances botInstance, AIModel aiModel, BotTypes botType, 
-                  Locale locale, GenericCqnService genericCqnService,
-                  PromptService promptService, AIModelResolver aiModelResolver) {
+
+    public ChatBot(BotInstances botInstance, AIModel aiModel, BotTypes botType,
+            Locale locale, GenericCqnService genericCqnService,
+            PromptService promptService, AIModelResolver aiModelResolver) {
         super(botInstance, aiModel, botType, locale, genericCqnService);
         this.promptService = promptService;
         this.aiModelResolver = aiModelResolver;
@@ -87,24 +87,38 @@ public class ChatBot extends AbstractBot {
 
     @Override
     public SseEmitter chatInStreaming(String content) {
+        List<PromptTexts> prompts = new ArrayList<>();
         try {
             // 1. 根据AIModel类型，获取到不同AIService服务
             AIService aiService = aiModelResolver.resolveAIService(aiModel.getModelConfigs());
 
-            // 2. 获取主任务ID和Prompt
-            // String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
-            List<PromptTexts> prompts = promptService.getPrompts(this);
-
-            // 3. 第一次调用需要保存prompt消息
-            boolean isFirstCall = genericCqnService.isFirstCall(botInstance.getId());
-            if (isFirstCall && prompts != null && !prompts.isEmpty()) {
-                savePromptMessages(prompts);
+            // 获取prompts
+            List<PromptTexts> retrievedPrompts = promptService.getPrompts(this);
+            if (retrievedPrompts != null && !retrievedPrompts.isEmpty()) {
+                prompts = retrievedPrompts;
             }
+
+            // // 3. 第一次调用需要保存prompt消息
+            // boolean isFirstCall = genericCqnService.isFirstCall(botInstance.getId());
+            // if (isFirstCall && prompts != null && !prompts.isEmpty()) {
+            // savePromptMessages(prompts);
+            // }
 
             // 4. 获取历史消息
             List<BotMessages> historyMessages = genericCqnService.getBotMessagesByBotInstanceId(botInstance.getId());
 
-            // 5. 调用流式聊天服务
+            // String ragContent = ;
+            PromptTexts ragPrompt = promptService.getRagAsPrompts(this, content);
+
+            // 6.将用户的聊天内容存储到表中
+            genericCqnService.createAndInsertBotMessage(botInstance.getId(), content, ragPrompt.getContent(), "user");
+
+            if (ragPrompt != null && ragPrompt.getContent() != null && !ragPrompt.getContent().isEmpty()) {
+                prompts.add(ragPrompt);
+            }
+
+
+            // 7. 调用流式聊天服务
             return aiService.chatWithAIStreaming(historyMessages, prompts, content, aiModel,
                     null, // executor - 可以后续添加
                     null // streamingCompletionProcessor - 可以后续添加
@@ -163,12 +177,12 @@ public class ChatBot extends AbstractBot {
     // 使用AbstractBot中的实现，不需要在这里重写
     // @Override
     // public BotInstances getBotInstance() {
-    //     return botInstance;
+    // return botInstance;
     // }
 
     // @Override
     // public AIModel getAiModel() {
-    //     return aiModel;
+    // return aiModel;
     // }
 
 }
