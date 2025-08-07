@@ -30,11 +30,11 @@ public class FunctionCallingBot extends AbstractBot {
     private PromptService promptService;
     private AIModelResolver aiModelResolver;
     private BotExecutionFactoryService botExecutionFactoryService; // BotExecution 工厂服务
-    
+
     public FunctionCallingBot(BotInstances botInstance, AIModel aiModel, BotTypes botType,
-                             Locale locale, GenericCqnService genericCqnService,
-                             PromptService promptService, AIModelResolver aiModelResolver,
-                             BotExecutionFactoryService botExecutionFactoryService) {
+            Locale locale, GenericCqnService genericCqnService,
+            PromptService promptService, AIModelResolver aiModelResolver,
+            BotExecutionFactoryService botExecutionFactoryService) {
         super(botInstance, aiModel, botType, locale, genericCqnService);
         this.promptService = promptService;
         this.aiModelResolver = aiModelResolver;
