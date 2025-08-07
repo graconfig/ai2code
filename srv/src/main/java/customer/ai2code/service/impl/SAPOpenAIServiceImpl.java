@@ -130,7 +130,7 @@ public class SAPOpenAIServiceImpl implements AIService {
                 if (content != null && !content.isBlank()) {
                         // params.addMessages(new
                         // OpenAiChatMessage.OpenAiChatUserMessage().addText(content));
-                        messageFactory.createUserMessage(content);
+                        params.addMessages(messageFactory.createUserMessage(content));
                 }
 
                 OpenAiClient aiClient = getAiClientbyModelUsingBTPDestination(
