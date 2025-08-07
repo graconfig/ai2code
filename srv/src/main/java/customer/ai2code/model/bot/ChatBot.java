@@ -52,7 +52,7 @@ public class ChatBot extends AbstractBot {
             // 获取prompts
             List<PromptTexts> retrievedPrompts = promptService.getPrompts(this);
             if (retrievedPrompts != null && !retrievedPrompts.isEmpty()) {
-                prompts = retrievedPrompts;
+                prompts = new ArrayList<>(retrievedPrompts); // 创建可修改的副本
             }
 
             // 2. 第一次chat需要保存prompt消息
@@ -71,7 +71,8 @@ public class ChatBot extends AbstractBot {
             PromptTexts ragPrompt = promptService.getRagAsPrompts(this, content);
 
             // 6.将用户的聊天内容存储到表中
-            genericCqnService.createAndInsertBotMessage(botInstance.getId(), content, ragPrompt.getContent(), AIConstants.Roles.USER);
+            genericCqnService.createAndInsertBotMessage(botInstance.getId(), content, ragPrompt.getContent(),
+                    AIConstants.Roles.USER);
 
             if (ragPrompt != null && ragPrompt.getContent() != null && !ragPrompt.getContent().isEmpty()) {
                 prompts.add(ragPrompt);
@@ -90,7 +91,7 @@ public class ChatBot extends AbstractBot {
 
     @Override
     public SseEmitter chatInStreaming(String content) {
-         List<PromptTexts> prompts = new ArrayList<>();
+        List<PromptTexts> prompts = new ArrayList<>();
         try {
             // 1. 根据AIModel类型，获取到不同AIService服务
             AIService aiService = aiModelResolver.resolveAIService(aiModel.getModelConfigs());
@@ -98,7 +99,7 @@ public class ChatBot extends AbstractBot {
             // 获取prompts
             List<PromptTexts> retrievedPrompts = promptService.getPrompts(this);
             if (retrievedPrompts != null && !retrievedPrompts.isEmpty()) {
-                prompts = retrievedPrompts;
+                prompts = new ArrayList<>(retrievedPrompts); // 创建可修改的副本
             }
 
             // // 3. 第一次调用需要保存prompt消息
@@ -114,12 +115,13 @@ public class ChatBot extends AbstractBot {
             PromptTexts ragPrompt = promptService.getRagAsPrompts(this, content);
 
             // 6.将用户的聊天内容存储到表中
-            BotMessages userMessage = genericCqnService.createAndInsertBotMessage(botInstance.getId(), content, ragPrompt.getContent(), AIConstants.Roles.USER);
+            BotMessages userMessage = genericCqnService.createAndInsertBotMessage(botInstance.getId(), content,
+                    ragPrompt.getContent(), AIConstants.Roles.USER);
 
             if (ragPrompt != null && ragPrompt.getContent() != null && !ragPrompt.getContent().isEmpty()) {
                 prompts.add(ragPrompt);
             }
-            
+
             // 创建final变量供lambda使用
             final List<PromptTexts> finalPrompts = prompts;
 
@@ -139,6 +141,7 @@ public class ChatBot extends AbstractBot {
                     aiService.chatWithAIStreaming(historyMessages, finalPrompts, content, aiModel)
                             .forEach(delta -> {
                                 // 发送每个delta到SSE emitter
+                                responseBuilder.append(delta);
                                 AIService.send(emitter, delta);
                             });
                     // 完成后关闭emitter
@@ -148,7 +151,8 @@ public class ChatBot extends AbstractBot {
                             "Streaming chat failed for bot: " + botInstance.getId() + ", error: " + e.getMessage());
                     emitter.completeWithError(e);
                 } finally {
-                    BotMessages assistantMessage = genericCqnService.createAndInsertBotMessage(botInstance.getId(), responseBuilder.toString(), AIConstants.Roles.ASSISTANT);
+                    BotMessages assistantMessage = genericCqnService.createAndInsertBotMessage(botInstance.getId(),
+                            responseBuilder.toString(), AIConstants.Roles.ASSISTANT);
                     // 再以SSE的方式发送BotMessages
                     AIService.send(emitter, userMessage.toJson());
 

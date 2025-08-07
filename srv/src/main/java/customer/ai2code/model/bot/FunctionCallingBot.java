@@ -57,8 +57,12 @@ public class FunctionCallingBot extends AbstractBot {
 
             // 2. 使用genericCqnService.getMainTaskId，再获取Prompt
             // String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
+            // 获取prompts
+            List<PromptTexts> retrievedPrompts = promptService.getPrompts(this);
+            if (retrievedPrompts != null && !retrievedPrompts.isEmpty()) {
+                prompts = new ArrayList<>(retrievedPrompts); // 创建可修改的副本
+            }
 
-            prompts = promptService.getPrompts(this);
             System.out.println("- Retrieved " + prompts.size() + " prompts for execution");
 
             // 3. 获取历史消息

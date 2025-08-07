@@ -83,7 +83,6 @@ public class SAClaudeAIServiceImpl implements AIService {
                                 .temperature(aiCoreServiceKeyConfig.getTemperature());
                 request.setInferenceConfig(inferenceConfig);
 
-
                 String systemMessage = prompts.stream()
                                 .filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
                                                 && prompt.getRoleCode() != null
@@ -138,11 +137,73 @@ public class SAClaudeAIServiceImpl implements AIService {
         @Override
         public Stream<String> chatWithAIStreaming(List<BotMessages> messages, List<PromptTexts> prompts, String content,
                         AIModel model
-                        // ExecutorService executor,
-                        // StreamingCompletedProcessor streamingCompletionProcessor
-                        ) {
+        // ExecutorService executor,
+        // StreamingCompletedProcessor streamingCompletionProcessor
+        ) {
                 // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'chatWithAIStreaming'");
+                // throw new UnsupportedOperationException("Unimplemented method
+                // 'chatWithAIStreaming'");
+                SAPAICoreClaudeConfig aiCoreServiceKeyConfig = (SAPAICoreClaudeConfig) model.parseModelConfigs();
+
+                ConverseRequest request = new ConverseRequest();
+                ConverseRequestInferenceConfig inferenceConfig = new ConverseRequestInferenceConfig()
+                                .maxTokens(aiCoreServiceKeyConfig.getMaxTokens())
+                                .temperature(aiCoreServiceKeyConfig.getTemperature());
+                request.setInferenceConfig(inferenceConfig);
+
+                String systemMessage = prompts.stream()
+                                .filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                                && prompt.getRoleCode() != null
+                                                && AIConstants.Roles.SYSTEM.equals(prompt.getRoleCode()))
+                                .map(PromptTexts::getContent)
+
+                                .findFirst()
+                                .orElse("");
+
+                if (systemMessage != null) {
+                        request.addSystemItem(messageFactory.createSystemBlock(systemMessage));
+                }
+                // history messages
+                messages.stream()
+                                .filter(msg -> !AIConstants.Roles.SYSTEM.equals(msg.getRole()))
+                                .forEach(msg -> {
+                                        if (AIConstants.Roles.USER.equals(msg.getRole())) {
+                                                request.addMessagesItem(
+                                                                messageFactory.createUserMessage(msg.getMessage()));
+                                        } else if (AIConstants.Roles.ASSISTANT.equals(msg.getRole())) {
+                                                request.addMessagesItem(
+                                                                messageFactory.createAssistantMessage(
+                                                                                msg.getMessage()));
+                                        } else {
+                                                throw new BusinessException(AIConstants.Messages.UNEXPECTED_ROLE +
+                                                                msg.getRole());
+                                        }
+                                });
+                // add user prompt
+                prompts.stream().filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                && prompt.getRoleCode() != null && AIConstants.Roles.USER.equals(prompt.getRoleCode()))
+                                .forEach(prompt -> request.addMessagesItem(
+                                                messageFactory.createUserMessage(prompt.getContent())));
+
+                // add user message
+                if (content != null && !content.isBlank()) {
+                        request.addMessagesItem(messageFactory.createUserMessage(content));
+                }
+
+                ClaudeAiClient aiClient = getAiClientbyModelUsingBTPDestination(
+                                (SAPAICoreClaudeConfig) model.parseModelConfigs(),
+                                resolveClaudeAiModel(model.getModelName()));
+                return aiClient.streamChatCompletionDeltas(request).map(delta -> {
+                        // if (delta.getContent() != null) {
+                        // return delta.getContent().getText();
+                        // } else if (delta.getToolUse() != null) {
+                        // // 处理工具调用的情况
+                        // return "Tool use: " + delta.getToolUse().getName();
+                        // }
+                        // return "";
+                        return delta.getDeltaContent();
+                });
+
         }
 
         @Override
