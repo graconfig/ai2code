@@ -4,6 +4,7 @@ import customer.ai2code.model.ai.response.AIResponse;
 import customer.ai2code.model.aicore.claude.ContentBlock;
 import customer.ai2code.model.aicore.claude.ConverseRequestAssistantMessage;
 import customer.ai2code.model.aicore.claude.ConverseResponse;
+import customer.ai2code.model.aicore.claude.ConverseResponseAssistantMessage;
 import customer.ai2code.model.aicore.claude.InvokeResponse;
 import customer.ai2code.model.aicore.claude.TextResponseContent;
 import customer.ai2code.model.aicore.claude.ToolResponseContent;
@@ -76,7 +77,7 @@ public class SAPClaudeAIResponseAdapter implements AIResponse {
         // Handle tool use case
         if (ConverseResponse.StopReasonEnum.TOOL_USE.equals(response.getStopReason())) {
             // StringBuilder toolContent = new StringBuilder();
-            ConverseRequestAssistantMessage assistantMessage = (ConverseRequestAssistantMessage) response.getOutput()
+            ConverseResponseAssistantMessage assistantMessage = (ConverseResponseAssistantMessage) response.getOutput()
                     .getMessage();
             ContentBlock toolUse = assistantMessage.getContent().stream()
                     .filter(content -> content.getToolUse() != null)
@@ -102,7 +103,7 @@ public class SAPClaudeAIResponseAdapter implements AIResponse {
                 ConverseResponse.StopReasonEnum.END_TURN.equals(response.getStopReason()) ||
                 ConverseResponse.StopReasonEnum.CONTENT_FILTERED.equals(response.getStopReason())) {
             StringBuilder toolContent = new StringBuilder();
-            ConverseRequestAssistantMessage assistantMessage = (ConverseRequestAssistantMessage) response.getOutput()
+            ConverseResponseAssistantMessage assistantMessage = (ConverseResponseAssistantMessage) response.getOutput()
                     .getMessage();
             for (var content : assistantMessage.getContent()) {
                 if (content.getText() != null) {

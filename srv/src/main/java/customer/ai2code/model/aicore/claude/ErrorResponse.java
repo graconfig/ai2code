@@ -24,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import customer.ai2code.model.aicore.claude.ConverseResponseAssistantMessage;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,51 +33,115 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Output container for Converse API responses. IMPORTANT: This is a UNION type - currently only supports &#39;message&#39;. 
+ * ErrorResponse
  */
 
 @Beta// CHECKSTYLE:OFF
-public class ConverseOutput 
+public class ErrorResponse 
 // CHECKSTYLE:ON
 {
   @JsonProperty("message")
-  private ConverseResponseAssistantMessage message;
+  private String message;
+
+  @JsonProperty("code")
+  private String code;
+
+  @JsonProperty("requestId")
+  private String requestId;
 
   @JsonAnySetter
   @JsonAnyGetter
   private final Map<String, Object> cloudSdkCustomFields = new LinkedHashMap<>();
 
   /**
-   * Set the message of this {@link ConverseOutput} instance and return the same instance.
+   * Set the message of this {@link ErrorResponse} instance and return the same instance.
    *
-   * @param message  The message of this {@link ConverseOutput}
-   * @return The same instance of this {@link ConverseOutput} class
+   * @param message  The message of this {@link ErrorResponse}
+   * @return The same instance of this {@link ErrorResponse} class
    */
-  @Nonnull public ConverseOutput message( @Nullable final ConverseResponseAssistantMessage message) {
+  @Nonnull public ErrorResponse message( @Nullable final String message) {
     this.message = message;
     return this;
   }
 
   /**
    * Get message
-   * @return message  The message of this {@link ConverseOutput} instance.
+   * @return message  The message of this {@link ErrorResponse} instance.
    */
   @Nonnull
-  public ConverseResponseAssistantMessage getMessage() {
+  public String getMessage() {
     return message;
   }
 
   /**
-   * Set the message of this {@link ConverseOutput} instance.
+   * Set the message of this {@link ErrorResponse} instance.
    *
-   * @param message  The message of this {@link ConverseOutput}
+   * @param message  The message of this {@link ErrorResponse}
    */
-  public void setMessage( @Nullable final ConverseResponseAssistantMessage message) {
+  public void setMessage( @Nullable final String message) {
     this.message = message;
   }
 
   /**
-   * Get the names of the unrecognizable properties of the {@link ConverseOutput}.
+   * Set the code of this {@link ErrorResponse} instance and return the same instance.
+   *
+   * @param code  The code of this {@link ErrorResponse}
+   * @return The same instance of this {@link ErrorResponse} class
+   */
+  @Nonnull public ErrorResponse code( @Nullable final String code) {
+    this.code = code;
+    return this;
+  }
+
+  /**
+   * Get code
+   * @return code  The code of this {@link ErrorResponse} instance.
+   */
+  @Nonnull
+  public String getCode() {
+    return code;
+  }
+
+  /**
+   * Set the code of this {@link ErrorResponse} instance.
+   *
+   * @param code  The code of this {@link ErrorResponse}
+   */
+  public void setCode( @Nullable final String code) {
+    this.code = code;
+  }
+
+  /**
+   * Set the requestId of this {@link ErrorResponse} instance and return the same instance.
+   *
+   * @param requestId  The requestId of this {@link ErrorResponse}
+   * @return The same instance of this {@link ErrorResponse} class
+   */
+  @Nonnull public ErrorResponse requestId( @Nullable final String requestId) {
+    this.requestId = requestId;
+    return this;
+  }
+
+  /**
+   * Get requestId
+   * @return requestId  The requestId of this {@link ErrorResponse} instance.
+   */
+  @Nonnull
+  public String getRequestId() {
+    return requestId;
+  }
+
+  /**
+   * Set the requestId of this {@link ErrorResponse} instance.
+   *
+   * @param requestId  The requestId of this {@link ErrorResponse}
+   */
+  public void setRequestId( @Nullable final String requestId) {
+    this.requestId = requestId;
+  }
+
+  /**
+   * Get the names of the unrecognizable properties of the {@link ErrorResponse}.
    * @return The set of properties names
    */
   @JsonIgnore
@@ -88,7 +151,7 @@ public class ConverseOutput
   }
 
   /**
-   * Get the value of an unrecognizable property of this {@link ConverseOutput} instance.
+   * Get the value of an unrecognizable property of this {@link ErrorResponse} instance.
    * @deprecated Use {@link #toMap()} instead.
    * @param name  The name of the property
    * @return The value of the property
@@ -98,13 +161,13 @@ public class ConverseOutput
   @Deprecated
   public Object getCustomField( @Nonnull final String name ) throws NoSuchElementException {
     if( !cloudSdkCustomFields.containsKey(name) ) {
-        throw new NoSuchElementException("ConverseOutput has no field with name '" + name + "'.");
+        throw new NoSuchElementException("ErrorResponse has no field with name '" + name + "'.");
     }
     return cloudSdkCustomFields.get(name);
   }
 
   /**
-   * Get the value of all properties of this {@link ConverseOutput} instance including unrecognized properties.
+   * Get the value of all properties of this {@link ErrorResponse} instance including unrecognized properties.
    *
    * @return The map of all properties
    */
@@ -114,11 +177,13 @@ public class ConverseOutput
   {
     final Map<String, Object> declaredFields = new LinkedHashMap<>(cloudSdkCustomFields);
     if( message != null ) declaredFields.put("message", message);
+    if( code != null ) declaredFields.put("code", code);
+    if( requestId != null ) declaredFields.put("requestId", requestId);
     return declaredFields;
   }
 
   /**
-   * Set an unrecognizable property of this {@link ConverseOutput} instance. If the map previously contained a mapping
+   * Set an unrecognizable property of this {@link ErrorResponse} instance. If the map previously contained a mapping
    * for the key, the old value is replaced by the specified value.
    * @param customFieldName The name of the property
    * @param customFieldValue The value of the property
@@ -138,21 +203,25 @@ public class ConverseOutput
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final ConverseOutput converseOutput = (ConverseOutput) o;
-    return Objects.equals(this.cloudSdkCustomFields, converseOutput.cloudSdkCustomFields) &&
-        Objects.equals(this.message, converseOutput.message);
+    final ErrorResponse errorResponse = (ErrorResponse) o;
+    return Objects.equals(this.cloudSdkCustomFields, errorResponse.cloudSdkCustomFields) &&
+        Objects.equals(this.message, errorResponse.message) &&
+        Objects.equals(this.code, errorResponse.code) &&
+        Objects.equals(this.requestId, errorResponse.requestId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(message, cloudSdkCustomFields);
+    return Objects.hash(message, code, requestId, cloudSdkCustomFields);
   }
 
   @Override
   @Nonnull public String toString() {
     final StringBuilder sb = new StringBuilder();
-    sb.append("class ConverseOutput {\n");
+    sb.append("class ErrorResponse {\n");
     sb.append("    message: ").append(toIndentedString(message)).append("\n");
+    sb.append("    code: ").append(toIndentedString(code)).append("\n");
+    sb.append("    requestId: ").append(toIndentedString(requestId)).append("\n");
     cloudSdkCustomFields.forEach((k,v) -> sb.append("    ").append(k).append(": ").append(toIndentedString(v)).append("\n"));
     sb.append("}");
     return sb.toString();

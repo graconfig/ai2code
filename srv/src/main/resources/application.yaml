@@ -1,4 +1,3 @@
----
 spring:
   web:
     resources:
@@ -6,9 +5,20 @@ spring:
   config:
     activate:
       on-profile: default
+  sql:
+    init:
+      platform: h2
+
 cds:
+  data-source:
+    auto-config:
+      enabled: false
   remote:
     services:
+      '[com.sap.gateway.srvd.zsrvd_genclas.v0001]':
+        destination:
+          name: com.sap.gateway.srvd.zsrvd_genclas.v0001
+        type: odata-v4
       '[com.sap.gateway.srvd.zsrvd_gentabl.v0001]':
         destination:
           name: com.sap.gateway.srvd.zsrvd_gentabl.v0001
@@ -37,33 +47,32 @@ cds:
           suffix: /sap/opu/odata4/sap/zsrvb_gensrvd/srvd/sap
         model: com.sap.gateway.srvd.zsrvd_gensrvd.v0001
         type: odata-v4
+      '[com.sap.gateway.srvd.zsrvd_genbdef.v0001]':
+        destination:
+          name: com.sap.gateway.srvd.zsrvd_genbdef.v0001
+        type: odata-v4
   sql:
     hana:
       search:
         fuzzinessThreshold: 0.9
         fuzzy: true
----
-spring:
-  config.activate.on-profile: dev
-  sql.init.platform: h2
-  web.resources.static-locations: file:./app/
-cds:
-  data-source.auto-config.enabled: false
-
----
 management:
   endpoint:
     health:
       show-components: always
-      probes.enabled: true
+      probes:
+        enabled: true
   endpoints:
     web:
       exposure:
         include: health
   health:
-    defaults.enabled: false
-    ping.enabled: true
-    db.enabled: true
+    defaults:
+      enabled: false
+    ping:
+      enabled: true
+    db:
+      enabled: true
 logging:
   level:
     com:
