@@ -185,7 +185,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
+			<!-- <plugin>
 				<groupId>com.sap.cloud.sdk.datamodel</groupId>
 				<artifactId>openapi-generator-maven-plugin</artifactId>
 				<configuration>
@@ -214,21 +214,12 @@
 								<useOneOfInterfaces>true</useOneOfInterfaces>
 								<useOneOfCreators>true</useOneOfCreators>
 								<useFloatArrays>true</useFloatArrays>
-								<!-- new exclude paths -->
-								<!-- <excludePaths>/deployments/{deployment-id}/completions
-											/deployments/{deployment-id}/audio/transcriptions
-											/deployments/{deployment-id}/audio/translations
-											/deployments/{deployment-id}/images/generations</excludePaths> -->
-								<!-- new exclude properties -->
-								<!-- <excludeProperties>chatCompletionResponseMessage.context
-											createChatCompletionRequest.data_sources</excludeProperties> -->
-								<!-- new: remove unassigned components -->
-								<removeUnusedComponents>true</removeUnusedComponents>
+								<removeUnusedComponents>false</removeUnusedComponents>
 							</additionalProperties>
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
 		</plugins>
 	</build>
 </project>

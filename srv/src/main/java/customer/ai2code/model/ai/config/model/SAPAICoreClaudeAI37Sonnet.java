@@ -1,8 +1,9 @@
 package customer.ai2code.model.ai.config.model;
 
 import cds.gen.configservice.ModelConfigs;
+import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.ai.config.service.AIServiceConfig;
-import customer.ai2code.model.ai.config.service.SAPAICoreConfig;
+import customer.ai2code.model.ai.config.service.SAPAICoreClaudeConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,10 +22,18 @@ public class SAPAICoreClaudeAI37Sonnet implements AIModel {
 
     @Override
     public AIServiceConfig parseModelConfigs() {
-        ObjectMapper mapper = getDefaultObjectMapper();
-        SAPAICoreConfig claudeConfig =
-            mapper.convertValue(modelConfigs.getParameters(), SAPAICoreConfig.class);
-        return claudeConfig;
+        try {
+            ObjectMapper mapper = getDefaultObjectMapper();
+            
+            Object parameters = modelConfigs.getParameters();
+            if (parameters instanceof String) {
+                return mapper.readValue((String) parameters, SAPAICoreClaudeConfig.class);
+            } else {
+                return mapper.convertValue(parameters, SAPAICoreClaudeConfig.class);
+            }
+        } catch (Exception e) {
+            throw new BusinessException("Failed to parse model configuration", e);
+        }
     }
 
 }

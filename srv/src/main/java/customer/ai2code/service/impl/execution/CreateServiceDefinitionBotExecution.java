@@ -7,12 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.cds.ql.Select;
+import com.sap.cds.ql.cqn.CqnSelect;
 import com.sap.cds.services.ServiceException;
 import com.sap.cds.services.request.ParameterInfo;
 import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataResponseException;
 
 import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.V0001;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.ZcGensrvdT;
 import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.ZcGensrvdTAutoActiveSRVDSRVBContext;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.ZcGensrvdT_;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.ZsgenSrvdExposeList;
 import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.ZtgensrvdL;
 import customer.ai2code.model.execution.annotation.BotExecutor;
 import customer.ai2code.model.execution.annotation.ExecuteMethod;
@@ -46,10 +51,44 @@ public class CreateServiceDefinitionBotExecution implements BotExecution {
         Collection<ZtgensrvdL> results;// OData返回结果
 
         // 填充报文
+        ZcGensrvdTAutoActiveSRVDSRVBContext newContext = ZcGensrvdTAutoActiveSRVDSRVBContext.create();
+        CqnSelect select = (CqnSelect)Select.from(ZcGensrvdT_.CDS_NAME);
+        newContext.setCqn(select);
+
+        newContext.setSrvdname(autoActiveSRVDSRVBContext.getSrvdname());
+        newContext.setSrvddesc(autoActiveSRVDSRVBContext.getSrvddesc());
+        newContext.setLabeltext(autoActiveSRVDSRVBContext.getLabeltext());
+        newContext.setLeadingEntity(autoActiveSRVDSRVBContext.getLeadingEntity());
+        newContext.setDevclass(autoActiveSRVDSRVBContext.getDevclass());
+        newContext.setTrkorr(autoActiveSRVDSRVBContext.getTrkorr());
+        newContext.setReference(autoActiveSRVDSRVBContext.getReference());
+        newContext.setBindingType(autoActiveSRVDSRVBContext.getBindingType());
+        newContext.setSrvbname(autoActiveSRVDSRVBContext.getSrvbname());
+        newContext.setSrvbdesc(autoActiveSRVDSRVBContext.getSrvbdesc());
+
+        
+        Collection<ZsgenSrvdExposeList> exposeList = new ArrayList<>();
+        // ZsgenSrvdExposeList expose = ZsgenSrvdExposeList.create();
+        autoActiveSRVDSRVBContext.getExpose().forEach(
+                expose -> {
+                    ZsgenSrvdExposeList exposeNew = ZsgenSrvdExposeList.create();
+                    exposeNew.setDdlsname(expose.getDdlsname());
+                    // exposeNew.setDdlstext(expose.getDdlstext());
+                    // exposeNew.setExposed(expose.getExposed());
+                    // exposeNew.setReference(expose.getReference());
+                    exposeList.add(exposeNew);
+                });
+        newContext.setExpose(exposeList);
+        // expose.setDdlsname("ZC_RAP100_ATRA2390");
+        // exposeList.add(expose);
+        // autoActiveSRVDSRVBContext.setExpose(exposeList);
+
+
+
 
         // 调用action
         try {
-            zsrvdGensrvd.emit(autoActiveSRVDSRVBContext);
+            zsrvdGensrvd.emit(newContext);
         } catch (ServiceException e) {
             ODataResponseException odataResponseException = (ODataResponseException) e.getCause().getCause();
             int statusCode = odataResponseException.getHttpCode();
@@ -62,7 +101,7 @@ public class CreateServiceDefinitionBotExecution implements BotExecution {
 
         // 结果返回
         try {
-            results = autoActiveSRVDSRVBContext.getResult();
+            results = newContext.getResult();
             if (results == null) {
                 returnMessage = "OData Response is null";
             } else {

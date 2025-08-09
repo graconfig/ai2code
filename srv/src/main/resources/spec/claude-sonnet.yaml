@@ -212,7 +212,7 @@ components:
         - $ref: "#/components/schemas/ConverseRequestAssistantMessage"
     ConverseResponseMessage:
       oneOf: 
-        - $ref: "#/components/schemas/ConverseRequestAssistantMessage"
+        - $ref: "#/components/schemas/ConverseResponseAssistantMessage"
       # discriminator:
       #   propertyName: role
       #   mapping:
@@ -234,6 +234,21 @@ components:
           items:
             $ref: "#/components/schemas/ContentBlock"
     ConverseRequestAssistantMessage:
+      type: object
+      required:
+        - role
+        - content
+      properties:
+        role:
+          type: string
+          enum: [assistant]
+        content:
+          description: |
+            The contents of the user message.
+          type: array
+          items:
+            $ref: "#/components/schemas/ContentBlock"
+    ConverseResponseAssistantMessage:
       type: object
       required:
         - role
