@@ -89,7 +89,7 @@ public class CreateCdsOdataBotExecution implements BotExecution {
 
         // 调用action
         try {
-            zsrvdGenddls.emit(AutoActiveCDSContext);
+            zsrvdGenddls.emit(AutoActiveCDSContextNew);
         } catch (ServiceException e) {
             ODataResponseException odataexce = (ODataResponseException) e.getCause().getCause();
             int statusCode = odataexce.getHttpCode();

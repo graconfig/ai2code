@@ -8,12 +8,17 @@ spring:
   sql:
     init:
       platform: h2
+
 cds:
   data-source:
     auto-config:
       enabled: false
   remote:
     services:
+      '[com.sap.gateway.srvd.zsrvd_genclas.v0001]':
+        destination:
+          name: com.sap.gateway.srvd.zsrvd_genclas.v0001
+        type: odata-v4
       '[zsrvd_genddls]':
         destination:
           name: zsrvd_genddls
