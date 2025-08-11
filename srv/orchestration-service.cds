@@ -4,7 +4,7 @@ using ai.orchestration.rag as rag from '../db/orchestration-rag-model';
 
 using {zsrvd_gensrvd as zsrvd_gensrvd} from './external/zsrvd_gensrvd';
 using {zsrvd_genddls as zsrvd_genddls} from './external/zsrvd_genddls';
-using {zsrvd_genclas as zsrvd_genclas } from './external/zsrvd_genclas';
+using {zsrvd_genclas as zsrvd_genclas} from './external/zsrvd_genclas';
 using {zsrvd_genbdef as zsrvd_genbdef} from './external/zsrvd_genbdef';
 using {zsrvd_gentabl as zsrvd_gentabl} from './external/zsrvd_gentabl';
 

@@ -35,6 +35,12 @@ cds:
       '[zsrvd_genclas]':
         destination:
           name: zsrvd_genclas
+        http:
+          service: zsrvd_genclas/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_genclas/srvd/sap
+        model: zsrvd_genclas
         type: odata-v4
       '[zsrvd_gensrvd]':
         destination:
