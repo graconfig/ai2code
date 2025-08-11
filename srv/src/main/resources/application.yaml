@@ -1,3 +1,4 @@
+---
 spring:
   web:
     resources:
@@ -5,13 +6,10 @@ spring:
   config:
     activate:
       on-profile: default
-  sql:
-    init:
-      platform: h2
+  # sql:
+  #   init:
+  #     platform: h2
 cds:
-  data-source:
-    auto-config:
-      enabled: false
   remote:
     services:
       '[zsrvd_genbdef]':
@@ -51,6 +49,15 @@ cds:
       search:
         fuzzinessThreshold: 0.9
         fuzzy: true
+---
+spring:
+  config.activate.on-profile: dev
+  sql.init.platform: h2
+  web.resources.static-locations: file:./app/
+cds:
+  data-source.auto-config.enabled: false
+
+---
 management:
   endpoint:
     health:
