@@ -1,3 +1,4 @@
+---
 spring:
   web:
     resources:
@@ -5,18 +6,21 @@ spring:
   config:
     activate:
       on-profile: default
-  sql:
-    init:
-      platform: h2
+  # sql:
+  #   init:
+  #     platform: h2
 cds:
-  data-source:
-    auto-config:
-      enabled: false
   remote:
     services:
       '[zsrvd_genbdef]':
         destination:
           name: zsrvd_genbdef
+        http:
+          service: zsrvd_genbdef/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_genbdef/srvd/sap
+        model: zsrvd_genbdef
         type: odata-v4
       '[zsrvd_gentabl]':
         destination:
@@ -36,11 +40,17 @@ cds:
           csrf:
             enabled: true
           suffix: /sap/opu/odata4/sap/zsrvb_genddls/srvd/sap
-        model: com.sap.gateway.srvd.zsrvd_genddls.v0001
+        model: zsrvd_genddls
         type: odata-v4
       '[zsrvd_genclas]':
         destination:
           name: zsrvd_genclas
+        http:
+          service: zsrvd_genclas/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_genclas/srvd/sap
+        model: zsrvd_genclas
         type: odata-v4
       '[zsrvd_gensrvd]':
         destination:
@@ -50,13 +60,22 @@ cds:
           csrf:
             enabled: true
           suffix: /sap/opu/odata4/sap/zsrvb_gensrvd/srvd/sap
-        model: com.sap.gateway.srvd.zsrvd_gensrvd.v0001
+        model: zsrvd_gensrvd
         type: odata-v4
   sql:
     hana:
       search:
         fuzzinessThreshold: 0.9
         fuzzy: true
+---
+spring:
+  config.activate.on-profile: dev
+  sql.init.platform: h2
+  web.resources.static-locations: file:./app/
+cds:
+  data-source.auto-config.enabled: false
+
+---
 management:
   endpoint:
     health:

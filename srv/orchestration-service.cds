@@ -4,7 +4,7 @@ using ai.orchestration.rag as rag from '../db/orchestration-rag-model';
 
 using {zsrvd_gensrvd as zsrvd_gensrvd} from './external/zsrvd_gensrvd';
 using {zsrvd_genddls as zsrvd_genddls} from './external/zsrvd_genddls';
-using {zsrvd_genclas as zsrvd_genclas } from './external/zsrvd_genclas';
+using {zsrvd_genclas as zsrvd_genclas} from './external/zsrvd_genclas';
 using {zsrvd_genbdef as zsrvd_genbdef} from './external/zsrvd_genbdef';
 using {zsrvd_gentabl as zsrvd_gentabl} from './external/zsrvd_gentabl';
 
@@ -46,7 +46,7 @@ service MainService {
     
     //Create class
     entity CreateClass             as projection on zsrvd_genclas.zc_genclas_l;
-
+    //Create Bdef Definition
     entity CreateGenBdefOdata as projection on zsrvd_genbdef.zc_genbdef_t;
     //Create CDS Table
     entity CreateGenTableOdata as projection on zsrvd_gentabl.zc_gentabl_t;

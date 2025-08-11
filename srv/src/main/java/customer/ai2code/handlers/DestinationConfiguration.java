@@ -67,6 +67,31 @@ public class DestinationConfiguration implements EventHandler {
 			loader.registerDestination(httpDestination);
 			DestinationAccessor.prependDestinationLoader(loader);
 
+			// Registering the destination for zsrvd_genbdef
+			httpDestination = DefaultHttpDestination
+					.builder(
+							"https://handsap01.hand-china.com")
+					.header("Authorization", auth)
+					.property("sap-client", "310")
+					.property("sap-language", "en")
+					.name("zsrvd_genbdef").build();
+
+			loader = new DefaultDestinationLoader();
+			loader.registerDestination(httpDestination);
+			DestinationAccessor.prependDestinationLoader(loader);
+
+			// 新增：配置 zsrvd_genclas 
+			httpDestination = DefaultHttpDestination
+					.builder("https://handsap01.hand-china.com")
+					.header("Authorization", auth) 
+					.property("sap-client", "310") 
+					.property("sap-language", "en") 
+					.name("zsrvd_genclas").build(); 
+
+			loader = new DefaultDestinationLoader();
+			loader.registerDestination(httpDestination);
+			DestinationAccessor.prependDestinationLoader(loader);
+
 			httpDestination = DefaultHttpDestination
 					.builder(
 							"https://handsap01.hand-china.com")
@@ -85,14 +110,14 @@ public class DestinationConfiguration implements EventHandler {
 
 	// @EventListener
 	// void applicationReady(ApplicationReadyEvent ready) {
-	// 	int port = Integer.valueOf(environment.getProperty("local.server.port"));
-	// 	DefaultHttpDestination mockDestination = DefaultHttpDestination
-	// 			.builder("http://localhost:" + port)
-	// 			.name("s4-business-partner-api-mocked").build();
+	// int port = Integer.valueOf(environment.getProperty("local.server.port"));
+	// DefaultHttpDestination mockDestination = DefaultHttpDestination
+	// .builder("http://localhost:" + port)
+	// .name("s4-business-partner-api-mocked").build();
 
-	// 	DefaultDestinationLoader loader = new DefaultDestinationLoader();
-	// 	loader.registerDestination(mockDestination);
-	// 	DestinationAccessor.prependDestinationLoader(loader);
+	// DefaultDestinationLoader loader = new DefaultDestinationLoader();
+	// loader.registerDestination(mockDestination);
+	// DestinationAccessor.prependDestinationLoader(loader);
 	// }
 
 }
