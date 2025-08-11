@@ -51,9 +51,9 @@ public class DestinationConfiguration implements EventHandler {
 			loader.registerDestination(httpDestination);
 			DestinationAccessor.prependDestinationLoader(loader);
 
-			loader = new DefaultDestinationLoader();
-			loader.registerDestination(httpDestination);
-			DestinationAccessor.prependDestinationLoader(loader);
+			// loader = new DefaultDestinationLoader();
+			// loader.registerDestination(httpDestination);
+			// DestinationAccessor.prependDestinationLoader(loader);
 
 			httpDestination = DefaultHttpDestination
 					.builder(
