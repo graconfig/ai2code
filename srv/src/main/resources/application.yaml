@@ -30,7 +30,7 @@ cds:
           csrf:
             enabled: true
           suffix: /sap/opu/odata4/sap/zsrvb_genddls/srvd/sap
-        model: com.sap.gateway.srvd.zsrvd_genddls.v0001
+        model: zsrvd_genddls
         type: odata-v4
       '[zsrvd_genclas]':
         destination:
@@ -44,7 +44,7 @@ cds:
           csrf:
             enabled: true
           suffix: /sap/opu/odata4/sap/zsrvb_gensrvd/srvd/sap
-        model: com.sap.gateway.srvd.zsrvd_gensrvd.v0001
+        model: zsrvd_gensrvd
         type: odata-v4
   sql:
     hana:
