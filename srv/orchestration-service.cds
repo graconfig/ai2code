@@ -46,7 +46,7 @@ service MainService {
     
     //Create class
     entity CreateClass             as projection on zsrvd_genclas.zc_genclas_l;
-
+    //Create Bdef Definition
     entity CreateGenBdefOdata as projection on zsrvd_genbdef.zc_genbdef_t;
     //Create CDS Table
     entity CreateGenTableOdata as projection on zsrvd_gentabl.zc_gentabl_t;

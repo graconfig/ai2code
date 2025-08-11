@@ -17,6 +17,12 @@ cds:
       '[zsrvd_genbdef]':
         destination:
           name: zsrvd_genbdef
+        http:
+          service: zsrvd_genbdef/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_genbdef/srvd/sap
+        model: zsrvd_genbdef
         type: odata-v4
       '[zsrvd_gentabl]':
         destination:
