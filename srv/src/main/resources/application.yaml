@@ -21,6 +21,12 @@ cds:
       '[zsrvd_gentabl]':
         destination:
           name: zsrvd_gentabl
+        http:
+          service: zsrvd_gentabl/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_gentabl/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_gentabl.v0001
         type: odata-v4
       '[zsrvd_genddls]':
         destination:
