@@ -13,12 +13,12 @@ import com.sap.cds.services.ServiceException;
 import com.sap.cds.services.request.ParameterInfo;
 import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataResponseException;
 
-import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.V0001;
-import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.ZcGensrvdT;
-import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.ZcGensrvdTAutoActiveSRVDSRVBContext;
-import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.ZcGensrvdT_;
-import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.ZsgenSrvdExposeList;
-import cds.gen.com.sap.gateway.srvd.zsrvd_gensrvd.v0001.ZtgensrvdL;
+import cds.gen.zsrvd_gensrvd.ZsrvdGensrvd;
+import cds.gen.zsrvd_gensrvd.ZcGensrvdT;
+import cds.gen.zsrvd_gensrvd.ZcGensrvdTAutoActiveSRVDSRVBContext;
+import cds.gen.zsrvd_gensrvd.ZcGensrvdT_;
+import cds.gen.zsrvd_gensrvd.ZsgenSrvdExposeList;
+import cds.gen.zsrvd_gensrvd.ZtgensrvdL;
 import customer.ai2code.model.execution.annotation.BotExecutor;
 import customer.ai2code.model.execution.annotation.ExecuteMethod;
 import customer.ai2code.model.execution.annotation.ExecuteParameter;
@@ -30,13 +30,13 @@ import customer.ai2code.service.impl.TaskBotCacheManager;
 public class CreateServiceDefinitionBotExecution implements BotExecution {
 
     private final ContextService contextService;
-    private final V0001 zsrvdGensrvd;
+    private final ZsrvdGensrvd zsrvdGensrvd;
     private final ObjectMapper objectMapper;
     private final TaskBotCacheManager taskBotCacheManager;
 
     // 默认构造函数
     public CreateServiceDefinitionBotExecution(ContextService contextService,
-            V0001 zsrvdGensrvd2, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
+            ZsrvdGensrvd zsrvdGensrvd2, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
         this.contextService = contextService;
         this.zsrvdGensrvd = zsrvdGensrvd2;
         this.objectMapper = objectMapper;

@@ -2,11 +2,11 @@ using ai.orchestration as db from '../db/orchestration-model';
 using ai.orchestration.config as config from '../db/orchestration-config-model';
 using ai.orchestration.rag as rag from '../db/orchestration-rag-model';
 
-using {com.sap.gateway.srvd.zsrvd_gensrvd.v0001 as zsrvd_gensrvd} from './external/zsrvd_gensrvd';
-using {com.sap.gateway.srvd.zsrvd_genddls.v0001 as zsrvd_genddls} from './external/zsrvd_genddls';
-using { com.sap.gateway.srvd.zsrvd_genclas.v0001 as zsrvd_genclas } from './external/zsrvd_genclas';
-using {com.sap.gateway.srvd.zsrvd_genbdef.v0001 as zsrvd_genbdef} from './external/zsrvd_genbdef';
-using {com.sap.gateway.srvd.zsrvd_gentabl.v0001 as zsrvd_gentabl} from './external/zsrvd_gentabl';
+using {zsrvd_gensrvd as zsrvd_gensrvd} from './external/zsrvd_gensrvd';
+using {zsrvd_genddls as zsrvd_genddls} from './external/zsrvd_genddls';
+using {zsrvd_genclas as zsrvd_genclas } from './external/zsrvd_genclas';
+using {zsrvd_genbdef as zsrvd_genbdef} from './external/zsrvd_genbdef';
+using {zsrvd_gentabl as zsrvd_gentabl} from './external/zsrvd_gentabl';
 
 service MainService {
     entity Tasks             as projection on db.Task

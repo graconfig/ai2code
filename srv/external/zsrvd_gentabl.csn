@@ -1,10 +1,10 @@
 {
  "meta": {
-  "creator": "cds-dk 8.9.4"
+  "creator": "cds-dk 9.1.1"
  },
  "$version": "2.0",
  "definitions": {
-  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tCbAControl": {
+  "zsrvd_gentabl.zc_gentabl_tCbAControl": {
    "kind": "type",
    "@cds.external": true,
    "elements": {
@@ -24,7 +24,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tOperationControl": {
+  "zsrvd_gentabl.zc_gentabl_tOperationControl": {
    "kind": "type",
    "@cds.external": true,
    "elements": {
@@ -44,7 +44,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.za_gen_response_log": {
+  "zsrvd_gentabl.za_gen_response_log": {
    "kind": "type",
    "@cds.external": true,
    "elements": {
@@ -101,7 +101,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.EntityControl": {
+  "zsrvd_gentabl.EntityControl": {
    "kind": "type",
    "@cds.external": true,
    "elements": {
@@ -121,7 +121,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.ZSGEN_TABL_FIELD_LIST": {
+  "zsrvd_gentabl.ZSGEN_TABL_FIELD_LIST": {
    "kind": "type",
    "@cds.external": true,
    "elements": {
@@ -203,7 +203,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.SAP__Message": {
+  "zsrvd_gentabl.SAP__Message": {
    "kind": "type",
    "@cds.external": true,
    "elements": {
@@ -238,7 +238,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_gentabl.v0001": {
+  "zsrvd_gentabl": {
    "kind": "service",
    "@cds.external": true,
    "@Aggregation.ApplySupported": {
@@ -291,7 +291,7 @@
    "@Capabilities.KeyAsSegmentSupported": true,
    "@Capabilities.AsynchronousRequestsSupported": true
   },
-  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.I_DraftAdministrativeData": {
+  "zsrvd_gentabl.I_DraftAdministrativeData": {
    "kind": "entity",
    "@cds.external": true,
    "@cds.persistence.skip": true,
@@ -454,7 +454,7 @@
    "@Capabilities.UpdateRestrictions.Updatable": false,
    "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
   },
-  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_f": {
+  "zsrvd_gentabl.zc_gentabl_f": {
    "kind": "entity",
    "@cds.external": true,
    "@cds.persistence.skip": true,
@@ -635,7 +635,7 @@
      "@Common.QuickInfo": "Draft - Indicator - Is active document"
     },
     "__EntityControl": {
-     "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.EntityControl",
+     "type": "zsrvd_gentabl.EntityControl",
      "@Core.Computed": true,
      "@UI.HiddenFilter": true,
      "@UI.Hidden": true,
@@ -645,13 +645,13 @@
     },
     "SAP__Messages": {
      "items": {
-      "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.SAP__Message",
+      "type": "zsrvd_gentabl.SAP__Message",
       "notNull": true
      }
     },
     "DraftAdministrativeData": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.I_DraftAdministrativeData",
+     "target": "zsrvd_gentabl.I_DraftAdministrativeData",
      "cardinality": {
       "max": 1
      },
@@ -659,7 +659,7 @@
     },
     "SiblingEntity": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_f",
+     "target": "zsrvd_gentabl.zc_gentabl_f",
      "cardinality": {
       "max": 1
      },
@@ -667,7 +667,7 @@
     },
     "_tabl_t": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t",
+     "target": "zsrvd_gentabl.zc_gentabl_t",
      "cardinality": {
       "max": 1
      },
@@ -832,7 +832,7 @@
    },
    "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
   },
-  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_l": {
+  "zsrvd_gentabl.zc_gentabl_l": {
    "kind": "entity",
    "@cds.external": true,
    "@cds.persistence.skip": true,
@@ -992,7 +992,7 @@
      "@Common.QuickInfo": "Draft - Indicator - Is active document"
     },
     "__EntityControl": {
-     "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.EntityControl",
+     "type": "zsrvd_gentabl.EntityControl",
      "@Core.Computed": true,
      "@UI.HiddenFilter": true,
      "@UI.Hidden": true,
@@ -1002,13 +1002,13 @@
     },
     "SAP__Messages": {
      "items": {
-      "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.SAP__Message",
+      "type": "zsrvd_gentabl.SAP__Message",
       "notNull": true
      }
     },
     "DraftAdministrativeData": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.I_DraftAdministrativeData",
+     "target": "zsrvd_gentabl.I_DraftAdministrativeData",
      "cardinality": {
       "max": 1
      },
@@ -1016,7 +1016,7 @@
     },
     "SiblingEntity": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_l",
+     "target": "zsrvd_gentabl.zc_gentabl_l",
      "cardinality": {
       "max": 1
      },
@@ -1024,7 +1024,7 @@
     },
     "_tabl_t": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t",
+     "target": "zsrvd_gentabl.zc_gentabl_t",
      "cardinality": {
       "max": 1
      },
@@ -1189,7 +1189,7 @@
    },
    "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
   },
-  "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t": {
+  "zsrvd_gentabl.zc_gentabl_t": {
    "kind": "entity",
    "@cds.external": true,
    "@cds.persistence.skip": true,
@@ -1331,7 +1331,7 @@
      "@Common.QuickInfo": "Draft - Indicator - Is active document"
     },
     "__CreateByAssociationControl": {
-     "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tCbAControl",
+     "type": "zsrvd_gentabl.zc_gentabl_tCbAControl",
      "@Core.Computed": true,
      "@UI.HiddenFilter": true,
      "@UI.Hidden": true,
@@ -1340,7 +1340,7 @@
      "@Common.QuickInfo": "Dynamic Create via Association Control Property"
     },
     "__EntityControl": {
-     "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.EntityControl",
+     "type": "zsrvd_gentabl.EntityControl",
      "@Core.Computed": true,
      "@UI.HiddenFilter": true,
      "@UI.Hidden": true,
@@ -1349,7 +1349,7 @@
      "@Common.QuickInfo": "Dynamic Method Property"
     },
     "__OperationControl": {
-     "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tOperationControl",
+     "type": "zsrvd_gentabl.zc_gentabl_tOperationControl",
      "@Core.Computed": true,
      "@UI.HiddenFilter": true,
      "@UI.Hidden": true,
@@ -1359,13 +1359,13 @@
     },
     "SAP__Messages": {
      "items": {
-      "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.SAP__Message",
+      "type": "zsrvd_gentabl.SAP__Message",
       "notNull": true
      }
     },
     "DraftAdministrativeData": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.I_DraftAdministrativeData",
+     "target": "zsrvd_gentabl.I_DraftAdministrativeData",
      "cardinality": {
       "max": 1
      },
@@ -1373,7 +1373,7 @@
     },
     "SiblingEntity": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t",
+     "target": "zsrvd_gentabl.zc_gentabl_t",
      "cardinality": {
       "max": 1
      },
@@ -1381,7 +1381,7 @@
     },
     "_log": {
      "type": "cds.Composition",
-     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_l",
+     "target": "zsrvd_gentabl.zc_gentabl_l",
      "cardinality": {
       "max": "*"
      },
@@ -1390,7 +1390,7 @@
     },
     "_tabl_f": {
      "type": "cds.Composition",
-     "target": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_f",
+     "target": "zsrvd_gentabl.zc_gentabl_f",
      "cardinality": {
       "max": "*"
      },
@@ -1423,7 +1423,7 @@
       }
      },
      "returns": {
-      "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t",
+      "type": "zsrvd_gentabl.zc_gentabl_t",
       "notNull": true
      },
      "@Core.OperationAvailable": {
@@ -1448,7 +1448,7 @@
       }
      },
      "returns": {
-      "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t",
+      "type": "zsrvd_gentabl.zc_gentabl_t",
       "notNull": true
      },
      "@Core.OperationAvailable": {
@@ -1464,7 +1464,7 @@
       }
      },
      "returns": {
-      "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_t",
+      "type": "zsrvd_gentabl.zc_gentabl_t",
       "notNull": true
      }
     },
@@ -1530,14 +1530,14 @@
       },
       "_FIELDS": {
        "items": {
-        "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.ZSGEN_TABL_FIELD_LIST",
+        "type": "zsrvd_gentabl.ZSGEN_TABL_FIELD_LIST",
         "notNull": true
        }
       }
      },
      "returns": {
       "items": {
-       "type": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.za_gen_response_log"
+       "type": "zsrvd_gentabl.za_gen_response_log"
       }
      }
     },
@@ -1582,7 +1582,7 @@
     {
      "$Type": "SAP__UI.DataFieldForAction",
      "Label": "Active",
-     "Action": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.activeTable(com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType)",
+     "Action": "zsrvd_gentabl.activeTable(zsrvd_gentabl.zc_gentabl_tType)",
      "InvocationGrouping": {
       "#": "ChangeSet"
      }
@@ -1634,7 +1634,7 @@
     {
      "$Type": "SAP__UI.DataFieldForAction",
      "Label": "Active",
-     "Action": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.autoActiveTable(Collection(com.sap.gateway.srvd.zsrvd_gentabl.v0001.zc_gentabl_tType))",
+     "Action": "zsrvd_gentabl.autoActiveTable(Collection(zsrvd_gentabl.zc_gentabl_tType))",
      "InvocationGrouping": {
       "#": "ChangeSet"
      }
@@ -1711,10 +1711,10 @@
     }
    ],
    "@Common.DraftRoot": {
-    "EditAction": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.Edit",
-    "DiscardAction": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.Discard",
-    "ActivationAction": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.Activate",
-    "PreparationAction": "com.sap.gateway.srvd.zsrvd_gentabl.v0001.Prepare"
+    "EditAction": "zsrvd_gentabl.Edit",
+    "DiscardAction": "zsrvd_gentabl.Discard",
+    "ActivationAction": "zsrvd_gentabl.Activate",
+    "PreparationAction": "zsrvd_gentabl.Prepare"
    },
    "@Capabilities.SearchRestrictions.Searchable": false,
    "@Capabilities.FilterRestrictions.Filterable": true,

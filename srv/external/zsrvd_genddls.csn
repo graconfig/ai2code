@@ -1,10 +1,10 @@
 {
  "meta": {
-  "creator": "cds-dk 8.9.3"
+  "creator": "cds-dk 9.1.1"
  },
  "$version": "2.0",
  "definitions": {
-  "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_pCbAControl": {
+  "zsrvd_genddls.zc_genddls_pCbAControl": {
    "kind": "type",
    "@cds.external": true,
    "elements": {
@@ -18,7 +18,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_pOperationControl": {
+  "zsrvd_genddls.zc_genddls_pOperationControl": {
    "kind": "type",
    "@cds.external": true,
    "elements": {
@@ -32,7 +32,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_genddls.v0001.ZSGEN_DDLS_SOURCE_LIST": {
+  "zsrvd_genddls.ZSGEN_DDLS_SOURCE_LIST": {
    "kind": "type",
    "@cds.external": true,
    "elements": {
@@ -57,7 +57,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_genddls.v0001.ZTGENDDLS_L": {
+  "zsrvd_genddls.ZTGENDDLS_L": {
    "kind": "type",
    "@cds.external": true,
    "elements": {
@@ -136,7 +136,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_genddls.v0001.EntityControl": {
+  "zsrvd_genddls.EntityControl": {
    "kind": "type",
    "@cds.external": true,
    "elements": {
@@ -150,7 +150,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_genddls.v0001.SAP__Message": {
+  "zsrvd_genddls.SAP__Message": {
    "kind": "type",
    "@cds.external": true,
    "elements": {
@@ -185,11 +185,11 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_genddls.v0001": {
+  "zsrvd_genddls": {
    "kind": "service",
    "@cds.external": true
   },
-  "com.sap.gateway.srvd.zsrvd_genddls.v0001.I_DraftAdministrativeData": {
+  "zsrvd_genddls.I_DraftAdministrativeData": {
    "kind": "entity",
    "@cds.external": true,
    "@cds.persistence.skip": true,
@@ -278,7 +278,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_l": {
+  "zsrvd_genddls.zc_genddls_l": {
    "kind": "entity",
    "@cds.external": true,
    "@cds.persistence.skip": true,
@@ -378,17 +378,17 @@
      "notNull": true
     },
     "__EntityControl": {
-     "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.EntityControl"
+     "type": "zsrvd_genddls.EntityControl"
     },
     "SAP__Messages": {
      "items": {
-      "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.SAP__Message",
+      "type": "zsrvd_genddls.SAP__Message",
       "notNull": true
      }
     },
     "DraftAdministrativeData": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.I_DraftAdministrativeData",
+     "target": "zsrvd_genddls.I_DraftAdministrativeData",
      "cardinality": {
       "max": 1
      },
@@ -396,7 +396,7 @@
     },
     "SiblingEntity": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_l",
+     "target": "zsrvd_genddls.zc_genddls_l",
      "cardinality": {
       "max": 1
      },
@@ -404,7 +404,7 @@
     },
     "_proj": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p",
+     "target": "zsrvd_genddls.zc_genddls_p",
      "cardinality": {
       "max": 1
      },
@@ -412,7 +412,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p": {
+  "zsrvd_genddls.zc_genddls_p": {
    "kind": "entity",
    "@cds.external": true,
    "@cds.persistence.skip": true,
@@ -495,23 +495,23 @@
      "notNull": true
     },
     "__CreateByAssociationControl": {
-     "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_pCbAControl"
+     "type": "zsrvd_genddls.zc_genddls_pCbAControl"
     },
     "__EntityControl": {
-     "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.EntityControl"
+     "type": "zsrvd_genddls.EntityControl"
     },
     "__OperationControl": {
-     "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_pOperationControl"
+     "type": "zsrvd_genddls.zc_genddls_pOperationControl"
     },
     "SAP__Messages": {
      "items": {
-      "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.SAP__Message",
+      "type": "zsrvd_genddls.SAP__Message",
       "notNull": true
      }
     },
     "DraftAdministrativeData": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.I_DraftAdministrativeData",
+     "target": "zsrvd_genddls.I_DraftAdministrativeData",
      "cardinality": {
       "max": 1
      },
@@ -519,7 +519,7 @@
     },
     "SiblingEntity": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p",
+     "target": "zsrvd_genddls.zc_genddls_p",
      "cardinality": {
       "max": 1
      },
@@ -527,7 +527,7 @@
     },
     "_log": {
      "type": "cds.Composition",
-     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_l",
+     "target": "zsrvd_genddls.zc_genddls_l",
      "cardinality": {
       "max": "*"
      },
@@ -535,7 +535,7 @@
     },
     "_source": {
      "type": "cds.Composition",
-     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_s",
+     "target": "zsrvd_genddls.zc_genddls_s",
      "cardinality": {
       "max": "*"
      },
@@ -552,7 +552,7 @@
       }
      },
      "returns": {
-      "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p",
+      "type": "zsrvd_genddls.zc_genddls_p",
       "notNull": true
      }
     },
@@ -565,7 +565,7 @@
       }
      },
      "returns": {
-      "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p",
+      "type": "zsrvd_genddls.zc_genddls_p",
       "notNull": true
      }
     },
@@ -582,7 +582,7 @@
       }
      },
      "returns": {
-      "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p",
+      "type": "zsrvd_genddls.zc_genddls_p",
       "notNull": true
      }
     },
@@ -634,14 +634,14 @@
       },
       "_SOURCE": {
        "items": {
-        "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.ZSGEN_DDLS_SOURCE_LIST",
+        "type": "zsrvd_genddls.ZSGEN_DDLS_SOURCE_LIST",
         "notNull": true
        }
       }
      },
      "returns": {
       "items": {
-       "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.ZTGENDDLS_L"
+       "type": "zsrvd_genddls.ZTGENDDLS_L"
       }
      }
     },
@@ -665,7 +665,7 @@
     }
    }
   },
-  "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_s": {
+  "zsrvd_genddls.zc_genddls_s": {
    "kind": "entity",
    "@cds.external": true,
    "@cds.persistence.skip": true,
@@ -740,17 +740,17 @@
      "notNull": true
     },
     "__EntityControl": {
-     "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.EntityControl"
+     "type": "zsrvd_genddls.EntityControl"
     },
     "SAP__Messages": {
      "items": {
-      "type": "com.sap.gateway.srvd.zsrvd_genddls.v0001.SAP__Message",
+      "type": "zsrvd_genddls.SAP__Message",
       "notNull": true
      }
     },
     "DraftAdministrativeData": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.I_DraftAdministrativeData",
+     "target": "zsrvd_genddls.I_DraftAdministrativeData",
      "cardinality": {
       "max": 1
      },
@@ -758,7 +758,7 @@
     },
     "SiblingEntity": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_s",
+     "target": "zsrvd_genddls.zc_genddls_s",
      "cardinality": {
       "max": 1
      },
@@ -766,7 +766,7 @@
     },
     "_proj": {
      "type": "cds.Association",
-     "target": "com.sap.gateway.srvd.zsrvd_genddls.v0001.zc_genddls_p",
+     "target": "zsrvd_genddls.zc_genddls_p",
      "cardinality": {
       "max": 1
      },
