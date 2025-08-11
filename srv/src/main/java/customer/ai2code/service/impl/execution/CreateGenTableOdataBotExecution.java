@@ -18,6 +18,7 @@ import cds.gen.zsrvd_genddls.ZsgenDdlsSourceList;
 import cds.gen.zsrvd_genddls.ZtgenddlsL;
 import cds.gen.zsrvd_gensrvd.*;
 // import cds.gen.zsrvd_gensrvd.V0001;
+import cds.gen.zsrvd_gentabl.ZsrvdGentabl;
 import cds.gen.zsrvd_gentabl.ZaGenResponseLog;
 import cds.gen.zsrvd_gentabl.ZcGentablT;
 import cds.gen.zsrvd_gentabl.ZcGentablTActiveTableContext;
@@ -36,16 +37,16 @@ import customer.ai2code.service.impl.TaskBotCacheManager;
 public class CreateGenTableOdataBotExecution implements BotExecution {
     // private final GenericCqnService genericCqnService;
     private final ContextService contextService;
-    private final V0001 zsrvdGenclas; 
+    private final ZsrvdGentabl zsrvdGentabl;
     private final ObjectMapper objectMapper;
     private final TaskBotCacheManager taskBotCacheManager;
 
     public CreateGenTableOdataBotExecution(ContextService contextService,
-            V0001 zsrvdGenclas, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
+            ZsrvdGentabl zsrvdGentabl, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
         // 默认构造函数
         // this.genericCqnService = genericCqnService;
         this.contextService = contextService;
-        this.zsrvdGenclas = zsrvdGenclas;
+        this.zsrvdGentabl = zsrvdGentabl;
         this.objectMapper = objectMapper;
         this.taskBotCacheManager = taskBotCacheManager;
     }
@@ -101,7 +102,7 @@ public class CreateGenTableOdataBotExecution implements BotExecution {
 
         // 调用action
         try {
-            zsrvdGenclas.emit(AutoActiveContext);
+            zsrvdGentabl.emit(zcGentablTAutoActiveTableContext);
         } catch (ServiceException e) {
             ODataResponseException odataexce = (ODataResponseException) e.getCause().getCause();
             int statusCode = odataexce.getHttpCode();
