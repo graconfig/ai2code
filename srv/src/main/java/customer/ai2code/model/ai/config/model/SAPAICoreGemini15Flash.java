@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SAPAICoreGemini25Flash implements AIModel {
+public class SAPAICoreGemini15Flash implements AIModel {
     private ModelConfigs modelConfigs;
 
     @Override
