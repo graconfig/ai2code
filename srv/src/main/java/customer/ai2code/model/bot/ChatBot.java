@@ -49,7 +49,7 @@ public class ChatBot extends AbstractBot {
             // 获取prompts
             List<PromptTexts> retrievedPrompts = promptService.getPrompts(this);
             if (retrievedPrompts != null && !retrievedPrompts.isEmpty()) {
-                prompts = retrievedPrompts;
+                prompts = new ArrayList<>(retrievedPrompts); // 创建可修改的副本
             }
 
             // 2. 第一次chat需要保存prompt消息
@@ -70,7 +70,7 @@ public class ChatBot extends AbstractBot {
             // 6.将用户的聊天内容存储到表中
             genericCqnService.createAndInsertBotMessage(botInstance.getId(), content, ragPrompt.getContent(), "user");
 
-            if (ragPrompt != null) {
+            if (ragPrompt != null && ragPrompt.getContent() != null && !ragPrompt.getContent().isEmpty()) {
                 prompts.add(ragPrompt);
             }
 

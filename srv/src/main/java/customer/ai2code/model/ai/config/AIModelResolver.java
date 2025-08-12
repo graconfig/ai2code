@@ -5,6 +5,7 @@ import cds.gen.configservice.ModelConfigs;
 import customer.ai2code.model.ai.config.model.AIModel;
 import customer.ai2code.model.ai.config.model.SAPAICoreClaudeAI35Sonnet;
 import customer.ai2code.model.ai.config.model.SAPAICoreClaudeAI37Sonnet;
+import customer.ai2code.model.ai.config.model.SAPAICoreClaudeAI4Sonnet;
 import customer.ai2code.model.ai.config.model.SAPAICoreOpenAIGPT35;
 import customer.ai2code.model.ai.config.model.SAPAICoreOpenAIgpt4o;
 import customer.ai2code.service.AIService;
@@ -94,6 +95,8 @@ public class AIModelResolver {
                         return new SAPAICoreClaudeAI35Sonnet(modelConfigs);
                     case "claude-3.7-sonnet": // 新增Claude 3.7支持
                         return new SAPAICoreClaudeAI37Sonnet(modelConfigs);
+                    case "claude-4-sonnet": // 新增Claude 4支持
+                        return new SAPAICoreClaudeAI4Sonnet(modelConfigs);
                     // 其他Claude模型...
                 }
                 break;

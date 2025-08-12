@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
-import customer.ai2code.model.aicore.claude.ConverseRequestAssistantMessage;
+import customer.ai2code.model.aicore.claude.ConverseResponseAssistantMessage;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -42,7 +42,7 @@ public class ConverseOutput
 // CHECKSTYLE:ON
 {
   @JsonProperty("message")
-  private ConverseRequestAssistantMessage message;
+  private ConverseResponseAssistantMessage message;
 
   @JsonAnySetter
   @JsonAnyGetter
@@ -54,7 +54,7 @@ public class ConverseOutput
    * @param message  The message of this {@link ConverseOutput}
    * @return The same instance of this {@link ConverseOutput} class
    */
-  @Nonnull public ConverseOutput message( @Nullable final ConverseRequestAssistantMessage message) {
+  @Nonnull public ConverseOutput message( @Nullable final ConverseResponseAssistantMessage message) {
     this.message = message;
     return this;
   }
@@ -64,7 +64,7 @@ public class ConverseOutput
    * @return message  The message of this {@link ConverseOutput} instance.
    */
   @Nonnull
-  public ConverseRequestAssistantMessage getMessage() {
+  public ConverseResponseAssistantMessage getMessage() {
     return message;
   }
 
@@ -73,7 +73,7 @@ public class ConverseOutput
    *
    * @param message  The message of this {@link ConverseOutput}
    */
-  public void setMessage( @Nullable final ConverseRequestAssistantMessage message) {
+  public void setMessage( @Nullable final ConverseResponseAssistantMessage message) {
     this.message = message;
   }
 
