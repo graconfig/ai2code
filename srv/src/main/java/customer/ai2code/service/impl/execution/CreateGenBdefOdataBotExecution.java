@@ -68,6 +68,7 @@ public class CreateGenBdefOdataBotExecution implements BotExecution {
             newView.setEtagFieldname(view.getEtagFieldname());
             newView.setMaster(view.getMaster());
             newView.setWithadditionalsave(view.getWithadditionalsave());
+            newView.setNumberingtype(view.getNumberingtype());
 
             // 处理_ACTION子集合
             Collection<ZsgenBdefAction> actions = new ArrayList<>();

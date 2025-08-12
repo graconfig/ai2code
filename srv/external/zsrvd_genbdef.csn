@@ -1,6 +1,6 @@
 {
  "meta": {
-  "creator": "cds-dk 9.1.1"
+  "creator": "cds-dk 8.9.4"
  },
  "$version": "2.0",
  "definitions": {
@@ -182,6 +182,13 @@
      "type": "cds.Boolean",
      "notNull": true,
      "@Common.Label": "Boolean Variable (X = True, - = False, Space = Unknown)"
+    },
+    "NUMBERINGTYPE": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.Label": "Numbering Type",
+     "@Common.QuickInfo": "Numbering type"
     },
     "_ACTION": {
      "items": {
@@ -1977,10 +1984,18 @@
      },
      "@Common.QuickInfo": "Boolean Variable (X = True, - = False, Space = Unknown)"
     },
-    "master": {
+    "Master": {
      "type": "cds.Boolean",
      "notNull": true,
-     "@Common.Label": "Boolean Variable (X = True, - = False, Space = Unknown)"
+     "@Common.Label": "Master flag",
+     "@Common.QuickInfo": "Boolean Variable (X = True, - = False, Space = Unknown)"
+    },
+    "NumberingType": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.Label": "Numbering Type",
+     "@Common.QuickInfo": "Numbering type"
     },
     "CreatedBy": {
      "type": "cds.String",
@@ -2174,6 +2189,18 @@
      "Value": {
       "=": "Withadditionalsave"
      }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Master"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "NumberingType"
+     }
     }
    ],
    "@UI.LineItem": [
@@ -2205,6 +2232,18 @@
      "$Type": "SAP__UI.DataField",
      "Value": {
       "=": "Withadditionalsave"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "Master"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
+      "=": "NumberingType"
      }
     }
    ],
