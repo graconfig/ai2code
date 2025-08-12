@@ -15,11 +15,11 @@ import com.sap.cds.services.cds.CqnService;
 import com.sap.cds.services.handler.EventHandler;
 import com.sap.cds.services.handler.annotations.On;
 import com.sap.cds.services.handler.annotations.ServiceName;
-import cds.gen.zsrvd_genddls.ZcGenddlsPAutoActiveCDSContext;
-import cds.gen.zsrvd_genddls.ZsrvdGenddls;
-import cds.gen.zsrvd_genddls.ZcGenddlsP_;
-import cds.gen.zsrvd_genddls.ZsgenDdlsSourceList;
-import cds.gen.zsrvd_genddls.ZtgenddlsL;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZcGenddlsPAutoActiveCDSContext;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.V0001;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZcGenddlsP_;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZsgenDdlsSourceList;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZtgenddlsL;
 import cds.gen.mainservice.CreateCds_;
 import cds.gen.mainservice.MainService_;
 import customer.ai2code.service.ContextService;
@@ -30,11 +30,11 @@ import customer.ai2code.service.impl.execution.CreateCdsOdataBotExecution;
 @Component
 @ServiceName(MainService_.CDS_NAME)
 public class MainServiceCreateCdsHandler implements EventHandler {
-    private final ZsrvdGenddls zsrvdGenddls;
+    private final V0001 zsrvdGenddls;
     private CreateCdsOdataBotExecution callodata = null;
     private final TaskBotCacheManager taskBotCacheManager;
 
-    MainServiceCreateCdsHandler(ContextService contextService, ZsrvdGenddls zsrvdGenddls, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
+    MainServiceCreateCdsHandler(ContextService contextService, V0001 zsrvdGenddls, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
         this.callodata = new CreateCdsOdataBotExecution(contextService, zsrvdGenddls,
                 objectMapper, taskBotCacheManager);
         this.zsrvdGenddls = zsrvdGenddls;
