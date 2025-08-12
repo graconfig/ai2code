@@ -10,13 +10,13 @@ import com.sap.cds.ql.cqn.CqnSelect;
 import com.sap.cds.services.ServiceException;
 import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataResponseException;
 
-import cds.gen.zsrvd_genclas.ZsrvdGenclas;
-import cds.gen.zsrvd_genclas.ZcGenclasTAutoActiveCLASContext;
-import cds.gen.zsrvd_genclas.ZcGenclasT_;
-import cds.gen.zsrvd_genclas.ZsgenClasAttrList;
-import cds.gen.zsrvd_genclas.ZsgenClasMethodsList;
-import cds.gen.zsrvd_genclas.ZsgenClasTypesList;
-import cds.gen.zsrvd_genclas.ZtgenclasL;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genclas.v0001.V0001;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genclas.v0001.ZcGenclasTAutoActiveCLASContext;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genclas.v0001.ZcGenclasT_;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genclas.v0001.ZsgenClasAttrList;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genclas.v0001.ZsgenClasMethodsList;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genclas.v0001.ZsgenClasTypesList;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genclas.v0001.ZtgenclasL;
 import customer.ai2code.model.execution.annotation.BotExecutor;
 import customer.ai2code.model.execution.annotation.ExecuteMethod;
 import customer.ai2code.model.execution.annotation.ExecuteParameter;
@@ -28,12 +28,12 @@ import customer.ai2code.service.impl.TaskBotCacheManager;
 public class CreateGenclasOdataBotExecution implements BotExecution {
 
     private final ContextService contextService;
-    private final ZsrvdGenclas zsrvdGenclas;
+    private final V0001 zsrvdGenclas;
     private final ObjectMapper objectMapper;
     private final TaskBotCacheManager taskBotCacheManager;
 
     public CreateGenclasOdataBotExecution(ContextService contextService,
-                                          ZsrvdGenclas zsrvdGenclas,
+                                          V0001 zsrvdGenclas,
                                           ObjectMapper objectMapper,
                                           TaskBotCacheManager taskBotCacheManager) {
         this.contextService = contextService;
