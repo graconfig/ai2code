@@ -12,19 +12,19 @@ import com.sap.cds.ql.cqn.CqnSelect;
 import com.sap.cds.services.ServiceException;
 import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataResponseException;
 
-import cds.gen.zsrvd_genddls.ZcGenddlsPAutoActiveCDSContext;
-import cds.gen.zsrvd_genddls.ZcGenddlsP_;
-import cds.gen.zsrvd_genddls.ZsgenDdlsSourceList;
-import cds.gen.zsrvd_genddls.ZtgenddlsL;
-import cds.gen.zsrvd_gensrvd.*;
+// import cds.gen.zsrvd_genddls.ZcGenddlsPAutoActiveCDSContext;
+// import cds.gen.zsrvd_genddls.ZcGenddlsP_;
+// import cds.gen.zsrvd_genddls.ZsgenDdlsSourceList;
+// import cds.gen.zsrvd_genddls.ZtgenddlsL;
+// import cds.gen.zsrvd_gensrvd.*;
 // import cds.gen.zsrvd_gensrvd.V0001;
-import cds.gen.zsrvd_gentabl.ZsrvdGentabl;
-import cds.gen.zsrvd_gentabl.ZaGenResponseLog;
-import cds.gen.zsrvd_gentabl.ZcGentablT;
-import cds.gen.zsrvd_gentabl.ZcGentablTActiveTableContext;
-import cds.gen.zsrvd_gentabl.ZcGentablTAutoActiveTableContext;
-import cds.gen.zsrvd_gentabl.ZcGentablT_;
-import cds.gen.zsrvd_gentabl.ZsgenTablFieldList;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gentabl.v0001.V0001;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gentabl.v0001.ZaGenResponseLog;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gentabl.v0001.ZcGentablT;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gentabl.v0001.ZcGentablTActiveTableContext;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gentabl.v0001.ZcGentablTAutoActiveTableContext;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gentabl.v0001.ZcGentablT_;
+import cds.gen.com.sap.gateway.srvd.zsrvd_gentabl.v0001.ZsgenTablFieldList;
 import cds.gen.mainservice.ContextNodes;
 import customer.ai2code.model.execution.annotation.BotExecutor;
 import customer.ai2code.model.execution.annotation.ExecuteMethod;
@@ -37,12 +37,12 @@ import customer.ai2code.service.impl.TaskBotCacheManager;
 public class CreateGenTableOdataBotExecution implements BotExecution {
     // private final GenericCqnService genericCqnService;
     private final ContextService contextService;
-    private final ZsrvdGentabl zsrvdGentabl;
+    private final V0001 zsrvdGentabl;
     private final ObjectMapper objectMapper;
     private final TaskBotCacheManager taskBotCacheManager;
 
     public CreateGenTableOdataBotExecution(ContextService contextService,
-            ZsrvdGentabl zsrvdGentabl, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
+            V0001 zsrvdGentabl, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
         // 默认构造函数
         // this.genericCqnService = genericCqnService;
         this.contextService = contextService;
@@ -150,19 +150,19 @@ public class CreateGenTableOdataBotExecution implements BotExecution {
 
     }
 
-    private Object safeGetStringFromProxy(Object valueFromGetter, ZcGenddlsPAutoActiveCDSContext context,
-            String fieldName) {
-        // 1. 首先尝试 getter 方法
+    // private Object safeGetStringFromProxy(Object valueFromGetter, ZcGenddlsPAutoActiveCDSContext context,
+    //         String fieldName) {
+    //     // 1. 首先尝试 getter 方法
 
-        // 2. 如果 getter 返回 null，尝试从 toString() 解析
-        if (valueFromGetter == null) {
-            System.out.println(fieldName + " is null from getter, trying to parse from toString()");
-            // String toStringValue = contextNode.toString();
-            return context.get(fieldName);
-        }
-        return valueFromGetter;
+    //     // 2. 如果 getter 返回 null，尝试从 toString() 解析
+    //     if (valueFromGetter == null) {
+    //         System.out.println(fieldName + " is null from getter, trying to parse from toString()");
+    //         // String toStringValue = contextNode.toString();
+    //         return context.get(fieldName);
+    //     }
+    //     return valueFromGetter;
 
-        // return safeGetString(value, fieldName);
-    }
+    //     // return safeGetString(value, fieldName);
+    // }
 
 }

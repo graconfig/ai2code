@@ -3,12 +3,12 @@ package customer.ai2code.service.impl.execution;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import cds.gen.zsrvd_genbdef.ZsrvdGenbdef;
-import cds.gen.zsrvd_genbdef.ZcGenbdefTAutoActiveBDEFContext;
-import cds.gen.zsrvd_genbdef.ZcGenbdefT_;
-import cds.gen.zsrvd_genbdef.ZsgenBdefAction;
-import cds.gen.zsrvd_genbdef.ZsgenBdefView;
-import cds.gen.zsrvd_genbdef.ZtgenbdefL;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genbdef.v0001.V0001;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genbdef.v0001.ZcGenbdefTAutoActiveBDEFContext;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genbdef.v0001.ZcGenbdefT_;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genbdef.v0001.ZsgenBdefAction;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genbdef.v0001.ZsgenBdefView;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genbdef.v0001.ZtgenbdefL;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cds.ql.Select;
@@ -24,13 +24,13 @@ import customer.ai2code.service.impl.TaskBotCacheManager;
 public class CreateGenBdefOdataBotExecution implements BotExecution {
 
     private final ContextService contextService;
-    private final ZsrvdGenbdef zsrvdGenbdef;
+    private final V0001 zsrvdGenbdef;
     private final ObjectMapper objectMapper;
     private final TaskBotCacheManager taskBotCacheManager;
 
     public CreateGenBdefOdataBotExecution(
             ContextService contextService,
-            ZsrvdGenbdef zsrvdGenbdef,
+            V0001 zsrvdGenbdef,
             ObjectMapper objectMapper,
             TaskBotCacheManager taskBotCacheManager) {
         this.contextService = contextService;
@@ -68,6 +68,7 @@ public class CreateGenBdefOdataBotExecution implements BotExecution {
             newView.setEtagFieldname(view.getEtagFieldname());
             newView.setMaster(view.getMaster());
             newView.setWithadditionalsave(view.getWithadditionalsave());
+            newView.setNumberingtype(view.getNumberingtype());
 
             // 处理_ACTION子集合
             Collection<ZsgenBdefAction> actions = new ArrayList<>();

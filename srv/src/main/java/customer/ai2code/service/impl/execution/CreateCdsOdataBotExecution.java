@@ -12,11 +12,11 @@ import com.sap.cds.ql.cqn.CqnSelect;
 import com.sap.cds.services.ServiceException;
 import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataResponseException;
 
-import cds.gen.zsrvd_genddls.ZsrvdGenddls;
-import cds.gen.zsrvd_genddls.ZcGenddlsPAutoActiveCDSContext;
-import cds.gen.zsrvd_genddls.ZcGenddlsP_;
-import cds.gen.zsrvd_genddls.ZsgenDdlsSourceList;
-import cds.gen.zsrvd_genddls.ZtgenddlsL;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.V0001;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZcGenddlsPAutoActiveCDSContext;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZcGenddlsP_;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZsgenDdlsSourceList;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genddls.v0001.ZtgenddlsL;
 import cds.gen.mainservice.ContextNodes;
 import customer.ai2code.model.execution.annotation.BotExecutor;
 import customer.ai2code.model.execution.annotation.ExecuteMethod;
@@ -29,7 +29,7 @@ import customer.ai2code.service.impl.TaskBotCacheManager;
 public class CreateCdsOdataBotExecution implements BotExecution {
     // private final GenericCqnService genericCqnService;
     private final ContextService contextService;
-    private final ZsrvdGenddls zsrvdGenddls;
+    private final V0001 zsrvdGenddls;
     private final ObjectMapper objectMapper;
     private final TaskBotCacheManager taskBotCacheManager;
 
@@ -37,7 +37,7 @@ public class CreateCdsOdataBotExecution implements BotExecution {
     // ZsrvdGenddls zsrvdGenddls) {
     // public CreateCdsOdataBotExecution(V0001 zsrvdGenddls) {
     public CreateCdsOdataBotExecution(ContextService contextService,
-            ZsrvdGenddls zsrvdGenddls, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
+            V0001 zsrvdGenddls, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
         // 默认构造函数
         // this.genericCqnService = genericCqnService;
         this.contextService = contextService;

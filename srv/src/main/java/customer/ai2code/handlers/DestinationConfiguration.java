@@ -45,7 +45,7 @@ public class DestinationConfiguration implements EventHandler {
 					.header("Authorization", auth)
 					.property("sap-client", "310")
 					.property("sap-language", "en")
-					.name("zsrvd_genddls").build();
+					.name("S4").build();
 
 			DefaultDestinationLoader loader = new DefaultDestinationLoader();
 			loader.registerDestination(httpDestination);
@@ -55,54 +55,54 @@ public class DestinationConfiguration implements EventHandler {
 			// loader.registerDestination(httpDestination);
 			// DestinationAccessor.prependDestinationLoader(loader);
 
-			httpDestination = DefaultHttpDestination
-					.builder(
-							"https://handsap01.hand-china.com")
-					.header("Authorization", auth)
-					.property("sap-client", "310")
-					.property("sap-language", "en")
-					.name("zsrvd_gensrvd").build();
+			// httpDestination = DefaultHttpDestination
+			// 		.builder(
+			// 				"https://handsap01.hand-china.com")
+			// 		.header("Authorization", auth)
+			// 		.property("sap-client", "310")
+			// 		.property("sap-language", "en")
+			// 		.name("zsrvd_gensrvd").build();
 
-			loader = new DefaultDestinationLoader();
-			loader.registerDestination(httpDestination);
-			DestinationAccessor.prependDestinationLoader(loader);
+			// loader = new DefaultDestinationLoader();
+			// loader.registerDestination(httpDestination);
+			// DestinationAccessor.prependDestinationLoader(loader);
 
-			// Registering the destination for zsrvd_genbdef
-			httpDestination = DefaultHttpDestination
-					.builder(
-							"https://handsap01.hand-china.com")
-					.header("Authorization", auth)
-					.property("sap-client", "310")
-					.property("sap-language", "en")
-					.name("zsrvd_genbdef").build();
+			// // Registering the destination for zsrvd_genbdef
+			// httpDestination = DefaultHttpDestination
+			// 		.builder(
+			// 				"https://handsap01.hand-china.com")
+			// 		.header("Authorization", auth)
+			// 		.property("sap-client", "310")
+			// 		.property("sap-language", "en")
+			// 		.name("zsrvd_genbdef").build();
 
-			loader = new DefaultDestinationLoader();
-			loader.registerDestination(httpDestination);
-			DestinationAccessor.prependDestinationLoader(loader);
+			// loader = new DefaultDestinationLoader();
+			// loader.registerDestination(httpDestination);
+			// DestinationAccessor.prependDestinationLoader(loader);
 
-			// 新增：配置 zsrvd_genclas 
-			httpDestination = DefaultHttpDestination
-					.builder("https://handsap01.hand-china.com")
-					.header("Authorization", auth) 
-					.property("sap-client", "310") 
-					.property("sap-language", "en") 
-					.name("zsrvd_genclas").build(); 
+			// // 新增：配置 zsrvd_genclas 
+			// httpDestination = DefaultHttpDestination
+			// 		.builder("https://handsap01.hand-china.com")
+			// 		.header("Authorization", auth) 
+			// 		.property("sap-client", "310") 
+			// 		.property("sap-language", "en") 
+			// 		.name("zsrvd_genclas").build(); 
 
-			loader = new DefaultDestinationLoader();
-			loader.registerDestination(httpDestination);
-			DestinationAccessor.prependDestinationLoader(loader);
+			// loader = new DefaultDestinationLoader();
+			// loader.registerDestination(httpDestination);
+			// DestinationAccessor.prependDestinationLoader(loader);
 
-			httpDestination = DefaultHttpDestination
-					.builder(
-							"https://handsap01.hand-china.com")
-					.header("Authorization", auth)
-					.property("sap-client", "310")
-					.property("sap-language", "en")
-					.name("zsrvd_gentabl").build();
+			// httpDestination = DefaultHttpDestination
+			// 		.builder(
+			// 				"https://handsap01.hand-china.com")
+			// 		.header("Authorization", auth)
+			// 		.property("sap-client", "310")
+			// 		.property("sap-language", "en")
+			// 		.name("zsrvd_gentabl").build();
 
-			loader = new DefaultDestinationLoader();
-			loader.registerDestination(httpDestination);
-			DestinationAccessor.prependDestinationLoader(loader);
+			// loader = new DefaultDestinationLoader();
+			// loader.registerDestination(httpDestination);
+			// DestinationAccessor.prependDestinationLoader(loader);
 
 		}
 
