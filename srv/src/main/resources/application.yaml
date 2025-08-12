@@ -30,7 +30,7 @@ cds:
           csrf:
             enabled: true
           suffix: /sap/opu/odata4/sap/zsrvb_gentabl/srvd/sap
-        model: com.sap.gateway.srvd.zsrvd_gentabl.v0001
+        model: zsrvd_gentabl
         type: odata-v4
       '[zsrvd_genddls]':
         destination:
