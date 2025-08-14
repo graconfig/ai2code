@@ -26,7 +26,7 @@ public class BatchTaskOrchestrationController {
      * 启动主任务自动执行
      */
     @PostMapping("/tasks/{mainTaskId}/start")
-    public CompletableFuture<JobExecution> startExecution(@PathVariable String mainTaskId) {
+    public CompletableFuture<JobExecution> startExecution(@PathVariable(value = "mainTaskId") String mainTaskId) {
         return batchOrchestrationService.startMainTaskExecution(mainTaskId);
     }
 
