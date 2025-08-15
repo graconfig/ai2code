@@ -12,12 +12,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SAPAICoreGemini15Flash implements AIModel {
+public class SAPAICoreGemini15Pro implements AIModel {
     private ModelConfigs modelConfigs;
 
     @Override
     public String getModelName() {
-        return modelConfigs.getModelName(); // 如"gemini-1.5-flash"
+        return modelConfigs.getModelName(); // 如"gemini-1.5-pro"
     }
 
     @Override

@@ -6,11 +6,14 @@ import customer.ai2code.model.ai.config.model.AIModel;
 import customer.ai2code.model.ai.config.model.SAPAICoreClaudeAI35Sonnet;
 import customer.ai2code.model.ai.config.model.SAPAICoreClaudeAI37Sonnet;
 import customer.ai2code.model.ai.config.model.SAPAICoreClaudeAI4Sonnet;
+import customer.ai2code.model.ai.config.model.SAPAICoreGemini15Flash;
+import customer.ai2code.model.ai.config.model.SAPAICoreGemini15Pro;
 import customer.ai2code.model.ai.config.model.SAPAICoreOpenAIGPT35;
 import customer.ai2code.model.ai.config.model.SAPAICoreOpenAIgpt4o;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.impl.GenericCqnService;
 import customer.ai2code.service.impl.SAClaudeAIServiceImpl;
+import customer.ai2code.service.impl.SAPGeminiAIServiceImpl;
 import customer.ai2code.service.impl.SAPOpenAIServiceImpl;
 
 /**
@@ -24,13 +27,16 @@ public class AIModelResolver {
 
     private final SAPOpenAIServiceImpl sapOpenAIService;
     private final SAClaudeAIServiceImpl sapClaudeAIService;
+    private final SAPGeminiAIServiceImpl sapGeminiAIService;
 
     public AIModelResolver(GenericCqnService genericCqnService 
             , SAPOpenAIServiceImpl sapOpenAIService
-            , SAClaudeAIServiceImpl sapClaudeAIService) {
+            , SAClaudeAIServiceImpl sapClaudeAIService
+            , SAPGeminiAIServiceImpl sapGeminiAIService) {
         this.genericCqnService = genericCqnService;
         this.sapOpenAIService = sapOpenAIService;
         this.sapClaudeAIService = sapClaudeAIService;
+        this.sapGeminiAIService = sapGeminiAIService;
     }
 
 
@@ -100,6 +106,15 @@ public class AIModelResolver {
                     // 其他Claude模型...
                 }
                 break;
+            case "SAPAICore-Gemini": // Gemini系列模型
+                switch (modelConfigs.getModelName()) {
+                    case "gemini-1.5-flash": // 新增Gemini 1.5 Flash支持
+                        return new SAPAICoreGemini15Flash(modelConfigs);
+                    case "gemini-1.5-pro": // 新增Gemini 1.5 Pro支持
+                        return new SAPAICoreGemini15Pro(modelConfigs);
+                    // 其他Claude模型...
+                }
+                break;
             default:
                 break;
         }
@@ -129,6 +144,8 @@ public class AIModelResolver {
                 return sapOpenAIService;
             case "SAPAICore-Claude":
                 return sapClaudeAIService;
+            case "SAPAICore-Gemini":
+                return sapGeminiAIService;
             default:
                 return sapOpenAIService; // 默认返回OpenAI服务
         }

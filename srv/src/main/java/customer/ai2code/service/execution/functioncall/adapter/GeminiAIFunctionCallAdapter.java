@@ -17,11 +17,11 @@ import java.util.Map;
 public class GeminiAIFunctionCallAdapter {
     
     /**
-     * 将通用的函数信息转换为 OpenAI Function Calling 格式
+     * 将通用的函数信息转换为 Gemini AI Function Calling 格式
      */
-    public List<Map<String, Object>> convertToOpenAIFormat(List<FunctionInfo> functionInfos) {
-        List<Map<String, Object>> openAIFunctions = new ArrayList<>();
-        
+    public List<Map<String, Object>> convertToGeminiAIFormat(List<FunctionInfo> functionInfos) {
+        List<Map<String, Object>> geminiAIFunctions = new ArrayList<>();
+
         for (FunctionInfo functionInfo : functionInfos) {
             Map<String, Object> function = new HashMap<>();
             function.put("name", functionInfo.getName());
@@ -78,10 +78,10 @@ public class GeminiAIFunctionCallAdapter {
             }
             
             function.put("parameters", parameters);
-            openAIFunctions.add(function);
+            geminiAIFunctions.add(function);
         }
-        
-        return openAIFunctions;
+
+        return geminiAIFunctions;
     }
     
     /**

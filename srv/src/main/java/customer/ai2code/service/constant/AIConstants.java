@@ -23,6 +23,7 @@ public final class AIConstants {
         SAPOPENAI,
         SAPCLAUDE,
         OPENAI,
-        DEEPSEEK
+        DEEPSEEK,
+        SAPGEMINI
     }
 }
