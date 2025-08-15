@@ -34,7 +34,7 @@ public class BatchTaskOrchestrationController {
      * 暂停任务执行
      */
     @PostMapping("/tasks/{mainTaskId}/pause")
-    public ResponseEntity<Map<String, String>> pauseExecution(@PathVariable String mainTaskId) {
+    public ResponseEntity<Map<String, String>> pauseExecution(@PathVariable(value = "mainTaskId")  String mainTaskId) {
         try {
             batchOrchestrationService.pauseExecution(mainTaskId);
             
@@ -59,7 +59,7 @@ public class BatchTaskOrchestrationController {
      * 停止任务执行
      */
     @PostMapping("/tasks/{mainTaskId}/stop")
-    public void stopExecution(@PathVariable String mainTaskId) {
+    public void stopExecution(@PathVariable(value = "mainTaskId")  String mainTaskId) {
         batchOrchestrationService.stopExecution(mainTaskId);
     }
 
@@ -67,7 +67,7 @@ public class BatchTaskOrchestrationController {
      * 重启任务执行
      */
     @PostMapping("/tasks/{mainTaskId}/restart")
-    public CompletableFuture<JobExecution> restartExecution(@PathVariable String mainTaskId) {
+    public CompletableFuture<JobExecution> restartExecution(@PathVariable(value = "mainTaskId")  String mainTaskId) {
         return batchOrchestrationService.restartExecution(mainTaskId);
     }
 
@@ -75,7 +75,7 @@ public class BatchTaskOrchestrationController {
      * 获取任务执行状态
      */
     @GetMapping("/tasks/{mainTaskId}/status")
-    public BatchStatus getStatus(@PathVariable String mainTaskId) {
+    public BatchStatus getStatus(@PathVariable(value = "mainTaskId")  String mainTaskId) {
         return batchOrchestrationService.getExecutionStatus(mainTaskId);
     }
 
@@ -83,7 +83,7 @@ public class BatchTaskOrchestrationController {
      * 获取任务执行详情
      */
     @GetMapping("/tasks/{mainTaskId}/execution")
-    public JobExecution getJobExecution(@PathVariable String mainTaskId) {
+    public JobExecution getJobExecution(@PathVariable(value = "mainTaskId")  String mainTaskId) {
         return batchOrchestrationService.getJobExecution(mainTaskId);
     }
 
@@ -91,7 +91,7 @@ public class BatchTaskOrchestrationController {
      * 清理完成的任务
      */
     @DeleteMapping("/tasks/{mainTaskId}")
-    public void cleanupTask(@PathVariable String mainTaskId) {
+    public void cleanupTask(@PathVariable(value = "mainTaskId")  String mainTaskId) {
         batchOrchestrationService.cleanupCompletedTask(mainTaskId);
     }
 }

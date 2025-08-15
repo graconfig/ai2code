@@ -124,7 +124,7 @@ public class GenericCqnService {
         botInstance.setId(UUID.randomUUID().toString());
         botInstance.setSequence(botType.getSequence());
         botInstance.setTypeId(botType.getId());
-        botInstance.setStatusCode("C"); // Created
+        botInstance.setStatusCode("CREATED"); // Created
         botInstance.setTaskId(taskId);
 
         entityService.insert(mainService, null, BotInstances_.class, botInstance, true);
