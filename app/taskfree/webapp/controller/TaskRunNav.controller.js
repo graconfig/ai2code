@@ -49,6 +49,9 @@ sap.ui.define(
           Device.media.attachHandler(this._handleWindowResize, this);
           this._attachRouteHandler();
           this._subscribeEventBus();
+
+          // 5. 处理页面刷新时的数据加载
+          this._handlePageRefresh();
         },
 
         onExit() {
@@ -103,7 +106,7 @@ sap.ui.define(
         /** ===================== 模型与缓存初始化 ===================== */
         _initNavigationModel() {
           const oNavigationModel = new JSONModel({
-            selectedKey: "",
+            selectedTreeKey: "", // Tree控件的选中状态
             currentView: "tasks", // "tasks" or "contextNodes"
             navigation: [],
             fixedNavigation: [
@@ -168,26 +171,25 @@ sap.ui.define(
               this._handleBotInstanceDetailRoute(oArguments);
               break;
             case "RouteContextNodeDetail":
+            case "RouteTextNodePage":
+            case "RouteTextAreaNodePage":
+            case "RouteMarkDownNodePage":
               this._handleContextNodeDetailRoute(oArguments);
               break;
             case "RouteAIConversation":
               this._handleAIConversationRoute(oArguments);
               break;
+
             default:
               break;
           }
         },
 
         _handleTaskRunNavRoute(args) {
-          this.getView()
-            .getModel("side")
-            .setProperty("/selectedKey", "RouteTaskRunNav");
-
           const taskId = args?.taskRunId;
           if (!taskId) return;
 
           this._initNavigationModel();
-          this.byId("idItemsNavigationTree").expandToLevel(1);
 
           if (
             !this._dataCache.currentTask ||
@@ -196,6 +198,7 @@ sap.ui.define(
             this._preloadTaskData(taskId, true);
           } else {
             this._buildNavigationFromCache();
+            this._expandNavigationTree();
           }
 
           this.currentTaskId = taskId;
@@ -203,48 +206,18 @@ sap.ui.define(
 
         _handleTaskDetailRoute(args) {
           this._restoreNavigationState();
-
-          const taskId = args?.taskId;
-
-          if (
-            taskId &&
-            this._dataCache.isLoaded &&
-            this._dataCache.currentTask?.id === taskId
-          ) {
-            this.getView()
-              .getModel("side")
-              .setProperty("/selectedKey", `task_${taskId}`);
-          }
         },
 
         _handleBotInstanceDetailRoute(args) {
           this._restoreNavigationState();
-          const botInstanceId = args?.botInstanceId;
-          if (botInstanceId && this._dataCache.isLoaded) {
-            this.getView()
-              .getModel("side")
-              .setProperty("/selectedKey", `botinstance_${botInstanceId}`);
-          }
         },
 
         _handleContextNodeDetailRoute(args) {
           this._restoreNavigationState();
-          const contextNodeId = args?.contextNodeId;
-          if (contextNodeId && this._dataCache.isLoaded) {
-            this.getView()
-              .getModel("side")
-              .setProperty("/selectedKey", `contextnode_${contextNodeId}`);
-          }
         },
 
         _handleAIConversationRoute(args) {
           this._restoreNavigationState();
-          const botInstanceId = args?.botInstanceId;
-          if (botInstanceId && this._dataCache.isLoaded) {
-            this.getView()
-              .getModel("side")
-              .setProperty("/selectedKey", `botinstance_${botInstanceId}`);
-          }
         },
         /** ===================== 数据加载与缓存 ===================== */
         async _preloadTaskData(sTaskId, isBusy) {
@@ -277,6 +250,9 @@ sap.ui.define(
             this._cacheContextNodeTree(oContextTree);
 
             this._buildNavigationFromCache();
+            this._expandNavigationTree();
+
+
           } catch (error) {
             MessageToast.show(
               "Failed to load data: " + (error.message || error.toString())
@@ -285,6 +261,8 @@ sap.ui.define(
             if (isBusy) {
               BusyIndicator.hide();
             }
+            // 隐藏左侧导航的busy状态
+            this._setNavigationBusy(false);
           }
         },
 
@@ -367,20 +345,28 @@ sap.ui.define(
         },
 
         _buildNavigationFromCache() {
-          const sCurrentView =
-            this.getView().getModel("side").getProperty("/currentView") ||
-            "tasks";
+          const oSideModel = this.getView().getModel("side");
+          const sCurrentView = oSideModel.getProperty("/currentView") || "tasks";
 
           if (sCurrentView === "tasks") {
-            this.getView()
-              .getModel("side")
-              .setProperty("/navigation", this._taskTreeData || []);
+            oSideModel.setProperty("/navigation", this._taskTreeData || []);
           } else if (sCurrentView === "contextNodes") {
-            this.getView()
-              .getModel("side")
-              .setProperty("/navigation", this._contextNodeTreeData || []);
+            oSideModel.setProperty("/navigation", this._contextNodeTreeData || []);
           }
         },
+
+        _expandNavigationTree() {
+          // 延迟执行以确保DOM已更新
+          setTimeout(() => {
+            const oTree = this.byId("idItemsNavigationTree");
+            if (oTree) {
+              // 默认展开所有层级
+              oTree.expandToLevel(99);
+            }
+          }, 50);
+        },
+
+
 
         /** ===================== 树结构适配与递归 ===================== */
         _adaptTreeNodeText(nodes) {
@@ -524,7 +510,6 @@ sap.ui.define(
           const oSideModel = this.getView().getModel("side");
 
           oSideModel?.setProperty("/currentView", sKey);
-          oSideModel?.setProperty("/selectedKey", sKey);
 
           if (
             this._dataCache.invalidated &&
@@ -534,6 +519,7 @@ sap.ui.define(
             this._preloadTaskData(this._dataCache.currentTask.id, "");
           } else if (this._dataCache.isLoaded) {
             this._buildNavigationFromCache();
+            this._expandNavigationTree();
           }
         },
 
@@ -541,11 +527,23 @@ sap.ui.define(
           const oItem = oEvent.getParameter("listItem");
           const oContext = oItem.getBindingContext("side");
           const oData = oContext.getObject();
-          const sKey = oData.key;
 
-          this.getView().getModel("side").setProperty("/selectedKey", sKey);
+          // 设置Tree的选中状态
+          this.getView().getModel("side").setProperty("/selectedTreeKey", oData.key);
+
           this._maintainNavigationState();
           this._navigateToItem(oData);
+        },
+
+        onTreeSelectionChange(oEvent) {
+          const oSelectedItem = oEvent.getParameter("listItem");
+          if (oSelectedItem) {
+            const oContext = oSelectedItem.getBindingContext("side");
+            const oData = oContext.getObject();
+            
+            // 更新模型中的选中状态
+            this.getView().getModel("side").setProperty("/selectedTreeKey", oData.key);
+          }
         },
 
         onSideNavButtonPress() {
@@ -655,6 +653,140 @@ sap.ui.define(
           return null;
         },
 
+        async _extractTaskRunIdFromUrl() {
+          const oRouter = this.getOwnerComponent().getRouter();
+          const oHashChanger = oRouter.getHashChanger();
+          const sHash = oHashChanger.getHash();
+
+          // 从Tasks路由中直接提取taskRunId
+          const taskMatch = sHash.match(/Tasks\(([^)]+)\)/);
+          if (taskMatch && taskMatch[1]) {
+            return taskMatch[1].replace(/'/g, "");
+          }
+
+          // 从其他详情页面路由中提取ID并查找对应的taskRunId
+          const patterns = [
+            { regex: /TaskDetail\(([^)]+)\)/, type: 'task' },
+            { regex: /BotInstanceDetail\(([^)]+)\)/, type: 'botInstance' },
+            { regex: /ContextNodeDetail\(([^)]+)\)/, type: 'contextNode' },
+            { regex: /ContextNodeDetail\(([^)]+)\)\/\w+/, type: 'contextNode' } // 文本节点页面
+          ];
+
+          for (const pattern of patterns) {
+            const match = sHash.match(pattern.regex);
+            if (match && match[1]) {
+              const id = match[1].replace(/'/g, "");
+              return await this._findTaskRunIdByDetailId(id, pattern.type);
+            }
+          }
+
+          return null;
+        },
+
+        async _findTaskRunIdByDetailId(id, type) {
+          const oModel = this.getOwnerComponent().getModel();
+
+          try {
+            switch (type) {
+              case 'task':
+                // 对于Task，需要找到主任务（isMain=true）
+                return await this._findMainTaskId(id);
+
+              case 'botInstance':
+                // 通过BotInstances找到对应的Task
+                const botPath = `/BotInstances(${id})`;
+                const botResult = await oModel.bindContext(botPath, null, { $expand: "task" }).requestObject();
+                const taskId = botResult?.task?.ID;
+                if (taskId) {
+                  return await this._findTaskRunIdByDetailId(taskId, 'task');
+                }
+                break;
+
+              case 'contextNode':
+                // 通过ContextNodes找到对应的Task
+                const contextPath = `/ContextNodes(${id})`;
+                const contextResult = await oModel.bindContext(contextPath, null, { $expand: "task" }).requestObject();
+                const contextTaskId = contextResult?.task?.ID;
+                if (contextTaskId) {
+                  return await this._findTaskRunIdByDetailId(contextTaskId, 'task');
+                }
+                break;
+            }
+          } catch (error) {
+            console.error("Error finding taskRunId:", error);
+          }
+
+          return null;
+        },
+
+        async _findMainTaskId(taskId) {
+          const oModel = this.getOwnerComponent().getModel();
+
+          try {
+            // 首先检查当前任务是否为主任务
+            const currentTaskPath = `/Tasks(${taskId})`;
+            const currentTask = await oModel.bindContext(currentTaskPath, null, { $expand: "botInstance" }).requestObject();
+
+            if (currentTask?.isMain) {
+              return taskId;
+            }
+
+            // 如果不是主任务，说明这是一个子任务，需要向上查找主任务
+            if (currentTask?.botInstance?.ID) {
+              // 通过botInstance找到父任务
+              const parentBotPath = `/BotInstances(${currentTask.botInstance.ID})`;
+              const parentBot = await oModel.bindContext(parentBotPath, null, { $expand: "task" }).requestObject();
+
+              if (parentBot?.task?.ID) {
+                // 递归查找父任务的主任务
+                return await this._findMainTaskId(parentBot.task.ID);
+              }
+            }
+
+            // 如果没有botInstance关联，通过层次结构查找主任务
+            const taskHierarchyPath = `/Tasks(${taskId})/MainService.getHierarchy()`;
+            const taskResult = await oModel.bindContext(taskHierarchyPath).requestObject();
+            const taskTree = taskResult?.value ? JSON.parse(taskResult.value) : [];
+
+            // 在层次结构中查找主任务
+            const mainTask = this._findMainTaskInTree(taskTree);
+
+            if (mainTask) {
+              return mainTask.id || mainTask.ID;
+            }
+
+            // 如果在层次结构中没找到主任务，尝试查找根节点
+            const rootTask = Array.isArray(taskTree) ? taskTree[0] : taskTree;
+            return rootTask?.id || rootTask?.ID || taskId;
+
+          } catch (error) {
+            console.error("Error finding main task:", error);
+            return taskId; // 如果出错，返回原始taskId
+          }
+        },
+
+        _findMainTaskInTree(taskTree) {
+          if (!taskTree) return null;
+
+          const tasks = Array.isArray(taskTree) ? taskTree : [taskTree];
+
+          // 递归查找主任务
+          const findMain = (nodes) => {
+            for (const node of nodes) {
+              if (node.isMain) {
+                return node;
+              }
+              if (node.items && node.items.length > 0) {
+                const found = findMain(node.items);
+                if (found) return found;
+              }
+            }
+            return null;
+          };
+
+          return findMain(tasks);
+        },
+
         /** ===================== 事件回调 ===================== */
         _onTaskSelectionChanged(sChannel, sEvent, oData) {
           const sNewTaskId = oData.taskId;
@@ -680,15 +812,56 @@ sap.ui.define(
           }
         },
 
+        /** ===================== 页面刷新处理 ===================== */
+        _handlePageRefresh() {
+          // 延迟执行，确保路由已经初始化
+          setTimeout(async () => {
+            if (!this._dataCache.isLoaded) {
+              // 显示左侧导航的busy状态
+              this._setNavigationBusy(true);
+
+              // 根据URL判断应该显示哪个视图
+              const currentView = this._detectViewFromUrl();
+              this.getView().getModel("side").setProperty("/currentView", currentView);
+
+              const taskRunId = await this._extractTaskRunIdFromUrl();
+              if (taskRunId) {
+                this._preloadTaskData(taskRunId, false);
+              } else {
+                // 如果无法提取taskRunId，隐藏busy状态
+                this._setNavigationBusy(false);
+              }
+            }
+          }, 100);
+        },
+
+        _detectViewFromUrl() {
+          const oRouter = this.getOwnerComponent().getRouter();
+          const oHashChanger = oRouter.getHashChanger();
+          const sHash = oHashChanger.getHash();
+
+          // 如果URL包含ContextNodeDetail，说明应该显示Context Nodes视图
+          if (sHash.includes("ContextNodeDetail")) {
+            return "contextNodes";
+          }
+
+          // 默认显示Tasks视图
+          return "tasks";
+        },
+
+        _setNavigationBusy(bBusy) {
+          const oTree = this.byId("idItemsNavigationTree");
+          if (oTree) {
+            oTree.setBusy(bBusy);
+          }
+        },
+
         /** ===================== 任务树映射与根节点查找 ===================== */
         _findRootTaskId(sTaskId) {
           return this._taskHierarchyMap?.get(sTaskId) || null;
         },
 
-        _updateNavigationSelection(sTaskId) {
-          const sNodeKey = "task_" + sTaskId;
-          this.getView().getModel("side").setProperty("/selectedKey", sNodeKey);
-        },
+
 
         // _loadRootTaskForSubTask(sTaskId) {
         //   const oModel = this.getOwnerComponent().getModel();

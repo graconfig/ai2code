@@ -346,6 +346,10 @@
     font-weight: 600;
 }
 /* 响应式设计 */
+
+
+
+
 @media (max-width: 768px) {
     .taskCard {
         width: 100%;

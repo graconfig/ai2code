@@ -98,12 +98,16 @@
 					focusable="true">
 					<Tree
 						id="idItemsNavigationTree"
+						mode="SingleSelectMaster"
 						itemPress=".onNavigationItemSelect"
+						selectionChange=".onTreeSelectionChange"
+						selectedKey="{side>/selectedTreeKey}"
 						items="{path: 'side>/navigation', parameters: {arrayNames:['items']}}">
 						<StandardTreeItem 
 							id="idGenStandardTreeItem" 
 							title="{side>text}" 
 							icon="{side>icon}"
+							key="{side>key}"
 							type="Navigation"/>
 					</Tree>
 					</ScrollContainer>
