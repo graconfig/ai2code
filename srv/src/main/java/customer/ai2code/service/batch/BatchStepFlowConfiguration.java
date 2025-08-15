@@ -161,11 +161,13 @@ public class BatchStepFlowConfiguration {
         // Step 2: 执行SubTasks (使用Partitioning)
         Step subTasksStep = buildSubTasksPartitioningStep(botNode);
 
+        JobExecutionDecider decider = createSubTaskDecision(botNode);
+        
         return new FlowBuilder<Flow>(flowName)
                 .start(executeStep)
-                .next(createSubTaskDecision(botNode)) // 决定是否执行SubTasks
+                .next(decider)
                 .on("HAS_SUBTASKS").to(subTasksStep)
-                .from(createSubTaskDecision(botNode)).on("NO_SUBTASKS").end("COMPLETED")
+                .from(decider).on("NO_SUBTASKS").end()
                 .build();
     }
 
