@@ -59,7 +59,7 @@ public class PromptServiceImpl implements PromptService {
     public List<PromptTexts> getPrompts(Bot bot) {
         try {
             // 1. 查询BotType对应的所有PromptTexts
-            List<PromptTexts> prompts = genericCqnService.getPromptTextsByBotType(bot.getBotType().getId());
+            List<PromptTexts> prompts = genericCqnService.getPromptTextsByBotType(bot.getBotType().getId(), bot.getLocale());
 
             // 2. 构建变量解析上下文
             VariableContext context = buildVariableContext(bot);
