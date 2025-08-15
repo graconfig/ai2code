@@ -265,7 +265,7 @@ public class GenericCqnService {
         // 使用缓存管理器获取主任务ID
         // String mainTaskId = cacheManager.getMainTaskId(botInstanceId);
         // if (mainTaskId != null) {
-        //     return mainTaskId;
+        // return mainTaskId;
         // }
 
         // 如果缓存中没有，执行原有逻辑
@@ -417,9 +417,9 @@ public class GenericCqnService {
     /**
      * 根据BotType ID查询所有PromptTexts
      */
-    public List<PromptTexts> getPromptTextsByBotType(String botTypeId) {
+    public List<PromptTexts> getPromptTextsByBotType(String botTypeId, Locale locale) {
         var select = Select.from(PromptTexts_.class)
-                .where(p -> p.botType_ID().eq(botTypeId));
+                .where(p -> p.botType_ID().eq(botTypeId).and(p.lang_code().eq(locale.getLanguage())));
         // .orderBy(p -> p.sequence().asc());
         return entityService.selectList(configService, select, PromptTexts.class);
     }
