@@ -94,9 +94,13 @@ sap.ui.define([
             return chatService.createEntity({
                 binding: this.binding,
                 entity: {
-                    content: "",
-                    createdBy: "AI",
-                    role: "assistant"
+                    role:this.sender ,
+                    message: this.message.trim(),
+                    ragData: this.message.trim()
+                    //botInstance_ID: this.bindingmodel.getObject().ID
+                    // content: "",
+                    // createdBy: "AI",
+                    // role: "assistant"
                 },
                 atEnd: true,
                 submitBatch: false

@@ -5,7 +5,10 @@ sap.ui.define(
   /**
    * @param {typeof sap.ui.core.mvc.Controller} Controller
    */
-  function (Controller, MessageToast, MessageBox, NewMessageHandler,) {
+  function (Controller,
+	MessageToast,
+	MessageBox,
+	NewMessageHandler) {
     "use strict";
 
     return Controller.extend(
@@ -191,16 +194,66 @@ sap.ui.define(
               message: message,
               sender: "user",
               bindingmodel: oBindingContext,
-              servicemodel: this.getOwnerComponent().getModel()
+              servicemodel: this.getOwnerComponent().getModel(),
+              onCreatedEmptyAssistantMessage: function (replyContext) {
+                    // 设置Busy状态                        
+                    const messageListItem = messageList.getItems().find(item =>
+                        item.getBindingContext("local") === replyContext
+                    );
+                    if (messageListItem) {
+                        messageListItem.setLoading(true);
+                    }
+                    this._scheduleScrollToBottom();
+                }.bind(this),
+                streamingCallback: function (chunk, replyContext) {
+                    if (!chunk) return;
+
+                    // replyContext.setProperty("content", `${replyContext.getProperty("content")}${chunk}`);
+                    replyContext.setProperty("content", chunk);
+
+                    const messageListItem = messageList.getItems().find(item =>
+                        item.getBindingContext("local") === replyContext
+                    );
+                    if (messageListItem) {
+                        messageListItem.setLoading(false);
+                        messageListItem.invalidate();
+                    }
+
+                    // const listEndMarker = this._dialogWithStream.getContent()[0].getContent()[0].getItems()[1];
+                    // UIHelper.scrollToElement(listEndMarker.getDomRef());
+                    this._scheduleScrollToBottom();
+                }.bind(this),
+                onComplete: function () {
+                    // 对话完成后恢复状态
+                    this._isProcessing = false;
+                    //feedInput.setEnabled(true);
+                    //feedInput.setValue("");
+                    // refresh title of Object Page
+                    oBindingContext.refresh();
+                    // refresh current context of the chat list
+                    this._triggerChatListRefresh(oBindingContext);
+                }.bind(this)
             });
 
-            messageHandler.createMessageAndCompletion();
+            //messageHandler.createMessageAndCompletion();
+            messageHandler.createMessageAndCompletion(true,
+                '/rest/v1/chat/streaming'
+            );
 
             this._scheduleScrollToBottom();
 
           } catch (error) {
             MessageToast.show("Error sending message: " + error.message);
           }
+        },
+        _triggerChatListRefresh: function (oBindingContext) {
+            var that = this
+            oBindingContext.requestProperty("ID").then((MessageId) => {
+                var oBus = that.getOwnerComponent().getEventBus();
+                oBus.publish("MessagesChannel", "TitleUpdated", {
+                    ID: MessageId
+                });
+            });
         },
 
         onBtnAdoptPress(event) {

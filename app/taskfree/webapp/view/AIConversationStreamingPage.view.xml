@@ -91,7 +91,7 @@
                                     <Avatar
                                         id="messageAvatar"
                                         displaySize="S"
-                                        src="{ path: 'role', formatter: 'ChatFormatter.senderIcon' }"
+                                        src="{ path: 'local>role', formatter: 'ChatFormatter.senderIcon' }"
                                         displayShape="Square"
                                         backgroundColor="Transparent"
                                     />
