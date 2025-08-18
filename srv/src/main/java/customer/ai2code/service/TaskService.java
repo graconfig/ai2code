@@ -37,4 +37,6 @@ public interface TaskService {
     public String getHierarchy(TasksGetHierarchyContext context);
 
     public String getMainTaskId(String botInstanceId);
+
+    public boolean deleteOriginalTasks(String botInstanceId);
 }

@@ -27,7 +27,8 @@ public class CreateTasksBotExecution implements BotExecution {
     @ExecuteMethod
     public List<String> execute(
             @ExecuteParameter(name = "botInstanceId", description = "Bot Instance") String botInstanceId,
-            @ExecuteParameter(name = "taskCreationParams", description = "Array of task parameters") List<TaskCreationParam> taskCreationParams
+            @ExecuteParameter(name = "taskCreationParams", description = "Array of task parameters") List<TaskCreationParam> taskCreationParams,
+            @ExecuteParameter(name = "deleteOriginal", description = "Delete original task") boolean deleteOriginal
     /**
      * 1.
      * sequence
@@ -47,6 +48,11 @@ public class CreateTasksBotExecution implements BotExecution {
         }
         if (botInstanceId == null || botInstanceId.isEmpty()) {
             throw new BusinessException("Bot instance ID cannot be null or empty");
+        }
+
+
+        if(deleteOriginal){
+            taskService.deleteOriginalTasks(botInstanceId);
         }
 
         // 遍历任务创建参数，创建任务
