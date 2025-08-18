@@ -1,6 +1,6 @@
 sap.ui.define([
     "sap/ui/base/Object",
-    "./ChatService"
+    "./ChatStreamingService"
 ], function (Object, ChatService) {
     "use strict";
 
@@ -12,7 +12,7 @@ sap.ui.define([
     //     this.sender = sender;
     //     this.streamingCallback = streamingCallback;
     // }
-    return Object.extend("ai.orchestration.taskfree.service.NewMessageHandler", {
+    return Object.extend("ai.orchestration.taskfree.service.NewMessageStreamingHandler", {
         constructor: function (settings) {
             this.botInstance = settings.botInstance;
             this.message = settings.message;
@@ -34,7 +34,7 @@ sap.ui.define([
              * For Temporary display of the message in the chat list, we are creating a temporary chat record context for the user.
              * This context will be deleted once the action newRecord is posted successfully.
              */
-            chatService.createEntity({
+            chatService.createEntityInJsonModel({
                 binding: this.binding,
                 entity: {
                     role:this.sender ,
@@ -91,12 +91,16 @@ sap.ui.define([
         handleStreamingCompletion: function (createdUserContext, streamingUrl) {
             var chatService = ChatService.getInstance();
             //执行一些初始化操作，比如创建一个空的助手消息上下文
-            return chatService.createEntity({
+            return chatService.createEntityInJsonModel({
                 binding: this.binding,
                 entity: {
-                    content: "",
-                    createdBy: "AI",
-                    role: "assistant"
+                    role:this.sender ,
+                    message: this.message.trim(),
+                    ragData: this.message.trim()
+                    //botInstance_ID: this.bindingmodel.getObject().ID
+                    // content: "",
+                    // createdBy: "AI",
+                    // role: "assistant"
                 },
                 atEnd: true,
                 submitBatch: false
@@ -124,8 +128,5 @@ sap.ui.define([
             });
 
         }
-
-
-
     });
 });

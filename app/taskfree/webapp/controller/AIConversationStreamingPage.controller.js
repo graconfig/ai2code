@@ -1,6 +1,6 @@
 sap.ui.define(
   ["sap/ui/core/mvc/Controller", "sap/m/MessageToast", "sap/m/MessageBox",
-    "ai/orchestration/taskfree/service/NewMessageHandler"
+    "ai/orchestration/taskfree/service/NewMessageStreamingHandler"
   ],
   /**
    * @param {typeof sap.ui.core.mvc.Controller} Controller
@@ -182,6 +182,7 @@ sap.ui.define(
 
           try {
             const binding = messageList ? messageList.getBinding("items") : null;
+            
 
             if (!binding) {
               MessageToast.show("Message binding not available. Please refresh the page.");
@@ -209,7 +210,7 @@ sap.ui.define(
                     if (!chunk) return;
 
                     // replyContext.setProperty("content", `${replyContext.getProperty("content")}${chunk}`);
-                    replyContext.setProperty("content", chunk);
+                    replyContext.setProperty("message", chunk); 
 
                     const messageListItem = messageList.getItems().find(item =>
                         item.getBindingContext("local") === replyContext
