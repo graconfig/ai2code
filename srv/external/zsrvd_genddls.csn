@@ -428,14 +428,6 @@
      "length": 40,
      "notNull": true
     },
-    "Withdraft": {
-     "type": "cds.Boolean",
-     "notNull": true
-    },
-    "Withadditionalsave": {
-     "type": "cds.Boolean",
-     "notNull": true
-    },
     "Devclass": {
      "type": "cds.String",
      "length": 30,
@@ -612,14 +604,6 @@
       "PROJDESC": {
        "type": "cds.String",
        "length": 40,
-       "notNull": true
-      },
-      "WITHDRAFT": {
-       "type": "cds.Boolean",
-       "notNull": true
-      },
-      "WITHADDITIONALSAVE": {
-       "type": "cds.Boolean",
        "notNull": true
       },
       "DEVCLASS": {
