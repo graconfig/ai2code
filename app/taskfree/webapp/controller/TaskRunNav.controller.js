@@ -106,7 +106,6 @@ sap.ui.define(
         /** ===================== 模型与缓存初始化 ===================== */
         _initNavigationModel() {
           const oNavigationModel = new JSONModel({
-            selectedTreeKey: "", // Tree控件的选中状态
             currentView: "tasks", // "tasks" or "contextNodes"
             navigation: [],
             fixedNavigation: [
@@ -251,8 +250,6 @@ sap.ui.define(
 
             this._buildNavigationFromCache();
             this._expandNavigationTree();
-
-
           } catch (error) {
             MessageToast.show(
               "Failed to load data: " + (error.message || error.toString())
@@ -346,12 +343,16 @@ sap.ui.define(
 
         _buildNavigationFromCache() {
           const oSideModel = this.getView().getModel("side");
-          const sCurrentView = oSideModel.getProperty("/currentView") || "tasks";
+          const sCurrentView =
+            oSideModel.getProperty("/currentView") || "tasks";
 
           if (sCurrentView === "tasks") {
             oSideModel.setProperty("/navigation", this._taskTreeData || []);
           } else if (sCurrentView === "contextNodes") {
-            oSideModel.setProperty("/navigation", this._contextNodeTreeData || []);
+            oSideModel.setProperty(
+              "/navigation",
+              this._contextNodeTreeData || []
+            );
           }
         },
 
@@ -365,8 +366,6 @@ sap.ui.define(
             }
           }, 50);
         },
-
-
 
         /** ===================== 树结构适配与递归 ===================== */
         _adaptTreeNodeText(nodes) {
@@ -528,22 +527,8 @@ sap.ui.define(
           const oContext = oItem.getBindingContext("side");
           const oData = oContext.getObject();
 
-          // 设置Tree的选中状态
-          this.getView().getModel("side").setProperty("/selectedTreeKey", oData.key);
-
           this._maintainNavigationState();
           this._navigateToItem(oData);
-        },
-
-        onTreeSelectionChange(oEvent) {
-          const oSelectedItem = oEvent.getParameter("listItem");
-          if (oSelectedItem) {
-            const oContext = oSelectedItem.getBindingContext("side");
-            const oData = oContext.getObject();
-            
-            // 更新模型中的选中状态
-            this.getView().getModel("side").setProperty("/selectedTreeKey", oData.key);
-          }
         },
 
         onSideNavButtonPress() {
@@ -666,10 +651,10 @@ sap.ui.define(
 
           // 从其他详情页面路由中提取ID并查找对应的taskRunId
           const patterns = [
-            { regex: /TaskDetail\(([^)]+)\)/, type: 'task' },
-            { regex: /BotInstanceDetail\(([^)]+)\)/, type: 'botInstance' },
-            { regex: /ContextNodeDetail\(([^)]+)\)/, type: 'contextNode' },
-            { regex: /ContextNodeDetail\(([^)]+)\)\/\w+/, type: 'contextNode' } // 文本节点页面
+            { regex: /TaskDetail\(([^)]+)\)/, type: "task" },
+            { regex: /BotInstanceDetail\(([^)]+)\)/, type: "botInstance" },
+            { regex: /ContextNodeDetail\(([^)]+)\)/, type: "contextNode" },
+            { regex: /ContextNodeDetail\(([^)]+)\)\/\w+/, type: "contextNode" }, // 文本节点页面
           ];
 
           for (const pattern of patterns) {
@@ -688,27 +673,34 @@ sap.ui.define(
 
           try {
             switch (type) {
-              case 'task':
+              case "task":
                 // 对于Task，需要找到主任务（isMain=true）
                 return await this._findMainTaskId(id);
 
-              case 'botInstance':
+              case "botInstance":
                 // 通过BotInstances找到对应的Task
                 const botPath = `/BotInstances(${id})`;
-                const botResult = await oModel.bindContext(botPath, null, { $expand: "task" }).requestObject();
+                const botResult = await oModel
+                  .bindContext(botPath, null, { $expand: "task" })
+                  .requestObject();
                 const taskId = botResult?.task?.ID;
                 if (taskId) {
-                  return await this._findTaskRunIdByDetailId(taskId, 'task');
+                  return await this._findTaskRunIdByDetailId(taskId, "task");
                 }
                 break;
 
-              case 'contextNode':
+              case "contextNode":
                 // 通过ContextNodes找到对应的Task
                 const contextPath = `/ContextNodes(${id})`;
-                const contextResult = await oModel.bindContext(contextPath, null, { $expand: "task" }).requestObject();
+                const contextResult = await oModel
+                  .bindContext(contextPath, null, { $expand: "task" })
+                  .requestObject();
                 const contextTaskId = contextResult?.task?.ID;
                 if (contextTaskId) {
-                  return await this._findTaskRunIdByDetailId(contextTaskId, 'task');
+                  return await this._findTaskRunIdByDetailId(
+                    contextTaskId,
+                    "task"
+                  );
                 }
                 break;
             }
@@ -725,7 +717,9 @@ sap.ui.define(
           try {
             // 首先检查当前任务是否为主任务
             const currentTaskPath = `/Tasks(${taskId})`;
-            const currentTask = await oModel.bindContext(currentTaskPath, null, { $expand: "botInstance" }).requestObject();
+            const currentTask = await oModel
+              .bindContext(currentTaskPath, null, { $expand: "botInstance" })
+              .requestObject();
 
             if (currentTask?.isMain) {
               return taskId;
@@ -735,7 +729,9 @@ sap.ui.define(
             if (currentTask?.botInstance?.ID) {
               // 通过botInstance找到父任务
               const parentBotPath = `/BotInstances(${currentTask.botInstance.ID})`;
-              const parentBot = await oModel.bindContext(parentBotPath, null, { $expand: "task" }).requestObject();
+              const parentBot = await oModel
+                .bindContext(parentBotPath, null, { $expand: "task" })
+                .requestObject();
 
               if (parentBot?.task?.ID) {
                 // 递归查找父任务的主任务
@@ -745,8 +741,12 @@ sap.ui.define(
 
             // 如果没有botInstance关联，通过层次结构查找主任务
             const taskHierarchyPath = `/Tasks(${taskId})/MainService.getHierarchy()`;
-            const taskResult = await oModel.bindContext(taskHierarchyPath).requestObject();
-            const taskTree = taskResult?.value ? JSON.parse(taskResult.value) : [];
+            const taskResult = await oModel
+              .bindContext(taskHierarchyPath)
+              .requestObject();
+            const taskTree = taskResult?.value
+              ? JSON.parse(taskResult.value)
+              : [];
 
             // 在层次结构中查找主任务
             const mainTask = this._findMainTaskInTree(taskTree);
@@ -758,7 +758,6 @@ sap.ui.define(
             // 如果在层次结构中没找到主任务，尝试查找根节点
             const rootTask = Array.isArray(taskTree) ? taskTree[0] : taskTree;
             return rootTask?.id || rootTask?.ID || taskId;
-
           } catch (error) {
             console.error("Error finding main task:", error);
             return taskId; // 如果出错，返回原始taskId
@@ -822,7 +821,9 @@ sap.ui.define(
 
               // 根据URL判断应该显示哪个视图
               const currentView = this._detectViewFromUrl();
-              this.getView().getModel("side").setProperty("/currentView", currentView);
+              this.getView()
+                .getModel("side")
+                .setProperty("/currentView", currentView);
 
               const taskRunId = await this._extractTaskRunIdFromUrl();
               if (taskRunId) {
@@ -860,8 +861,6 @@ sap.ui.define(
         _findRootTaskId(sTaskId) {
           return this._taskHierarchyMap?.get(sTaskId) || null;
         },
-
-
 
         // _loadRootTaskForSubTask(sTaskId) {
         //   const oModel = this.getOwnerComponent().getModel();
