@@ -12,32 +12,32 @@ import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 import cds.gen.mainservice.BotMessages;
 import customer.ai2code.exception.BusinessException;
-import customer.ai2code.model.config.AIModel;
-import customer.ai2code.model.config.AIModelResolver;
+import customer.ai2code.model.ai.config.AIModelResolver;
+import customer.ai2code.model.ai.config.model.AIModel;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.PromptService;
 import customer.ai2code.service.impl.GenericCqnService;
-import customer.ai2code.service.impl.rag.RAGExtractionFactoryService;
-import customer.ai2code.service.rag.RAGExtraction;
-import lombok.AllArgsConstructor;
+// import customer.ai2code.service.impl.rag.RAGExtractionFactoryService;
+// import customer.ai2code.service.rag.RAGExtraction;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class ChatBot implements Bot {
-
-    private BotInstances botInstance;
-    private AIModel aiModel;
-    private BotTypes botType;
-    private Locale locale;
+@EqualsAndHashCode(callSuper = true)
+public class ChatBot extends AbstractBot {
 
     // 服务依赖（通过构造函数注入）
-    private GenericCqnService genericCqnService;
     private PromptService promptService;
     private AIModelResolver aiModelResolver;
     // private RAGExtractionFactoryService ragExtractionFactoryService;
+    
+    public ChatBot(BotInstances botInstance, AIModel aiModel, BotTypes botType, 
+                  Locale locale, GenericCqnService genericCqnService,
+                  PromptService promptService, AIModelResolver aiModelResolver) {
+        super(botInstance, aiModel, botType, locale, genericCqnService);
+        this.promptService = promptService;
+        this.aiModelResolver = aiModelResolver;
+    }
 
     @Override
     public String chat(String content) {
@@ -49,7 +49,7 @@ public class ChatBot implements Bot {
             // 获取prompts
             List<PromptTexts> retrievedPrompts = promptService.getPrompts(this);
             if (retrievedPrompts != null && !retrievedPrompts.isEmpty()) {
-                prompts = retrievedPrompts;
+                prompts = new ArrayList<>(retrievedPrompts); // 创建可修改的副本
             }
 
             // 2. 第一次chat需要保存prompt消息
@@ -70,7 +70,7 @@ public class ChatBot implements Bot {
             // 6.将用户的聊天内容存储到表中
             genericCqnService.createAndInsertBotMessage(botInstance.getId(), content, ragPrompt.getContent(), "user");
 
-            if (ragPrompt != null) {
+            if (ragPrompt != null && ragPrompt.getContent() != null && !ragPrompt.getContent().isEmpty()) {
                 prompts.add(ragPrompt);
             }
 
@@ -160,25 +160,15 @@ public class ChatBot implements Bot {
         return true; // 返回是否成功
     }
 
-    @Override
-    public BotInstances getBotInstance() {
-        return botInstance;
-    }
-
+    // 使用AbstractBot中的实现，不需要在这里重写
     // @Override
     // public BotInstances getBotInstance() {
-    // // 返回当前Bot实例信息
-    // return null; // 需要实现具体的返回逻辑
+    //     return botInstance;
     // }
 
     // @Override
-    // public AIModel getAIModel() {
-    // // TODO Auto-generated method stub
-    // throw new UnsupportedOperationException("Unimplemented method 'getAIModel'");
+    // public AIModel getAiModel() {
+    //     return aiModel;
     // }
-
-    public AIModel getAiModel() {
-        return aiModel;
-    }
 
 }

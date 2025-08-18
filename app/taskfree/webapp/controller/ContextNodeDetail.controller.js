@@ -9,9 +9,8 @@ sap.ui.define(
     return Controller.extend(
       "ai.orchestration.taskfree.controller.ContextNodeDetail",
       {
-        onInit: function () {
-          // 创建 viewModel 用于页面数据绑定
-          var oViewModel = new JSONModel({
+        onInit() {
+          const oViewModel = new JSONModel({
             value: "",
             title: "Context Node",
             type: "",
@@ -20,17 +19,18 @@ sap.ui.define(
           });
           this.getView().setModel(oViewModel, "viewModel");
 
-          const oRouter = this.getOwnerComponent().getRouter();
-          oRouter.getRoute("RouteContextNodeDetail").attachPatternMatched(this._onRouteMatched, this);
+          this.getOwnerComponent()
+            .getRouter()
+            .getRoute("RouteContextNodeDetail")
+            .attachPatternMatched(this._onRouteMatched, this);
         },
 
-        _onRouteMatched: function (oEvent) {
+        async _onRouteMatched(oEvent) {
           const oArguments = oEvent.getParameter("arguments");
-          var oViewModel = this.getView().getModel("viewModel");
-          var oContextNodeId = oArguments && oArguments.contextNodeId;
-          var oController = this;
+          const oViewModel = this.getView().getModel("viewModel");
+          const oContextNodeId = oArguments?.contextNodeId;
 
-          oController.getView().setBusy(true);
+          this.getView().setBusy(true);
 
           if (!oContextNodeId) {
             MessageToast.show("No context node id provided");
@@ -39,28 +39,30 @@ sap.ui.define(
             return;
           }
 
-          var oModel = this.getView().getModel();
-          var sPath = "/ContextNodes(" + oContextNodeId + ")";
-          oModel.bindContext(sPath).requestObject().then(function (oData) {
-            oController.getView().setBusy(false);
-            oViewModel.setProperty("/value", oData.value);
-            oViewModel.setProperty("/title", oData.label);
-          }).catch(function () {
-            oController.getView().setBusy(false);
-            oViewModel.setProperty("/value", "加载失败");
-            oViewModel.setProperty("/title", "Context Node");
-            oViewModel.setProperty("/type", "");
-            oViewModel.setProperty("/busy", false);
+          const oModel = this.getView().getModel();
+          const sPath = "/ContextNodes(" + oContextNodeId + ")";
+
+          try {
+            const oData = await oModel.bindContext(sPath).requestObject();
+            oViewModel?.setProperty("/value", oData.value);
+            oViewModel?.setProperty("/title", oData.label);
+          } catch (error) {
+            oViewModel?.setProperty("/value", "加载失败");
+            oViewModel?.setProperty("/title", "Context Node");
+            oViewModel?.setProperty("/type", "");
+            oViewModel?.setProperty("/busy", false);
             MessageToast.show("加载失败");
-          });
+          } finally {
+            this.getView().setBusy(false);
+          }
         },
 
-        onReturnToBot: function () {
+        async onReturnToBot() {
           // 从路由获取contextNodeId
-          var oRouter = this.getOwnerComponent().getRouter();
-          var oCurrentRoute = oRouter.getHashChanger().getHash();
-          var oRouteInfo = oRouter.getRouteInfoByHash(oCurrentRoute);
-          var sContextNodeId = oRouteInfo && oRouteInfo.arguments && oRouteInfo.arguments.contextNodeId;
+          const oRouter = this.getOwnerComponent().getRouter();
+          const oCurrentRoute = oRouter.getHashChanger().getHash();
+          const oRouteInfo = oRouter.getRouteInfoByHash(oCurrentRoute);
+          const sContextNodeId = oRouteInfo && oRouteInfo.arguments && oRouteInfo.arguments.contextNodeId;
 
           if (!sContextNodeId) {
             MessageToast.show("ContextNode ID not available");
@@ -68,13 +70,13 @@ sap.ui.define(
           }
 
           // 根据数据模型关联关系：通过ContextNode的botInstances导航属性获取关联的BotInstance
-          var oModel = this.getView().getModel();
-          var sContextNodePath = "/ContextNodes(" + sContextNodeId + ")";
+          const oModel = this.getView().getModel();
+          const sContextNodePath = "/ContextNodes(" + sContextNodeId + ")";
 
-          var that = this;
-          oModel.bindContext(sContextNodePath, null, {
-            $expand: "botInstances"
-          }).requestObject().then(function (oContextNode) {
+          try {
+            const oContextNode = await oModel.bindContext(sContextNodePath, null, {
+              $expand: "botInstances"
+            }).requestObject();
 
             if (!oContextNode) {
               MessageToast.show("ContextNode not found");
@@ -87,7 +89,7 @@ sap.ui.define(
             }
 
             // 在BotInstances中找到contextID等于sContextNodeId的特定记录
-            var oBotInstance = oContextNode.botInstances.find(function (botInstance) {
+            const oBotInstance = oContextNode.botInstances.find(function (botInstance) {
               return botInstance.contextID === sContextNodeId;
             });
 
@@ -95,28 +97,23 @@ sap.ui.define(
               MessageToast.show("No matching BotInstance found with contextID: " + sContextNodeId);
               return;
             }
-            var sBotInstanceId = oBotInstance.ID;
+            const sBotInstanceId = oBotInstance.ID;
 
             // 跳转到BotInstance页面
             oRouter.navTo("RouteBotInstanceDetail", {
               botInstanceId: sBotInstanceId
             });
 
-          }).catch(function (oError) {
-            MessageToast.show("Error loading BotInstance: " + (oError.message || oError.toString()));
-          });
+          } catch (error) {
+            MessageToast.show("Error loading BotInstance: " + (error.message || error.toString()));
+          }
         },
 
-        onExit: function () {
-          var oViewModel = this.getView().getModel("viewModel");
-          if (oViewModel) {
-            oViewModel.setProperty("/title", "");
-            oViewModel.setProperty("/value", "");
-            oViewModel.setProperty("/busy", false);
-          }
-          if (this._oVBox) {
-            this._oVBox.removeAllItems();
-          }
+        onExit() {
+          const oViewModel = this.getView().getModel("viewModel");
+          oViewModel?.setProperty("/title", "");
+          oViewModel?.setProperty("/value", "");
+          oViewModel?.setProperty("/busy", false);
         }
       }
     );

@@ -23,6 +23,7 @@ import customer.ai2code.model.execution.annotation.ExecuteMethod;
 import customer.ai2code.model.execution.annotation.ExecuteParameter;
 import customer.ai2code.service.ContextService;
 import customer.ai2code.service.execution.BotExecution;
+import customer.ai2code.service.impl.TaskBotCacheManager;
 
 @BotExecutor(name = "Call Remote Odata", description = "Implementation for Call S4/HANA OP Odata", version = "1.0", enabled = true)
 public class CreateCdsOdataBotExecution implements BotExecution {
@@ -30,17 +31,19 @@ public class CreateCdsOdataBotExecution implements BotExecution {
     private final ContextService contextService;
     private final V0001 zsrvdGenddls;
     private final ObjectMapper objectMapper;
+    private final TaskBotCacheManager taskBotCacheManager;
 
     // public CreateCdsOdataBotExecution(GenericCqnService genericCqnService,
     // ZsrvdGenddls zsrvdGenddls) {
     // public CreateCdsOdataBotExecution(V0001 zsrvdGenddls) {
     public CreateCdsOdataBotExecution(ContextService contextService,
-            V0001 zsrvdGenddls, ObjectMapper objectMapper) {
+            V0001 zsrvdGenddls, ObjectMapper objectMapper, TaskBotCacheManager taskBotCacheManager) {
         // 默认构造函数
         // this.genericCqnService = genericCqnService;
         this.contextService = contextService;
         this.zsrvdGenddls = zsrvdGenddls;
         this.objectMapper = objectMapper;
+        this.taskBotCacheManager = taskBotCacheManager;
     }
 
     // String DestinationName,String Request,String Response,，List<ContextNodes>
@@ -86,7 +89,7 @@ public class CreateCdsOdataBotExecution implements BotExecution {
 
         // 调用action
         try {
-            zsrvdGenddls.emit(AutoActiveCDSContext);
+            zsrvdGenddls.emit(AutoActiveCDSContextNew);
         } catch (ServiceException e) {
             ODataResponseException odataexce = (ODataResponseException) e.getCause().getCause();
             int statusCode = odataexce.getHttpCode();
@@ -122,11 +125,11 @@ public class CreateCdsOdataBotExecution implements BotExecution {
 
             // contextService.upsertContext(botInstanceId, REFERENCE, , type)
             try {
-                contextService.updateAdditionInfo(botInstanceId, REFERENCE, objectMapper.writeValueAsString(item));
+                contextService.updateAdditionInfo(taskBotCacheManager.getCachedBot(botInstanceId), REFERENCE, objectMapper.writeValueAsString(item));
             } catch (JsonProcessingException e) {
                 // TODO Auto-generated catch block
                 // e.printStackTrace();
-                contextService.updateAdditionInfo(botInstanceId, REFERENCE, e.getMessage());
+                contextService.updateAdditionInfo(taskBotCacheManager.getCachedBot(botInstanceId), REFERENCE, e.getMessage());
             }
 
         }

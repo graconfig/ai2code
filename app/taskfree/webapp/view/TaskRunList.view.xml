@@ -4,6 +4,7 @@
     xmlns="sap.m"
     xmlns:f="sap.f"
     xmlns:core="sap.ui.core"
+    xmlns:plugins="sap.m.plugins"
     displayBlock="true"
     height="100%">
     
@@ -21,22 +22,12 @@
         <f:header>
             <f:DynamicPageHeader id="dynamicPageHeader" pinnable="true">
                 <f:content>
-                    <VBox id="headerContent">
-                        <!-- Search and Filter Bar -->
-                        <HBox id="searchFilterBar" class="sapUiMediumMarginBottom" alignItems="Center" justifyContent="SpaceBetween">
-                            <HBox id="leftControls" alignItems="Center">
-                                <SearchField 
-                                    id="searchField"
-                                    width="300px" 
-                                    placeholder="Search tasks..."
-                                    search="onSearch"
-                                    class="sapUiMediumMarginEnd"/>
-                            </HBox>
-                            <!-- <HBox id="rightControls" alignItems="Center">
-                                <Text id="taskCounter" text="Tasks: {/Tasks/$count}" class="sapUiMediumMarginEnd"/>
-                            </HBox> -->
-                        </HBox>
-                    </VBox>
+                    <SearchField
+                        id="searchField"
+                        width="300px"
+                        placeholder="Search tasks..."
+                        search="onSearch"
+                        class="sapUiSmallMargin"/>
                 </f:content>
             </f:DynamicPageHeader>
         </f:header>
@@ -59,7 +50,12 @@
                 }"
                 growing="true"
                 growingThreshold="20"
-                mode="MultiSelect">
+                mode="MultiSelect"
+                popinLayout="GridSmall">
+
+                <dependents>
+                    <plugins:ColumnResizer id="columnResizer" />
+                </dependents>
                 
                 <headerToolbar>
                     <OverflowToolbar id="tableToolbar">
@@ -82,19 +78,19 @@
                       <Column id="nameColumn">
                          <Text id="nameHeader" text="Main Task"/>
                       </Column>
-                      <Column id="descriptionColumn" width="20%">
+                      <Column id="descriptionColumn" width="20%" minScreenWidth="Tablet" demandPopin="true">
                          <Text id="descriptionHeader" text="Description"/>
                       </Column>
-                      <Column id="typeName" width="15%">
+                      <Column id="typeName" width="15%" minScreenWidth="Tablet" demandPopin="true">
                          <Text id="typeNameHeader" text="Task Type"/>
                       </Column>
-                      <Column id="typeDesc" width="20%">
+                      <Column id="typeDesc" width="20%" minScreenWidth="Desktop" demandPopin="true">
                          <Text id="typeDescHeader" text="Type Description"/>
                       </Column>
-                      <Column id="createdBy" width="12%">
+                      <Column id="createdBy" width="12%" minScreenWidth="Desktop" demandPopin="true">
                          <Text id="createdByHeader" text="Created By"/>
                       </Column>
-                      <Column id="createdAt" width="13%">
+                      <Column id="createdAt" width="13%" minScreenWidth="Desktop" demandPopin="true">
                          <Text id="createdAtHeader" text="Created At"/>
                       </Column>
                   </columns>

@@ -10,11 +10,14 @@
   "sapux": [
     "app/runtime",
     "app/model-config",
-    "app/cdsviews",
-    "app/scenarios",
-    "app/ragjoincond",
-    "app/ragjoincond",
-    "app/cdsviewfields"
+    "app/ragcdsviews",
+    "app/ragscenarios",
+    "app/ragwithjoincond",
+    "app/ragwithjoincond",
+    "app/ragcdsviewfields",
+    "app/config",
+    "app/taskfree",
+    "app/taskrun"
   ],
   "dependencies": {
     "ai2code-cds": "file:"

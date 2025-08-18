@@ -87,26 +87,26 @@ public class TaskBotNode {
         return null;
     }
     
-    // 获取根节点（主任务）
-    public TaskBotNode getRoot() {
-        TaskBotNode current = this;
-        while (current.parent != null) {
-            current = current.parent;
-        }
-        return current;
-    }
+    // // 获取根节点（主任务）
+    // public TaskBotNode getRoot() {
+    //     TaskBotNode current = this;
+    //     while (current.parent != null) {
+    //         current = current.parent;
+    //     }
+    //     return current;
+    // }
     
-    // 获取主任务ID
-    public String getMainTaskId() {
-        TaskBotNode root = getRoot();
-        if (root.type == NodeType.TASK && root.taskObject != null) {
-            if (root.taskObject.getTask().getIsMain() != null && root.taskObject.getTask().getIsMain()) {
-                return root.id;
-            }
-        }
-        // throw new BusinessException("Root node is not a main task");
-        return null;
-    }
+    // // 获取主任务ID
+    // public String getMainTaskId() {
+    //     TaskBotNode root = getRoot();
+    //     if (root.type == NodeType.TASK && root.taskObject != null) {
+    //         if (root.taskObject.getTask().getIsMain() != null && root.taskObject.getTask().getIsMain()) {
+    //             return root.id;
+    //         }
+    //     }
+    //     // throw new BusinessException("Root node is not a main task");
+    //     return null;
+    // }
     
     // 查找指定序列的Bot实例
     public TaskBotNode findBotBySequence(int sequence) {
@@ -114,6 +114,19 @@ public class TaskBotNode {
             if (child.type == NodeType.BOT_INSTANCE && child.botObject != null) {
                 Integer botSequence = child.botObject.getBotInstance().getSequence();
                 if (botSequence != null && botSequence == sequence) {
+                    return child;
+                }
+            }
+        }
+        return null;
+    }
+
+    // 查找指定序列的Task实例
+    public TaskBotNode findTaskBySequence(int sequence) {
+        for (TaskBotNode child : children) {
+            if (child.type == NodeType.TASK && child.taskObject != null) {
+                Integer taskSequence = child.taskObject.getTask().getSequence();
+                if (taskSequence != null && taskSequence == sequence) {
                     return child;
                 }
             }

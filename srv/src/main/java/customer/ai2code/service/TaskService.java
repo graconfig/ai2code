@@ -35,4 +35,6 @@ public interface TaskService {
     public String getHierarchy(String taskId);
 
     public String getHierarchy(TasksGetHierarchyContext context);
+
+    public String getMainTaskId(String botInstanceId);
 }

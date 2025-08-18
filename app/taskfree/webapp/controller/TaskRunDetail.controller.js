@@ -1,6 +1,5 @@
 sap.ui.define(
   ["sap/ui/core/mvc/Controller", "sap/m/MessageToast",
-    "sap/ui/model/json/JSONModel",
     "sap/ui/layout/BlockLayout",
     "sap/ui/layout/BlockLayoutRow",
     "sap/ui/layout/BlockLayoutCell",
@@ -12,109 +11,107 @@ sap.ui.define(
   /**
    * @param {typeof sap.ui.core.mvc.Controller} Controller
    */
-  function (Controller, MessageToast, JSONModel, BlockLayout, BlockLayoutRow, BlockLayoutCell, Title, Text, VBox, Icon) {
+  function (Controller, MessageToast, BlockLayout, BlockLayoutRow, BlockLayoutCell, Title, Text, VBox, Icon) {
     "use strict";
 
     return Controller.extend(
       "ai.orchestration.taskfree.controller.TaskRunDetail",
       {
-        onInit: function () {
-          const oRouter = this.getOwnerComponent().getRouter();
-          oRouter.attachRouteMatched(this._onRouteMatched.bind(this));
-          
+        onInit() {
+          this.getOwnerComponent()
+            .getRouter()
+            .getRoute("RouteTaskRunNav")
+            .attachPatternMatched(this._onRouteMatched, this);
+
           // Show default home content
           this._renderDefaultHome();
         },
 
-        _onRouteMatched: function(oEvent) {
+        _onRouteMatched(oEvent) {
           const sRouteName = oEvent.getParameter("name");
           const oArguments = oEvent.getParameter("arguments");
-          
+
           if (sRouteName === "RouteTaskRunNav" && oArguments.taskRunId) {
-            // Load task data for the main task run detail page
-            const sTaskRunId = oArguments.taskRunId.replace(/'/g, '');
-            if (sTaskRunId && sTaskRunId.trim() !== '') {
+            const sTaskRunId = oArguments.taskRunId
+
+            if (sTaskRunId) {
               this._loadTaskRunDetail(sTaskRunId);
             }
           } else if (sRouteName === "RouteTaskRunNav") {
-            // Show default home content when no specific task is selected
             this._renderDefaultHome();
           }
         },
 
-        _loadTaskRunDetail: function(sTaskRunId) {
-          var oModel = this.getOwnerComponent().getModel();
-          var that = this;
-          
-          // Validate GUID format
-          var guidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-          if (!guidPattern.test(sTaskRunId)) {
-            MessageToast.show("Invalid GUID format for Task Run ID: " + sTaskRunId);
-            return;
-          }
-          
-          // For cuid (GUID) primary keys in OData V4, don't use quotes
-          var sPath = "/Tasks(" + sTaskRunId + ")";
-          
+        _loadTaskRunDetail(sTaskRunId) {
+          // 获取TaskRunNav控制器的缓存数据
+          const oTaskRunNavController = this._getTaskRunNavController();
 
-          
-          var oBinding = oModel.bindContext(sPath, null, {
-            $expand: "type,botInstances($expand=type),contextNodes"
-          });
-          
-          oBinding.attachDataReceived(function(oEvent) {
-            try {
-              var oBoundContext = oBinding.getBoundContext();
-              if (oBoundContext) {
-                var oData = oBoundContext.getObject();
-                if (oData) {
-    
-                  
-                  // Bind the view to the context
-                  that.getView().setBindingContext(oBoundContext);
-                  
-                  // Render task run overview content
-                  that._renderTaskRunContent(oData);
-                } else {
-                  MessageToast.show("No data found for Task Run");
-                }
-              } else {
-                MessageToast.show("Failed to load Task Run data");
-              }
-            } catch (error) {
-              MessageToast.show("Error processing Task Run data: " + error.message);
+          if (oTaskRunNavController && oTaskRunNavController.isCacheLoaded()) {
+            // 使用预加载的缓存数据
+            const oTaskData = oTaskRunNavController.getCachedTask(sTaskRunId);
+
+            if (oTaskData) {
+              // 直接渲染内容，无需OData请求
+              this._renderTaskRunContent(oTaskData);
+            } else {
+              //MessageToast.show("No data found for Task Run");
             }
-          });
-          
-          // Enhanced error handling
-          oBinding.attachEvent("dataReceived", function(oEvent) {
-            var oParameters = oEvent.getParameters();
-            if (oParameters && oParameters.error) {
-              MessageToast.show("Error loading Task Run: " + oParameters.error.message);
-            }
-          });
-          
-          // Request data with proper error handling
-          oBinding.requestObject().catch(function(oError) {
-            MessageToast.show("Failed to load Task Run data: " + (oError.message || oError.toString()));
-          });
+          } else {
+            // 缓存数据尚未加载，等待加载完成
+            this._waitForCacheLoad(sTaskRunId);
+          }
         },
 
-        _renderTaskRunContent: function(oTaskData) {
-          var oPage = this.byId("taskRunDetailPage");
+        _getTaskRunNavController() {
+          // 获取TaskRunNav控制器实例
+          const oTaskRunNavView = sap.ui.getCore().byId("container-ai.orchestration.taskfree---TaskRunNav");
+          return oTaskRunNavView ? oTaskRunNavView.getController() : null;
+        },
+
+        _waitForCacheLoad(sTaskRunId) {
+          let iRetryCount = 0;
+          const iMaxRetries = 300; // 最多等待30秒 (300 * 100ms)
+
+          const fnCheckCache = () => {
+            const oTaskRunNavController = this._getTaskRunNavController();
+
+            if (oTaskRunNavController && oTaskRunNavController.isCacheLoaded()) {
+              // 缓存已加载，获取数据
+              const oTaskData = oTaskRunNavController.getCachedTask(sTaskRunId);
+
+              if (oTaskData) {
+                this._renderTaskRunContent(oTaskData);
+              } else {
+                //MessageToast.show("No data found for Task Run");
+              }
+            } else if (iRetryCount < iMaxRetries) {
+              // 继续等待
+              iRetryCount++;
+              setTimeout(fnCheckCache, 100);
+            } else {
+              // 超时，显示错误
+              MessageToast.show("Failed to load Task Run data: Timeout waiting for data cache");
+            }
+          };
+
+          fnCheckCache();
+        },
+
+        _renderTaskRunContent(oTaskData) {
+          const oPage = this.byId("taskRunDetailPage");
           oPage.removeAllContent();
-          
-          var oBlockLayout = new BlockLayout({
+
+          let oBlockLayout = new BlockLayout({
             background: "Default"
           });
-          
+
           // Header row with task run info
-          var oHeaderRow = new BlockLayoutRow();
-          var oHeaderCell = new BlockLayoutCell({
+          let oHeaderRow = new BlockLayoutRow();
+          let oHeaderCell = new BlockLayoutCell({
             class: "sapUiNoContentPadding"
           });
-          
-          var oHeaderContent = new VBox({
+
+          const oHeaderContent = new VBox({
             items: [
               new Title({
                 text: oTaskData.name || "Unnamed Task Run",
@@ -125,20 +122,20 @@ sap.ui.define(
               })
             ]
           });
-          
+
           oHeaderCell.addContent(oHeaderContent);
           oHeaderRow.addContent(oHeaderCell);
           oBlockLayout.addContent(oHeaderRow);
-          
+
           // Task run overview
-          var oOverviewRow = new BlockLayoutRow();
-          var oOverviewCell = new BlockLayoutCell({
+          let oOverviewRow = new BlockLayoutRow();
+          let oOverviewCell = new BlockLayoutCell({
             backgroundColorSet: "ColorSet11",
             backgroundColorShade: "ShadeD",
             width: 2
           });
-          
-          var oOverviewContent = new VBox({
+
+          const oOverviewContent = new VBox({
             items: [
               new Icon({
                 src: "sap-icon://task",
@@ -154,21 +151,21 @@ sap.ui.define(
               })
             ]
           });
-          
+
           oOverviewCell.addContent(oOverviewContent);
           oOverviewRow.addContent(oOverviewCell);
-          
+
           // Statistics cell
-          var oStatsCell = new BlockLayoutCell({
+          let oStatsCell = new BlockLayoutCell({
             backgroundColorSet: "ColorSet5",
             backgroundColorShade: "ShadeB",
             width: 2
           });
-          
-          var iBotInstanceCount = (oTaskData.botInstances && oTaskData.botInstances.length) || 0;
-          var iContextNodeCount = (oTaskData.contextNodes && oTaskData.contextNodes.length) || 0;
-          
-          var oStatsContent = new VBox({
+
+          const iBotInstanceCount = (oTaskData.botInstances && oTaskData.botInstances.length) || 0;
+          const iContextNodeCount = (oTaskData.contextNodes && oTaskData.contextNodes.length) || 0;
+
+          const oStatsContent = new VBox({
             items: [
               new Icon({
                 src: "sap-icon://pie-chart",
@@ -187,28 +184,28 @@ sap.ui.define(
               })
             ]
           });
-          
+
           oStatsCell.addContent(oStatsContent);
           oOverviewRow.addContent(oStatsCell);
-          
+
           oBlockLayout.addContent(oOverviewRow);
-          
+
           oPage.addContent(oBlockLayout);
         },
 
-        _renderDefaultHome: function() {
-          var oPage = this.byId("taskRunDetailPage");
+        _renderDefaultHome() {
+          const oPage = this.byId("taskRunDetailPage");
           oPage.removeAllContent();
-          
-          var oBlockLayout = new BlockLayout({
+
+          let oBlockLayout = new BlockLayout({
             background: "Default"
           });
-          
+
           // Welcome row
-          var oWelcomeRow = new BlockLayoutRow();
-          var oWelcomeCell = new BlockLayoutCell();
-          
-          var oWelcomeContent = new VBox({
+          let oWelcomeRow = new BlockLayoutRow();
+          let oWelcomeCell = new BlockLayoutCell();
+
+          const oWelcomeContent = new VBox({
             items: [
               new Title({
                 text: "Task Run Management",
@@ -219,11 +216,11 @@ sap.ui.define(
               })
             ]
           });
-          
+
           oWelcomeCell.addContent(oWelcomeContent);
           oWelcomeRow.addContent(oWelcomeCell);
           oBlockLayout.addContent(oWelcomeRow);
-          
+
           oPage.addContent(oBlockLayout);
         }
       }
