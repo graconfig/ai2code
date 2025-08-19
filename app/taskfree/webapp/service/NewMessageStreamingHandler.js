@@ -39,7 +39,8 @@ sap.ui.define([
                 entity: {
                     role:this.sender ,
                     message: this.message.trim(),
-                    ragData: this.message.trim()
+                    ragData: this.message.trim(),
+                    createdAt: new Date(),
                     //botInstance_ID: this.bindingmodel.getObject().ID
                 },
                 atEnd: true,
@@ -96,7 +97,8 @@ sap.ui.define([
                 entity: {
                     role:this.sender ,
                     message: this.message.trim(),
-                    ragData: this.message.trim()
+                    ragData: this.message.trim(),
+                    createdAt: new Date()
                     //botInstance_ID: this.bindingmodel.getObject().ID
                     // content: "",
                     // createdBy: "AI",

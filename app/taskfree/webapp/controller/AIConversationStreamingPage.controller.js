@@ -197,6 +197,12 @@ sap.ui.define(
               bindingmodel: oBindingContext,
               servicemodel: this.getOwnerComponent().getModel(),
               onCreatedEmptyAssistantMessage: function (replyContext) {
+                    
+                    //初始化空值
+                    replyContext.setProperty("role", "assistant");
+                    replyContext.setProperty("message", "");
+                    replyContext.setProperty("createdAt", "");
+
                     // 设置Busy状态                        
                     const messageListItem = messageList.getItems().find(item =>
                         item.getBindingContext("local") === replyContext
@@ -208,21 +214,44 @@ sap.ui.define(
                 }.bind(this),
                 streamingCallback: function (chunk, replyContext) {
                     if (!chunk) return;
+                    
+                    //判断chunk内容包含 {"role":"assistant"}
+                    //为当前返回的消息内容，此时获取ID还有createdAt进行赋值
+                    var assistant_start = "{\"role\":\"assistant\"";  
+                    if( chunk.substring(0, 19) === assistant_start ){
 
-                    // replyContext.setProperty("content", `${replyContext.getProperty("content")}${chunk}`);
-                    replyContext.setProperty("message", chunk); 
+                      var assistantMessage = JSON.parse(chunk);
+                      replyContext.setProperty("ID", assistantMessage.ID); 
+                      replyContext.setProperty("createdAt", new Date());
 
-                    const messageListItem = messageList.getItems().find(item =>
-                        item.getBindingContext("local") === replyContext
-                    );
-                    if (messageListItem) {
-                        messageListItem.setLoading(false);
-                        messageListItem.invalidate();
+                      const messageListItem = messageList.getItems().find(item =>
+                            item.getBindingContext("local") === replyContext
+                        );
+                        if (messageListItem) {
+                            messageListItem.setLoading(false);
+                            messageListItem.invalidate();
+                        }
+
+                        // const listEndMarker = this._dialogWithStream.getContent()[0].getContent()[0].getItems()[1];
+                        // UIHelper.scrollToElement(listEndMarker.getDomRef());
+                        this._scheduleScrollToBottom();
+
+                    }else{
+                        // replyContext.setProperty("content", `${replyContext.getProperty("content")}${chunk}`);
+                        replyContext.setProperty("message", chunk); 
+
+                        const messageListItem = messageList.getItems().find(item =>
+                            item.getBindingContext("local") === replyContext
+                        );
+                        if (messageListItem) {
+                            messageListItem.setLoading(false);
+                            messageListItem.invalidate();
+                        }
+
+                        // const listEndMarker = this._dialogWithStream.getContent()[0].getContent()[0].getItems()[1];
+                        // UIHelper.scrollToElement(listEndMarker.getDomRef());
+                        this._scheduleScrollToBottom();
                     }
-
-                    // const listEndMarker = this._dialogWithStream.getContent()[0].getContent()[0].getItems()[1];
-                    // UIHelper.scrollToElement(listEndMarker.getDomRef());
-                    this._scheduleScrollToBottom();
                 }.bind(this),
                 onComplete: function () {
                     // 对话完成后恢复状态

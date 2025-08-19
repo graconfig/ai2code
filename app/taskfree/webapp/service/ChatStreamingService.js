@@ -229,6 +229,7 @@ sap.ui.define([
                                         }
                                         else if (content.substring(0, 19) === assistant_start) { 
                                             console.log("assistant_start:" +  assistant_start);
+                                            callback?.(content);
                                         }
                                         else{
                                             aiResponse += content;
