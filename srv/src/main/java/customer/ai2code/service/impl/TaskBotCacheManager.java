@@ -294,8 +294,9 @@ public class TaskBotCacheManager implements TaskBotDataService {
 
     private void removeSubtree(TaskBotNode node) {
         for (TaskBotNode child : node.getChildren()) {
-            nodeCache.remove(child.getId());
-            removeSubtree(child);
+            // nodeCache.remove(child.getId());
+            // removeSubtree(child);
+            removeNode(child.getId());
         }
     }
 

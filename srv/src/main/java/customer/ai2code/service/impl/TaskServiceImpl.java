@@ -357,4 +357,133 @@ public class TaskServiceImpl implements TaskService {
         contextService.upsertContextWithMainTaskId(taskId, "description", description, "STRING");
 
     }
+
+    @Override
+    public boolean deleteOriginalTasks(String botInstanceId) {
+        try {
+            // 获取Bot节点
+            TaskBotNode botNode = cacheManager.getBotInstanceNode(botInstanceId);
+            if (botNode == null) {
+                System.err.println("Bot节点不存在: " + botInstanceId);
+                return false;
+            }
+
+            // 递归删除Bot下的所有子任务及其子Bot
+            boolean deleteSuccess = deleteSubTasksRecursively(botNode);
+            
+            if (deleteSuccess) {
+                System.out.println("成功删除Bot及其子任务: " + botInstanceId);
+            } else {
+                System.err.println("删除Bot及其子任务时出现部分失败: " + botInstanceId);
+            }
+            
+            return deleteSuccess;
+            
+        } catch (Exception e) {
+            System.err.println("删除Bot及其子任务失败: " + botInstanceId + ", 错误: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 递归删除Bot节点下的所有子任务及其子Bot
+     */
+    private boolean deleteSubTasksRecursively(TaskBotNode botNode) {
+        boolean allSuccess = true;
+        
+        try {
+            // 获取Bot下的所有子任务
+            List<TaskBotNode> subTasks = cacheManager.getChildren(botNode);
+            
+            if (subTasks != null && !subTasks.isEmpty()) {
+                // 创建副本列表避免并发修改异常
+                List<TaskBotNode> subTasksCopy = new ArrayList<>(subTasks);
+                
+                for (TaskBotNode taskNode : subTasksCopy) {
+                    if (taskNode.getType() == TaskBotNode.NodeType.TASK) {
+                        try {
+                            // 递归删除任务下的所有Bot及其子任务
+                            boolean taskDeleteSuccess = deleteTaskAndBotsRecursively(taskNode);
+                            if (!taskDeleteSuccess) {
+                                allSuccess = false;
+                                System.err.println("删除子任务失败: " + taskNode.getId());
+                            }
+                        } catch (Exception e) {
+                            allSuccess = false;
+                            System.err.println("删除子任务时出错: " + taskNode.getId() + ", 错误: " + e.getMessage());
+                        }
+                    }
+                }
+            }
+            
+        } catch (Exception e) {
+            System.err.println("获取Bot子任务失败: " + botNode.getId() + ", 错误: " + e.getMessage());
+            allSuccess = false;
+        }
+        
+        return allSuccess;
+    }
+
+    /**
+     * 递归删除任务节点及其下的所有Bot和子任务
+     */
+    private boolean deleteTaskAndBotsRecursively(TaskBotNode taskNode) {
+        boolean allSuccess = true;
+        String taskId = taskNode.getId();
+        
+        try {
+            // 获取任务下的所有Bot
+            List<TaskBotNode> bots = cacheManager.getChildren(taskNode);
+            
+            if (bots != null && !bots.isEmpty()) {
+                // 创建副本列表避免并发修改异常
+                List<TaskBotNode> botsCopy = new ArrayList<>(bots);
+                
+                for (TaskBotNode botNode : botsCopy) {
+                    if (botNode.getType() == TaskBotNode.NodeType.BOT_INSTANCE) {
+                        try {
+                            // 递归删除Bot下的子任务
+                            boolean botDeleteSuccess = deleteSubTasksRecursively(botNode);
+                            if (!botDeleteSuccess) {
+                                allSuccess = false;
+                            }
+                            
+                            // 从数据库删除Bot实例
+                            boolean dbDeleteBot = genericCqnService.deleteBotInstance(botNode.getId());
+                            if (!dbDeleteBot) {
+                                allSuccess = false;
+                                System.err.println("从数据库删除Bot失败: " + botNode.getId());
+                            }
+                            
+                            // 从缓存中删除Bot节点
+                            cacheManager.removeNode(botNode.getId());
+                            System.out.println("已删除Bot: " + botNode.getId());
+                            
+                        } catch (Exception e) {
+                            allSuccess = false;
+                            System.err.println("删除Bot时出错: " + botNode.getId() + ", 错误: " + e.getMessage());
+                        }
+                    }
+                }
+            }
+            
+            // 从数据库删除任务
+            boolean dbDeleteTask = genericCqnService.deleteTask(taskId);
+            if (!dbDeleteTask) {
+                allSuccess = false;
+                System.err.println("从数据库删除任务失败: " + taskId);
+            }
+            
+            // 从缓存中删除任务节点
+            cacheManager.removeNode(taskId);
+            System.out.println("已删除任务: " + taskId);
+            
+        } catch (Exception e) {
+            allSuccess = false;
+            System.err.println("删除任务时出错: " + taskId + ", 错误: " + e.getMessage());
+        }
+        
+        return allSuccess;
+    }
 }

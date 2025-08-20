@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cds.ql.CQL;
 import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnSelect;
+import com.sap.cds.Result;
 import com.sap.cds.services.persistence.PersistenceService;
 
 import cds.gen.configservice.ConfigService;
@@ -947,6 +948,71 @@ public class GenericCqnService {
             throw new BusinessException("CDS视图上传失败543: " + e.getMessage(), e);
         }
 
+    }
+
+    /**
+     * 删除Bot实例及其相关数据
+     * 
+     * @param botInstanceId Bot实例ID
+     * @return 删除是否成功
+     */
+    public boolean deleteBotInstance(String botInstanceId) {
+        try {
+            // 删除Bot相关的消息
+            // Result result1 = persistenceService.run(
+            // Delete.from(BotMessages_.class)
+            // .where(b -> b.botInstance_ID().eq(botInstanceId))
+            // );
+            BotMessages botMessages = BotMessages.create();
+            botMessages.setBotInstanceId(botInstanceId);
+            Result result1 = entityService.delete(mainService, null, BotMessages_.class, botMessages, true);
+
+            // 删除Bot实例本身
+            BotInstances botInstances = BotInstances.create();
+            botInstances.setId(botInstanceId);
+            Result result2 = entityService.delete(mainService, null, BotInstances_.class, botInstances, true);
+
+            System.out.println("删除Bot实例 " + botInstanceId + ": " +
+                    "消息数=" + result1.rowCount() +
+                    ", Bot实例=" + result2.rowCount());
+
+            return result2.rowCount() > 0;
+
+        } catch (Exception e) {
+            System.err.println("删除Bot实例失败: " + botInstanceId + ", 错误: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 删除任务及其相关数据（但不删除子Bot，由调用方负责）
+     * 
+     * @param taskId 任务ID
+     * @return 删除是否成功
+     */
+    public boolean deleteTask(String taskId) {
+        try {
+            // // 删除任务相关的上下文节点
+            // Result result1 = persistenceService.run(
+            // Delete.from(ContextNodes_.class)
+            // .where(c -> c.task_ID().eq(taskId))
+            // );
+
+            Tasks task = Tasks.create();
+            task.setId(taskId);
+
+            // 删除任务本身
+            Result result2 = entityService.delete(mainService, null, Tasks_.class, task, true);
+
+            System.out.println("删除任务 " + taskId + ": " +
+                    "任务=" + result2.rowCount());
+
+            return result2.rowCount() > 0;
+
+        } catch (Exception e) {
+            System.err.println("删除任务失败: " + taskId + ", 错误: " + e.getMessage());
+            return false;
+        }
     }
 
 }
