@@ -164,7 +164,7 @@ sap.ui.define([
       const oCurrentRoute = oRouter.getHashChanger().getHash();
       const oRouteInfo = oRouter.getRouteInfoByHash(oCurrentRoute);
       const sContextNodeId = oRouteInfo && oRouteInfo.arguments && oRouteInfo.arguments.contextNodeId;
-      var sValue = oView.byId("idRichTextEditor").getValue();
+      var sValue = oView.byId("textAreaCodeEditor").getValue();
 
       if (!sContextNodeId) {
         MessageToast.show("ContextNodeId 不存在，无法保存");
