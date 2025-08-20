@@ -6,12 +6,14 @@ import customer.ai2code.model.ai.config.model.AIModel;
 import customer.ai2code.model.ai.config.model.DeepseekAIModel;
 import customer.ai2code.model.ai.config.model.SAPAICoreClaudeAI35Sonnet;
 import customer.ai2code.model.ai.config.model.SAPAICoreClaudeAI37Sonnet;
+import customer.ai2code.model.ai.config.model.SAPAICoreDeepSeek;
 import customer.ai2code.model.ai.config.model.SAPAICoreOpenAIGPT35;
 import customer.ai2code.model.ai.config.model.SAPAICoreOpenAIgpt4o;
 import customer.ai2code.service.AIService;
 import customer.ai2code.service.impl.DeepseekAIServiceImpl;
 import customer.ai2code.service.impl.GenericCqnService;
 import customer.ai2code.service.impl.SAClaudeAIServiceImpl;
+import customer.ai2code.service.impl.SAPDeepseekAIServiceImpl;
 import customer.ai2code.service.impl.SAPOpenAIServiceImpl;
 
 /**
@@ -25,16 +27,16 @@ public class AIModelResolver {
 
     private final SAPOpenAIServiceImpl sapOpenAIService;
     private final SAClaudeAIServiceImpl sapClaudeAIService;
-    private final DeepseekAIServiceImpl deepseekService;
+    private final SAPDeepseekAIServiceImpl sapDeepseekAIService;
 
     public AIModelResolver(GenericCqnService genericCqnService 
             , SAPOpenAIServiceImpl sapOpenAIService
             , SAClaudeAIServiceImpl sapClaudeAIService
-            , DeepseekAIServiceImpl deepseekService) {
+            , SAPDeepseekAIServiceImpl sapDeepseekAIService) {
         this.genericCqnService = genericCqnService;
         this.sapOpenAIService = sapOpenAIService;
         this.sapClaudeAIService = sapClaudeAIService;
-        this.deepseekService = deepseekService;
+        this.sapDeepseekAIService = sapDeepseekAIService;
     }
 
 
@@ -102,8 +104,8 @@ public class AIModelResolver {
                     // 其他Claude模型...
                 }
                 break;
-            case "DEEPSEEK":
-                return new DeepseekAIModel(modelConfigs);
+            case "SAPAICore-DeepSeek":
+                return new SAPAICoreDeepSeek(modelConfigs);
             default:
                 break;
         }
@@ -133,8 +135,8 @@ public class AIModelResolver {
                 return sapOpenAIService;
             case "SAPAICore-Claude":
                 return sapClaudeAIService;
-            case "DEEPSEEK":
-                return deepseekService;
+            case "SAPAICore-DeepSeek":
+                return sapDeepseekAIService;
             default:
                 return sapOpenAIService; // 默认返回OpenAI服务
         }

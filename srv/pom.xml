@@ -105,10 +105,10 @@
 			<artifactId>cds-feature-remote-odata</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
+			<groupId>com.openai</groupId>
+			<artifactId>openai-java</artifactId>
+			<version>1.6.0</version>
 		</dependency>
 	</dependencies>
 	<build>
