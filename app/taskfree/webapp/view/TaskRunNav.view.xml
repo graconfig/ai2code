@@ -1,14 +1,14 @@
 <mvc:View
-    id="TaskRunNav"
-    controllerName="ai.orchestration.taskfree.controller.TaskRunNav"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:l="sap.ui.layout"
+	id="TaskRunNav"
+	controllerName="ai.orchestration.taskfree.controller.TaskRunNav"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:l="sap.ui.layout"
 	xmlns:tnt="sap.tnt"
-    xmlns:task="ai.orchestration.taskfree.view.blocks"
-    height="100%">
+	xmlns:task="ai.orchestration.taskfree.view.blocks"
+	height="100%">
 	<tnt:ToolPage
-			id="navToolPage">
+		id="navToolPage">
 		<tnt:header>
 			<tnt:ToolHeader id="navToolHeader">
 				<!-- <Button
@@ -28,15 +28,15 @@
 					press=".onHomeButtonPress"
 					tooltip="{i18n>homeButtonTooltip}">
 					<layoutData>
-						<OverflowToolbarLayoutData id="navHomeLayoutData" priority="High"/>
+						<OverflowToolbarLayoutData id="navHomeLayoutData" priority="High" />
 					</layoutData>
 				</Button>
-				<ToolbarSpacer id="navToolbarSpacer1"/>
-				<Title 
+				<ToolbarSpacer id="navToolbarSpacer1" />
+				<Title
 					id="navTitle"
 					text="{i18n>appTitle}"
-					level="H2"/>
-				<ToolbarSpacer id="navToolbarSpacer2"/>
+					level="H2" />
+				<ToolbarSpacer id="navToolbarSpacer2" />
 				<Button
 					id="navErrorButton"
 					icon="sap-icon://message-popup"
@@ -45,7 +45,8 @@
 					press=".onMessagePopoverPress"
 					tooltip="{i18n>errorButtonTooltip}">
 					<layoutData>
-						<OverflowToolbarLayoutData id="navErrorLayoutData" closeOverflowOnInteraction="false"/>
+						<OverflowToolbarLayoutData id="navErrorLayoutData"
+							closeOverflowOnInteraction="false" />
 					</layoutData>
 				</Button>
 				<Button
@@ -56,7 +57,8 @@
 					press=".onNotificationPress"
 					tooltip="{i18n>notificationButtonTooltip}">
 					<layoutData>
-						<OverflowToolbarLayoutData id="navNotificationLayoutData" closeOverflowOnInteraction="false"/>
+						<OverflowToolbarLayoutData id="navNotificationLayoutData"
+							closeOverflowOnInteraction="false" />
 					</layoutData>
 				</Button>
 				<Button
@@ -65,75 +67,77 @@
 					type="Transparent"
 					press=".onUserNamePress">
 					<layoutData>
-						<OverflowToolbarLayoutData id="navUserLayoutData" closeOverflowOnInteraction="false"/>
+						<OverflowToolbarLayoutData id="navUserLayoutData"
+							closeOverflowOnInteraction="false" />
 					</layoutData>
 				</Button>
 			</tnt:ToolHeader>
 		</tnt:header>
 	</tnt:ToolPage>
-    <Page
-        id="page"
-        showHeader="false"
-        class="sapUiContentPadding"
-    > 
-    <SplitContainer
-        id="SplitContDemo"
-        initialDetail="detail"
-        initialMaster="master"
-    >
-        <masterPages>
-            <Page
-                id="master2"
-                title="Master 2"
-                backgroundDesign="List"
-                showNavButton="true"
-                navButtonPress=".onPressMasterBack"
-            >
-			<l:FixFlex id="idGenFixFlex" class="fixFlexVertical" fixContentSize="80%" >
-			    <l:fixContent> 
-				<ScrollContainer id="_IDGenScrollContainer"
-					height="100%"
-					width="100%"
-					vertical="true"
-					focusable="true">
-					<Tree
-						id="idItemsNavigationTree"
-						itemPress=".onNavigationItemSelect"
-						items="{path: 'side>/navigation', parameters: {arrayNames:['items']}}">
-						<StandardTreeItem 
-							id="idGenStandardTreeItem" 
-							title="{side>text}" 
-							icon="{side>icon}"
-							type="Navigation"/>
-					</Tree>
-					</ScrollContainer>
-				</l:fixContent>
-				<l:flexContent>
-                 <tnt:NavigationList id="navFixedNavigationList"
-						items="{
+	<Page
+		id="page"
+		showHeader="false"
+		class="sapUiContentPadding"
+	>
+		<SplitContainer
+			id="SplitContDemo"
+			initialDetail="detail"
+			initialMaster="master"
+		>
+			<masterPages>
+				<Page
+					id="master2"
+					title="Master 2"
+					backgroundDesign="List"
+					showNavButton="true"
+					navButtonPress=".onPressMasterBack"
+				>
+					<l:FixFlex id="idGenFixFlex" class="fixFlexVertical" fixContentSize="80%">
+						<l:fixContent>
+							<ScrollContainer id="_IDGenScrollContainer"
+								height="100%"
+								width="100%"
+								vertical="true"
+								focusable="true">
+								<Tree
+									id="idItemsNavigationTree"
+									mode="SingleSelectMaster"
+									itemPress=".onNavigationItemSelect"
+									items="{path: 'side>/navigation', parameters: {arrayNames:['items']}}">
+									<StandardTreeItem
+										id="idGenStandardTreeItem"
+										title="{side>text}"
+										icon="{side>icon}"
+										type="Navigation" />
+								</Tree>
+							</ScrollContainer>
+						</l:fixContent>
+						<l:flexContent>
+							<tnt:NavigationList id="navFixedNavigationList"
+								items="{
 							path: 'side>/fixedNavigation',
 							templateShareable: false
 						}">
-						<tnt:NavigationListItem id="navFixedNavigationListItem"
-							text="{side>text}"
-							icon="{side>icon}"
-							key="{side>key}"
-							select=".onFixedNavigationItemSelect">
-						</tnt:NavigationListItem>
-					</tnt:NavigationList>
-				</l:flexContent>
-			</l:FixFlex>
-            </Page>
-        </masterPages>
-        <detailPages>
-			<Page
-				id="detail"
-				title="Detail"
-				showNavButton="true"
+								<tnt:NavigationListItem id="navFixedNavigationListItem"
+									text="{side>text}"
+									icon="{side>icon}"
+									key="{side>key}"
+									select=".onFixedNavigationItemSelect">
+								</tnt:NavigationListItem>
+							</tnt:NavigationList>
+						</l:flexContent>
+					</l:FixFlex>
+				</Page>
+			</masterPages>
+			<detailPages>
+				<Page
+					id="detail"
+					title="Detail"
+					showNavButton="true"
 				>
-				<App id="navMainContents"/>
-            </Page>
-        </detailPages>
-    </SplitContainer>
+					<App id="navMainContents" />
+				</Page>
+			</detailPages>
+		</SplitContainer>
 	</Page>
 </mvc:View> 

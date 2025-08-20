@@ -126,7 +126,6 @@
                             showIcon="false"
                             growing="true"
                             placeholder="Type your message here..."
-                            maxLength="2000"
                         />
                     </OverflowToolbar>
                 </footer>

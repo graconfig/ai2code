@@ -157,7 +157,42 @@ sap.ui.define([
         MessageToast.show("Error loading BotInstance: " + (error.message || error.toString()));
       }
     },
+    onSave: async function () {
+      var oView = this.getView();
+      var oModel = oView.getModel();
+      const oRouter = this.getOwnerComponent().getRouter();
+      const oCurrentRoute = oRouter.getHashChanger().getHash();
+      const oRouteInfo = oRouter.getRouteInfoByHash(oCurrentRoute);
+      const sContextNodeId = oRouteInfo && oRouteInfo.arguments && oRouteInfo.arguments.contextNodeId;
+      var sValue = oView.byId("textAreaCodeEditor").getValue();
 
+      if (!sContextNodeId) {
+        MessageToast.show("ContextNodeId 不存在，无法保存");
+        return;
+      }
+
+      oView.setBusy(true);
+      var sPath = "/ContextNodes(" + sContextNodeId + ")";
+
+      try {
+        // 1. 绑定上下文
+        var oBinding = oModel.bindContext(sPath, null, { $$updateGroupId: "saveGroup" });
+        await oBinding.requestObject(); // 确保已加载
+
+        // 2. 获取 context 并设置属性
+        var oContext = oBinding.getBoundContext();
+        oContext.setProperty("value", sValue);
+
+        // 3. 提交更改
+        await oModel.submitBatch("saveGroup");
+
+        MessageToast.show("保存成功");
+      } catch (e) {
+        MessageToast.show("保存失败");
+      } finally {
+        oView.setBusy(false);
+      }
+    },
     onExit() {
       const oViewModel = this.getView().getModel("viewModel");
       oViewModel?.setProperty("/value", "");

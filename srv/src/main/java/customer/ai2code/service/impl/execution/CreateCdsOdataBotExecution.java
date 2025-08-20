@@ -57,8 +57,8 @@ public class CreateCdsOdataBotExecution implements BotExecution {
         AutoActiveCDSContextNew.setCqn(select);
         AutoActiveCDSContextNew.setProjname(AutoActiveCDSContext.getProjname());
         AutoActiveCDSContextNew.setProjdesc(AutoActiveCDSContext.getProjdesc());
-        AutoActiveCDSContextNew.setWithadditionalsave(AutoActiveCDSContext.getWithadditionalsave());
-        AutoActiveCDSContextNew.setWithdraft(AutoActiveCDSContext.getWithdraft());
+        // AutoActiveCDSContextNew.setWithadditionalsave(AutoActiveCDSContext.getWithadditionalsave());
+        // AutoActiveCDSContextNew.setWithdraft(AutoActiveCDSContext.getWithdraft());
         Collection<ZsgenDdlsSourceList> Sources = new ArrayList<>();
         AutoActiveCDSContext.getSource().forEach(
                 source -> {
@@ -74,7 +74,6 @@ public class CreateCdsOdataBotExecution implements BotExecution {
 
         AutoActiveCDSContextNew.setTrkorr(AutoActiveCDSContext.getTrkorr());
         AutoActiveCDSContextNew.setDevclass(AutoActiveCDSContext.getDevclass());
-
 
         String Result = "";// 返回结果
         // 打印CDS
@@ -125,11 +124,13 @@ public class CreateCdsOdataBotExecution implements BotExecution {
 
             // contextService.upsertContext(botInstanceId, REFERENCE, , type)
             try {
-                contextService.updateAdditionInfo(taskBotCacheManager.getCachedBot(botInstanceId), REFERENCE, objectMapper.writeValueAsString(item));
+                contextService.updateAdditionInfo(taskBotCacheManager.getCachedBot(botInstanceId), REFERENCE,
+                        objectMapper.writeValueAsString(item));
             } catch (JsonProcessingException e) {
                 // TODO Auto-generated catch block
                 // e.printStackTrace();
-                contextService.updateAdditionInfo(taskBotCacheManager.getCachedBot(botInstanceId), REFERENCE, e.getMessage());
+                contextService.updateAdditionInfo(taskBotCacheManager.getCachedBot(botInstanceId), REFERENCE,
+                        e.getMessage());
             }
 
         }
