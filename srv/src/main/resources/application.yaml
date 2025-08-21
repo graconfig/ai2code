@@ -1,4 +1,3 @@
----
 spring:
   web:
     resources:
@@ -6,135 +5,80 @@ spring:
   config:
     activate:
       on-profile: default
-  # sql:
-  #   init:
-  #     platform: h2
+  sql:
+    init:
+      platform: h2
 cds:
-  # data-source:
-  #   auto-config:
-  #     enabled: false
+  data-source:
+    auto-config:
+      enabled: false
   remote:
     services:
-      '[com.sap.gateway.srvd.zsrvd_genclas.v0001]':
-        destination:
-          name: S4
-        type: odata-v4
-        http:
-          service: zsrvd_genclas/0001
-          csrf:
-            enabled: true
-          suffix: /sap/opu/odata4/sap/zsrvb_genclas/srvd/sap
-        model: com.sap.gateway.srvd.zsrvd_genclas.v0001
-
       '[com.sap.gateway.srvd.zsrvd_gentabl.v0001]':
         destination:
           name: S4
-        type: odata-v4
         http:
           service: zsrvd_gentabl/0001
           csrf:
             enabled: true
           suffix: /sap/opu/odata4/sap/zsrvb_gentabl/srvd/sap
         model: com.sap.gateway.srvd.zsrvd_gentabl.v0001
-
+        type: odata-v4
+      '[com.sap.gateway.srvd.zsrvd_genclas.v0001]':
+        destination:
+          name: S4
+        http:
+          service: zsrvd_genclas/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_genclas/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_genclas.v0001
+        type: odata-v4
+      '[com.sap.gateway.srvd.zsrvd_genclas_seo.v0001]':
+        destination:
+          name: com.sap.gateway.srvd.zsrvd_genclas_seo.v0001
+        http:
+          service: zsrvd_genclas_seo/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_genclas_seo/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_genclas_seo.v0001
+        type: odata-v4
       '[com.sap.gateway.srvd.zsrvd_gensrvd.v0001]':
         destination:
           name: S4
-        type: odata-v4
         http:
           service: zsrvd_gensrvd/0001
           csrf:
             enabled: true
           suffix: /sap/opu/odata4/sap/zsrvb_gensrvd/srvd/sap
         model: com.sap.gateway.srvd.zsrvd_gensrvd.v0001
-
+        type: odata-v4
       '[com.sap.gateway.srvd.zsrvd_genddls.v0001]':
         destination:
           name: S4
-        type: odata-v4
         http:
           service: zsrvd_genddls/0001
           csrf:
             enabled: true
           suffix: /sap/opu/odata4/sap/zsrvb_genddls/srvd/sap
         model: com.sap.gateway.srvd.zsrvd_genddls.v0001
-
+        type: odata-v4
       '[com.sap.gateway.srvd.zsrvd_genbdef.v0001]':
         destination:
           name: S4
-        type: odata-v4
         http:
           service: zsrvd_genbdef/0001
           csrf:
             enabled: true
           suffix: /sap/opu/odata4/sap/zsrvb_genbdef/srvd/sap
         model: com.sap.gateway.srvd.zsrvd_genbdef.v0001
-
-      # '[zsrvd_genclas]':
-      #   destination:
-      #     name: zsrvd_genclas
-      #   http:
-      #     service: zsrvd_genclas/0001
-      #     csrf:
-      #       enabled: true
-      #     suffix: /sap/opu/odata4/sap/zsrvb_genclas/srvd/sap
-      #   model: zsrvd_genclas
-      #   type: odata-v4
-      # '[zsrvd_genddls]':
-      #   destination:
-      #     name: zsrvd_genddls
-      #   http:
-      #     service: zsrvd_genddls/0001
-      #     csrf:
-      #       enabled: true
-      #     suffix: /sap/opu/odata4/sap/zsrvb_genddls/srvd/sap
-      #   model: zsrvd_genddls
-      #   type: odata-v4
-      # '[zsrvd_gentabl]':
-      #   destination:
-      #     name: zsrvd_gentabl
-      #   http:
-      #     service: zsrvd_gentabl/0001
-      #     csrf:
-      #       enabled: true
-      #     suffix: /sap/opu/odata4/sap/zsrvb_gentabl/srvd/sap
-      #   model: zsrvd_gentabl
-      #   type: odata-v4
-      # '[zsrvd_genbdef]':
-      #   destination:
-      #     name: zsrvd_genbdef
-      #   http:
-      #     service: zsrvd_genbdef/0001
-      #     csrf:
-      #       enabled: true
-      #     suffix: /sap/opu/odata4/sap/zsrvb_genbdef/srvd/sap
-      #   model: zsrvd_genbdef
-      #   type: odata-v4
-      # '[zsrvd_gensrvd]':
-      #   destination:
-      #     name: zsrvd_gensrvd
-      #   http:
-      #     service: zsrvd_gensrvd/0001
-      #     csrf:
-      #       enabled: true
-      #     suffix: /sap/opu/odata4/sap/zsrvb_gensrvd/srvd/sap
-      #   model: zsrvd_gensrvd
-      #   type: odata-v4
-
+        type: odata-v4
   sql:
     hana:
       search:
         fuzzinessThreshold: 0.9
         fuzzy: true
----
-spring:
-  config.activate.on-profile: dev
-  sql.init.platform: h2
-  web.resources.static-locations: file:./app/
-cds:
-  data-source.auto-config.enabled: false
-
----
 management:
   endpoint:
     health:
