@@ -288,15 +288,19 @@ sap.ui.define(
 
         onBtnAdoptPress(event) {
           event.getSource().setBusy(true);
-          const context = event.getSource().getBindingContext();
+          // const context = event.getSource().getBindingContext();
+          const jsonContext = event.getSource().getBindingContext("local");
 
-          if (!context) {
+          if (!jsonContext) {
             MessageToast.show("No message context available");
             event.getSource().setBusy(false);
             return;
           }
 
-          const contextBinding = this.getView().getModel().bindContext("MainService.adopt(...)", context);
+          // Create OData context for adoption
+          const messageContext = this.getView().getModel().bindContext(`/BotMessages(${jsonContext.getProperty("ID")})`);
+
+          const contextBinding = this.getView().getModel().bindContext("MainService.adopt(...)", messageContext);
 
           contextBinding.invoke()
             .then((result) => {
