@@ -22,7 +22,15 @@ sap.ui.define(
 
           this._currentBotInstanceId = null;
         },
-
+        onAfterRendering: function() {
+          var oInput = this.byId("aiPageMessageInput");
+          if (oInput) {
+            oInput.$().on("keydown", function(e) {
+              // 只让输入框自己处理方向键
+              e.stopPropagation();
+            });
+          }
+        },
         _onRouteMatched(oEvent) {
           const oArguments = oEvent.getParameter("arguments");
           const sBotInstanceId = oArguments.botInstanceId;
@@ -62,6 +70,7 @@ sap.ui.define(
                 });
                 const localModel = this.getView().getModel("local");
                 localModel.setProperty("/messages", messages);
+                 this._scheduleScrollToBottom();
             });
         },
 
@@ -262,6 +271,7 @@ sap.ui.define(
                     oBindingContext.refresh();
                     // refresh current context of the chat list
                     this._triggerChatListRefresh(oBindingContext);
+                    this._scheduleScrollToBottom();
                 }.bind(this)
             });
 
@@ -327,23 +337,30 @@ sap.ui.define(
             this._scrollToBottom();
           }, 100);
         },
-
         _scrollToBottom() {
-          try {
-            const oMessageList = this.getView().byId("aiPageMessageList");
-            if (oMessageList && oMessageList.getItems().length > 0) {
-              const oLastItem = oMessageList.getItems()[oMessageList.getItems().length - 1];
-              if (oLastItem) {
-                oLastItem.getDomRef()?.scrollIntoView({
-                  behavior: "smooth",
-                  block: "end"
-                });
+              try {
+                const oMessageList = this.getView().byId("aiPageMessageList");
+                if (oMessageList && oMessageList.getItems().length > 0) {
+                  const oLastItem = oMessageList.getItems()[oMessageList.getItems().length - 1];
+                  if (oLastItem) {
+                    // 增加延迟以确保元素已准备好
+                    setTimeout(() => {
+                      oLastItem.getDomRef()?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "end",
+                        inline: "nearest"
+                      });
+                    }, 100);
+                  }
+                }
+                
+                // 滚动到列表末尾,通过此方法实现，则头部会缺少一块
+                // const aiPageListEndMarker = this.getView().byId("aiPageListEndMarker");
+                // aiPageListEndMarker.getDomRef()?.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
+              } catch (error) {
+                // Silent error handling
               }
-            }
-          } catch (error) {
-            // Silent error handling
-          }
-        },
+            },
 
         onGotoContextPress() {
           const oBindingContext = this.getView().getBindingContext();
