@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.cds.Result;
 import com.sap.cds.ql.CQL;
 import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnSelect;
@@ -175,6 +176,29 @@ public class GenericCqnService {
                 .where(b -> b.taskType_ID().eq(taskTypeId))
                 .orderBy(b -> b.sequence().asc());
         return entityService.selectList(configService, select, BotTypes.class);
+    }
+
+    // ========== Count 查询方法 ==========
+
+    /**
+     * 获取指定任务下的Bot实例数量
+     */
+    public long getBotInstanceCountByTaskId(String taskId) {
+        var select = Select.from(BotInstances_.class).columns(c -> CQL.count().as("count"))
+                .where(b -> b.task_ID().eq(taskId));
+        Result result = entityService.select(mainService, select);
+        return (long) result.first().get().get("count");
+    }
+
+    /**
+     * 获取指定Bot实例下的子任务数量
+     */
+    public long getTaskCountByBotInstanceId(String botInstanceId) {
+        var select = Select.from(Tasks_.class).columns(c -> CQL.count().as("count"))
+                .where(t -> t.botInstance_ID().eq(botInstanceId));
+        // return persistenceService.run(select).rowCount();
+        Result result = entityService.select(mainService, select);
+        return (long) result.first().get().get("count");
     }
 
     // ========== Task 查询方法 ==========
