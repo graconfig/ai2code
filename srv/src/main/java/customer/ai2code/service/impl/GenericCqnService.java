@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sap.cds.Result;
 import com.sap.cds.ql.CQL;
 import com.sap.cds.ql.Select;
 import com.sap.cds.ql.cqn.CqnSelect;
@@ -177,6 +178,29 @@ public class GenericCqnService {
         return entityService.selectList(configService, select, BotTypes.class);
     }
 
+    // ========== Count 查询方法 ==========
+
+    /**
+     * 获取指定任务下的Bot实例数量
+     */
+    public long getBotInstanceCountByTaskId(String taskId) {
+        var select = Select.from(BotInstances_.class).columns(c -> CQL.count().as("count"))
+                .where(b -> b.task_ID().eq(taskId));
+        Result result = entityService.select(mainService, select);
+        return (long) result.first().get().get("count");
+    }
+
+    /**
+     * 获取指定Bot实例下的子任务数量
+     */
+    public long getTaskCountByBotInstanceId(String botInstanceId) {
+        var select = Select.from(Tasks_.class).columns(c -> CQL.count().as("count"))
+                .where(t -> t.botInstance_ID().eq(botInstanceId));
+        // return persistenceService.run(select).rowCount();
+        Result result = entityService.select(mainService, select);
+        return (long) result.first().get().get("count");
+    }
+
     // ========== Task 查询方法 ==========
 
     public Tasks getTaskById(String taskId) {
@@ -265,7 +289,7 @@ public class GenericCqnService {
         // 使用缓存管理器获取主任务ID
         // String mainTaskId = cacheManager.getMainTaskId(botInstanceId);
         // if (mainTaskId != null) {
-        //     return mainTaskId;
+        // return mainTaskId;
         // }
 
         // 如果缓存中没有，执行原有逻辑
@@ -417,9 +441,9 @@ public class GenericCqnService {
     /**
      * 根据BotType ID查询所有PromptTexts
      */
-    public List<PromptTexts> getPromptTextsByBotType(String botTypeId) {
+    public List<PromptTexts> getPromptTextsByBotType(String botTypeId, Locale locale) {
         var select = Select.from(PromptTexts_.class)
-                .where(p -> p.botType_ID().eq(botTypeId));
+                .where(p -> p.botType_ID().eq(botTypeId).and(p.lang_code().eq(locale.getLanguage())));
         // .orderBy(p -> p.sequence().asc());
         return entityService.selectList(configService, select, PromptTexts.class);
     }

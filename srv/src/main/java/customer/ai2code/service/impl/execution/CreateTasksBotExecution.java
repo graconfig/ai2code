@@ -41,8 +41,9 @@ public class CreateTasksBotExecution implements BotExecution {
         List<String> tasks = new ArrayList<>();
         // throw new BusinessException("Unimplemented method 'execute'");
         // 调用BotService.createTaskWithBots(param);
-        if (taskCreationParams == null || taskCreationParams.isEmpty()) {
-            throw new BusinessException("Task creation parameters cannot be null or empty");
+        // if (taskCreationParams == null || taskCreationParams.isEmpty()) {
+        if (taskCreationParams == null ) {
+            throw new BusinessException("Task creation parameters cannot be null");
         }
         if (botInstanceId == null || botInstanceId.isEmpty()) {
             throw new BusinessException("Bot instance ID cannot be null or empty");

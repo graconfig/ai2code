@@ -1,6 +1,6 @@
 {
  "meta": {
-  "creator": "cds-dk 8.9.3"
+  "creator": "cds-dk 9.1.1"
  },
  "$version": "2.0",
  "definitions": {
@@ -428,14 +428,6 @@
      "length": 40,
      "notNull": true
     },
-    "Withdraft": {
-     "type": "cds.Boolean",
-     "notNull": true
-    },
-    "Withadditionalsave": {
-     "type": "cds.Boolean",
-     "notNull": true
-    },
     "Devclass": {
      "type": "cds.String",
      "length": 30,
@@ -612,14 +604,6 @@
       "PROJDESC": {
        "type": "cds.String",
        "length": 40,
-       "notNull": true
-      },
-      "WITHDRAFT": {
-       "type": "cds.Boolean",
-       "notNull": true
-      },
-      "WITHADDITIONALSAVE": {
-       "type": "cds.Boolean",
        "notNull": true
       },
       "DEVCLASS": {

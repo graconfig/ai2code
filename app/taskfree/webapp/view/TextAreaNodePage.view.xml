@@ -16,6 +16,11 @@
                             type="Emphasized"
                             press="onReturnToConversation"
                             visible="{viewModel>/showReturnButton}"/>
+					<Button id="textAreaNodeSaveBtn"
+						text="Save"
+						type="Accept"
+						press="onSave"
+						visible="true" />
                 </contentRight>
             </Bar>
         </customHeader>
@@ -27,8 +32,13 @@
                 syntaxHints="true"
                 type="{viewModel>/type}"
                 value="{viewModel>/value}"
-                editable="false"
-                height="95%" />
+                height="60%" />
+        </content>
+        <content>
+            <Text
+                text="{viewModel>/applicationInfo}"
+                wrapping="true"
+                class="sapUiSmallMargin"/>
         </content>
     </Page>
 </mvc:View>
