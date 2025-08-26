@@ -10,7 +10,7 @@ import com.sap.cds.services.ServiceException;
 import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataResponseException;
 import cds.gen.com.sap.gateway.srvd.zsrvd_genclas_seo.v0001.V0001;
 import cds.gen.com.sap.gateway.srvd.zsrvd_genclas_seo.v0001.ZtgenclasL;
-import cds.gen.com.sap.gateway.srvd.zsrvd_genclas_seo.v0001.ZtgenclasL_;
+import cds.gen.com.sap.gateway.srvd.zsrvd_genclas_seo.v0001.ZcGenclasGlobal_;
 import cds.gen.com.sap.gateway.srvd.zsrvd_genclas_seo.v0001.ZcGenclasGlobalAutoActiveCLASContext;
 import customer.ai2code.model.execution.annotation.BotExecutor;
 import customer.ai2code.model.execution.annotation.ExecuteMethod;
@@ -28,9 +28,9 @@ public class CreateGenclasseoOdataBotExecution implements BotExecution {
     private final TaskBotCacheManager taskBotCacheManager;
 
     public CreateGenclasseoOdataBotExecution(ContextService contextService,
-                                             V0001 zsrvdGenclasseo,
-                                             ObjectMapper objectMapper,
-                                             TaskBotCacheManager taskBotCacheManager) {
+            V0001 zsrvdGenclasseo,
+            ObjectMapper objectMapper,
+            TaskBotCacheManager taskBotCacheManager) {
         this.contextService = contextService;
         this.zsrvdGenclasseo = zsrvdGenclasseo;
         this.objectMapper = objectMapper;
@@ -40,11 +40,11 @@ public class CreateGenclasseoOdataBotExecution implements BotExecution {
     @ExecuteMethod
     public String execute(
             @ExecuteParameter(name = "botInstanceId", description = "Bot Instance ID") String botInstanceId,
-            @ExecuteParameter(name = "autoActiveCLASSEOContext", description = "Auto Active CLAS Context") ZcGenclasGlobalAutoActiveCLASContext autoActiveCLASContext) {
+            @ExecuteParameter(name = "ZcGenclasGlobalAutoActiveCLASContext", description = "ZcGenclasGlobalAutoActiveCLASContext") ZcGenclasGlobalAutoActiveCLASContext autoActiveCLASContext) {
 
         // 1. 创建新的上下文并复制参数
         ZcGenclasGlobalAutoActiveCLASContext newContext = ZcGenclasGlobalAutoActiveCLASContext.create();
-        CqnSelect select = Select.from(ZtgenclasL_.CDS_NAME);
+        CqnSelect select = (CqnSelect) Select.from(ZcGenclasGlobal_.CDS_NAME);
         newContext.setCqn(select);
 
         // 复制基础参数
@@ -54,7 +54,7 @@ public class CreateGenclasseoOdataBotExecution implements BotExecution {
         newContext.setDevclass(autoActiveCLASContext.getDevclass());
         newContext.setTrkorr(autoActiveCLASContext.getTrkorr());
         newContext.setReference(autoActiveCLASContext.getReference());
-        //newContext.setSourcecode(autoActiveCLASContext);
+        newContext.setSourcecode(autoActiveCLASContext.getSourcecode());
 
         // 2. 调用OData服务
         String result = "";
@@ -62,8 +62,18 @@ public class CreateGenclasseoOdataBotExecution implements BotExecution {
             zsrvdGenclasseo.emit(newContext);
         } catch (ServiceException e) {
             // 处理OData异常
-            ODataResponseException odataEx = (ODataResponseException) e.getCause().getCause();
-            result = String.format("Error (HTTP %d): %s", odataEx.getHttpCode(), odataEx.getHttpBody());
+            // ODataResponseException odataEx = (ODataResponseException)
+            // e.getCause().getCause();
+            // result = String.format("Error (HTTP %d): %s", odataEx.getHttpCode(),
+            // odataEx.getHttpBody());
+            // return result;
+
+            ODataResponseException odataexce = (ODataResponseException) e.getCause().getCause();
+            int statusCode = odataexce.getHttpCode();
+            String errorMessage = (String) odataexce.getHttpBody().getOrElse("");
+            System.err.println("statusCode=" + statusCode);
+            System.err.println("errorMessage=" + errorMessage);
+            result = errorMessage;
             return result;
         }
 
@@ -80,8 +90,7 @@ public class CreateGenclasseoOdataBotExecution implements BotExecution {
                 contextService.updateAdditionInfo(
                         taskBotCacheManager.getCachedBot(botInstanceId),
                         item.getReference(),
-                        objectMapper.writeValueAsString(item)
-                );
+                        objectMapper.writeValueAsString(item));
             }
         } catch (JsonProcessingException e) {
             result = "Failed to process results: " + e.getMessage();
