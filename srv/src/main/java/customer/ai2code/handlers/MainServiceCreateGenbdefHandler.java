@@ -33,7 +33,7 @@ import customer.ai2code.service.impl.execution.CreateGenBdefOdataBotExecution;
 public class MainServiceCreateGenbdefHandler implements EventHandler {
 
     private final V0001 zsrvdGenbdef;
-    private  CreateGenBdefOdataBotExecution genbdefExecution = null;
+    private CreateGenBdefOdataBotExecution genbdefExecution = null;
     private final TaskBotCacheManager taskBotCacheManager;
 
     public MainServiceCreateGenbdefHandler(

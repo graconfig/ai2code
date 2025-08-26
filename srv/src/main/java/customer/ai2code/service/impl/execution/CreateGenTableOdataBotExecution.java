@@ -71,7 +71,7 @@ public class CreateGenTableOdataBotExecution implements BotExecution {
 
 
         Collection<ZsgenTablFieldList> Sources = new ArrayList<>();
-        zcGentablTAutoActiveTableContext.getFields().forEach(
+        AutoActiveContext.getFields().forEach(
                 source -> {
                     ZsgenTablFieldList sourceNew = ZsgenTablFieldList.create();
                     sourceNew.setFieldname(source.getFieldname());
