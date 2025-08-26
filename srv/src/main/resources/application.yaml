@@ -36,7 +36,7 @@ cds:
         type: odata-v4
       '[com.sap.gateway.srvd.zsrvd_genclas_seo.v0001]':
         destination:
-          name: com.sap.gateway.srvd.zsrvd_genclas_seo.v0001
+          name: S4
         http:
           service: zsrvd_genclas_seo/0001
           csrf:
