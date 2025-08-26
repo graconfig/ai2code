@@ -55,7 +55,7 @@ public class CreateGenTableOdataBotExecution implements BotExecution {
     @ExecuteMethod
     public String execute(
             @ExecuteParameter(name = "botInstanceId", description = "Bot Instance") String botInstanceId,
-            @ExecuteParameter(description = "zcGentablTAutoActiveTableContext", name = "Auto Active Table Context") ZcGentablTAutoActiveTableContext AutoActiveContext) {
+            @ExecuteParameter(description = "Auto Active Table Context", name = "AutoActiveContext") ZcGentablTAutoActiveTableContext AutoActiveContext) {
     
         ZcGentablTAutoActiveTableContext zcGentablTAutoActiveTableContext = ZcGentablTAutoActiveTableContext.create();
         CqnSelect select = (CqnSelect) Select.from(ZcGentablT_.CDS_NAME);

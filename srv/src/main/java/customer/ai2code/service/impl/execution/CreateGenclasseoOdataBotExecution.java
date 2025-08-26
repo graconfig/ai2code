@@ -62,10 +62,15 @@ public class CreateGenclasseoOdataBotExecution implements BotExecution {
             zsrvdGenclasseo.emit(newContext);
         } catch (ServiceException e) {
             // 处理OData异常
+<<<<<<< HEAD
             // ODataResponseException odataEx = (ODataResponseException)
             // e.getCause().getCause();
             // result = String.format("Error (HTTP %d): %s", odataEx.getHttpCode(),
             // odataEx.getHttpBody());
+=======
+            // ODataResponseException odataEx = (ODataResponseException) e.getCause().getCause();
+            // result = String.format("Error (HTTP %d): %s", odataEx.getHttpCode(), odataEx.getHttpBody());
+>>>>>>> origin/develop
             // return result;
 
             ODataResponseException odataexce = (ODataResponseException) e.getCause().getCause();
