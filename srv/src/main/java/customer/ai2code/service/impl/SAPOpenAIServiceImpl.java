@@ -3,6 +3,7 @@ package customer.ai2code.service.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -144,10 +145,11 @@ public class SAPOpenAIServiceImpl implements AIService {
         }
 
         @Override
-        public SseEmitter chatWithAIStreaming(List<BotMessages> messages, List<PromptTexts> prompts, String content,
-                        AIModel model,
-                        ExecutorService executor,
-                        StreamingCompletedProcessor processor) {
+        public Stream<String> chatWithAIStreaming(List<BotMessages> messages, List<PromptTexts> prompts, String content,
+                        AIModel model
+                        // ExecutorService executor,
+                        // StreamingCompletedProcessor processor
+                        ) {
 
                 // Create streaming chat completion request
                 OpenAiChatCompletionParameters params = new OpenAiChatCompletionParameters();
@@ -201,28 +203,49 @@ public class SAPOpenAIServiceImpl implements AIService {
                                 (SAPAICoreConfig) model.parseModelConfigs(),
                                 resolveOpenAiModel(model.getModelName()));
 
-                SseEmitter emitter = new SseEmitter(20 * 60 * 1000L); // 3 minutes timeout
-                final StringBuilder responseBuilder = new StringBuilder();
-
-                executor.execute(() -> {
-                        try {
-                                aiClient.streamChatCompletionDeltas(params).forEach(delta -> {
-                                        // Process each delta and send it to the client
-                                        AIService.send(emitter, delta.getDeltaContent());
-                                        responseBuilder.append(delta);
-                                });
-                                // emitter.complete();
-                        } catch (Exception e) {
-                                emitter.completeWithError(e);
-                        } finally {
-                                // process other logic after streaming is complete
-                                if (processor != null) {
-                                        processor.process(responseBuilder.toString());
-                                }
-                                emitter.complete();
-                        }
+                // return aiClient.streamChatCompletionDeltas(params);
+                return aiClient.streamChatCompletionDeltas(params).map(delta ->{
+                        return delta.getDeltaContent();
                 });
-                return emitter;
+                        // .map(delta -> {
+                        //         // Process each delta and send it to the client
+                        //         SseEmitter emitter = new SseEmitter(20 * 60 * 1000L); // 3 minutes timeout
+                        //         AIService.send(emitter, delta.getDeltaContent());
+                        //         return emitter;
+                        // })
+                        // .onComplete(() -> {
+                        //         if (processor != null) {
+                        //                 processor.process("Streaming completed", "botInstanceId");
+                        //         }
+                        // })
+                        // .onError(e -> {
+                        //         if (processor != null) {
+                        //                 processor.process("Error during streaming: " + e.getMessage(), "botInstanceId");
+                        //         }
+                        // });
+
+                // SseEmitter emitter = new SseEmitter(20 * 60 * 1000L); // 3 minutes timeout
+                // final StringBuilder responseBuilder = new StringBuilder();
+
+                // executor.execute(() -> {
+                //         try {
+                //                 aiClient.streamChatCompletionDeltas(params).forEach(delta -> {
+                //                         // Process each delta and send it to the client
+                //                         AIService.send(emitter, delta.getDeltaContent());
+                //                         responseBuilder.append(delta);
+                //                 });
+                //                 // emitter.complete();
+                //         } catch (Exception e) {
+                //                 emitter.completeWithError(e);
+                //         } finally {
+                //                 // process other logic after streaming is complete
+                //                 if (processor != null) {
+                //                         processor.process(responseBuilder.toString(),);
+                //                 }
+                //                 emitter.complete();
+                //         }
+                // });
+                // return emitter;
 
         }
 

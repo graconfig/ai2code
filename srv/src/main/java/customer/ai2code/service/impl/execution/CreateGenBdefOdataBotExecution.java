@@ -17,10 +17,12 @@ import com.sap.cds.services.ServiceException;
 import com.sap.cloud.sdk.datamodel.odata.client.exception.ODataResponseException;
 import customer.ai2code.model.execution.annotation.ExecuteMethod;
 import customer.ai2code.model.execution.annotation.ExecuteParameter;
+import customer.ai2code.model.execution.annotation.BotExecutor;
 import customer.ai2code.service.ContextService;
 import customer.ai2code.service.execution.BotExecution;
 import customer.ai2code.service.impl.TaskBotCacheManager;
 
+@BotExecutor(name = "Call GenBdef Odata", description = "Implementation for Call S4/HANA OP Odata", version = "1.0", enabled = true)
 public class CreateGenBdefOdataBotExecution implements BotExecution {
 
     private final ContextService contextService;
