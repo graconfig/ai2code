@@ -87,7 +87,7 @@ public class BatchTaskOrchestrationService {
             jobExecution.setStatus(BatchStatus.STOPPING);
             
             // 标记当前正在执行的Bot状态为暂停
-            markCurrentBotsAsPaused(jobExecution);
+            // markCurrentBotsAsPaused(jobExecution);
         }
     }
     

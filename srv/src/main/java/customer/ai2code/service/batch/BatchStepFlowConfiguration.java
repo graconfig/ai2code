@@ -22,6 +22,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import customer.ai2code.service.impl.TaskBotCacheManager;
 import customer.ai2code.service.BotService;
+import customer.ai2code.service.execution.ExecuteConditionEvaluationService;
 import customer.ai2code.model.tree.TaskBotNode;
 import customer.ai2code.model.tree.TaskBotNode.NodeType;
 import customer.ai2code.model.bot.Bot;
@@ -51,6 +52,9 @@ public class BatchStepFlowConfiguration {
 
     @Autowired
     private TaskExecutor taskExecutor;
+
+    @Autowired
+    private ExecuteConditionEvaluationService executeConditionEvaluationService;
 
     /**
      * 为主任务构建完整的Job
@@ -355,12 +359,30 @@ public class BatchStepFlowConfiguration {
             ChunkContext chunkContext) {
         try {
             String botInstanceId = botNode.getId();
+            Bot bot = botNode.getBotObject();
             System.out.println("执行Chat Bot: " + botInstanceId);
 
             // 检查是否已完成 (支持重启)
             if (isBotCompleted(botNode)) {
                 System.out.println("跳过已完成的Chat Bot: " + botInstanceId);
                 return RepeatStatus.FINISHED;
+            }
+
+            // ✨ executeCondition 条件评估
+            String executeCondition = bot.getBotType().getExecuteCondition();
+            if (executeCondition != null && !executeCondition.trim().isEmpty()) {
+                boolean shouldExecute = executeConditionEvaluationService.evaluateCondition(executeCondition, bot);
+                if (!shouldExecute) {
+                    System.out.println("🚫 跳过Bot执行，条件不满足: " + botInstanceId + 
+                                     " -> 条件: " + executeCondition);
+                    // 更新Bot状态为SKIPPED
+                    taskBotCacheManager.updateBotStatus(botInstanceId, "SKIPPED");
+                    // 记录跳过原因到执行上下文
+                    chunkContext.getStepContext().getStepExecution().getExecutionContext()
+                            .put("skipReason", "条件不满足: " + executeCondition);
+                    return RepeatStatus.FINISHED;
+                }
+                System.out.println("✅ Bot执行条件满足: " + botInstanceId + " -> 条件: " + executeCondition);
             }
 
             // 标记开始执行
@@ -399,12 +421,30 @@ public class BatchStepFlowConfiguration {
             ChunkContext chunkContext) {
         try {
             String botInstanceId = botNode.getId();
+            Bot bot = botNode.getBotObject();
             System.out.println("执行Function Call Bot: " + botInstanceId);
 
             // 检查是否已完成 (支持重启)
             if (isBotCompleted(botNode)) {
                 System.out.println("跳过已完成的Function Call Bot: " + botInstanceId);
                 return RepeatStatus.FINISHED;
+            }
+
+            // ✨ executeCondition 条件评估
+            String executeCondition = bot.getBotType().getExecuteCondition();
+            if (executeCondition != null && !executeCondition.trim().isEmpty()) {
+                boolean shouldExecute = executeConditionEvaluationService.evaluateCondition(executeCondition, bot);
+                if (!shouldExecute) {
+                    System.out.println("🚫 跳过Function Bot执行，条件不满足: " + botInstanceId + 
+                                     " -> 条件: " + executeCondition);
+                    // 更新Bot状态为SKIPPED
+                    taskBotCacheManager.updateBotStatus(botInstanceId, "SKIPPED");
+                    // 记录跳过原因到执行上下文
+                    chunkContext.getStepContext().getStepExecution().getExecutionContext()
+                            .put("skipReason", "条件不满足: " + executeCondition);
+                    return RepeatStatus.FINISHED;
+                }
+                System.out.println("✅ Function Bot执行条件满足: " + botInstanceId + " -> 条件: " + executeCondition);
             }
 
             // 标记开始执行
@@ -455,8 +495,9 @@ public class BatchStepFlowConfiguration {
             // for (int i = 0; i < botCount; i++) {
             for (TaskBotNode taskBotNode : botNodes) {
                 String botId = taskBotNode.getId();
-                String botType = taskBotNode.getBot().getBotType().getFunctionTypeCode();
-                Integer sequence = taskBotNode.getBot().getBotInstance().getSequence();
+                Bot bot = taskBotNode.getBot();
+                String botType = bot.getBotType().getFunctionTypeCode();
+                Integer sequence = bot.getBotInstance().getSequence();
 
                 if (botId != null) {
                     System.out.println("执行Bot [" + sequence + "/" + botCount + "]: " + botId + " (类型: " + botType + ")");
@@ -464,6 +505,23 @@ public class BatchStepFlowConfiguration {
                     if (isBotCompleted(taskBotNode)) {
                         System.out.println("跳过已完成的SubTask Bot: " + botId);
                         continue;
+                    }
+
+                    // ✨ executeCondition 条件评估
+                    String executeCondition = bot.getBotType().getExecuteCondition();
+                    if (executeCondition != null && !executeCondition.trim().isEmpty()) {
+                        boolean shouldExecute = executeConditionEvaluationService.evaluateCondition(executeCondition, bot);
+                        if (!shouldExecute) {
+                            System.out.println("🚫 跳过SubTask Bot执行，条件不满足: " + botId + 
+                                             " -> 条件: " + executeCondition);
+                            // 更新Bot状态为SKIPPED
+                            taskBotCacheManager.updateBotStatus(botId, "SKIPPED");
+                            // 记录跳过原因到执行上下文
+                            executionContext.put("bot_" + sequence + "_status", "skipped");
+                            executionContext.put("bot_" + sequence + "_skipReason", "条件不满足: " + executeCondition);
+                            continue;
+                        }
+                        System.out.println("✅ SubTask Bot执行条件满足: " + botId + " -> 条件: " + executeCondition);
                     }
 
                     // 根据Bot类型执行相应的方法
@@ -500,11 +558,11 @@ public class BatchStepFlowConfiguration {
     }
 
     /**
-     * 检查Bot是否已完成
+     * 检查Bot是否已完成（包括成功完成和跳过执行）
      */
     private boolean isBotCompleted(TaskBotNode botNode) {
         String status = botNode.getBotStatus();
-        return "SUCCESS".equals(status); // S表示成功完成
+        return "SUCCESS".equals(status) || "SKIPPED".equals(status); // SUCCESS或SKIPPED都表示已完成
     }
 
     // ==================== 工具方法 ====================
