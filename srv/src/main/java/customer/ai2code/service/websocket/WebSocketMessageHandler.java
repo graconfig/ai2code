@@ -1,8 +1,11 @@
 package customer.ai2code.service.websocket;
 
+
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+
+import customer.ai2code.service.impl.TaskServiceImpl.HierarchyNode;
 
 @Component
 public class WebSocketMessageHandler {
@@ -50,6 +53,20 @@ public class WebSocketMessageHandler {
         );
     }
 
+    @EventListener
+    public void handleTaskTreeChanged(TaskTreeChangedEvent event) {
+        // 构建消息对象
+        HierarchyNode taskTree = event.getTaskTree();
+        
+        // 推送到/topic/task-tree
+        messagingTemplate.convertAndSend(
+            "/topic/task-tree/" + event.getTaskId(), 
+            taskTree
+        );
+    }
+
+
+
     // 消息类定义
     public static class BotStatusMessage {
         private final String botInstanceId;
@@ -84,4 +101,5 @@ public class WebSocketMessageHandler {
         
         // getters for JSON serialization
     }
+
 }

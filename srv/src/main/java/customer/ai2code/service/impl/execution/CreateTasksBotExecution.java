@@ -1,9 +1,12 @@
 package customer.ai2code.service.impl.execution;
 
 import customer.ai2code.service.execution.BotExecution;
+import customer.ai2code.service.websocket.TaskTreeChangedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.context.ApplicationEventPublisher;
 
 import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.execution.TaskCreationParam;
@@ -18,10 +21,14 @@ public class CreateTasksBotExecution implements BotExecution {
 
     // 任务服务实例
     private final TaskService taskService;
+    // private final ApplicationEventPublisher eventPublisher;
 
-    public CreateTasksBotExecution(TaskService taskService) {
+    public CreateTasksBotExecution(TaskService taskService
+    // , ApplicationEventPublisher eventPublisher
+    ) {
         // 默认构造函数
         this.taskService = taskService;
+        // this.eventPublisher = eventPublisher;
     }
 
     @ExecuteMethod
@@ -58,6 +65,10 @@ public class CreateTasksBotExecution implements BotExecution {
             tasks.add(taskService.createTaskWithBots(botInstanceId, param.getName(), param.getDescription(),
                     param.getContextPath(), param.getSequence()).getTask().getId());
         }
+
+        // 发送任务创建事件
+        // eventPublisher.publishEvent(new TaskTreeChangedEvent(taskService.getMainTaskId(botInstanceId), taskService.buildBotHierarchy(null)));
+
         return tasks;
     }
 }
