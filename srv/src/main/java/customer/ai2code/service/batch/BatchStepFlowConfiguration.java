@@ -376,7 +376,7 @@ public class BatchStepFlowConfiguration {
                     System.out.println("🚫 跳过Bot执行，条件不满足: " + botInstanceId + 
                                      " -> 条件: " + executeCondition);
                     // 更新Bot状态为SKIPPED
-                    taskBotCacheManager.updateBotStatus(botInstanceId, "SKIPPED");
+                    botService.updateBotInstanceStatus(bot, "SKIPPED");
                     // 记录跳过原因到执行上下文
                     chunkContext.getStepContext().getStepExecution().getExecutionContext()
                             .put("skipReason", "条件不满足: " + executeCondition);
@@ -438,7 +438,7 @@ public class BatchStepFlowConfiguration {
                     System.out.println("🚫 跳过Function Bot执行，条件不满足: " + botInstanceId + 
                                      " -> 条件: " + executeCondition);
                     // 更新Bot状态为SKIPPED
-                    taskBotCacheManager.updateBotStatus(botInstanceId, "SKIPPED");
+                    botService.updateBotInstanceStatus(bot, "SKIPPED");
                     // 记录跳过原因到执行上下文
                     chunkContext.getStepContext().getStepExecution().getExecutionContext()
                             .put("skipReason", "条件不满足: " + executeCondition);
@@ -515,7 +515,7 @@ public class BatchStepFlowConfiguration {
                             System.out.println("🚫 跳过SubTask Bot执行，条件不满足: " + botId + 
                                              " -> 条件: " + executeCondition);
                             // 更新Bot状态为SKIPPED
-                            taskBotCacheManager.updateBotStatus(botId, "SKIPPED");
+                            botService.updateBotInstanceStatus(bot, "SKIPPED");
                             // 记录跳过原因到执行上下文
                             executionContext.put("bot_" + sequence + "_status", "skipped");
                             executionContext.put("bot_" + sequence + "_skipReason", "条件不满足: " + executeCondition);

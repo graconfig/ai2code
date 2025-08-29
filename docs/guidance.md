@@ -1975,6 +1975,169 @@ DELETE /ContextNodes('<id>')
 - 不需要 SubTask，结构更简洁、性能优、易维护。
 
 ---
+# executeCondition 自动执行条件配置
+
+## 概述
+executeCondition是BotType实体中的字段，用于控制Bot在自动执行模式(autoRun=true)下是否应该执行。该字段支持Spring Expression Language (SpEL)语法，可以访问VariableContext中的所有变量。
+
+## 基本配置规则
+
+### 字段定义
+```cds
+entity BotType {
+  autoRun            : Boolean default false;      // 是否启用自动执行
+  executionCondition : String(1000);               // 执行条件表达式
+}
+```
+
+### 执行逻辑
+1. 当autoRun=true时，系统在Spring Batch中会检查executionCondition
+2. 如果executionCondition为空或未配置，默认执行Bot
+3. 如果executionCondition配置了表达式，只有当表达式结果为true时才执行Bot
+4. 表达式求值失败时，Bot会被跳过并记录错误日志
+
+### VariableContext变量访问
+executeCondition可以访问以下类型的变量：
+
+#### Context变量
+- `{{Context:path}}` - 绝对路径访问Task context中的任意节点
+- `{{SubContext:path}}` - 相对路径访问当前任务context下的内容
+
+#### Instance变量  
+- `{{Instance:ID}}` - 当前Bot或Task实例的ID
+- `{{Instance:status}}` - 实例状态
+- `{{Instance:result}}` - 实例执行结果
+- `{{Instance:type}}` - 实例类型
+
+#### OData查询
+- `{{OData:/EntitySet/key/property}}` - 直接查询OData数据
+
+## 表达式语法示例
+
+### 基础条件判断
+```javascript
+// 检查用户年龄
+{{Context:user.age}} >= 18
+
+// 检查任务状态
+{{SubContext:status}} == 'READY'
+
+// 检查实例类型
+{{Instance:type}} == 'AI_CHAT'
+```
+
+### 数值计算条件
+```javascript
+// 置信度门槛
+{{Context:aiResult.confidence}} > 0.8
+
+// 错误次数限制
+{{Context:errorCount}} < 3
+
+// 分数达标检查
+{{SubContext:score}} >= 80 && {{SubContext:attempts}} <= 5
+```
+
+### 字符串匹配条件
+```javascript
+// 精确匹配
+{{Context:processType}} == 'AUTOMATED'
+
+// 包含检查
+{{SubContext:description}}.contains('urgent')
+
+// 正则匹配
+{{Context:taskName}}.matches('.*_PRIORITY_.*')
+```
+
+### JSON对象属性访问
+```javascript
+// 直接属性访问
+{{Context:userProfile}}.level == 'VIP'
+
+// 嵌套属性访问
+{{SubContext:config}}.settings.autoApprove == true
+
+// 数组元素访问
+{{Context:items}}[0].status == 'COMPLETED'
+```
+
+### 复杂组合条件
+```javascript
+// 多条件AND组合
+{{Instance:autoRun}} == true && {{Context:priority}} > 5 && {{SubContext:errors}} == 0
+
+// 多条件OR组合  
+{{Context:userRole}} == 'ADMIN' || {{Context:userRole}} == 'MANAGER'
+
+// 嵌套条件判断
+({{Context:environment}} == 'PROD' && {{SubContext:approved}} == true) || {{Context:testMode}} == true
+```
+
+### OData查询条件
+```javascript
+// 查询相关实例状态
+{{OData:/BotInstances/{{Instance:parentTaskId}}/status}} == 'SUCCESS'
+
+// 动态查询当前实例信息
+{{OData:/Tasks/{{Instance:ID}}/contextNodes}} != null
+
+// 混合查询条件
+{{OData:/BotInstances/{{Instance:ID}}/type/functionType}} == 'AI_CHAT' && {{Context:ready}} == true
+```
+
+## 实际应用场景
+
+### 场景1：基于用户权限的执行控制
+```javascript
+// BotType配置
+autoRun: true
+executionCondition: "{{Context:user.role}} == 'ADMIN' || {{Context:user.permissions}}.contains('EXECUTE_BOT')"
+```
+
+### 场景2：基于数据质量的执行条件
+```javascript
+// 数据完整性检查
+executionCondition: "{{SubContext:dataQuality.completeness}} >= 0.9 && {{SubContext:dataQuality.accuracy}} > 0.95"
+```
+
+### 场景3：基于前置任务状态的执行控制
+```javascript
+// 依赖任务完成检查
+executionCondition: "{{Context:prerequisiteTasks}}.allMatch(task -> task.status == 'COMPLETED')"
+```
+
+### 场景4：基于时间窗口的执行控制
+```javascript
+// 工作时间执行
+executionCondition: "{{Context:currentHour}} >= 9 && {{Context:currentHour}} <= 17 && {{Context:isWorkday}} == true"
+```
+
+### 场景5：基于配置开关的执行控制
+```javascript
+// 功能开关控制
+executionCondition: "{{Context:featureFlags.enableAutoProcessing}} == true && {{SubContext:processingMode}} == 'AUTO'"
+```
+
+## 错误处理和调试
+
+### 表达式解析失败
+- 当表达式语法错误时，Bot执行会被跳过
+- 系统会记录详细错误日志用于调试
+- 建议在开发环境中先验证表达式语法
+
+### 变量不存在处理
+- 当引用的变量不存在时，返回null值
+- 可以使用null检查：`{{Context:optionalField}} != null`
+- 建议提供默认值处理
+
+### 调试建议
+1. 使用简单表达式开始，逐步增加复杂度
+2. 在测试环境中验证所有边界条件  
+3. 为关键条件添加日志输出
+4. 使用括号明确优先级避免歧义
+
+---
 # Prompt/AI 脚本 context 引用变量
 ## Prompt中引用格式
 以{{}}包围表达式的形式引用变量。
@@ -2009,6 +2172,62 @@ OData:/BotInstances/b631b9de-24ba-439c-afb3-f6a8002ddc9c/type/outputContextPath
 示例：
 
 {{OData:/BotInstances/{{Instance:ID}}/type/outputContextPath}}
+
+## executeCondition执行条件表达式
+在BotType中配置的executionCondition字段用于控制Bot是否执行，支持灵活的条件判断逻辑。
+
+### 基本语法
+executeCondition使用Spring Expression Language (SpEL)语法，支持VariableContext变量引用：
+
+#### 变量引用格式
+- Context:path - 绝对路径引用Task context中的节点
+- SubContext:path - 相对路径引用当前任务context节点下的内容  
+- Instance:属性名 - 引用当前实例的属性(如Instance:status、Instance:type)
+- OData:路径 - 直接查询OData数据
+
+#### 表达式示例
+```
+# 基本条件判断
+{{Context:user.age}} >= 18
+
+# 字符串比较
+{{SubContext:status}} == 'COMPLETED'
+
+# 数值计算
+{{Context:score}} > 80 && {{Context:attempts}} < 3
+
+# JSON对象属性访问
+{{Context:userInfo}}.level == 'VIP'
+
+# 复杂条件组合
+{{Instance:status}} == 'RUNNING' && {{Context:priority}} > 5
+
+# OData查询结果判断
+{{OData:/Tasks/{{Instance:ID}}/status}} != 'FAILED'
+
+# 混合引用条件
+{{Context:config.autoRun}} == true && {{SubContext:readyToProcess}} == 'YES'
+```
+
+### 条件运算符
+- 比较运算：==, !=, >, <, >=, <=
+- 逻辑运算：&&, ||, !
+- 数学运算：+, -, *, /, %
+- 字符串运算：matches, contains, startsWith, endsWith
+
+### 常用场景
+1. **状态检查**：`{{SubContext:processStatus}} == 'READY'`
+2. **权限验证**：`{{Context:user.role}} == 'ADMIN'`
+3. **数值门槛**：`{{Context:confidence}} > 0.8`
+4. **时间条件**：`{{Context:lastUpdate}} != null`
+5. **组合条件**：`{{Instance:autoRun}} == true && {{Context:errors}} == 0`
+
+### 注意事项
+- 变量引用必须使用{{}}包围
+- JSON对象属性可以直接使用.语法访问
+- 字符串值需要使用单引号包围
+- 布尔值直接使用true/false
+- null值检查使用!= null或== null
 
 ---
 5️⃣ 常见场景示例

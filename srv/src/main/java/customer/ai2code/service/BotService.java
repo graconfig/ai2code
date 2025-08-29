@@ -45,6 +45,14 @@ public interface BotService {
 
     public ContextNodes adopt(String botInstanceId, String messageId);
 
+    /**
+     * Update bot instance status
+     * This method updates both database and cache
+     * @param bot Bot object containing the instance to update
+     * @param status New status value (e.g., "RUNNING", "SUCCESS", "FAILED", "SKIPPED")
+     */
+    public void updateBotInstanceStatus(Bot bot, String status);
+
     // public Bot createBotInstance(BotInstances botInstance, BotTypes botType);
 
     // /**

@@ -411,7 +411,8 @@ public class BotServiceImpl implements BotService {
         }
     }
 
-    private void updateBotInstanceStatus(Bot bot, String status) {
+    @Override
+    public void updateBotInstanceStatus(Bot bot, String status) {
         String botInstanceId = bot.getBotInstance().getId();
         String oldStatus = bot.getBotInstance().getStatusCode(); // 获取当前状态（旧状态）
         // 使用缓存管理器更新状态
