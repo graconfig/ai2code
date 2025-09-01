@@ -11,10 +11,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import customer.ai2code.model.execution.functioncall.FunctionInfo;
+import customer.ai2code.service.TaskBotDataService;
 import customer.ai2code.service.TaskService;
 import customer.ai2code.service.execution.functioncall.adapter.OpenAIFunctionCallAdapter;
 import customer.ai2code.service.impl.execution.CreateTasksBotExecution;
@@ -24,7 +26,7 @@ class OpenAIParametersFormatTest {
 
     @Mock
     private ApplicationContext applicationContext;
-    
+
     @Mock
     private TaskService taskService;
 
@@ -33,40 +35,43 @@ class OpenAIParametersFormatTest {
     private ObjectMapper objectMapper;
     private CreateTasksBotExecution createTasksBotExecution;
 
+    private TaskBotDataService taskBotDataService;
+    private ApplicationEventPublisher eventPublisher;
+
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         functionCallProcessor = new FunctionCallProcessor(applicationContext, objectMapper);
         openAIFunctionCallAdapter = new OpenAIFunctionCallAdapter();
-        createTasksBotExecution = new CreateTasksBotExecution(taskService);
+        createTasksBotExecution = new CreateTasksBotExecution(taskService, eventPublisher, taskBotDataService);
     }
 
     @Test
     void testOpenAIFunctionCallParametersFormat() {
         System.out.println("=== Testing OpenAI Function Call Parameters Format ===");
-        
+
         // Step 1: Extract function info
         List<FunctionInfo> functionInfos = functionCallProcessor
-            .extractFunctionInfosFromInstance(createTasksBotExecution);
-        
+                .extractFunctionInfosFromInstance(createTasksBotExecution);
+
         assertFalse(functionInfos.isEmpty(), "Should have at least one function");
-        
+
         // Step 2: Convert to OpenAI format
         List<Map<String, Object>> openAIFunctions = openAIFunctionCallAdapter
-            .convertToOpenAIFormat(functionInfos);
-        
+                .convertToOpenAIFormat(functionInfos);
+
         assertEquals(1, openAIFunctions.size(), "Should have exactly one function");
-        
+
         Map<String, Object> function = openAIFunctions.get(0);
-        
+
         // Step 3: Print and validate the exact format that will be sent to OpenAI
         try {
             String prettyJson = objectMapper.writerWithDefaultPrettyPrinter()
-                .writeValueAsString(function);
-            
+                    .writeValueAsString(function);
+
             System.out.println("OpenAI Function Definition (Pretty Format):");
             System.out.println(prettyJson);
-            
+
             // Validate the JSON structure matches OpenAI requirements
             assertTrue(prettyJson.contains("\"name\" : \"Create_Tasks_Bot_Execution_execute\""));
             assertTrue(prettyJson.contains("\"description\""));
@@ -77,65 +82,65 @@ class OpenAIParametersFormatTest {
             assertTrue(prettyJson.contains("\"taskCreationParams\""));
             assertTrue(prettyJson.contains("\"type\" : \"string\""));
             assertTrue(prettyJson.contains("\"type\" : \"array\""));
-            
+
             // Also test compact format (what actually gets sent)
             String compactJson = objectMapper.writeValueAsString(function);
             System.out.println("\nOpenAI Function Definition (Compact Format):");
             System.out.println(compactJson);
-            
+
             // Validate compact format
             assertNotNull(compactJson);
             assertTrue(compactJson.length() > 0);
             assertFalse(compactJson.contains("\n")); // Should be compact
-            
+
         } catch (Exception e) {
             fail("Failed to serialize OpenAI function parameters: " + e.getMessage());
         }
-        
+
         System.out.println("\n=== OpenAI Parameters Format Test Passed ===");
     }
 
     @Test
     void testOpenAIParametersStructureValidation() {
         System.out.println("=== Testing OpenAI Parameters Structure Validation ===");
-        
+
         List<FunctionInfo> functionInfos = functionCallProcessor
-            .extractFunctionInfosFromInstance(createTasksBotExecution);
+                .extractFunctionInfosFromInstance(createTasksBotExecution);
         List<Map<String, Object>> openAIFunctions = openAIFunctionCallAdapter
-            .convertToOpenAIFormat(functionInfos);
-        
+                .convertToOpenAIFormat(functionInfos);
+
         Map<String, Object> function = openAIFunctions.get(0);
-        
+
         // Validate top-level structure
         assertEquals("Create_Tasks_Bot_Execution_execute", function.get("name"));
         assertEquals("Implementation for creating tasks in the bot execution framework", function.get("description"));
         assertTrue(function.containsKey("parameters"));
-        
+
         // Validate parameters structure
         @SuppressWarnings("unchecked")
         Map<String, Object> parameters = (Map<String, Object>) function.get("parameters");
         assertEquals("object", parameters.get("type"));
         assertTrue(parameters.containsKey("properties"));
-        
+
         // Validate properties structure
         @SuppressWarnings("unchecked")
         Map<String, Object> properties = (Map<String, Object>) parameters.get("properties");
         assertEquals(2, properties.size(), "Should have exactly 2 properties");
-        
+
         // Validate botInstanceId property
         assertTrue(properties.containsKey("botInstanceId"));
         @SuppressWarnings("unchecked")
         Map<String, Object> botInstanceIdProp = (Map<String, Object>) properties.get("botInstanceId");
         assertEquals("string", botInstanceIdProp.get("type"));
         assertEquals("Bot Instance", botInstanceIdProp.get("description"));
-        
+
         // Validate taskCreationParams property
         assertTrue(properties.containsKey("taskCreationParams"));
         @SuppressWarnings("unchecked")
         Map<String, Object> taskCreationParamProp = (Map<String, Object>) properties.get("taskCreationParams");
         assertEquals("array", taskCreationParamProp.get("type"));
         assertEquals("Array of task parameters", taskCreationParamProp.get("description"));
-        
+
         System.out.println("Structure Validation Results:");
         System.out.println("✓ Function name: " + function.get("name"));
         System.out.println("✓ Function description: " + function.get("description"));
@@ -143,42 +148,42 @@ class OpenAIParametersFormatTest {
         System.out.println("✓ Properties count: " + properties.size());
         System.out.println("✓ botInstanceId type: " + botInstanceIdProp.get("type"));
         System.out.println("✓ taskCreationParams type: " + taskCreationParamProp.get("type"));
-        
+
         System.out.println("=== Parameters Structure Validation Test Passed ===");
     }
 
     @Test
     void testParametersFormatMatchesOpenAISpec() {
         System.out.println("=== Testing Parameters Format Matches OpenAI Specification ===");
-        
+
         List<FunctionInfo> functionInfos = functionCallProcessor
-            .extractFunctionInfosFromInstance(createTasksBotExecution);
+                .extractFunctionInfosFromInstance(createTasksBotExecution);
         List<Map<String, Object>> openAIFunctions = openAIFunctionCallAdapter
-            .convertToOpenAIFormat(functionInfos);
-        
+                .convertToOpenAIFormat(functionInfos);
+
         Map<String, Object> function = openAIFunctions.get(0);
-        
+
         // According to OpenAI API spec, a function should have:
         // - name (string, required)
-        // - description (string, optional but recommended)  
+        // - description (string, optional but recommended)
         // - parameters (object, required) - JSON Schema object
-        
+
         // Validate according to OpenAI spec
         assertTrue(function.get("name") instanceof String, "name must be string");
         assertTrue(function.get("description") instanceof String, "description must be string");
         assertTrue(function.get("parameters") instanceof Map, "parameters must be object");
-        
+
         @SuppressWarnings("unchecked")
         Map<String, Object> parameters = (Map<String, Object>) function.get("parameters");
-        
+
         // Parameters should follow JSON Schema format
         assertEquals("object", parameters.get("type"), "parameters.type must be 'object'");
         assertTrue(parameters.containsKey("properties"), "parameters must have 'properties'");
         assertTrue(parameters.get("properties") instanceof Map, "properties must be object");
-        
+
         @SuppressWarnings("unchecked")
         Map<String, Object> properties = (Map<String, Object>) parameters.get("properties");
-        
+
         // Each property should have a type
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
             assertTrue(entry.getValue() instanceof Map, "Each property must be an object");
@@ -187,7 +192,7 @@ class OpenAIParametersFormatTest {
             assertTrue(property.containsKey("type"), "Each property must have a 'type'");
             assertTrue(property.get("type") instanceof String, "Property type must be string");
         }
-        
+
         System.out.println("OpenAI Specification Compliance:");
         System.out.println("✓ Function has required 'name' field (string)");
         System.out.println("✓ Function has 'description' field (string)");
@@ -196,7 +201,7 @@ class OpenAIParametersFormatTest {
         System.out.println("✓ Parameters have 'type': 'object'");
         System.out.println("✓ Parameters have 'properties' object");
         System.out.println("✓ Each property has valid 'type' field");
-        
+
         System.out.println("=== OpenAI Specification Compliance Test Passed ===");
     }
 }
