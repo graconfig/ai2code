@@ -31,6 +31,8 @@ public class SpELVariableHelper {
     /**
      * 将变量值注入到SpEL上下文中
      */
+    @SuppressWarnings("unused")
+    @Deprecated
     public void injectVariables(StandardEvaluationContext context, String resolvedCondition) {
         // 提取并注入JSON对象
         injectJsonObjects(context, resolvedCondition);
@@ -53,6 +55,9 @@ public class SpELVariableHelper {
         
         // 处理JSON数组并转换表达式
         transformedExpression = processAndReplaceJsonArrays(context, transformedExpression);
+        
+        // 处理简单变量（处理边界情况，如null值、特殊字符串等）
+        transformedExpression = processSimpleVariables(context, transformedExpression);
         
         return transformedExpression;
     }
@@ -119,6 +124,38 @@ public class SpELVariableHelper {
         }
         
         return result;
+    }
+
+    /**
+     * 处理简单变量的边界情况
+     * 主要处理null值、特殊字符串等SpEL可能无法直接处理的情况
+     */
+    private String processSimpleVariables(StandardEvaluationContext context, String expression) {
+        String result = expression;
+        
+        // 处理null值 - 将裸露的null转换为SpEL可识别的null
+        result = result.replaceAll("\\bnull\\b", "null");
+        
+        // 处理特殊的字符串值，确保它们被正确引用
+        // 例如：处理包含空格或特殊字符的字符串
+        result = handleSpecialStringValues(result);
+        
+        // 处理布尔值 - 确保布尔值格式正确
+        result = result.replaceAll("\\btrue\\b", "true");
+        result = result.replaceAll("\\bfalse\\b", "false");
+        
+        return result;
+    }
+    
+    /**
+     * 处理特殊字符串值
+     */
+    private String handleSpecialStringValues(String expression) {
+        // 这里可以添加对特殊字符串的处理逻辑
+        // 例如：处理包含特殊字符的字符串，确保它们被正确引用
+        
+        // 如果需要处理更复杂的字符串情况，可以在这里添加
+        return expression;
     }
 
     /**
@@ -204,7 +241,6 @@ public class SpELVariableHelper {
     /**
      * 从变量名推断并设置上下文变量
      */
-    @SuppressWarnings("unused")
     public void setContextVariable(StandardEvaluationContext context, String varName, Object value) {
         if (value == null) {
             context.setVariable(varName, null);

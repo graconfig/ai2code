@@ -78,39 +78,42 @@ public class ExecuteConditionEvaluationService {
      * @param botInstanceId Bot实例ID
      * @return 是否应该执行该Bot
      */
-    public boolean evaluateCondition(String executeCondition, String botInstanceId) {
-        if (executeCondition == null || executeCondition.trim().isEmpty()) {
-            return true;
-        }
+    // public boolean evaluateCondition(String executeCondition, String botInstanceId) {
 
-        try {
-            // 构建基本的变量上下文
-            VariableContext context = VariableContext.builder()
-                    .botInstanceId(botInstanceId)
-                    .build();
 
-            // 解析条件中的变量
-            String resolvedCondition = variableParsingService.parseVariables(executeCondition, context);
 
-            // 🔧 构建SpEL评估上下文并转换表达式
-            StandardEvaluationContext spelContext = new StandardEvaluationContext();
-            spelContext.setVariable("botInstanceId", context.getBotInstanceId());
-            spelContext.setVariable("mainTaskId", context.getMainTaskId());
+        // if (executeCondition == null || executeCondition.trim().isEmpty()) {
+        //     return true;
+        // }
+
+        // try {
+        //     // 构建基本的变量上下文
+        //     VariableContext context = VariableContext.builder()
+        //             .botInstanceId(botInstanceId)
+        //             .build();
+
+        //     // 解析条件中的变量
+        //     String resolvedCondition = variableParsingService.parseVariables(executeCondition, context);
+
+        //     // 🔧 构建SpEL评估上下文并转换表达式
+        //     StandardEvaluationContext spelContext = new StandardEvaluationContext();
+        //     spelContext.setVariable("botInstanceId", context.getBotInstanceId());
+        //     spelContext.setVariable("mainTaskId", context.getMainTaskId());
             
-            String transformedExpression = spelVariableHelper.injectVariablesAndTransform(spelContext, resolvedCondition);
+        //     String transformedExpression = spelVariableHelper.injectVariablesAndTransform(spelContext, resolvedCondition);
 
-            // 使用转换后的表达式进行SpEL评估
-            Expression expression = expressionParser.parseExpression(transformedExpression);
-            Object result = expression.getValue(spelContext);
+        //     // 使用转换后的表达式进行SpEL评估
+        //     Expression expression = expressionParser.parseExpression(transformedExpression);
+        //     Object result = expression.getValue(spelContext);
 
-            return convertToBoolean(result);
+        //     return convertToBoolean(result);
 
-        } catch (Exception e) {
-            System.err.println("Failed to evaluate execute condition: " + executeCondition + 
-                             " for botInstanceId: " + botInstanceId + ", error: " + e.getMessage());
-            return false;
-        }
-    }
+        // } catch (Exception e) {
+        //     System.err.println("Failed to evaluate execute condition: " + executeCondition + 
+        //                      " for botInstanceId: " + botInstanceId + ", error: " + e.getMessage());
+        //     return false;
+        // }
+    // }
 
     /**
      * 构建变量解析上下文（复用PromptServiceImpl的逻辑）
@@ -127,20 +130,20 @@ public class ExecuteConditionEvaluationService {
     /**
      * 创建SpEL评估上下文（已弃用，保留用于向后兼容）
      */
-    @SuppressWarnings("unused")
-    @Deprecated
-    private StandardEvaluationContext createSpelContext(VariableContext variableContext, String resolvedCondition) {
-        StandardEvaluationContext context = new StandardEvaluationContext();
+    // @SuppressWarnings("unused")
+    // @Deprecated
+    // private StandardEvaluationContext createSpelContext(VariableContext variableContext, String resolvedCondition) {
+    //     StandardEvaluationContext context = new StandardEvaluationContext();
 
-        // 添加基本变量到SpEL上下文
-        context.setVariable("botInstanceId", variableContext.getBotInstanceId());
-        context.setVariable("mainTaskId", variableContext.getMainTaskId());
+    //     // 添加基本变量到SpEL上下文
+    //     context.setVariable("botInstanceId", variableContext.getBotInstanceId());
+    //     context.setVariable("mainTaskId", variableContext.getMainTaskId());
 
-        // ✨ 使用注入的SpELVariableHelper实例注入复杂变量（JSON对象、数组等）
-        spelVariableHelper.injectVariables(context, resolvedCondition);
+    //     // ✨ 使用注入的SpELVariableHelper实例注入复杂变量（JSON对象、数组等）
+    //     spelVariableHelper.injectVariables(context, resolvedCondition);
 
-        return context;
-    }
+    //     return context;
+    // }
 
     /**
      * 将结果转换为布尔值
@@ -165,48 +168,5 @@ public class ExecuteConditionEvaluationService {
 
         // 其他类型默认为true（存在即为真）
         return true;
-    }
-
-    /**
-     * 验证执行条件表达式的语法
-     */
-    public boolean validateConditionSyntax(String executeCondition) {
-        if (executeCondition == null || executeCondition.trim().isEmpty()) {
-            return true;
-        }
-
-        try {
-            // 简单的语法检查
-            expressionParser.parseExpression(executeCondition);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    /**
-     * 测试执行条件（用于调试）
-     */
-    public String testCondition(String executeCondition, Bot bot) {
-        try {
-            VariableContext context = buildVariableContext(bot);
-            String resolvedCondition = variableParsingService.parseVariables(executeCondition, context);
-            
-            // 🔧 使用新的转换方法
-            StandardEvaluationContext spelContext = new StandardEvaluationContext();
-            spelContext.setVariable("botInstanceId", context.getBotInstanceId());
-            spelContext.setVariable("mainTaskId", context.getMainTaskId());
-            
-            String transformedExpression = spelVariableHelper.injectVariablesAndTransform(spelContext, resolvedCondition);
-            
-            Expression expression = expressionParser.parseExpression(transformedExpression);
-            Object result = expression.getValue(spelContext);
-
-            return String.format("Original: %s\nResolved: %s\nTransformed: %s\nResult: %s\nBoolean: %s",
-                    executeCondition, resolvedCondition, transformedExpression, result, convertToBoolean(result));
-
-        } catch (Exception e) {
-            return "Error: " + e.getMessage();
-        }
     }
 }
