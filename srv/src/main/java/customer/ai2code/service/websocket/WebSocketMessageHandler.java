@@ -4,6 +4,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import customer.ai2code.service.impl.TaskServiceImpl.HierarchyNode;
+
 @Component
 public class WebSocketMessageHandler {
 
@@ -18,17 +20,15 @@ public class WebSocketMessageHandler {
     public void handleBotStatusChanged(BotInstanceStatusChangedEvent event) {
         // 构建消息对象
         BotStatusMessage message = new BotStatusMessage(
-            event.getBotInstanceId(),
-            event.getOldStatus(),
-            event.getNewStatus(),
-            System.currentTimeMillis()
-        );
-        
+                event.getBotInstanceId(),
+                event.getOldStatus(),
+                event.getNewStatus(),
+                System.currentTimeMillis());
+
         // 推送到/topic/bot-status/{taskId}，让订阅该任务的客户端接收
         messagingTemplate.convertAndSend(
-            "/topic/bot-status/" + event.getTaskId(), 
-            message
-        );
+                "/topic/bot-status/" + event.getTaskId(),
+                message);
     }
 
     // 处理ContextNode文本变更事件
@@ -36,18 +36,28 @@ public class WebSocketMessageHandler {
     public void handleContextNodeChanged(ContextNodeChangedEvent event) {
         // 构建消息对象
         ContextNodeMessage message = new ContextNodeMessage(
-            event.getNodeId(),
-            event.getPath(),
-            event.getOldValue(),
-            event.getNewValue(),
-            System.currentTimeMillis()
-        );
-        
+                event.getNodeId(),
+                event.getPath(),
+                event.getOldValue(),
+                event.getNewValue(),
+                System.currentTimeMillis());
+
         // 推送到/topic/context/{taskId}
         messagingTemplate.convertAndSend(
-            "/topic/context/" + event.getTaskId(), 
-            message
-        );
+                "/topic/context/" + event.getTaskId(),
+                message);
+    }
+
+    // 处理任务树变更事件
+    @EventListener
+    public void handleTaskTreeChanged(TaskTreeChangedEvent event) {
+        // 构建消息对象
+        HierarchyNode taskTree = event.getTaskTree();
+
+        // 推送到/topic/task-tree
+        messagingTemplate.convertAndSend(
+                "/topic/task-tree/" + event.getTaskId(),
+                taskTree);
     }
 
     // 消息类定义（补充 getter 方法用于 JSON 序列化）
