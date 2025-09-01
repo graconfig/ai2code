@@ -6,6 +6,7 @@ import cds.gen.configservice.BotTypes;
 import cds.gen.mainservice.BotInstances;
 import customer.ai2code.model.ai.config.model.AIModel;
 import customer.ai2code.service.impl.GenericCqnService;
+import customer.ai2code.service.variable.VariableContext;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public abstract class AbstractBot implements Bot {
     protected AIModel aiModel;
     protected BotTypes botType;
     protected Locale locale;
+    // protected VariableContext variableContext;
     
     // 服务依赖
     protected GenericCqnService genericCqnService;
@@ -78,5 +80,15 @@ public abstract class AbstractBot implements Bot {
         // 更新本地的botInstance引用
         this.botInstance = genericCqnService.getBotInstanceById(this.botInstance.getId());
         return this.botInstance;
+    }
+
+    @Override
+    public VariableContext getVariableContext() {
+        // 这里通过反射调用私有方法，或者将该方法公开
+        return VariableContext.builder()
+                .botInstanceId(botInstance.getId())
+                .mainTaskId(this.genericCqnService.getMainTaskId(botInstance.getId()))
+                .currentInstance(botInstance)
+                .build();
     }
 }
