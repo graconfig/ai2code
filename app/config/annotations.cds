@@ -108,8 +108,10 @@ annotate service.BotTypes with @(
         },
         {
             $Type: 'UI.DataField',
-            Value: executionCondition,
-            Label: '{i18n>ExecutionCondition}',
+            // Value: executionCondition,
+            Value: executeCondition,
+            // Label: '{i18n>ExecutionCondition}',
+            Label: '{i18n>ExecuteCondition}',
         },
         {
             $Type: 'UI.DataField',
@@ -260,8 +262,10 @@ annotate service.BotTypes with @(
             },
             {
                 $Type: 'UI.DataField',
-                Value: executionCondition,
-                Label: '{i18n>ExecutionCondition}',
+                Value: executeCondition,
+                // Value: executionCondition,
+                Label: '{i18n>ExecuteCondition}',
+                // Label: '{i18n>ExecutionCondition}',
             },
         ],
     },
