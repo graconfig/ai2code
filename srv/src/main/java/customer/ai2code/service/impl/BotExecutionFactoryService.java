@@ -179,6 +179,12 @@ public class BotExecutionFactoryService {
      */
     private Object resolveBeanFromContext(Class<?> type) {
         try {
+            // 特殊处理 ApplicationEventPublisher - Spring 框架核心接口
+            if (type.equals(org.springframework.context.ApplicationEventPublisher.class)) {
+                System.out.println("    - Providing ApplicationEventPublisher from ApplicationContext");
+                return applicationContext; // ApplicationContext 实现了 ApplicationEventPublisher 接口
+            }
+
             // 尝试按类型获取 Bean
             String[] beanNames = applicationContext.getBeanNamesForType(type);
 
