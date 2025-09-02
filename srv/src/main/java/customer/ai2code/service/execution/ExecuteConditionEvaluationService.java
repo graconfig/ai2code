@@ -44,15 +44,15 @@ public class ExecuteConditionEvaluationService {
 
         try {
             // 1. 构建变量解析上下文
-            VariableContext context = buildVariableContext(bot);
+            // VariableContext context = buildVariableContext(bot);
 
             // 2. 解析条件中的变量
-            String resolvedCondition = variableParsingService.parseVariables(executeCondition, context);
+            String resolvedCondition = variableParsingService.parseVariables(executeCondition, bot.getVariableContext());
 
             // 3. 构建SpEL评估上下文并转换表达式
             StandardEvaluationContext spelContext = new StandardEvaluationContext();
-            spelContext.setVariable("botInstanceId", context.getBotInstanceId());
-            spelContext.setVariable("mainTaskId", context.getMainTaskId());
+            // spelContext.setVariable("botInstanceId", context.getBotInstanceId());
+            // spelContext.setVariable("mainTaskId", context.getMainTaskId());
             
             // 🔧 使用新方法：注入变量并获取转换后的表达式
             String transformedExpression = spelVariableHelper.injectVariablesAndTransform(spelContext, resolvedCondition);
@@ -72,12 +72,12 @@ public class ExecuteConditionEvaluationService {
         }
     }
 
-    /**
-     * 评估Bot的执行条件（基于Bot实例ID）
-     * @param executeCondition 执行条件表达式
-     * @param botInstanceId Bot实例ID
-     * @return 是否应该执行该Bot
-     */
+    // /**
+    //  * 评估Bot的执行条件（基于Bot实例ID）
+    //  * @param executeCondition 执行条件表达式
+    //  * @param botInstanceId Bot实例ID
+    //  * @return 是否应该执行该Bot
+    //  */
     // public boolean evaluateCondition(String executeCondition, String botInstanceId) {
 
 
@@ -118,14 +118,15 @@ public class ExecuteConditionEvaluationService {
     /**
      * 构建变量解析上下文（复用PromptServiceImpl的逻辑）
      */
-    private VariableContext buildVariableContext(Bot bot) {
-        // 使用PromptServiceImpl中已有的buildVariableContext逻辑
-        // 这里通过反射调用私有方法，或者将该方法公开
-        return VariableContext.builder()
-                .botInstanceId(bot.getBotInstance().getId())
-                .currentInstance(bot.getBotInstance())
-                .build();
-    }
+    // private VariableContext buildVariableContext(Bot bot) {
+    //     // 使用PromptServiceImpl中已有的buildVariableContext逻辑
+    //     // 这里通过反射调用私有方法，或者将该方法公开
+    //     return VariableContext.builder()
+    //             .botInstanceId(bot.getBotInstance().getId())
+    //             .mainTaskId
+    //             .currentInstance(bot.getBotInstance())
+    //             .build();
+    // }
 
     /**
      * 创建SpEL评估上下文（已弃用，保留用于向后兼容）

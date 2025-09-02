@@ -433,6 +433,9 @@ public class TaskBotCacheManager implements TaskBotDataService {
             if (current.getType() == TaskBotNode.NodeType.TASK) {
                 // return getRoot(current);
                 // Node(current.)
+                if (current.getTaskObject().getTask().getIsMain() == true){
+                    return null;
+                }
                 return getBotInstanceNode(current.getTaskObject().getTask().getBotInstanceId());
             } else {
                 return getTaskNode(current.getBotObject().getBotInstance().getTaskId());

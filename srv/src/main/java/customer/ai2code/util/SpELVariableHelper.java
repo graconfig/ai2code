@@ -18,10 +18,10 @@ public class SpELVariableHelper {
 
     private final ObjectMapper objectMapper;
     
-    // JSON对象模式
-    private static final Pattern JSON_OBJECT_PATTERN = Pattern.compile("\\{[^{}]*\\}");
+    // 简单JSON对象模式（用于初步检测）
+    private static final Pattern JSON_OBJECT_START_PATTERN = Pattern.compile("\\{");
     
-    // JSON数组模式
+    // JSON数组模式（保持原有逻辑用于简单数组）
     private static final Pattern JSON_ARRAY_PATTERN = Pattern.compile("\\[[^\\[\\]]*\\]");
 
     public SpELVariableHelper(ObjectMapper objectMapper) {
@@ -64,34 +64,86 @@ public class SpELVariableHelper {
 
     /**
      * 处理JSON对象并替换表达式中的JSON字符串为变量引用
+     * 支持嵌套JSON和JSON字符串值
      */
     private String processAndReplaceJsonObjects(StandardEvaluationContext context, String expression) {
-        Matcher matcher = JSON_OBJECT_PATTERN.matcher(expression);
         String result = expression;
         int index = 0;
         
-        while (matcher.find()) {
-            String jsonStr = matcher.group();
-            try {
-                Map<String, Object> jsonObject = objectMapper.readValue(jsonStr, 
-                    new TypeReference<Map<String, Object>>() {});
-                
-                // 生成唯一的变量名
-                String varName = "jsonVar" + index;
-                
-                // 注入变量到上下文
-                context.setVariable(varName, jsonObject);
-                
-                // 替换表达式中的JSON字符串为变量引用
-                result = result.replace(jsonStr, "#" + varName);
-                
-                index++;
-            } catch (Exception e) {
-                // 忽略JSON解析错误，保持原样
+        // 查找所有JSON对象的起始位置
+        int pos = 0;
+        while (pos < result.length()) {
+            int startPos = result.indexOf('{', pos);
+            if (startPos == -1) break;
+            
+            // 尝试提取完整的JSON对象
+            String jsonStr = extractCompleteJsonObject(result, startPos);
+            if (jsonStr != null) {
+                try {
+                    // 验证是否为有效的JSON对象
+                    Map<String, Object> jsonObject = objectMapper.readValue(jsonStr, 
+                        new TypeReference<Map<String, Object>>() {});
+                    
+                    // 生成唯一的变量名
+                    String varName = "jsonVar" + index;
+                    
+                    // 注入变量到上下文
+                    context.setVariable(varName, jsonObject);
+                    
+                    // 替换表达式中的JSON字符串为变量引用
+                    result = result.replace(jsonStr, "#" + varName);
+                    
+                    index++;
+                    pos = startPos + varName.length() + 1; // 跳过替换后的变量名
+                } catch (Exception e) {
+                    // JSON解析失败，继续寻找下一个
+                    pos = startPos + 1;
+                }
+            } else {
+                pos = startPos + 1;
             }
         }
         
         return result;
+    }
+    
+    /**
+     * 提取完整的JSON对象，正确处理嵌套和字符串转义
+     */
+    private String extractCompleteJsonObject(String text, int startPos) {
+        if (startPos >= text.length() || text.charAt(startPos) != '{') {
+            return null;
+        }
+        
+        int braceCount = 0;
+        boolean inString = false;
+        boolean escaped = false;
+        int pos = startPos;
+        
+        while (pos < text.length()) {
+            char ch = text.charAt(pos);
+            
+            if (escaped) {
+                escaped = false;
+            } else if (ch == '\\' && inString) {
+                escaped = true;
+            } else if (ch == '"') {
+                inString = !inString;
+            } else if (!inString) {
+                if (ch == '{') {
+                    braceCount++;
+                } else if (ch == '}') {
+                    braceCount--;
+                    if (braceCount == 0) {
+                        // 找到完整的JSON对象
+                        return text.substring(startPos, pos + 1);
+                    }
+                }
+            }
+            pos++;
+        }
+        
+        return null; // 未找到完整的JSON对象
     }
 
     /**
@@ -159,29 +211,38 @@ public class SpELVariableHelper {
     }
 
     /**
-     * 注入JSON对象变量
+     * 注入JSON对象变量 (已弃用的方法，保留用于向后兼容)
      */
+    @Deprecated
     private void injectJsonObjects(StandardEvaluationContext context, String text) {
-        Matcher matcher = JSON_OBJECT_PATTERN.matcher(text);
         int index = 0;
+        int pos = 0;
         
-        while (matcher.find()) {
-            String jsonStr = matcher.group();
-            try {
-                Map<String, Object> jsonObject = objectMapper.readValue(jsonStr, 
-                    new TypeReference<Map<String, Object>>() {});
-                
-                // 注入整个对象
-                context.setVariable("jsonObject" + index, jsonObject);
-                
-                // 注入对象的各个属性
-                for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-                    context.setVariable(entry.getKey(), entry.getValue());
+        while (pos < text.length()) {
+            int startPos = text.indexOf('{', pos);
+            if (startPos == -1) break;
+            
+            String jsonStr = extractCompleteJsonObject(text, startPos);
+            if (jsonStr != null) {
+                try {
+                    Map<String, Object> jsonObject = objectMapper.readValue(jsonStr, 
+                        new TypeReference<Map<String, Object>>() {});
+                    
+                    // 注入整个对象
+                    context.setVariable("jsonObject" + index, jsonObject);
+                    
+                    // 注入对象的各个属性
+                    for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+                        context.setVariable(entry.getKey(), entry.getValue());
+                    }
+                    
+                    index++;
+                    pos = startPos + jsonStr.length();
+                } catch (Exception e) {
+                    pos = startPos + 1;
                 }
-                
-                index++;
-            } catch (Exception e) {
-                // 忽略JSON解析错误
+            } else {
+                pos = startPos + 1;
             }
         }
     }
