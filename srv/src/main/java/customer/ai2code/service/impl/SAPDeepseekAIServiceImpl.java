@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -219,13 +220,11 @@ public class SAPDeepseekAIServiceImpl implements AIService {
     }
 
     @Override
-    public SseEmitter chatWithAIStreaming(
+    public Stream<String> chatWithAIStreaming(
             List<BotMessages> messages,
             List<PromptTexts> prompts,
             String content,
-            AIModel model,
-            ExecutorService executor,
-            StreamingCompletedProcessor processor) {
+            AIModel model) {
         throw new UnsupportedOperationException("Streaming not implemented for DeepSeek");
     }
 
