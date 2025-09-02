@@ -1,15 +1,13 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/m/MessageToast",
-    "sap/m/MessageBox",
     "sap/ui/model/json/JSONModel",
-    "ai/orchestration/taskfree/control/marked"
-], function (Controller, MessageToast, MessageBox, JSONModel, marked) {
+], function (Controller, MessageToast, JSONModel) {
     "use strict";
 
     return Controller.extend("ai.orchestration.taskfree.controller.TextNodePage", {
-        onInit: function () {
-            var oViewModel = new JSONModel({
+        onInit() {
+            const oViewModel = new JSONModel({
                 value: "",
                 title: "Context Node",
                 type: ""
@@ -17,21 +15,20 @@ sap.ui.define([
             this.getView().setModel(oViewModel, "viewModel");
 
             // 监听路由
-            var oRouter = this.getOwnerComponent().getRouter();
+            const oRouter = this.getOwnerComponent().getRouter();
             oRouter.getRoute("RouteTextNodePage").attachPatternMatched(this._onRouteMatched, this);
 
         },
 
-        _onRouteMatched: function (oEvent) {
-            var oArgs = oEvent.getParameter("arguments");
-            var contextNodeId = oArgs && oArgs.contextNodeId;
-            var oViewModel = this.getView().getModel("viewModel");
-            if (oViewModel) {
-                oViewModel.setProperty("/value", "");
-                oViewModel.setProperty("/title", "");
-            }
+        async _onRouteMatched(oEvent) {
+            const oArgs = oEvent.getParameter("arguments");
+            const contextNodeId = oArgs && oArgs.contextNodeId;
+            const oViewModel = this.getView().getModel("viewModel");
 
-            var oController = this;
+
+            oViewModel?.setProperty("/value", "");
+            oViewModel?.setProperty("/title", "");
+
             if (!contextNodeId) {
                 MessageToast.show("No context node id provided");
                 oViewModel.setProperty("/value", "");
@@ -40,29 +37,28 @@ sap.ui.define([
             }
 
             // Set busy state
-            oController.getView().setBusy(true);
+            this.getView().setBusy(true);
 
             //获取OData
-            var oModel = this.getView().getModel();
-            var sPath = "/ContextNodes(" + contextNodeId + ")";
+            const oModel = this.getView().getModel();
+            const sPath = "/ContextNodes(" + contextNodeId + ")";
 
-            oModel.bindContext(sPath).requestObject().then(function (oData) {
-                oController.getView().setBusy(false);
-                oViewModel.setProperty("/value", oData.value);
-                oViewModel.setProperty("/title", oData.label);
-            }).catch(function () {
-                oController.getView().setBusy(false);
-                oViewModel.setProperty("/value", "加载失败");
-                oViewModel.setProperty("/title", "Text Node");
+            try {
+                const oData = await oModel.bindContext(sPath).requestObject();
+                oViewModel?.setProperty("/value", oData.value);
+                oViewModel?.setProperty("/title", oData.label);
+            } catch (error) {
+                oViewModel?.setProperty("/value", "加载失败");
+                oViewModel?.setProperty("/title", "Text Node");
                 MessageToast.show("加载失败");
-            });
-        },
-        onExit: function () {
-            var oViewModel = this.getView().getModel("viewModel");
-            if (oViewModel) {
-                oViewModel.setProperty("/value", "");
-                oViewModel.setProperty("/title", "");
+            } finally {
+                this.getView().setBusy(false);
             }
+        },
+        onExit() {
+            const oViewModel = this.getView().getModel("viewModel");
+            oViewModel?.setProperty("/value", "");
+            oViewModel?.setProperty("/title", "");
         }
     });
 });

@@ -80,7 +80,7 @@ annotate service.TaskTypes with @(
 );
 
 annotate service.BotTypes with @(
-    UI.LineItem #BotTypes : [
+    UI.LineItem #BotTypes           : [
         {
             $Type: 'UI.DataField',
             Value: sequence,
@@ -157,20 +157,16 @@ annotate service.BotTypes with @(
             Label: '{i18n>ImplementationClass}',
         },
     ],
-    UI.PresentationVariant #BotTypes : {
-        $Type : 'UI.PresentationVariantType',
-        Visualizations : [
-            '@UI.LineItem#BotTypes'
-        ],
-        SortOrder : [
-            {
-                $Type : 'Common.SortOrderType',
-                Property : sequence,
-                Descending : false
-            }
-        ]
+    UI.PresentationVariant #BotTypes: {
+        $Type         : 'UI.PresentationVariantType',
+        Visualizations: ['@UI.LineItem#BotTypes'],
+        SortOrder     : [{
+            $Type     : 'Common.SortOrderType',
+            Property  : sequence,
+            Descending: false
+        }]
     },
-    UI.HeaderInfo         : {
+    UI.HeaderInfo                   : {
         Title         : {
             $Type: 'UI.DataField',
             Value: name,
@@ -182,7 +178,7 @@ annotate service.BotTypes with @(
             Value: description,
         },
     },
-    UI.Facets             : [
+    UI.Facets                       : [
         {
             $Type : 'UI.CollectionFacet',
             Label : 'Bot Type',
@@ -209,7 +205,7 @@ annotate service.BotTypes with @(
             Target: 'prompts/@UI.LineItem#Prompts',
         }
     ],
-    UI.FieldGroup #BotTypeGeneral: {
+    UI.FieldGroup #BotTypeGeneral   : {
         $Type: 'UI.FieldGroupType',
         Data : [
             {
@@ -252,7 +248,7 @@ annotate service.BotTypes with @(
                 Value: contextType_code,
                 Label: '{i18n>ContextType}',
             },
-             {
+            {
                 $Type: 'UI.DataField',
                 Value: subTaskType_ID,
                 Label: '{i18n>subTaskType}',
@@ -269,45 +265,43 @@ annotate service.BotTypes with @(
             },
         ],
     },
-    UI.FieldGroup #BotTypeRAG   : {
-        Data: [
-            {
-                $Type: 'UI.DataField',
-                Value: isRAGEnabled,
-                Label: '{i18n>IsRagenabled}',
-            },
-            {
-                $Type: 'UI.DataField',
-                Value: ragClass,
-                Label: '{i18n>RagClass}',
-            },
-            {
-                $Type: 'UI.DataField',
-                Value: ragSource,
-                Label: '{i18n>RagSource}',
-            },
-            {
-                $Type: 'UI.DataField',
-                Value: ragTopK,
-                Label: '{i18n>RagTopk}',
-            },
-            {
-                $Type: 'UI.DataField',
-                Value: ragThreshold,
-                Label: '{i18n>RagThreshold}',
-            },
-            {
-                $Type: 'UI.DataField',
-                Value: ragParameter,
-                Label: '{i18n>RagParameter}',
-            },
-            {
-                $Type: 'UI.DataField',
-                Value: ragOutputContextPath,
-                Label: '{i18n>RagOutputContextPath}',
-            },
-        ]
-    }
+    UI.FieldGroup #BotTypeRAG       : {Data: [
+        {
+            $Type: 'UI.DataField',
+            Value: isRAGEnabled,
+            Label: '{i18n>IsRagenabled}',
+        },
+        {
+            $Type: 'UI.DataField',
+            Value: ragClass,
+            Label: '{i18n>RagClass}',
+        },
+        {
+            $Type: 'UI.DataField',
+            Value: ragSource,
+            Label: '{i18n>RagSource}',
+        },
+        {
+            $Type: 'UI.DataField',
+            Value: ragTopK,
+            Label: '{i18n>RagTopk}',
+        },
+        {
+            $Type: 'UI.DataField',
+            Value: ragThreshold,
+            Label: '{i18n>RagThreshold}',
+        },
+        {
+            $Type: 'UI.DataField',
+            Value: ragParameter,
+            Label: '{i18n>RagParameter}',
+        },
+        {
+            $Type: 'UI.DataField',
+            Value: ragOutputContextPath,
+            Label: '{i18n>RagOutputContextPath}',
+        },
+    ]}
 );
 
 annotate service.BotTypes with {
@@ -479,6 +473,25 @@ annotate service.PromptTexts with {
             ],
         },
         Common.ValueListWithFixedValues: false,
+    );
+    role @(
+        Common.Text                    : role.descr,
+        Common.ValueList               : {
+            $Type         : 'Common.ValueListType',
+            CollectionPath: 'RoleTypes',
+            Parameters    : [
+                {
+                    $Type            : 'Common.ValueListParameterInOut',
+                    LocalDataProperty: role_code,
+                    ValueListProperty: 'code',
+                },
+                {
+                    $Type            : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty: 'name',
+                },
+            ],
+        },
+        Common.ValueListWithFixedValues: true
     )
 };
 
@@ -489,6 +502,11 @@ annotate service.PromptTexts with @(
             $Type: 'UI.DataField',
             Value: lang_code,
             Label: '{i18n>Language}',
+        },
+        {
+            $Type: 'UI.DataField',
+            Value: role_code,
+            Label: '{i18n>Role}',
         },
         {
             $Type: 'UI.DataField',
@@ -525,6 +543,11 @@ annotate service.PromptTexts with @(
             },
             {
                 $Type: 'UI.DataField',
+                Value: role_code,
+                Label: '{i18n>Role}',
+            },
+            {
+                $Type: 'UI.DataField',
                 Value: name,
                 Label: '{i18n>Name}',
 
@@ -542,4 +565,3 @@ annotate service.PromptTexts with @(
 annotate service.PromptTexts with {
     content @UI.MultiLineText: true
 };
-

@@ -9,6 +9,7 @@ import cds.gen.configservice.PromptTexts;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.service.PromptService;
 import customer.ai2code.service.TaskBotDataService;
+import customer.ai2code.service.constant.AIConstants;
 import customer.ai2code.service.impl.rag.RAGExtractionFactoryService;
 import customer.ai2code.service.rag.RAGExtraction;
 import customer.ai2code.service.variable.VariableContext;
@@ -58,7 +59,7 @@ public class PromptServiceImpl implements PromptService {
     public List<PromptTexts> getPrompts(Bot bot) {
         try {
             // 1. 查询BotType对应的所有PromptTexts
-            List<PromptTexts> prompts = genericCqnService.getPromptTextsByBotType(bot.getBotType().getId());
+            List<PromptTexts> prompts = genericCqnService.getPromptTextsByBotType(bot.getBotType().getId(), bot.getLocale());
 
             // 2. 构建变量解析上下文
             VariableContext context = buildVariableContext(bot);
@@ -142,6 +143,7 @@ public class PromptServiceImpl implements PromptService {
                 if (ragContent != null && !ragContent.isEmpty()) {
                     // PromptTexts ragPrompt = new PromptTexts();
                     ragPrompt.setContent(ragContent);
+                    ragPrompt.setRoleCode(AIConstants.Roles.SYSTEM);
                     // prompts.add(ragPrompt);
                 }
 

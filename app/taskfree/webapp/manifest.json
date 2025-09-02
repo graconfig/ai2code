@@ -24,6 +24,19 @@
           "odataVersion": "4.0"
         }
       }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "taskfree-Display": {
+          "semanticObject": "taskfree",
+          "action": "Display",
+          "title": "task free",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
     }
   },
   "sap.ui": {
@@ -78,6 +91,9 @@
           "autoExpandSelect": true,
           "earlyRequests": true
         }
+      },
+      "local": {
+        "type": "sap.ui.model.json.JSONModel"
       }
     },
     "resources": {
@@ -192,8 +208,8 @@
         "TargetAIConversation": {
           "viewType": "XML",
           "clearControlAggregation": false,
-          "viewId": "AIConversationPage",
-          "viewName": "AIConversationPage",
+          "viewId": "AIConversationStreamingPage",
+          "viewName": "AIConversationStreamingPage",
           "controlId": "navMainContents",
           "parent": "TargetTaskRunNav"
         },

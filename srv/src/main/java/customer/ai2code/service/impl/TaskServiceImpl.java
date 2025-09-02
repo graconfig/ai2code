@@ -15,6 +15,7 @@ import customer.ai2code.service.BotService;
 import customer.ai2code.service.TaskService;
 import customer.ai2code.service.ContextService;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sap.cds.ql.cqn.AnalysisResult;
@@ -32,6 +33,7 @@ public class TaskServiceImpl implements TaskService {
     private final ContextService contextService;
     private final TaskBotCacheManager cacheManager;
     private final ObjectMapper objectMapper;
+    // private final ApplicationEventPublisher eventPublisher;
 
     // 全局Task缓存链表
     // private final Map<String, Task> taskCache = new ConcurrentHashMap<>();
@@ -41,13 +43,16 @@ public class TaskServiceImpl implements TaskService {
             GenericCqnService genericCqnService,
             ContextService contextService,
             TaskBotCacheManager cacheManager,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper
+            // ApplicationEventPublisher eventPublisher
+            ) {
 
         this.botService = botService;
         this.genericCqnService = genericCqnService;
         this.contextService = contextService;
         this.cacheManager = cacheManager;
         this.objectMapper = objectMapper;
+        // this.eventPublisher = eventPublisher;
     }
 
     /*
@@ -103,7 +108,8 @@ public class TaskServiceImpl implements TaskService {
 
         // 3.2 获取绝对路径
         String absoluteOutputContextPath = contextService.getContextFullPath(bot, contextPath);
-        // String absoluteOutputContextPath = contextService.getContextFullPath(botInstanceId, contextPath);
+        // String absoluteOutputContextPath =
+        // contextService.getContextFullPath(botInstanceId, contextPath);
         // 4. 创建Task
         Tasks newTask = genericCqnService.createAndInsertSubTask(name, description, absoluteOutputContextPath,
                 sequence, botInstanceId, PBotType.getSubTaskTypeId());
@@ -128,6 +134,7 @@ public class TaskServiceImpl implements TaskService {
             // 放入缓存 - 使用新的缓存管理器
             cacheManager.addBotInstanceNode(botNew);
         }
+
 
         // 8.返回新建的Task对象
         return task;
@@ -172,7 +179,7 @@ public class TaskServiceImpl implements TaskService {
         return taskNode.getTaskObject();
         // Task cachedTask = cacheManager.getCachedTask(taskId);
         // if (cachedTask != null) {
-        //     return cachedTask;
+        // return cachedTask;
         // }
 
         // // 从数据库查询
@@ -286,37 +293,38 @@ public class TaskServiceImpl implements TaskService {
                     // Bot bot = botService.getCurrentBot(botInstance.getId());
 
                     // 创建Bot节点
-                    HierarchyNode botNode = new HierarchyNode();
-                    botNode.type = "bot";
-                    botNode.id = cachedBot.getId();
-                    botNode.name = cachedBot.getBotObject().getBotType().getName();
-                    botNode.description = cachedBot.getBotObject().getBotType().getDescription();
-                    // botNode.functionType = cachedBot.getBotObject().getBotInstance().getTypeId();
-                    botNode.functionType = cachedBot.getBotObject().getBotType().getFunctionTypeCode();
-                    botNode.status = cachedBot.getBotStatus(); // 使用 getStatusCode() 而不是 getStatus()
-                    botNode.sequence = cachedBot.getBotObject().getBotInstance().getSequence() != null ? cachedBot.getBotObject().getBotInstance().getSequence()
-                            : 0;
+                    HierarchyNode botNode = buildBotHierarchy(cachedBot);
+                    // HierarchyNode botNode = new HierarchyNode();
+                    // botNode.type = "bot";
+                    // botNode.id = cachedBot.getId();
+                    // botNode.name = cachedBot.getBotObject().getBotType().getName();
+                    // botNode.description = cachedBot.getBotObject().getBotType().getDescription();
+                    // // botNode.functionType = cachedBot.getBotObject().getBotInstance().getTypeId();
+                    // botNode.functionType = cachedBot.getBotObject().getBotType().getFunctionTypeCode();
+                    // botNode.status = cachedBot.getBotStatus(); // 使用 getStatusCode() 而不是 getStatus()
+                    // botNode.sequence = cachedBot.getBotObject().getBotInstance().getSequence() != null
+                    //         ? cachedBot.getBotObject().getBotInstance().getSequence()
+                    //         : 0;
 
-                    // 获取Bot下的子任务
-                    // List<Tasks> subTasks = bot.getBotInstance().getTasks();
-                    List<TaskBotNode> subTasks = cacheManager.getChildren(cachedBot);
+                    // // 获取Bot下的子任务
+                    // // List<Tasks> subTasks = bot.getBotInstance().getTasks();
+                    // List<TaskBotNode> subTasks = cacheManager.getChildren(cachedBot);
 
+                    // if (subTasks != null && !subTasks.isEmpty()) {
+                    //     botNode.items = new ArrayList<>();
 
-                    if (subTasks != null && !subTasks.isEmpty()) {
-                        botNode.items = new ArrayList<>();
-
-                        for (TaskBotNode cachedTask : subTasks) {
-                            try {
-                                // 递归处理子任务
-                                // Task subTask = getCurrentTask(subTask.getId());
-                                HierarchyNode subTaskNode = buildHierarchy(cachedTask.getTaskObject());
-                                botNode.items.add(subTaskNode);
-                            } catch (Exception e) {
-                                System.err.println("Error processing sub-task: " + cachedTask.getId() + ", error: "
-                                        + e.getMessage());
-                            }
-                        }
-                    }
+                    //     for (TaskBotNode cachedTask : subTasks) {
+                    //         try {
+                    //             // 递归处理子任务
+                    //             // Task subTask = getCurrentTask(subTask.getId());
+                    //             HierarchyNode subTaskNode = buildHierarchy(cachedTask.getTaskObject());
+                    //             botNode.items.add(subTaskNode);
+                    //         } catch (Exception e) {
+                    //             System.err.println("Error processing sub-task: " + cachedTask.getId() + ", error: "
+                    //                     + e.getMessage());
+                    //         }
+                    //     }
+                    // }
 
                     taskNode.items.add(botNode);
 
@@ -328,6 +336,45 @@ public class TaskServiceImpl implements TaskService {
         }
 
         return taskNode;
+    }
+    
+    @Override
+    public HierarchyNode buildBotHierarchy(TaskBotNode cachedBot) {
+        // 创建Bot节点
+        // 创建Bot节点
+        HierarchyNode botNode = new HierarchyNode();
+        botNode.type = "bot";
+        botNode.id = cachedBot.getId();
+        botNode.name = cachedBot.getBotObject().getBotType().getName();
+        botNode.description = cachedBot.getBotObject().getBotType().getDescription();
+        // botNode.functionType = cachedBot.getBotObject().getBotInstance().getTypeId();
+        botNode.functionType = cachedBot.getBotObject().getBotType().getFunctionTypeCode();
+        botNode.status = cachedBot.getBotStatus(); // 使用 getStatusCode() 而不是 getStatus()
+        botNode.sequence = cachedBot.getBotObject().getBotInstance().getSequence() != null
+                ? cachedBot.getBotObject().getBotInstance().getSequence()
+                : 0;
+
+        // 获取Bot下的子任务
+        // List<Tasks> subTasks = bot.getBotInstance().getTasks();
+        List<TaskBotNode> subTasks = cacheManager.getChildren(cachedBot);
+
+        if (subTasks != null && !subTasks.isEmpty()) {
+            botNode.items = new ArrayList<>();
+
+            for (TaskBotNode cachedTask : subTasks) {
+                try {
+                    // 递归处理子任务
+                    // Task subTask = getCurrentTask(subTask.getId());
+                    HierarchyNode subTaskNode = buildHierarchy(cachedTask.getTaskObject());
+                    botNode.items.add(subTaskNode);
+                } catch (Exception e) {
+                    System.err.println("Error processing sub-task: " + cachedTask.getId() + ", error: "
+                            + e.getMessage());
+                }
+            }
+        }
+
+        return botNode;
     }
 
     /**

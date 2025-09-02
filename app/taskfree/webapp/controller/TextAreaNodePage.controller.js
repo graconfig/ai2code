@@ -1,58 +1,56 @@
 sap.ui.define([
   "sap/ui/core/mvc/Controller",
   "sap/m/MessageToast",
-  "sap/m/MessageBox",
   "sap/ui/model/json/JSONModel",
-  "ai/orchestration/taskfree/control/marked"
-], function (Controller, MessageToast, MessageBox, JSONModel, marked) {
+], function (Controller, MessageToast, JSONModel) {
   "use strict";
 
   return Controller.extend("ai.orchestration.taskfree.controller.TextAreaNodePage", {
-    onInit: function () {
+    onInit() {
       // 创建 viewModel 用于页面数据绑定
-      var oViewModel = new JSONModel({
+      const oViewModel = new JSONModel({
         value: "",
         title: "Context Node",
         type: "",
         showReturnButton: false // 添加返回按钮显示控制
       });
-      
+
       this.getView().setModel(oViewModel, "viewModel");
 
       // 监听路由
-      var oRouter = this.getOwnerComponent().getRouter();
-      oRouter.getRoute("RouteTextAreaNodePage").attachPatternMatched(this._onRouteMatched, this);
+      this.getOwnerComponent()
+        .getRouter()
+        .getRoute("RouteTextAreaNodePage")
+        .attachPatternMatched(this._onRouteMatched, this);
 
     },
 
-    _onRouteMatched: function (oEvent) {
-      var oArgs = oEvent.getParameter("arguments");
-      var contextNodeId = oArgs && oArgs.contextNodeId;
-      var oViewModel = this.getView().getModel("viewModel");
-      if (oViewModel) {
-        oViewModel.setProperty("/value", "");
-        oViewModel.setProperty("/type", "");
-        oViewModel.setProperty("/showReturnButton", true);
-      }
+    async _onRouteMatched(oEvent) {
+      const oArgs = oEvent.getParameter("arguments");
+      const contextNodeId = oArgs?.contextNodeId;
+      const oViewModel = this.getView().getModel("viewModel");
 
+      oViewModel?.setProperty("/value", "");
+      oViewModel?.setProperty("/type", "");
+      oViewModel?.setProperty("/showReturnButton", true);
 
-      var oController = this;
       if (!contextNodeId) {
         MessageToast.show("No context node id provided");
-        oViewModel.setProperty("/value", "");
-        oViewModel.setProperty("/title", "Context Node");
-        oViewModel.setProperty("/type", "");
+        oViewModel?.setProperty("/value", "");
+        oViewModel?.setProperty("/title", "Context Node");
+        oViewModel?.setProperty("/type", "");
         this._setMarkdownContent("");
         return;
       }
-      // Set busy state
-      oController.getView().setBusy(true);
+
+      this.getView().setBusy(true);
 
       // 直接查OData
-      var oModel = this.getView().getModel();
-      var sPath = "/ContextNodes(" + contextNodeId + ")";
-      oModel.bindContext(sPath).requestObject().then(function (oData) {
-        oController.getView().setBusy(false);
+      const oModel = this.getView().getModel();
+      const sPath = "/ContextNodes(" + contextNodeId + ")";
+
+      try {
+        const oData = await oModel.bindContext(sPath).requestObject();
 
         let editorType;
         switch (oData.type?.toLowerCase()) {
@@ -72,54 +70,51 @@ sap.ui.define([
             editorType = "json";
         }
 
-        let value = oData.value;
-
-        oViewModel.setProperty("/type", editorType);
-        oViewModel.setProperty("/value", value);
-        oViewModel.setProperty("/title", oData.label);
-      }).catch(function () {
-        oController.getView().setBusy(false);
-        oViewModel.setProperty("/title", "Context Node");
-        oViewModel.setProperty("/type", "");
-        oViewModel.setProperty("/value", "加载失败");
+        oViewModel?.setProperty("/type", editorType);
+        oViewModel?.setProperty("/value", oData.value);
+        oViewModel?.setProperty("/title", oData.label);
+      } catch (error) {
+        oViewModel?.setProperty("/title", "Context Node");
+        oViewModel?.setProperty("/type", "");
+        oViewModel?.setProperty("/value", "加载失败");
         MessageToast.show("加载失败");
-      });
+      } finally {
+        this.getView().setBusy(false);
+      }
     },
 
-    onReturnToConversation: function () {
+    async onReturnToConversation() {
       // 从路由获取contextNodeId
-      var oRouter = this.getOwnerComponent().getRouter();
-      var oCurrentRoute = oRouter.getHashChanger().getHash();
-      var oRouteInfo = oRouter.getRouteInfoByHash(oCurrentRoute);
-      var sContextNodeId = oRouteInfo && oRouteInfo.arguments && oRouteInfo.arguments.contextNodeId;
+      const oRouter = this.getOwnerComponent().getRouter();
+      const oCurrentRoute = oRouter.getHashChanger().getHash();
+      const oRouteInfo = oRouter.getRouteInfoByHash(oCurrentRoute);
+      const sContextNodeId = oRouteInfo?.arguments?.contextNodeId;
 
       if (!sContextNodeId) {
         MessageToast.show("ContextNode ID not available");
         return;
       }
 
-      // 根据数据模型关联关系：通过ContextNode的botInstances导航属性获取关联的BotInstance
-      // 同时展开type关联以获取functionType信息
-      var oModel = this.getView().getModel();
-      var sContextNodePath = "/ContextNodes(" + sContextNodeId + ")";
+      const oModel = this.getView().getModel();
+      const sContextNodePath = "/ContextNodes(" + sContextNodeId + ")";
 
-      var that = this;
-      oModel.bindContext(sContextNodePath, null, {
-        $expand: "botInstances($expand=task,type)"
-      }).requestObject().then(function (oContextNode) {
+      try {
+        const oContextNode = await oModel.bindContext(sContextNodePath, null, {
+          $expand: "botInstances($expand=task,type)"
+        }).requestObject();
 
         if (!oContextNode) {
           MessageToast.show("ContextNode not found");
           return;
         }
 
-        if (!oContextNode.botInstances || oContextNode.botInstances.length === 0) {
+        if (!oContextNode.botInstances) {
           MessageToast.show("No associated BotInstance found for this ContextNode");
           return;
         }
 
         // 在BotInstances中找到contextID等于sContextNodeId的特定记录
-        var oBotInstance = oContextNode.botInstances.find(function (botInstance) {
+        const oBotInstance = oContextNode.botInstances.find(function (botInstance) {
           return botInstance.contextID === sContextNodeId;
         });
 
@@ -127,9 +122,9 @@ sap.ui.define([
           MessageToast.show("No matching BotInstance found with contextID: " + sContextNodeId);
           return;
         }
-        
-        var sBotInstanceId = oBotInstance.ID;
-        var sTaskId = oBotInstance.task ? oBotInstance.task.ID : oBotInstance.task_ID;
+
+        const sBotInstanceId = oBotInstance.ID;
+        const sTaskId = oBotInstance.task ? oBotInstance.task.ID : oBotInstance.task_ID;
 
         if (!sTaskId) {
           MessageToast.show("Task ID not available");
@@ -137,8 +132,8 @@ sap.ui.define([
         }
 
         // 获取botInstance的functionType来决定跳转路由
-        var sFunctionType = oBotInstance.type && oBotInstance.type.functionType_code;
-        
+        const sFunctionType = oBotInstance?.type?.functionType_code;
+
         if (!sFunctionType) {
           MessageToast.show("BotInstance function type not available");
           return;
@@ -158,18 +153,86 @@ sap.ui.define([
           });
         }
 
-      }).catch(function (oError) {
-        MessageToast.show("Error loading BotInstance: " + (oError.message || oError.toString()));
-      });
-    },
-
-    onExit: function () {
-      var oViewModel = this.getView().getModel("viewModel");
-      if (oViewModel) {
-        oViewModel.setProperty("/value", "");
-        oViewModel.setProperty("/title", "");
-        oViewModel.setProperty("/type", "");
+      } catch (error) {
+        MessageToast.show("Error loading BotInstance: " + (error.message || error.toString()));
       }
+    },
+// 新增：查找 BotInstance 的工具函数
+        async _findBotInstanceIdByContextNodeId(sContextNodeId) {
+            const oModel = this.getView().getModel();
+            const sContextNodePath = "/ContextNodes(" + sContextNodeId + ")";
+            const oContextNode = await oModel.bindContext(sContextNodePath, null, {
+                $expand: "botInstances($expand=task,type)"
+            }).requestObject();
+
+            if (!oContextNode || !oContextNode.botInstances || oContextNode.botInstances.length === 0) {
+                return null;
+            }
+            const oBotInstance = oContextNode.botInstances.find(function (botInstance) {
+                return botInstance.contextID === sContextNodeId;
+            });
+            return oBotInstance ? oBotInstance.ID : null;
+        },
+
+        // 新增：创建 BotMessage 的工具函数
+        async _createBotMessage(sBotInstanceId, sValue) {
+            const oModel = this.getView().getModel();
+            const oBotMessagesBinding = oModel.bindList("/BotMessages", null, null, null, { $$updateGroupId: "$auto" });
+            await oBotMessagesBinding.create({
+                role: "user",
+                message: sValue,
+                botInstance_ID: sBotInstanceId
+            });
+        },
+
+        onSave: async function () {
+            const oView = this.getView();
+            const oModel = oView.getModel();
+            const oRouter = this.getOwnerComponent().getRouter();
+            const oCurrentRoute = oRouter.getHashChanger().getHash();
+            const oRouteInfo = oRouter.getRouteInfoByHash(oCurrentRoute);
+            const sContextNodeId = oRouteInfo && oRouteInfo.arguments && oRouteInfo.arguments.contextNodeId;
+            const sValue = oView.byId("textAreaCodeEditor").getValue();
+
+            if (!sContextNodeId) {
+                MessageToast.show("ContextNodeId 不存在，无法保存");
+                return;
+            }
+
+            oView.setBusy(true);
+            const sPath = "/ContextNodes(" + sContextNodeId + ")";
+
+            try {
+                // 1. 保存 ContextNode
+                const oBinding = oModel.bindContext(sPath, null, { $$updateGroupId: "$auto" });
+                await oBinding.requestObject();
+                const oContext = oBinding.getBoundContext();
+                oContext.setProperty("value", sValue);
+                //await oModel.submitBatch("saveGroup");
+
+                // 2. 查找 BotInstanceId
+                const sBotInstanceId = await this._findBotInstanceIdByContextNodeId(sContextNodeId);
+                if (!sBotInstanceId) {
+                    MessageToast.show("No associated BotInstance found for this ContextNode");
+                    return;
+                }
+
+                // 3. 新增 BotMessage
+                await this._createBotMessage(sBotInstanceId, sValue);
+
+                MessageToast.show("保存成功，并已同步到 BotInstance");
+            } catch (e) {
+                MessageToast.show("保存失败");
+            } finally {
+                oView.setBusy(false);
+            }
+        },
+    onExit() {
+      const oViewModel = this.getView().getModel("viewModel");
+      oViewModel?.setProperty("/value", "");
+      oViewModel?.setProperty("/title", "");
+      oViewModel?.setProperty("/type", "");
+
     }
   });
 });

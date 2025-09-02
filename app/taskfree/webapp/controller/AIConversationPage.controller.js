@@ -11,18 +11,28 @@ sap.ui.define(
     return Controller.extend(
       "ai.orchestration.taskfree.controller.AIConversationPage",
       {
-        onInit: function () {
-          const oRouter = this.getOwnerComponent().getRouter();
-          oRouter.getRoute("RouteAIConversation").attachPatternMatched(this._onRouteMatched, this);
+        onInit() {
+          this.getOwnerComponent()
+            .getRouter()
+            .getRoute("RouteAIConversation")
+            .attachPatternMatched(this._onRouteMatched, this);
 
           this._currentBotInstanceId = null;
         },
-
-        _onRouteMatched: function (oEvent) {
+        onAfterRendering: function() {
+          var oInput = this.byId("aiPageMessageInput");
+          if (oInput) {
+            oInput.$().on("keydown", function(e) {
+              // 只让输入框自己处理方向键
+              e.stopPropagation();
+            });
+          }
+        },
+        _onRouteMatched(oEvent) {
           const oArguments = oEvent.getParameter("arguments");
-
           const sBotInstanceId = oArguments.botInstanceId;
-          if (sBotInstanceId && sBotInstanceId.trim() !== '') {
+
+          if (sBotInstanceId) {
             this._currentBotInstanceId = sBotInstanceId;
 
             this.getView().bindElement({
@@ -36,22 +46,21 @@ sap.ui.define(
           }
         },
 
-        onRefreshPress: function () {
-          var oElementBinding = this.getView().getElementBinding();
+        onRefreshPress() {
+          const oElementBinding = this.getView().getElementBinding();
           if (oElementBinding) {
             oElementBinding.refresh();
-            var sMessage = this.getView().getModel("i18n").getResourceBundle().getText("messagesRefreshed");
+            const sMessage = this.getView().getModel("i18n").getResourceBundle().getText("messagesRefreshed");
             MessageToast.show(sMessage);
           } else {
             MessageToast.show("No binding available for refresh");
           }
         },
 
-        onClearPress: function () {
-          var that = this;
-          var oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
+        onClearPress() {
+          const oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
 
-          var oBindingContext = this.getView().getBindingContext();
+          const oBindingContext = this.getView().getBindingContext();
           if (!oBindingContext) {
             MessageToast.show("No context available for clearing messages");
             return;
@@ -61,32 +70,31 @@ sap.ui.define(
             oResourceBundle.getText("clearConfirmMessage"),
             {
               title: oResourceBundle.getText("clearConfirmTitle"),
-              onClose: function (oAction) {
+              onClose: (oAction) => {
                 if (oAction === MessageBox.Action.OK) {
-                  that._clearAllMessages();
+                  this._clearAllMessages();
                 }
               }
             }
           );
         },
 
-        _clearAllMessages: function () {
-          var oBindingContext = this.getView().getBindingContext();
+        _clearAllMessages() {
+          const oBindingContext = this.getView().getBindingContext();
           if (!oBindingContext) {
             MessageToast.show("No context available for clearing messages");
             return;
           }
 
-          var oMessageList = this.byId("aiPageMessageList");
-          var oBinding = oMessageList ? oMessageList.getBinding("items") : null;
+          const oMessageList = this.getView().byId("aiPageMessageList");
+          const oBinding = oMessageList ? oMessageList.getBinding("items") : null;
 
           if (!oBinding) {
             MessageToast.show("No message binding found");
             return;
           }
 
-          var that = this;
-          var aContexts = oBinding.getAllCurrentContexts();
+          const aContexts = oBinding.getAllCurrentContexts();
 
           if (!aContexts || aContexts.length === 0) {
             MessageToast.show("No messages to clear");
@@ -97,17 +105,18 @@ sap.ui.define(
             oMessageList.setBusy(true);
           }
 
-          var aPromises = [];
+          let aPromises = [];
 
-          aContexts.forEach(function (oContext) {
+          aContexts.forEach((oContext) => {
             try {
               if (oContext && typeof oContext.getPath === 'function') {
-                var sPath = oContext.getPath();
+                const sPath = oContext.getPath();
 
-                var oDeletePromise = oContext.delete("$auto").then(function () {
-                }).catch(function (oError) {
-                  throw oError;
-                });
+                const oDeletePromise = oContext.delete("$auto")
+                  .then(() => {
+                  }).catch((oError) => {
+                    throw oError;
+                  });
 
                 aPromises.push(oDeletePromise);
               }
@@ -116,35 +125,36 @@ sap.ui.define(
             }
           });
 
-          Promise.all(aPromises).then(function (aResults) {
-            var oResourceBundle = that.getView().getModel("i18n").getResourceBundle();
-            MessageToast.show(oResourceBundle.getText("messagesClearedSuccess") || "All messages cleared successfully");
+          Promise.all(aPromises)
+            .then((aResults) => {
+              const oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
+              MessageToast.show(oResourceBundle.getText("messagesClearedSuccess") || "All messages cleared successfully");
 
-            // Refresh the element binding
-            var oElementBinding = that.getView().getElementBinding();
-            if (oElementBinding) {
-              oElementBinding.refresh();
-            }
+              // Refresh the element binding
+              const oElementBinding = this.getView().getElementBinding();
+              if (oElementBinding) {
+                oElementBinding.refresh();
+              }
 
-          }).catch(function (oError) {
-            MessageToast.show("Error clearing messages: " + (oError.message || oError.toString()));
+            }).catch((oError) => {
+              MessageToast.show("Error clearing messages: " + (oError.message || oError.toString()));
 
-          }).finally(function () {
-            if (oMessageList) {
-              oMessageList.setBusy(false);
-            }
-          });
+            }).finally(() => {
+              if (oMessageList) {
+                oMessageList.setBusy(false);
+              }
+            });
         },
 
-        onPostMessage: function (event) {
+        onPostMessage(event) {
           if (!event.getParameter("value")) {
             return;
           }
 
           const message = event.getParameter("value");
-          const messageList = this.byId("aiPageMessageList");
+          const messageList = this.getView().byId("aiPageMessageList");
 
-          var oBindingContext = this.getView().getBindingContext();
+          const oBindingContext = this.getView().getBindingContext();
 
           if (!oBindingContext) {
             MessageToast.show("Bot instance not available. Please refresh the page.");
@@ -177,9 +187,9 @@ sap.ui.define(
           }
         },
 
-        onBtnAdoptPress: function (event) {
+        onBtnAdoptPress(event) {
           event.getSource().setBusy(true);
-          var context = event.getSource().getBindingContext();
+          const context = event.getSource().getBindingContext();
 
           if (!context) {
             MessageToast.show("No message context available");
@@ -187,39 +197,39 @@ sap.ui.define(
             return;
           }
 
-          var contextBinding = this.getView().getModel().bindContext("MainService.adopt(...)", context);
-          var that = this;
+          const contextBinding = this.getView().getModel().bindContext("MainService.adopt(...)", context);
 
-          contextBinding.invoke().then(function (result) {
-            MessageToast.show("Message adopted successfully");
+          contextBinding.invoke()
+            .then((result) => {
+              MessageToast.show("Message adopted successfully");
 
-            // Notify navigation controller that ContextNode data has changed
-            sap.ui.getCore().getEventBus().publish("DataUpdate", "ContextNodeChanged");
+              // Notify navigation controller this ContextNode data has changed
+              sap.ui.getCore().getEventBus().publish("DataUpdate", "ContextNodeChanged");
 
-            var oElementBinding = that.getView().getElementBinding();
-            if (oElementBinding) {
-              oElementBinding.refresh();
-            }
+              const oElementBinding = this.getView().getElementBinding();
+              if (oElementBinding) {
+                oElementBinding.refresh();
+              }
 
-          }).catch(function (error) {
-            MessageToast.show("Error adopting message: " + (error.message || error.toString()));
+            }).catch((error) => {
+              MessageToast.show("Error adopting message: " + (error.message || error.toString()));
 
-          }).finally(function () {
-            event.getSource().setBusy(false);
-          });
+            }).finally(() => {
+              event.getSource().setBusy(false);
+            });
         },
 
-        _scheduleScrollToBottom: function () {
+        _scheduleScrollToBottom() {
           setTimeout(() => {
             this._scrollToBottom();
           }, 100);
         },
 
-        _scrollToBottom: function () {
+        _scrollToBottom() {
           try {
-            var oMessageList = this.byId("aiPageMessageList");
+            const oMessageList = this.getView().byId("aiPageMessageList");
             if (oMessageList && oMessageList.getItems().length > 0) {
-              var oLastItem = oMessageList.getItems()[oMessageList.getItems().length - 1];
+              const oLastItem = oMessageList.getItems()[oMessageList.getItems().length - 1];
               if (oLastItem) {
                 oLastItem.getDomRef()?.scrollIntoView({
                   behavior: "smooth",
@@ -232,70 +242,71 @@ sap.ui.define(
           }
         },
 
-        onGotoContextPress: function () {
-          var oBindingContext = this.getView().getBindingContext();
+        onGotoContextPress() {
+          const oBindingContext = this.getView().getBindingContext();
           if (!oBindingContext) {
             MessageToast.show("No BotInstance context available");
             return;
           }
 
-          var that = this;
-
           // 重新获取最新的BotInstance数据
-          oBindingContext.requestObject().then(function (oBotInstance) {
-            // 检查BotInstance是否有关联的ContextNode
-            if (!oBotInstance.context || !oBotInstance.context.ID) {
-              MessageToast.show("No ContextNode associated with this BotInstance. Please adopt a message first to create the context.");
-              return;
-            }
-
-            var sContextNodeId = oBotInstance.context.ID;
-
-            // 获取ContextNode的详细信息以确定类型
-            var oModel = that.getView().getModel();
-            var sContextPath = "/ContextNodes(" + sContextNodeId + ")";
-
-            oModel.bindContext(sContextPath).requestObject().then(function (oContextNode) {
-              if (!oContextNode) {
-                MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
+          oBindingContext.requestObject()
+            .then((oBotInstance) => {
+              // 检查BotInstance是否有关联的ContextNode
+              if (!oBotInstance.context || !oBotInstance.context.ID) {
+                MessageToast.show("No ContextNode associated with this BotInstance. Please adopt a message first to create the context.");
                 return;
               }
 
-              // 切换左侧导航到ContextNodes视图
+              const sContextNodeId = oBotInstance.context.ID;
 
-              var sType = (oContextNode.type || "string").toLowerCase();
-              var oRouter = that.getOwnerComponent().getRouter();
+              // 获取ContextNode的详细信息以确定类型
+              const oModel = this.getView().getModel();
+              const sContextPath = "/ContextNodes(" + sContextNodeId + ")";
 
-              // 根据类型跳转到对应的页面
-              var sRouteName;
-              switch (sType) {
-                case "code":
-                case "json":
-                  sRouteName = "RouteTextAreaNodePage";
-                  break;
-                case "markdown":
-                  sRouteName = "RouteMarkDownNodePage";
-                  break;
-                case "string":
-                default:
-                  sRouteName = "RouteTextNodePage";
-                  break;
-              }
+              oModel.bindContext(sContextPath)
+                .requestObject()
+                .then((oContextNode) => {
+                  if (!oContextNode) {
+                    MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
+                    return;
+                  }
 
-              oRouter.navTo(sRouteName, {
-                contextNodeId: sContextNodeId
-              });
+                  // 切换左侧导航到ContextNodes视图
 
-            }).catch(function (oError) {
-              MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
+                  const sType = (oContextNode.type || "string").toLowerCase();
+                  const oRouter = this.getOwnerComponent().getRouter();
+
+                  // 根据类型跳转到对应的页面
+                  let sRouteName;
+                  switch (sType) {
+                    case "code":
+                    case "json":
+                      sRouteName = "RouteTextAreaNodePage";
+                      break;
+                    case "markdown":
+                      sRouteName = "RouteMarkDownNodePage";
+                      break;
+                    case "string":
+                    default:
+                      sRouteName = "RouteTextNodePage";
+                      break;
+                  }
+
+                  oRouter.navTo(sRouteName, {
+                    contextNodeId: sContextNodeId
+                  });
+
+                }).catch((oError) => {
+                  MessageToast.show("No ContextNode found. Please adopt a message first to create the context.");
+                });
+
+            }).catch((oError) => {
+              MessageToast.show("Error loading BotInstance: " + (oError.message || oError.toString()));
             });
-
-          }).catch(function (oError) {
-            MessageToast.show("Error loading BotInstance: " + (oError.message || oError.toString()));
-          });
         },
 
-        onExit: function () {
+        onExit() {
           if (this._scrollTimeout) {
             clearTimeout(this._scrollTimeout);
           }

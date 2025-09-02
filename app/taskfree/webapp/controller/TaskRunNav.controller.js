@@ -1,763 +1,911 @@
 sap.ui.define(
-  ["sap/ui/core/mvc/Controller", "sap/m/MessageToast",
+  [
+    "sap/ui/core/mvc/Controller",
+    "sap/m/MessageToast",
     "sap/ui/model/json/JSONModel",
     "sap/ui/Device",
     "sap/ui/core/IconPool",
-    'sap/ui/core/BusyIndicator'
+    "sap/ui/core/BusyIndicator",
   ],
   /**
    * @param {typeof sap.ui.core.mvc.Controller} Controller
    */
-  function (Controller, MessageToast, JSONModel, Device, IconPool, BusyIndicator) {
+  function (
+    Controller,
+    MessageToast,
+    JSONModel,
+    Device,
+    IconPool,
+    BusyIndicator
+  ) {
     "use strict";
 
+    /**
+     * TaskRunNav Controller
+     * 优化结构、事件管理、缓存与导航逻辑，保持 JSONModel 绑定和现有功能不变
+     */
     return Controller.extend(
       "ai.orchestration.taskfree.controller.TaskRunNav",
       {
         _bExpanded: true,
-
         _isBusy: false,
 
-        onInit: function () {
-          this.getView().addStyleClass(this.getOwnerComponent().getContentDensityClass());
+        onInit() {
+          // 1. 视图样式
+          this.getView().addStyleClass(
+            this.getOwnerComponent().getContentDensityClass()
+          );
 
-          // Initialize navigation model
+          // 2. 初始化模型和缓存
           this._initNavigationModel();
-
-          // Initialize data cache
           this._initDataCache();
-
           this._initIcon();
 
-          // if the app starts on desktop devices with small or medium screen size, collapse the side navigation
+          // 3. 侧边栏自适应
           if (Device.resize.width <= 1024) {
             this.onSideNavButtonPress();
           }
-
+          // 4. 事件监听
           Device.media.attachHandler(this._handleWindowResize, this);
-          this.getOwnerComponent().getRouter().attachRouteMatched(this.onRouteChange.bind(this));
+          this._attachRouteHandler();
+          this._subscribeEventBus();
+
+          // 5. 处理页面刷新时的数据加载
+          this._handlePageRefresh();
         },
 
-        _initIcon: function () {
-          var b = [];
-          var c = {};
-          //Fiori Theme font family and URI
-          var t = {
-            fontFamily: "SAP-icons-TNT",
-            fontURI: sap.ui.require.toUrl("sap/tnt/themes/base/fonts/")
-          };
-          //Registering to the icon pool
-          IconPool.registerFont(t);
-          b.push(IconPool.fontLoaded("SAP-icons-TNT"));
-          c["SAP-icons-TNT"] = t;
-          //SAP Business Suite Theme font family and URI
-          var B = {
-            fontFamily: "BusinessSuiteInAppSymbols",
-            fontURI: sap.ui.require.toUrl("sap/ushell/themes/base/fonts/")
-          };
-          //Registering to the icon pool
-          IconPool.registerFont(B);
-          b.push(IconPool.fontLoaded("BusinessSuiteInAppSymbols"));
-          c["BusinessSuiteInAppSymbols"] = B;
+        onExit() {
+          Device.media.detachHandler(this._handleWindowResize, this);
+          this._detachRouteHandler();
+          this._unsubscribeEventBus();
         },
 
-        _initDataCache: function () {
-          // Initialize data cache for storing preloaded task data
+        /** ===================== 事件订阅与解绑 ===================== */
+        _attachRouteHandler() {
+          this._fnRouteHandler = this.onRouteChange.bind(this);
+          this.getOwnerComponent()
+            .getRouter()
+            .attachRouteMatched(this._fnRouteHandler);
+        },
+
+        _detachRouteHandler() {
+          if (this._fnRouteHandler) {
+            this.getOwnerComponent()
+              .getRouter()
+              .detachRouteMatched(this._fnRouteHandler);
+            this._fnRouteHandler = null;
+          }
+        },
+        _subscribeEventBus() {
+          const oBus = sap.ui.getCore().getEventBus();
+          const subscriptions = [
+            ["DataUpdate", "ContextNodeChanged", this._onDataUpdated],
+            ["DataUpdate", "BotInstanceChanged", this._onBotInstanceUpdated],
+            ["DataUpdate", "TaskChanged", this._onDataUpdated],
+            ["TaskRun", "TaskSelectionChanged", this._onTaskSelectionChanged],
+          ];
+
+          subscriptions.forEach(([channel, event, handler]) => {
+            oBus.subscribe(channel, event, handler, this);
+          });
+        },
+        _unsubscribeEventBus() {
+          const oBus = sap.ui.getCore().getEventBus();
+          const subscriptions = [
+            ["DataUpdate", "ContextNodeChanged", this._onDataUpdated],
+            ["DataUpdate", "BotInstanceChanged", this._onBotInstanceUpdated],
+            ["DataUpdate", "TaskChanged", this._onDataUpdated],
+            ["TaskRun", "TaskSelectionChanged", this._onTaskSelectionChanged],
+          ];
+
+          subscriptions.forEach(([channel, event, handler]) => {
+            oBus.unsubscribe(channel, event, handler, this);
+          });
+        },
+
+        /** ===================== 模型与缓存初始化 ===================== */
+        _initNavigationModel() {
+          const oNavigationModel = new JSONModel({
+            currentView: "tasks", // "tasks" or "contextNodes"
+            navigation: [],
+            fixedNavigation: [
+              { text: "Tasks", icon: "sap-icon://task", key: "tasks" },
+              {
+                text: "Context Nodes",
+                icon: "sap-icon://tree",
+                key: "contextNodes",
+              },
+            ],
+          });
+          this.getView().setModel(oNavigationModel, "side");
+        },
+
+        _initDataCache() {
           this._dataCache = {
             currentTask: null,
             botInstances: new Map(),
             contextNodes: new Map(),
             botMessages: new Map(),
             isLoaded: false,
-            invalidated: false
+            invalidated: false,
           };
-
-          // Listen for data update events
-          sap.ui.getCore().getEventBus().subscribe("DataUpdate", "ContextNodeChanged", this._onDataUpdated, this);
-          sap.ui.getCore().getEventBus().subscribe("DataUpdate", "BotInstanceChanged", this._onBotInstanceUpdated, this);
-          sap.ui.getCore().getEventBus().subscribe("DataUpdate", "TaskChanged", this._onDataUpdated, this);
-          sap.ui.getCore().getEventBus().subscribe("TaskRun", "TaskSelectionChanged", this._onTaskSelectionChanged, this);
+          // 事件订阅已集中管理
         },
 
-        onExit: function () {
-          Device.media.detachHandler(this._handleWindowResize, this);
-          // Unsubscribe from events
-          sap.ui.getCore().getEventBus().unsubscribe("DataUpdate", "ContextNodeChanged", this._onDataUpdated, this);
-          sap.ui.getCore().getEventBus().unsubscribe("DataUpdate", "BotInstanceChanged", this._onBotInstanceUpdated, this);
-          sap.ui.getCore().getEventBus().unsubscribe("DataUpdate", "TaskChanged", this._onDataUpdated, this);
-          sap.ui.getCore().getEventBus().unsubscribe("TaskRun", "TaskSelectionChanged", this._onTaskSelectionChanged, this);
-        },
+        _initIcon() {
+          // 注册自定义字体图标
+          const iconConfigs = [
+            {
+              name: "SAP-icons-TNT",
+              fontFamily: "SAP-icons-TNT",
+              fontURI: sap.ui.require.toUrl("sap/tnt/themes/base/fonts/"),
+            },
+            {
+              name: "BusinessSuiteInAppSymbols",
+              fontFamily: "BusinessSuiteInAppSymbols",
+              fontURI: sap.ui.require.toUrl("sap/ushell/themes/base/fonts/"),
+            },
+          ];
 
-        _onTaskSelectionChanged: function (sChannel, sEvent, oData) {
-          var sNewTaskId = oData.taskId;
-          // Invalidate cache if the new task is different from the current one
-          if (!this._dataCache.currentTask || this._dataCache.currentTask.ID !== sNewTaskId) {
-            this._dataCache.isLoaded = false;
-            this._dataCache.currentTask = null;
-          }
-        },
-
-        onRouteChange: function (oEvent) {
-
-          var sRouteName = oEvent.getParameter('name');
-          var oArguments = oEvent.getParameter('arguments');
-
-          // Only update selectedKey for routes that match our navigation structure
-          if (sRouteName === "RouteTaskRunNav") {
-            this.getView().getModel('side').setProperty('/selectedKey', sRouteName);
-          }
-
-          if (Device.system.phone) {
-            this.onSideNavButtonPress();
-          }
-
-          // Handle RouteTaskRunNav navigation from TaskRunList
-          if (sRouteName === "RouteTaskRunNav" && oArguments && oArguments.taskRunId) {
-            var sTaskId = oArguments.taskRunId;
-
-            // Initialize navigation model
-            this._initNavigationModel();
-
-            //set the nav level to 1
-            this.byId("idItemsNavigationTree").expandToLevel(1);
-
-            // Check if we need to load data for a new task
-            if (!this._dataCache.currentTask || this._dataCache.currentTask.ID !== sTaskId) {
-              this._preloadTaskData(sTaskId, "X");
-            } else {
-              this._buildNavigationFromCache();
-            }
-
-            // Store the task ID for reference, but don't bind the entire view to avoid context inheritance issues
-            this._currentTaskId = sTaskId;
-          }
-
-          // Handle cases where we need to extract task ID from detail routes
-          var sExtractedTaskId = null;
-          if (sRouteName.indexOf("RouteTask") === 0 || sRouteName.indexOf("RouteBotInstance") === 0 || sRouteName.indexOf("RouteContextNode") === 0 || sRouteName.indexOf("RouteAI") === 0) {
-            if (oArguments.taskRunId) {
-              sExtractedTaskId = oArguments.taskRunId;
-            } else if (oArguments.taskId) {
-              sExtractedTaskId = oArguments.taskId;
-            } else {
-              // Try to extract from current hash
-              var oRouter = this.getOwnerComponent().getRouter();
-              var sHash = oRouter.getHashChanger().getHash();
-              var aMatches = sHash.match(/Tasks\(([^)]+)\)/);
-              if (aMatches && aMatches[1]) {
-                sExtractedTaskId = aMatches[1].replace(/'/g, '');
-              }
-            }
-
-            // Smart routing: check if it's a subTask of current hierarchy
-            if (sExtractedTaskId) {
-              if (this._dataCache.isLoaded) {
-                var sRootTaskId = this._findRootTaskId(sExtractedTaskId);
-                if (sRootTaskId === this._dataCache.currentTask?.ID) {
-                  // It's a subTask of current hierarchy, just update selection
-                  this._restoreNavigationState();
-                  this._updateNavigationSelection(sExtractedTaskId);
-                  return;
-                } else if (sRootTaskId && sRootTaskId !== sExtractedTaskId) {
-                  // It's a subTask but not of current hierarchy, load the root task
-                  this._preloadTaskData(sRootTaskId, "");
-                  return;
-                }
-              } else {
-                // No data loaded yet, check if it might be a subTask by looking for root task
-                this._loadRootTaskForSubTask(sExtractedTaskId);
-                return;
-              }
-            }
-
-            // If we found a task ID and don't have navigation data, load it
-            if (sExtractedTaskId && (!this._dataCache.isLoaded || this._dataCache.currentTask?.ID !== sExtractedTaskId)) {
-              this._preloadTaskData(sExtractedTaskId, "");
-            }
-          }
-
-          // For detail routes, maintain navigation state but update selection
-          if (sRouteName === "RouteTaskDetail" && oArguments && oArguments.taskId) {
-            this._restoreNavigationState();
-            if (this._dataCache.isLoaded && this._dataCache.currentTask && this._dataCache.currentTask.ID === oArguments.taskId) {
-              this.getView().getModel('side').setProperty('/selectedKey', 'task_' + oArguments.taskId);
-            }
-          } else if (sRouteName === "RouteBotInstanceDetail" && oArguments && oArguments.botInstanceId) {
-            this._restoreNavigationState();
-            if (this._dataCache.isLoaded) {
-              this.getView().getModel('side').setProperty('/selectedKey', 'botinstance_' + oArguments.botInstanceId);
-            }
-          } else if (sRouteName === "RouteContextNodeDetail" && oArguments && oArguments.contextNodeId) {
-            this._restoreNavigationState();
-            if (this._dataCache.isLoaded) {
-              this.getView().getModel('side').setProperty('/selectedKey', 'contextnode_' + oArguments.contextNodeId);
-            }
-          } else if (sRouteName === "RouteAIConversation" && oArguments && oArguments.botInstanceId) {
-            this._restoreNavigationState();
-            if (this._dataCache.isLoaded) {
-              this.getView().getModel('side').setProperty('/selectedKey', 'botinstance_' + oArguments.botInstanceId);
-            }
-          }
-        },
-
-        _initNavigationModel: function () {
-          var oNavigationModel = new JSONModel({
-            selectedKey: "",
-            currentView: "tasks", // "tasks" or "contextNodes"
-            navigation: [],
-            fixedNavigation: [
-              {
-                text: "Tasks",
-                icon: "sap-icon://task",
-                key: "tasks"
-              },
-              {
-                text: "Context Nodes",
-                icon: "sap-icon://tree",
-                key: "contextNodes"
-              }
-            ]
+          iconConfigs.forEach(({ name, ...config }) => {
+            IconPool.registerFont(config);
+            IconPool.fontLoaded(name);
           });
-          this.getView().setModel(oNavigationModel, "side");
         },
 
-        _preloadTaskData: function (sTaskId, isBusy) {
-          var oModel = this.getOwnerComponent().getModel();
-          var that = this;
+        /** ===================== 路由与导航 ===================== */
+        onRouteChange(oEvent) {
+          const sRouteName = oEvent.getParameter("name");
+          const oArguments = oEvent.getParameter("arguments");
 
-          //加载busy
-          if (isBusy === "X") {
+          // 详情页处理
+          switch (sRouteName) {
+            case "RouteTaskRunNav":
+              this._handleTaskRunNavRoute(oArguments);
+              break;
+            case "RouteTaskDetail":
+              this._handleTaskDetailRoute(oArguments);
+              break;
+            case "RouteBotInstanceDetail":
+              this._handleBotInstanceDetailRoute(oArguments);
+              break;
+            case "RouteContextNodeDetail":
+            case "RouteTextNodePage":
+            case "RouteTextAreaNodePage":
+            case "RouteMarkDownNodePage":
+              this._handleContextNodeDetailRoute(oArguments);
+              break;
+            case "RouteAIConversation":
+              this._handleAIConversationRoute(oArguments);
+              break;
+
+            default:
+              break;
+          }
+        },
+
+        _handleTaskRunNavRoute(args) {
+          const taskId = args?.taskRunId;
+          if (!taskId) return;
+
+          this._initNavigationModel();
+
+          if (
+            !this._dataCache.currentTask ||
+            this._dataCache.currentTask.id !== taskId
+          ) {
+            this._preloadTaskData(taskId, true);
+          } else {
+            this._buildNavigationFromCache();
+            this._expandNavigationTree();
+          }
+
+          this.currentTaskId = taskId;
+        },
+
+        _handleTaskDetailRoute(args) {
+          this._restoreNavigationState();
+        },
+
+        _handleBotInstanceDetailRoute(args) {
+          this._restoreNavigationState();
+        },
+
+        _handleContextNodeDetailRoute(args) {
+          this._restoreNavigationState();
+        },
+
+        _handleAIConversationRoute(args) {
+          this._restoreNavigationState();
+        },
+        /** ===================== 数据加载与缓存 ===================== */
+        async _preloadTaskData(sTaskId, isBusy) {
+          const oModel = this.getOwnerComponent().getModel();
+
+          if (isBusy) {
             BusyIndicator.show();
           }
-          // Create binding with comprehensive $expand to get all related data in one request
-          var oBinding = oModel.bindContext("/Tasks(" + sTaskId + ")", null, {
-            $expand: "botInstances($expand=type,messages,tasks($expand=type,botInstances($expand=type,messages,tasks($expand=type,botInstances($expand=type))))),contextNodes"
-          });
 
-          oBinding.attachDataReceived(function () {
-            var oContext = oBinding.getBoundContext();
-            if (oContext) {
-              var oTaskData = oContext.getObject();
-              if (oTaskData) {
-                that._cacheTaskData(oTaskData);
-                that._buildNavigationFromCache();
-              }
-            }
-            if (BusyIndicator) {
+          try {
+            const sTaskPath = "/Tasks(" + sTaskId + ")";
+            const sHierarchyPath = sTaskPath + "/MainService.getHierarchy()";
+            const sContextHierarchyPath =
+              sTaskPath + "/MainService.getContextHierarchy()";
+
+            const [taskhierarchyResult, contextHierarchyResult] =
+              await Promise.all([
+                oModel.bindContext(sHierarchyPath).requestObject(),
+                oModel.bindContext(sContextHierarchyPath).requestObject(),
+              ]);
+
+            const oTaskTree = taskhierarchyResult?.value
+              ? JSON.parse(taskhierarchyResult.value)
+              : [];
+            this._cacheTaskData(oTaskTree);
+
+            const oContextTree = contextHierarchyResult?.value
+              ? JSON.parse(contextHierarchyResult.value)
+              : [];
+            this._cacheContextNodeTree(oContextTree);
+
+            this._buildNavigationFromCache();
+            this._expandNavigationTree();
+          } catch (error) {
+            MessageToast.show(
+              "Failed to load data: " + (error.message || error.toString())
+            );
+          } finally {
+            if (isBusy) {
               BusyIndicator.hide();
             }
-          });
-
-          // Request the data
-          oBinding.requestObject().catch(function (oError) {
-            MessageToast.show("Failed to load task data: " + (oError.message || oError.toString()));
-            if (BusyIndicator) {
-              BusyIndicator.hide();
-            }
-          });
+            // 隐藏左侧导航的busy状态
+            this._setNavigationBusy(false);
+          }
         },
 
-        _cacheTaskData: function (oTaskData) {
-          // Clear previous cache
-          this._dataCache.botInstances.clear();
-          this._dataCache.contextNodes.clear();
-          this._dataCache.botMessages.clear();
+        _cacheTaskData(oTaskTree) {
+          this._taskTreeData = Array.isArray(oTaskTree)
+            ? oTaskTree
+            : [oTaskTree];
+          // 递归处理单个节点
+          const processNode = (node) => {
+            if (!node || typeof node !== "object") {
+              return node;
+            }
 
-          // Initialize sub-tasks cache if not exists
-          if (!this._dataCache.subTasks) {
-            this._dataCache.subTasks = new Map();
-          } else {
-            this._dataCache.subTasks.clear();
-          }
+            // 如果有items数组，进行去重和排序处理
+            if (node.items && Array.isArray(node.items)) {
+              // 去重
+              const uniqueItems = [];
+              const seenIds = new Set();
 
-          // Cache task data
-          this._dataCache.currentTask = oTaskData;
+              node.items.forEach((item) => {
+                if (!seenIds.has(item.id)) {
+                  seenIds.add(item.id);
+                  uniqueItems.push(item);
+                }
+              });
 
-          // Cache bot instances and their messages
-          if (oTaskData.botInstances && Array.isArray(oTaskData.botInstances)) {
-            this._cacheBotInstancesRecursively(oTaskData.botInstances);
-          }
+              // 递归处理每个子节点
+              const processedItems = uniqueItems.map(processNode);
 
-          // Cache context nodes
-          if (oTaskData.contextNodes && Array.isArray(oTaskData.contextNodes)) {
-            oTaskData.contextNodes.forEach(function (oContextNode) {
-              this._dataCache.contextNodes.set(oContextNode.ID, oContextNode);
-            }.bind(this));
-          }
+              // 按sequence排序
+              processedItems.sort((a, b) => {
+                return (a.sequence || 0) - (b.sequence || 0);
+              });
 
-          // Build task hierarchy mapping
+              // 返回处理后的节点
+              return { ...node, items: processedItems };
+            }
+
+            // 没有items数组则直接返回节点（可能包含其他属性）
+            return { ...node };
+          };
+          // 处理整个任务树
+          this._taskTreeData = this._taskTreeData.map(processNode);
+
+          this._adaptTreeNodeText(this._taskTreeData);
+          this.getView()
+            .getModel("side")
+            .setProperty("/navigation", this._taskTreeData);
+
+          Object.assign(this._dataCache, {
+            isLoaded: true,
+            invalidated: false,
+          });
+
           this._buildTaskHierarchyMap();
 
-          this._dataCache.isLoaded = true;
-          this._dataCache.invalidated = false;
+          const [mainTask] = this._taskTreeData;
+          if (mainTask) this._dataCache.currentTask = mainTask;
+
+          // const [mainTask] = this._taskTreeData;
+          // if (mainTask) {
+          //   this._dataCache.currentTask = mainTask;
+          //   const cacehSubTasks = (node) => {
+          //     if (!node) return;
+          //     if (node.id && node.id !== this._dataCache.currentTask.ID) {
+          //       this._dataCache.subTasks.set(node.id, node);
+          //     }
+          //     node.items?.forEach(cacehSubTasks);
+          //   };
+
+          //   mainTask.items?.forEach(cacehSubTasks);
+          // }
         },
 
-        _cacheBotInstancesRecursively: function (aBotInstances) {
-          aBotInstances.forEach(function (oBotInstance) {
-            this._dataCache.botInstances.set(oBotInstance.ID, oBotInstance);
-
-            // Cache messages for this bot instance
-            if (oBotInstance.messages && Array.isArray(oBotInstance.messages)) {
-              oBotInstance.messages.forEach(function (oMessage) {
-                this._dataCache.botMessages.set(oMessage.ID, oMessage);
-              }.bind(this));
-            }
-
-            // Cache sub-tasks and their bot instances recursively
-            if (oBotInstance.tasks && Array.isArray(oBotInstance.tasks)) {
-              oBotInstance.tasks.forEach(function (oSubTask) {
-                this._dataCache.subTasks.set(oSubTask.ID, oSubTask);
-
-                // Recursively cache bot instances of sub-tasks
-                if (oSubTask.botInstances && Array.isArray(oSubTask.botInstances)) {
-                  this._cacheBotInstancesRecursively(oSubTask.botInstances);
-                }
-              }.bind(this));
-            }
-          }.bind(this));
+        _cacheContextNodeTree(oContextTree) {
+          this._contextNodeTreeData = Array.isArray(oContextTree)
+            ? oContextTree
+            : [oContextTree];
+          this._adaptTreeNodeText(this._contextNodeTreeData);
         },
 
-        _buildNavigationFromCache: function () {
-          if (!this._dataCache.isLoaded || !this._dataCache.currentTask) {
-            return;
-          }
-
-          var sCurrentView = this.getView().getModel("side").getProperty("/currentView") || "tasks";
+        _buildNavigationFromCache() {
+          const oSideModel = this.getView().getModel("side");
+          const sCurrentView =
+            oSideModel.getProperty("/currentView") || "tasks";
 
           if (sCurrentView === "tasks") {
-            this._buildTasksNavigationFromCache();
+            oSideModel.setProperty("/navigation", this._taskTreeData || []);
           } else if (sCurrentView === "contextNodes") {
-            this._buildContextNodesNavigationFromCache();
+            oSideModel.setProperty(
+              "/navigation",
+              this._contextNodeTreeData || []
+            );
           }
         },
 
-        _buildTasksNavigationFromCache: function () {
-          var oTask = this._dataCache.currentTask;
-          var aNavigationData = [];
-
-          var oTaskItem = this._buildTaskItemRecursively(oTask);
-          aNavigationData.push(oTaskItem);
-          this.getView().getModel("side").setProperty("/navigation", aNavigationData);
+        _expandNavigationTree() {
+          // 延迟执行以确保DOM已更新
+          setTimeout(() => {
+            const oTree = this.byId("idItemsNavigationTree");
+            if (oTree) {
+              // 默认展开所有层级
+              oTree.expandToLevel(99);
+            }
+          }, 50);
         },
 
-        _buildTaskItemRecursively: function (oTask) {
+        /** ===================== 树结构适配与递归 ===================== */
+        _adaptTreeNodeText(nodes) {
+          if (!Array.isArray(nodes)) return;
 
-          var icon = "";
-          if (oTask.isMain === true) {
-            icon = "sap-icon://menu2";
-          } else {
-            icon = "sap-icon://task";
-          }
+          const typeIconMap = new Map([
+            [
+              "task",
+              { icon: "sap-icon://task", keyPrefix: "task_", type: "Task" },
+            ],
+            [
+              "bot",
+              {
+                icon: "sap-icon://activities",
+                keyPrefix: "botinstance_",
+                type: "BotInstance",
+              },
+            ],
+            [
+              "string",
+              {
+                icon: "sap-icon://syntax",
+                keyPrefix: "code_",
+                type: "ContextNode",
+              },
+            ],
+            [
+              "code",
+              {
+                icon: "sap-icon://syntax",
+                keyPrefix: "code_",
+                type: "ContextNode",
+              },
+            ],
+            [
+              "json",
+              {
+                icon: "sap-icon://syntax",
+                keyPrefix: "code_",
+                type: "ContextNode",
+              },
+            ],
+            [
+              "text",
+              {
+                icon: "sap-icon://syntax",
+                keyPrefix: "code_",
+                type: "ContextNode",
+              },
+            ],
+            [
+              "virtual",
+              {
+                icon: "sap-icon://syntax",
+                keyPrefix: "code_",
+                type: "ContextNode",
+              },
+            ],
+            [
+              "markdown",
+              {
+                icon: "sap-icon://text",
+                keyPrefix: "markdown_",
+                type: "ContextNode",
+              },
+            ],
+          ]);
 
-          var oTaskItem = {
-            text: oTask.name || "Unnamed Task",
-            key: "task_" + oTask.ID,
-            type: "Task",
-            data: oTask,
-            icon: icon,
-            items: []
-          };
+          nodes.forEach((node) => {
+            // 使用空值合并操作符设置默认值
+            node.text = node.name || node.label || "undefined";
 
-          // Add BotInstances as child items
-          if (oTask.botInstances && Array.isArray(oTask.botInstances)) {
-            // Sort botInstances by sequence before processing
-            var aSortedBotInstances = oTask.botInstances.slice().sort(function (a, b) {
-              return (a.sequence || 0) - (b.sequence || 0);
-            });
+            const nodeType = (node.type || "").toLowerCase();
+            // let typeConfig = typeIconMap.get(nodeType) ||
+            //   { icon: 'sap-icon://syntax', keyPrefix: 'code_', type: 'ContextNode' };
 
-            aSortedBotInstances.forEach(function (oBotInstance) {
-              var oBotInstanceItem = this._buildBotInstanceItem(oBotInstance);
-              oTaskItem.items.push(oBotInstanceItem);
-            }.bind(this));
-          }
-
-          return oTaskItem;
-        },
-
-        _buildBotInstanceItem: function (oBotInstance) {
-          var icon = "";
-          var functionType_code = oBotInstance.type && oBotInstance.type.functionType_code;
-          if (functionType_code && functionType_code === "A") {
-            icon = "sap-icon://SAP-icons-TNT/robot";
-          } else {
-            icon = "sap-icon://activities";
-          }
-
-          var sDisplayName = oBotInstance.type && oBotInstance.type.name ?
-            oBotInstance.type.name :
-            ("Bot Instance " + oBotInstance.sequence);
-
-          var oBotInstanceItem = {
-            text: sDisplayName,
-            key: "botinstance_" + oBotInstance.ID,
-            type: "BotInstance",
-            data: oBotInstance,
-            icon: icon,
-            items: []
-          };
-
-          // Add sub-tasks recursively
-          if (oBotInstance.tasks && Array.isArray(oBotInstance.tasks)) {
-            // Sort sub-tasks by sequence before processing
-            var aSortedSubTasks = oBotInstance.tasks.slice().sort(function (a, b) {
-              return (a.sequence || 0) - (b.sequence || 0);
-            });
-
-            aSortedSubTasks.forEach(function (oSubTask) {
-              var oSubTaskItem = this._buildTaskItemRecursively(oSubTask);
-              oBotInstanceItem.items.push(oSubTaskItem);
-            }.bind(this));
-          }
-
-          return oBotInstanceItem;
-        },
-
-        _buildContextNodesNavigationFromCache: function () {
-          var oTask = this._dataCache.currentTask;
-          var aNavigationData = [];
-
-          var Taskicon = "";
-          if (oTask.isMain === true) {
-            Taskicon = "sap-icon://menu2";
-          } else {
-            Taskicon = "sap-icon://task";
-          }
-
-          var contextNodeIcon = "sap-icon://document-text";
-
-          if (this._dataCache.contextNodes.size > 0) {
-            var oTaskItem = {
-              text: oTask.name || "Unnamed Task",
-              key: "task_" + oTask.ID,
-              type: "Task",
-              data: oTask,
-              icon: Taskicon,
-              items: []
+            let typeConfig = {
+              ...(typeIconMap.get(nodeType) || {
+                icon: "sap-icon://syntax",
+                keyPrefix: "code_",
+                type: "ContextNode",
+              }),
             };
 
-            // Add ContextNodes as child items from cache
-            this._dataCache.contextNodes.forEach(function (oContextNode) {
-              oTaskItem.items.push({
-                text: oContextNode.label || "Context Node",
-                key: "contextnode_" + oContextNode.ID,
-                type: "ContextNode",
-                data: oContextNode,
-                icon: contextNodeIcon,
-                items: []
-              });
+            // 特殊处理
+            if (nodeType === "task" && node.isMain) {
+              typeConfig.icon = "sap-icon://menu2";
+            } else if (nodeType === "bot" && node.functionType === "A") {
+              typeConfig.icon = "sap-icon://SAP-icons-TNT/robot";
+            }
+
+            // 使用对象展开语法
+            Object.assign(node, {
+              icon: typeConfig.icon,
+              key: `${typeConfig.keyPrefix}${node.id}`,
+              type: typeConfig.type,
             });
 
-            aNavigationData.push(oTaskItem);
-          }
-
-          this.getView().getModel("side").setProperty("/navigation", aNavigationData);
+            // 递归处理子节点
+            if (node.items?.length > 0) {
+              this._adaptTreeNodeText(node.items);
+            }
+          });
         },
 
-        onFixedNavigationItemSelect: function (oEvent) {
-          var sKey = oEvent.getParameter("item").getKey();
-          var oSideModel = this.getView().getModel("side");
+        /** ===================== 导航状态管理 ===================== */
+        _maintainNavigationState() {
+          const oSideModel = this.getView().getModel("side");
+          const aCurrentNavigation = oSideModel.getProperty("/navigation");
 
-          oSideModel.setProperty("/currentView", sKey);
-          oSideModel.setProperty("/selectedKey", sKey);
+          if (aCurrentNavigation) {
+            this._lastNavigationState = {
+              navigation: aCurrentNavigation,
+              currentView: oSideModel.getProperty("/currentView"),
+            };
 
-          // Check if cache is invalidated and refresh if needed
-          if (this._dataCache.invalidated && this._dataCache.isLoaded && this._dataCache.currentTask) {
-            this._preloadTaskData(this._dataCache.currentTask.ID, "");
+            oSideModel.setProperty("/hasNavigationData", true);
+          }
+        },
+
+        _restoreNavigationState() {
+          const oSideModel = this.getView().getModel("side");
+          const aCurrentNavigation = oSideModel.getProperty("/navigation");
+
+          if (!aCurrentNavigation && this._lastNavigationState) {
+            oSideModel.setProperty(
+              "/navigation",
+              this._lastNavigationState.navigation
+            );
+            oSideModel.setProperty(
+              "/currentView",
+              this._lastNavigationState.currentView
+            );
+            oSideModel.setProperty("/hasNavigationData", true);
+          }
+        },
+
+        /** ===================== UI 事件处理 ===================== */
+        onFixedNavigationItemSelect(oEvent) {
+          const sKey = oEvent.getParameter("item").getKey();
+          const oSideModel = this.getView().getModel("side");
+
+          oSideModel?.setProperty("/currentView", sKey);
+
+          if (
+            this._dataCache.invalidated &&
+            this._dataCache.isLoaded &&
+            this._dataCache.currentTask
+          ) {
+            this._preloadTaskData(this._dataCache.currentTask.id, "");
           } else if (this._dataCache.isLoaded) {
             this._buildNavigationFromCache();
+            this._expandNavigationTree();
           }
         },
 
-        onNavigationItemSelect: function (oEvent) {
-          var oItem = oEvent.getParameter("listItem");
-          var oContext = oItem.getBindingContext("side");
-          var oData = oContext.getObject();
-          var sKey = oData.key;
+        onNavigationItemSelect(oEvent) {
+          const oItem = oEvent.getParameter("listItem");
+          const oContext = oItem.getBindingContext("side");
+          const oData = oContext.getObject();
 
-          this.getView().getModel("side").setProperty("/selectedKey", sKey);
-
-          // Ensure navigation data remains available after route change
           this._maintainNavigationState();
-
-          // Navigate to appropriate view based on item type and data
           this._navigateToItem(oData);
         },
 
-        _maintainNavigationState: function () {
-          // Store current navigation state to prevent loss during route changes
-          var oSideModel = this.getView().getModel("side");
-          var aCurrentNavigation = oSideModel.getProperty("/navigation");
+        onSideNavButtonPress() {
+          const oToolPage = this.byId("navToolPage");
+          const bSideExpanded = oToolPage.getSideExpanded();
 
-          if (aCurrentNavigation && aCurrentNavigation.length > 0) {
-            // Store in a more permanent location
-            this._lastNavigationState = {
-              navigation: aCurrentNavigation,
-              currentView: oSideModel.getProperty("/currentView")
-            };
-
-            // Set a flag to indicate we have valid navigation data
-            oSideModel.setProperty("/hasNavigationData", true);
-          }
+          this._setToggleButtonTooltip(bSideExpanded);
+          oToolPage.setSideExpanded(!oToolPage.getSideExpanded());
         },
 
-        _restoreNavigationState: function () {
-          // Restore navigation state if it was lost
-          var oSideModel = this.getView().getModel("side");
-          var aCurrentNavigation = oSideModel.getProperty("/navigation");
-
-          if ((!aCurrentNavigation || aCurrentNavigation.length === 0) && this._lastNavigationState) {
-            oSideModel.setProperty("/navigation", this._lastNavigationState.navigation);
-            oSideModel.setProperty("/currentView", this._lastNavigationState.currentView);
-            oSideModel.setProperty("/hasNavigationData", true);
-          }
+        _setToggleButtonTooltip(isbSideExpanded) {
+          const oToggleButton = this.byId("navSideNavigationToggleButton");
+          const tooltip = isbSideExpanded
+            ? "Large Size Navigation Menu"
+            : "Small Size Navigation Menu";
+          oToggleButton.setTooltip(tooltip);
         },
 
-        _navigateToItem: function (oItemData) {
-          var oRouter = this.getOwnerComponent().getRouter();
-          var that = this;
+        onHomeButtonPress() {
+          this.getOwnerComponent().getRouter().navTo("RouteTaskRunList");
+        },
 
-          // Add delay to prevent request collision and improve navigation reliability
-          setTimeout(function () {
-            // Navigate directly using entity IDs, no need for taskRunId dependency
-            if (oItemData.type === "Task") {
-              // Navigate to task detail with task ID
-              var sTaskId = oItemData.data.ID;
-              if (sTaskId) {
-                oRouter.navTo("RouteTaskDetail", {
-                  taskId: sTaskId
-                });
-              } else {
-                MessageToast.show("Task ID not available");
-              }
-            } else if (oItemData.type === "BotInstance") {
-              // Navigate to bot instance detail or AI conversation based on type
-              var sBotInstanceId = oItemData.data.ID;
-              if (sBotInstanceId) {
+        /** ===================== 导航跳转 ===================== */
+        _navigateToItem(oItemData) {
+          const oRouter = this.getOwnerComponent().getRouter();
 
-                // Check if this is a Chat BotInstance
-                var sBotTypeName = oItemData.data.type && oItemData.data.type.name;
-                var functionType_code = oItemData.data.type && oItemData.data.type.functionType_code;
-                if (functionType_code && functionType_code === "A") {
-                  // Navigate to AI Conversation page
-                  oRouter.navTo("RouteAIConversation", {
-                    taskRunId: that._getCurrentTaskRunId(),
-                    botInstanceId: sBotInstanceId
-                  });
+          setTimeout(() => {
+            const { type, id, functionType, key } = oItemData;
+
+            switch (type) {
+              case "Task":
+                if (id) {
+                  oRouter.navTo("RouteTaskDetail", { taskId: id });
                 } else {
-                  // Navigate to regular bot instance detail page
-                  oRouter.navTo("RouteBotInstanceDetail", {
-                    botInstanceId: sBotInstanceId
-                  });
+                  MessageToast.show("Task ID not available");
                 }
-              } else {
-                MessageToast.show("Bot Instance ID not available");
-              }
-            } else if (oItemData.type === "ContextNode") {
-              var sContextNodeId = oItemData.data.ID;
-              var sNodeType = (oItemData.data.type || "").toLowerCase();
-              if (sContextNodeId) {
-                if (sNodeType === "string") {
-                  //oRouter.navTo("RouteTextNodePage", { contextNodeId: sContextNodeId });
-                  oRouter.navTo("RouteTextAreaNodePage", { contextNodeId: sContextNodeId });
-                } else if (sNodeType === "markdown") {
-                  oRouter.navTo("RouteMarkDownNodePage", { contextNodeId: sContextNodeId });
-                } else if (sNodeType === "code" || sNodeType === "json") {
-                  oRouter.navTo("RouteTextAreaNodePage", { contextNodeId: sContextNodeId });
+                break;
+              case "BotInstance":
+                if (id) {
+                  if (functionType === "A") {
+                    oRouter.navTo("RouteAIConversation", {
+                      taskRunId: this._getCurrentTaskRunId(),
+                      botInstanceId: id,
+                    });
+                  } else {
+                    oRouter.navTo("RouteBotInstanceDetail", {
+                      botInstanceId: id,
+                    });
+                  }
                 } else {
-                  // 默认跳转
-                  //oRouter.navTo("RouteContextNodeDetail", { contextNodeId: sContextNodeId });
-                  oRouter.navTo("RouteTextAreaNodePage", { contextNodeId: sContextNodeId });
+                  MessageToast.show("Bot Instance ID not available");
                 }
-              } else {
-                MessageToast.show("Context Node ID not available");
-              }
+                break;
+              case "ContextNode":
+                if (id) {
+                  const routeName = key.startsWith("markdown_")
+                    ? "RouteMarkDownNodePage"
+                    : "RouteTextAreaNodePage";
+                  oRouter.navTo(routeName, { contextNodeId: id });
+                } else {
+                  MessageToast.show("Context Node ID not available");
+                }
+                break;
+              default:
+                MessageToast.show("Unknown item type");
+                break;
             }
           }, 100);
         },
 
-        // Public methods for other controllers to access cached data
-        getCachedBotInstance: function (sBotInstanceId) {
-          return this._dataCache.botInstances.get(sBotInstanceId);
-        },
-
-        getCachedContextNode: function (sContextNodeId) {
-          return this._dataCache.contextNodes.get(sContextNodeId);
-        },
-
-        getCachedTask: function (sTaskId) {
-          // If no ID is provided, return the main task
+        /** ===================== 缓存与外部访问 ===================== */
+        getCachedTask(sTaskId) {
           if (!sTaskId) {
             return this._dataCache.currentTask;
           }
-
-          // First, check if the requested ID matches the main task
-          if (this._dataCache.currentTask && this._dataCache.currentTask.ID === sTaskId) {
+          if (
+            this._dataCache.currentTask &&
+            this._dataCache.currentTask.id === sTaskId
+          ) {
             return this._dataCache.currentTask;
           }
-
-          // If not the main task, search in the sub-tasks
-          return this._dataCache.subTasks ? this._dataCache.subTasks.get(sTaskId) : null;
+          return this._dataCache.subTasks
+            ? this._dataCache.subTasks.get(sTaskId)
+            : null;
         },
 
-        getCachedBotMessages: function (sBotInstanceId) {
-          var oBotInstance = this._dataCache.botInstances.get(sBotInstanceId);
-          return oBotInstance ? oBotInstance.messages : [];
-        },
-
-        isCacheLoaded: function () {
+        isCacheLoaded() {
           return this._dataCache.isLoaded;
         },
 
-        _getCurrentTaskRunId: function () {
-          // First try to get from stored current task ID
-          if (this._currentTaskId) {
-            return this._currentTaskId;
+        _getCurrentTaskRunId() {
+          if (this.currentTaskId) {
+            return this.currentTaskId;
           }
 
-          // Fallback: get from route hash
-          var oRouter = this.getOwnerComponent().getRouter();
-          var oHashChanger = oRouter.getHashChanger();
-          var sHash = oHashChanger.getHash();
+          const oRouter = this.getOwnerComponent().getRouter();
+          const oHashChanger = oRouter.getHashChanger();
+          const sHash = oHashChanger.getHash();
+          const aMatches = sHash.match(/Tasks\(([^)]+)\)/);
 
-          // Extract taskRunId from hash pattern like "Tasks(guid)"
-          var aMatches = sHash.match(/Tasks\(([^)]+)\)/);
           if (aMatches && aMatches[1]) {
-            // Remove quotes if present (for backward compatibility)
-            return aMatches[1].replace(/'/g, '');
+            return aMatches[1].replace(/'/g, "");
+          }
+          if (this._dataCache.currentTask && this._dataCache.currentTask.id) {
+            return this._dataCache.currentTask.id;
+          }
+          return null;
+        },
+
+        async _extractTaskRunIdFromUrl() {
+          const oRouter = this.getOwnerComponent().getRouter();
+          const oHashChanger = oRouter.getHashChanger();
+          const sHash = oHashChanger.getHash();
+
+          // 从Tasks路由中直接提取taskRunId
+          const taskMatch = sHash.match(/Tasks\(([^)]+)\)/);
+          if (taskMatch && taskMatch[1]) {
+            return taskMatch[1].replace(/'/g, "");
           }
 
-          // If we have cached data, use that
-          if (this._dataCache.currentTask && this._dataCache.currentTask.ID) {
-            return this._dataCache.currentTask.ID;
+          // 从其他详情页面路由中提取ID并查找对应的taskRunId
+          const patterns = [
+            { regex: /TaskDetail\(([^)]+)\)/, type: "task" },
+            { regex: /BotInstanceDetail\(([^)]+)\)/, type: "botInstance" },
+            { regex: /ContextNodeDetail\(([^)]+)\)/, type: "contextNode" },
+            { regex: /ContextNodeDetail\(([^)]+)\)\/\w+/, type: "contextNode" }, // 文本节点页面
+          ];
+
+          for (const pattern of patterns) {
+            const match = sHash.match(pattern.regex);
+            if (match && match[1]) {
+              const id = match[1].replace(/'/g, "");
+              return await this._findTaskRunIdByDetailId(id, pattern.type);
+            }
           }
 
           return null;
         },
 
-        onSideNavButtonPress: function () {
-          var oToolPage = this.byId("navToolPage");
-          var bSideExpanded = oToolPage.getSideExpanded();
-          this._setToggleButtonTooltip(bSideExpanded);
-          oToolPage.setSideExpanded(!oToolPage.getSideExpanded());
+        async _findTaskRunIdByDetailId(id, type) {
+          const oModel = this.getOwnerComponent().getModel();
+
+          try {
+            switch (type) {
+              case "task":
+                // 对于Task，需要找到主任务（isMain=true）
+                return await this._findMainTaskId(id);
+
+              case "botInstance":
+                // 通过BotInstances找到对应的Task
+                const botPath = `/BotInstances(${id})`;
+                const botResult = await oModel
+                  .bindContext(botPath, null, { $expand: "task" })
+                  .requestObject();
+                const taskId = botResult?.task?.ID;
+                if (taskId) {
+                  return await this._findTaskRunIdByDetailId(taskId, "task");
+                }
+                break;
+
+              case "contextNode":
+                // 通过ContextNodes找到对应的Task
+                const contextPath = `/ContextNodes(${id})`;
+                const contextResult = await oModel
+                  .bindContext(contextPath, null, { $expand: "task" })
+                  .requestObject();
+                const contextTaskId = contextResult?.task?.ID;
+                if (contextTaskId) {
+                  return await this._findTaskRunIdByDetailId(
+                    contextTaskId,
+                    "task"
+                  );
+                }
+                break;
+            }
+          } catch (error) {
+            console.error("Error finding taskRunId:", error);
+          }
+
+          return null;
         },
 
-        _setToggleButtonTooltip: function (bSideExpanded) {
-          var oToggleButton = this.byId('navSideNavigationToggleButton');
-          if (bSideExpanded) {
-            oToggleButton.setTooltip('Large Size Navigation Menu');
-          } else {
-            oToggleButton.setTooltip('Small Size Navigation Menu');
+        async _findMainTaskId(taskId) {
+          const oModel = this.getOwnerComponent().getModel();
+
+          try {
+            // 首先检查当前任务是否为主任务
+            const currentTaskPath = `/Tasks(${taskId})`;
+            const currentTask = await oModel
+              .bindContext(currentTaskPath, null, { $expand: "botInstance" })
+              .requestObject();
+
+            if (currentTask?.isMain) {
+              return taskId;
+            }
+
+            // 如果不是主任务，说明这是一个子任务，需要向上查找主任务
+            if (currentTask?.botInstance?.ID) {
+              // 通过botInstance找到父任务
+              const parentBotPath = `/BotInstances(${currentTask.botInstance.ID})`;
+              const parentBot = await oModel
+                .bindContext(parentBotPath, null, { $expand: "task" })
+                .requestObject();
+
+              if (parentBot?.task?.ID) {
+                // 递归查找父任务的主任务
+                return await this._findMainTaskId(parentBot.task.ID);
+              }
+            }
+
+            // 如果没有botInstance关联，通过层次结构查找主任务
+            const taskHierarchyPath = `/Tasks(${taskId})/MainService.getHierarchy()`;
+            const taskResult = await oModel
+              .bindContext(taskHierarchyPath)
+              .requestObject();
+            const taskTree = taskResult?.value
+              ? JSON.parse(taskResult.value)
+              : [];
+
+            // 在层次结构中查找主任务
+            const mainTask = this._findMainTaskInTree(taskTree);
+
+            if (mainTask) {
+              return mainTask.id || mainTask.ID;
+            }
+
+            // 如果在层次结构中没找到主任务，尝试查找根节点
+            const rootTask = Array.isArray(taskTree) ? taskTree[0] : taskTree;
+            return rootTask?.id || rootTask?.ID || taskId;
+          } catch (error) {
+            console.error("Error finding main task:", error);
+            return taskId; // 如果出错，返回原始taskId
           }
         },
 
-        _handleWindowResize: function () {
-          // Handle window resize events
+        _findMainTaskInTree(taskTree) {
+          if (!taskTree) return null;
+
+          const tasks = Array.isArray(taskTree) ? taskTree : [taskTree];
+
+          // 递归查找主任务
+          const findMain = (nodes) => {
+            for (const node of nodes) {
+              if (node.isMain) {
+                return node;
+              }
+              if (node.items && node.items.length > 0) {
+                const found = findMain(node.items);
+                if (found) return found;
+              }
+            }
+            return null;
+          };
+
+          return findMain(tasks);
         },
 
-        onMessagePopoverPress: function (oEvent) {
-          // Handle message popover
+        /** ===================== 事件回调 ===================== */
+        _onTaskSelectionChanged(sChannel, sEvent, oData) {
+          const sNewTaskId = oData.taskId;
+
+          if (
+            !this._dataCache.currentTask ||
+            this._dataCache.currentTask.id !== sNewTaskId
+          ) {
+            Object.assign(this._dataCache, {
+              isLoaded: false,
+              currentTask: null,
+            });
+          }
         },
 
-        onNotificationPress: function (oEvent) {
-          // Handle notification press
-        },
-
-        onUserNamePress: function (oEvent) {
-          // Handle user name press
-        },
-
-        onHomeButtonPress: function () {
-          // Navigate back to the task list page
-          var oRouter = this.getOwnerComponent().getRouter();
-          oRouter.navTo("RouteTaskRunList");
-        },
-
-        _onDataUpdated: function () {
-          // Mark cache as invalidated when data is updated
+        _onDataUpdated() {
           this._dataCache.invalidated = true;
         },
 
-        _onBotInstanceUpdated: function (sChannelId, sEventId, oData) {
-          // Handle BotInstance updates (like execute creating new tasks)
+        _onBotInstanceUpdated(sChannelId, sEventId, oData) {
           if (this._dataCache.isLoaded && this._dataCache.currentTask) {
-            // Reload the current task data to get updated BotInstance with new tasks
-            this._preloadTaskData(this._dataCache.currentTask.ID, "");
+            this._preloadTaskData(this._dataCache.currentTask.id, true);
           }
         },
 
-        _buildTaskHierarchyMap: function () {
-          if (!this._taskHierarchyMap) {
-            this._taskHierarchyMap = new Map();
-          } else {
-            this._taskHierarchyMap.clear();
-          }
+        /** ===================== 页面刷新处理 ===================== */
+        _handlePageRefresh() {
+          // 延迟执行，确保路由已经初始化
+          setTimeout(async () => {
+            if (!this._dataCache.isLoaded) {
+              // 显示左侧导航的busy状态
+              this._setNavigationBusy(true);
 
-          if (this._dataCache.currentTask) {
-            this._mapTaskRecursively(this._dataCache.currentTask, this._dataCache.currentTask.ID);
-          }
-        },
+              // 根据URL判断应该显示哪个视图
+              const currentView = this._detectViewFromUrl();
+              this.getView()
+                .getModel("side")
+                .setProperty("/currentView", currentView);
 
-        _mapTaskRecursively: function (oTask, sRootTaskId) {
-          this._taskHierarchyMap.set(oTask.ID, sRootTaskId);
-
-          if (oTask.botInstances && Array.isArray(oTask.botInstances)) {
-            oTask.botInstances.forEach(function (oBotInstance) {
-              if (oBotInstance.tasks && Array.isArray(oBotInstance.tasks)) {
-                oBotInstance.tasks.forEach(function (oSubTask) {
-                  this._mapTaskRecursively(oSubTask, sRootTaskId);
-                }.bind(this));
-              }
-            }.bind(this));
-          }
-        },
-
-        _findRootTaskId: function (sTaskId) {
-          if (!this._taskHierarchyMap) {
-            return null;
-          }
-
-          var sRootTaskId = this._taskHierarchyMap.get(sTaskId);
-          return sRootTaskId || null;
-        },
-
-        _updateNavigationSelection: function (sTaskId) {
-          var sNodeKey = "task_" + sTaskId;
-          this.getView().getModel("side").setProperty("/selectedKey", sNodeKey);
-        },
-
-        _loadRootTaskForSubTask: function (sTaskId) {
-          var oModel = this.getOwnerComponent().getModel();
-          var that = this;
-
-          // Try to load the task and check if it has a botInstance (indicating it's a subTask)
-          var oBinding = oModel.bindContext("/Tasks(" + sTaskId + ")", null, {
-            $expand: "botInstance/task($expand=botInstances($expand=type,messages,tasks($expand=type,botInstances($expand=type,messages,tasks($expand=type,botInstances($expand=type))))),contextNodes)"
-          });
-
-          oBinding.attachDataReceived(function () {
-            var oContext = oBinding.getBoundContext();
-            if (oContext) {
-              var oTaskData = oContext.getObject();
-              if (oTaskData && oTaskData.botInstance && oTaskData.botInstance.task) {
-                // This is a subTask, load the root task
-                var oRootTask = oTaskData.botInstance.task;
-                that._cacheTaskData(oRootTask);
-                that._buildNavigationFromCache();
-                that._updateNavigationSelection(sTaskId);
+              const taskRunId = await this._extractTaskRunIdFromUrl();
+              if (taskRunId) {
+                this._preloadTaskData(taskRunId, false);
               } else {
-                // This is likely a root task, load it directly
-                that._preloadTaskData(sTaskId, "");
+                // 如果无法提取taskRunId，隐藏busy状态
+                this._setNavigationBusy(false);
               }
             }
-          });
-
-          oBinding.requestObject().catch(function (oError) {
-            // Fallback: try loading as root task
-            that._preloadTaskData(sTaskId, "");
-          });
+          }, 100);
         },
 
+        _detectViewFromUrl() {
+          const oRouter = this.getOwnerComponent().getRouter();
+          const oHashChanger = oRouter.getHashChanger();
+          const sHash = oHashChanger.getHash();
+
+          // 如果URL包含ContextNodeDetail，说明应该显示Context Nodes视图
+          if (sHash.includes("ContextNodeDetail")) {
+            return "contextNodes";
+          }
+
+          // 默认显示Tasks视图
+          return "tasks";
+        },
+
+        _setNavigationBusy(bBusy) {
+          const oTree = this.byId("idItemsNavigationTree");
+          if (oTree) {
+            oTree.setBusy(bBusy);
+          }
+        },
+
+        /** ===================== 任务树映射与根节点查找 ===================== */
+        _findRootTaskId(sTaskId) {
+          return this._taskHierarchyMap?.get(sTaskId) || null;
+        },
+
+        // _loadRootTaskForSubTask(sTaskId) {
+        //   const oModel = this.getOwnerComponent().getModel();
+        //   const sHierarchyPath = "/Tasks(" + sTaskId + ")/MainService.getHierarchy()";
+
+        //   oModel.bindContext(sHierarchyPath)
+        //     .requestObject()
+        //     .then((result) => {
+        //       const oTaskTree = result && result.value ? JSON.parse(result.value) : [];
+        //       const rootNode = Array.isArray(oTaskTree) ? oTaskTree[0] : oTaskTree;
+        //       if (!rootNode) {
+        //         that._preloadTaskData(sTaskId, "");
+        //         return;
+        //       }
+        //       const rootId = rootNode.id || rootNode.ID;
+        //       if (rootId === sTaskId) {
+        //         that._preloadTaskData(sTaskId, "");
+        //       } else {
+        //         that._preloadTaskData(rootId, "");
+        //         setTimeout(() => {
+        //           that._updateNavigationSelection(sTaskId);
+        //         }, 500);
+        //       }
+        //     })
+        //     .catch(() => {
+        //       that._preloadTaskData(sTaskId, "");
+        //     });
+        // },
+
+        _buildTaskHierarchyMap() {
+          this._taskHierarchyMap = new Map();
+
+          const traverse = (node, rootId) => {
+            if (!node) return;
+
+            this._taskHierarchyMap.set(node.id || node.ID, rootId);
+            if (Array.isArray(node.items)) {
+              node.items.forEach((child) => traverse(child, rootId));
+            }
+          };
+          (this._taskTreeData || []).forEach((root) =>
+            traverse(root, root.id || root.ID)
+          );
+        },
       }
     );
   }
-); 
+);
