@@ -55,7 +55,7 @@ public class CreateGenclasseoOdataBotExecution implements BotExecution {
         newContext.setTrkorr(autoActiveCLASContext.getTrkorr());
         newContext.setReference(autoActiveCLASContext.getReference());
         newContext.setSourcecode(autoActiveCLASContext.getSourcecode());
-        newContext.setCustddls(autoActiveCLASContext.getCustddls);
+        newContext.setCustddls(autoActiveCLASContext.getCustddls());
 
         // 2. 调用OData服务
         String result = "";
