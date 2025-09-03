@@ -5,25 +5,15 @@ spring:
   config:
     activate:
       on-profile: default
-  # sql:
-  #   init:
-  #     platform: h2
+  sql:
+    init:
+      platform: h2
 cds:
-  # data-source:
-  #   auto-config:
-  #     enabled: false
+  data-source:
+    auto-config:
+      enabled: false
   remote:
     services:
-      '[com.sap.gateway.srvd.zsrvd_gentabl.v0001]':
-        destination:
-          name: S4
-        http:
-          service: zsrvd_gentabl/0001
-          csrf:
-            enabled: true
-          suffix: /sap/opu/odata4/sap/zsrvb_gentabl/srvd/sap
-        model: com.sap.gateway.srvd.zsrvd_gentabl.v0001
-        type: odata-v4
       '[com.sap.gateway.srvd.zsrvd_genclas.v0001]':
         destination:
           name: S4
@@ -34,9 +24,19 @@ cds:
           suffix: /sap/opu/odata4/sap/zsrvb_genclas/srvd/sap
         model: com.sap.gateway.srvd.zsrvd_genclas.v0001
         type: odata-v4
-      '[com.sap.gateway.srvd.zsrvd_genclas_seo.v0001]':
+      '[com.sap.gateway.srvd.zsrvd_gentabl.v0001]':
         destination:
           name: S4
+        http:
+          service: zsrvd_gentabl/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_gentabl/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_gentabl.v0001
+        type: odata-v4
+      '[com.sap.gateway.srvd.zsrvd_genclas_seo.v0001]':
+        destination:
+          name: com.sap.gateway.srvd.zsrvd_genclas_seo.v0001
         http:
           service: zsrvd_genclas_seo/0001
           csrf:
@@ -79,15 +79,6 @@ cds:
       search:
         fuzzinessThreshold: 0.9
         fuzzy: true
----
-spring:
-  config.activate.on-profile: dev
-  sql.init.platform: h2
-  web.resources.static-locations: file:./app/
-cds:
-  data-source.auto-config.enabled: false
-
----
 management:
   endpoint:
     health:

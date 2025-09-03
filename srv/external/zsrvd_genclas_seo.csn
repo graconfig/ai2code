@@ -731,6 +731,12 @@
        "@Common.Label": "Object name",
        "@Common.QuickInfo": "XCO CDS: Object name"
       },
+      "CUSTDDLS": {
+       "type": "cds.String",
+       "length": 40,
+       "notNull": true,
+       "@Common.Label": "View name"
+      },
       "DEVCLASS": {
        "type": "cds.String",
        "length": 30,
