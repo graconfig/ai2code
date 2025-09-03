@@ -1,6 +1,8 @@
 package customer.ai2code.service.execution.functioncall;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -21,6 +24,7 @@ import cds.gen.mainservice.Tasks;
 import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.task.GenericTask;
 import customer.ai2code.model.task.Task;
+import customer.ai2code.service.TaskBotDataService;
 import customer.ai2code.service.TaskService;
 import customer.ai2code.service.impl.execution.CreateTasksBotExecution;
 
@@ -37,99 +41,103 @@ class FunctionCallExecutionTest {
     private ObjectMapper objectMapper;
     private CreateTasksBotExecution createTasksBotExecution;
 
+    private TaskBotDataService taskBotDataService;
+    private ApplicationEventPublisher eventPublisher;
+
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         functionCallProcessor = new FunctionCallProcessor(applicationContext, objectMapper);
-        createTasksBotExecution = new CreateTasksBotExecution(taskService);
+        createTasksBotExecution = new CreateTasksBotExecution(taskService, eventPublisher, taskBotDataService);
     }
 
     // @Test
     // void testExecuteFunctionCallOnInstance_Success() throws Exception {
-    //     System.out.println("=== Testing executeFunctionCallOnInstance - Success Case ===");
+    // System.out.println("=== Testing executeFunctionCallOnInstance - Success Case
+    // ===");
 
-    //     // Given - 准备测试数据
-    //     String functionName = "Create_Tasks_Bot_Execution_execute";
-    //     String argumentsJson = """
-    //             {
-    //                 "botInstanceId": "test-bot-123",
-    //                 "taskCreationParams": [
-    //                     {
-    //                         "sequence": 1,
-    //                         "name": "Test Task 1",
-    //                         "description": "First test task",
-    //                         "contextPath": "SubContext:test.context[1]"
-    //                     },
-    //                     {
-    //                         "sequence": 2,
-    //                         "name": "Test Task 2",
-    //                         "description": "Second test task",
-    //                         "contextPath": "SubContext:test.context[2]"
-    //                     }
-    //                 ]
-    //             }
-    //             """;
+    // // Given - 准备测试数据
+    // String functionName = "Create_Tasks_Bot_Execution_execute";
+    // String argumentsJson = """
+    // {
+    // "botInstanceId": "test-bot-123",
+    // "taskCreationParams": [
+    // {
+    // "sequence": 1,
+    // "name": "Test Task 1",
+    // "description": "First test task",
+    // "contextPath": "SubContext:test.context[1]"
+    // },
+    // {
+    // "sequence": 2,
+    // "name": "Test Task 2",
+    // "description": "Second test task",
+    // "contextPath": "SubContext:test.context[2]"
+    // }
+    // ]
+    // }
+    // """;
 
-    //     // Mock TaskService 返回结果
-    //     Map<String, Object> taskParam1 = new HashMap<>();
-    //     taskParam1.put("ID", "task-1");
-    //     taskParam1.put("sequence", 1);
-    //     taskParam1.put("name", "Test Task 1");
-    //     taskParam1.put("description", "First test task");
-    //     taskParam1.put("contextPath", "/test/context1");
-    //     Task mockTask1 = new GenericTask(Tasks.of(taskParam1));
+    // // Mock TaskService 返回结果
+    // Map<String, Object> taskParam1 = new HashMap<>();
+    // taskParam1.put("ID", "task-1");
+    // taskParam1.put("sequence", 1);
+    // taskParam1.put("name", "Test Task 1");
+    // taskParam1.put("description", "First test task");
+    // taskParam1.put("contextPath", "/test/context1");
+    // Task mockTask1 = new GenericTask(Tasks.of(taskParam1));
 
-    //     Map<String, Object> taskParam2 = new HashMap<>();
-    //     taskParam2.put("ID", "task-2");
-    //     taskParam2.put("sequence", 2);
-    //     taskParam2.put("name", "Test Task 2");
-    //     taskParam2.put("description", "Second test task");
-    //     taskParam2.put("contextPath", "/test/context2");
-    //     Task mockTask2 = new GenericTask(Tasks.of(taskParam2));
+    // Map<String, Object> taskParam2 = new HashMap<>();
+    // taskParam2.put("ID", "task-2");
+    // taskParam2.put("sequence", 2);
+    // taskParam2.put("name", "Test Task 2");
+    // taskParam2.put("description", "Second test task");
+    // taskParam2.put("contextPath", "/test/context2");
+    // Task mockTask2 = new GenericTask(Tasks.of(taskParam2));
 
-    //     when(taskService.createTaskWithBots(eq("test-bot-123"), eq("Test Task 1"),
-    //             eq("First test task"), eq("/test/context1"), eq(1)))
-    //             .thenReturn(mockTask1);
+    // when(taskService.createTaskWithBots(eq("test-bot-123"), eq("Test Task 1"),
+    // eq("First test task"), eq("/test/context1"), eq(1)))
+    // .thenReturn(mockTask1);
 
-    //     when(taskService.createTaskWithBots(eq("test-bot-123"), eq("Test Task 2"),
-    //             eq("Second test task"), eq("/test/context2"), eq(2)))
-    //             .thenReturn(mockTask2);
+    // when(taskService.createTaskWithBots(eq("test-bot-123"), eq("Test Task 2"),
+    // eq("Second test task"), eq("/test/context2"), eq(2)))
+    // .thenReturn(mockTask2);
 
-    //     // When - 执行函数调用
-    //     Object result = functionCallProcessor.executeFunctionCallOnInstance(
-    //             functionName, argumentsJson, createTasksBotExecution);
+    // // When - 执行函数调用
+    // Object result = functionCallProcessor.executeFunctionCallOnInstance(
+    // functionName, argumentsJson, createTasksBotExecution);
 
-    //     // Then - 验证结果
-    //     assertNotNull(result, "Function call result should not be null");
-    //     assertTrue(result instanceof List, "Result should be a List");
+    // // Then - 验证结果
+    // assertNotNull(result, "Function call result should not be null");
+    // assertTrue(result instanceof List, "Result should be a List");
 
-    //     @SuppressWarnings("unchecked")
-    //     List<Task> tasks = (List<Task>) result;
-    //     assertEquals(2, tasks.size(), "Should create 2 tasks");
+    // @SuppressWarnings("unchecked")
+    // List<Task> tasks = (List<Task>) result;
+    // assertEquals(2, tasks.size(), "Should create 2 tasks");
 
-    //     // 验证第一个任务
-    //     Task task1 = tasks.get(0);
-    //     assertEquals("task-1", task1.getTask().getId());
-    //     assertEquals("Test Task 1", task1.getTask().getName());
-    //     assertEquals("First test task", task1.getTask().getDescription());
+    // // 验证第一个任务
+    // Task task1 = tasks.get(0);
+    // assertEquals("task-1", task1.getTask().getId());
+    // assertEquals("Test Task 1", task1.getTask().getName());
+    // assertEquals("First test task", task1.getTask().getDescription());
 
-    //     // 验证第二个任务
-    //     Task task2 = tasks.get(1);
-    //     assertEquals("task-2", task2.getTask().getId());
-    //     assertEquals("Test Task 2", task2.getTask().getName());
-    //     assertEquals("Second test task", task2.getTask().getDescription());
+    // // 验证第二个任务
+    // Task task2 = tasks.get(1);
+    // assertEquals("task-2", task2.getTask().getId());
+    // assertEquals("Test Task 2", task2.getTask().getName());
+    // assertEquals("Second test task", task2.getTask().getDescription());
 
-    //     // 验证 TaskService 被正确调用
-    //     verify(taskService).createTaskWithBots("test-bot-123", "Test Task 1",
-    //             "First test task", "/test/context1", 1);
-    //     verify(taskService).createTaskWithBots("test-bot-123", "Test Task 2",
-    //             "Second test task", "/test/context2", 2);
+    // // 验证 TaskService 被正确调用
+    // verify(taskService).createTaskWithBots("test-bot-123", "Test Task 1",
+    // "First test task", "/test/context1", 1);
+    // verify(taskService).createTaskWithBots("test-bot-123", "Test Task 2",
+    // "Second test task", "/test/context2", 2);
 
-    //     System.out.println("✅ Function call executed successfully:");
-    //     System.out.println("- Created " + tasks.size() + " tasks");
-    //     System.out.println("- Task 1 ID: " + task1.getTask().getId());
-    //     System.out.println("- Task 2 ID: " + task2.getTask().getId());
-    //     System.out.println("=== Success Case Test Passed ===\n");
+    // System.out.println("✅ Function call executed successfully:");
+    // System.out.println("- Created " + tasks.size() + " tasks");
+    // System.out.println("- Task 1 ID: " + task1.getTask().getId());
+    // System.out.println("- Task 2 ID: " + task2.getTask().getId());
+    // System.out.println("=== Success Case Test Passed ===\n");
     // }
 
     @Test
@@ -241,11 +249,11 @@ class FunctionCallExecutionTest {
         boolean foundParseError = false;
         Throwable cause = exception;
         while (cause != null) {
-            if (cause.getMessage() != null && 
-                (cause.getMessage().contains("Failed to parse function arguments") ||
-                 cause.getMessage().contains("Failed to execute function call") ||
-                 cause.getMessage().contains("parse") ||
-                 cause.getMessage().contains("JSON"))) {
+            if (cause.getMessage() != null &&
+                    (cause.getMessage().contains("Failed to parse function arguments") ||
+                            cause.getMessage().contains("Failed to execute function call") ||
+                            cause.getMessage().contains("parse") ||
+                            cause.getMessage().contains("JSON"))) {
                 foundParseError = true;
                 break;
             }
@@ -305,8 +313,8 @@ class FunctionCallExecutionTest {
             cause = cause.getCause();
         }
 
-        assertTrue(foundTaskError || foundDatabaseError, 
-                   "Should contain task creation or database error information");
+        assertTrue(foundTaskError || foundDatabaseError,
+                "Should contain task creation or database error information");
 
         System.out.println("✅ TaskService exception handled correctly");
         System.out.println("- Exception message: " + exception.getMessage());

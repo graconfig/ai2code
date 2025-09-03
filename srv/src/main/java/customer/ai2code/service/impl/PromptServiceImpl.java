@@ -62,11 +62,11 @@ public class PromptServiceImpl implements PromptService {
             List<PromptTexts> prompts = genericCqnService.getPromptTextsByBotType(bot.getBotType().getId(), bot.getLocale());
 
             // 2. 构建变量解析上下文
-            VariableContext context = buildVariableContext(bot);
+            // VariableContext context = buildVariableContext(bot);
 
             // 3. 解析每个PromptTexts的内容
             for (PromptTexts prompt : prompts) {
-                String parsedText = parse(prompt, context);
+                String parsedText = parse(prompt, bot.getVariableContext());
                 prompt.setContent(parsedText);
             }
 
@@ -98,12 +98,12 @@ public class PromptServiceImpl implements PromptService {
                 // 5.1 读取botType.ragParameter,再通过promptService.parse获取配置好的表达式，作为RAG输入语句
                 String ragParameter = botType.getRagParameter();
                 // 2. 构建变量解析上下文
-                VariableContext context = buildVariableContext(bot);
+                // VariableContext context = buildVariableContext(bot);
 
                 PromptTexts ragInput = PromptTexts.create();
                 ragInput.setContent(ragParameter);
 
-                String ragInputStatement = parse(ragInput, context);
+                String ragInputStatement = parse(ragInput, bot.getVariableContext());
 
                 // 5.2 与content合并成新的RAG输入语句
                 String combinedRagInput = ragInputStatement + "/" + query;
@@ -160,8 +160,8 @@ public class PromptServiceImpl implements PromptService {
      */
     public String parseVariableExpression(String expression, Bot bot) {
         try {
-            VariableContext context = buildVariableContext(bot);
-            return variableParsingService.parseVariables("{{" + expression + "}}", context)
+            // VariableContext context = buildVariableContext(bot);
+            return variableParsingService.parseVariables("{{" + expression + "}}", bot.getVariableContext())
                     .replace("{{" + expression + "}}", ""); // 移除包装的大括号
         } catch (Exception e) {
             System.err.println("Failed to parse variable expression: " + expression + ", error: " + e.getMessage());
@@ -191,11 +191,11 @@ public class PromptServiceImpl implements PromptService {
      * 批量解析多个Prompt
      */
     public List<PromptTexts> parsePrompts(List<PromptTexts> prompts, Bot bot) {
-        VariableContext context = buildVariableContext(bot);
+        // VariableContext context = buildVariableContext(bot);
 
         for (PromptTexts prompt : prompts) {
             if (hasVariables(prompt)) {
-                String parsedContent = variableParsingService.parseVariables(prompt.getContent(), context);
+                String parsedContent = variableParsingService.parseVariables(prompt.getContent(), bot.getVariableContext());
                 prompt.setContent(parsedContent);
             }
         }

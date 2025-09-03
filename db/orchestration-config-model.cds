@@ -24,7 +24,7 @@ entity BotType : cuid, managed {
   description          : String;
   functionType         : Association to BotFunctionType default 'AI_CHAT';
   autoRun              : Boolean default false;
-  executionCondition   : String(1000);
+  executeCondition   : String(1000);
   model                : Association to ModelConfig;
   prompts              : Composition of many PromptText
                            on prompts.botType = $self;
