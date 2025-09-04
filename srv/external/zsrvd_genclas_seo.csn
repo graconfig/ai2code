@@ -443,6 +443,15 @@
      "@Common.Heading": "Object name",
      "@Common.QuickInfo": "XCO CDS: Object name"
     },
+    "Custddls": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Common.Label": "Custom entity name",
+     "@Common.IsUpperCase": true,
+     "@Common.Heading": "View name",
+     "@Common.QuickInfo": "View name"
+    },
     "Devclass": {
      "type": "cds.String",
      "length": 30,
@@ -819,6 +828,12 @@
     {
      "$Type": "SAP__UI.DataField",
      "Value": {
+      "=": "Custddls"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
       "=": "Devclass"
      }
     },
@@ -869,6 +884,12 @@
     {
      "$Type": "SAP__UI.DataField",
      "Value": {
+      "=": "Custddls"
+     }
+    },
+    {
+     "$Type": "SAP__UI.DataField",
+     "Value": {
       "=": "Devclass"
      }
     },
@@ -900,6 +921,7 @@
    "@UI.SelectionFields": [
     "Clasname",
     "Bdefname",
+    "Custddls",
     "Status",
     "Reference"
    ],
