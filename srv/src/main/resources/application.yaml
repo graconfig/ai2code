@@ -79,6 +79,15 @@ cds:
       search:
         fuzzinessThreshold: 0.9
         fuzzy: true
+---
+spring:
+  config.activate.on-profile: dev
+  sql.init.platform: h2
+  web.resources.static-locations: file:./app/
+cds:
+  data-source.auto-config.enabled: false
+
+---
 management:
   endpoint:
     health:
