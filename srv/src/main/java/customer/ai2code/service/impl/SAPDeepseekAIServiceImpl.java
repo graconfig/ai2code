@@ -2,27 +2,34 @@ package customer.ai2code.service.impl;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.HashMap;
 
 import javax.annotation.Nonnull;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.sap.ai.sdk.core.AiCoreService;
-import com.sap.ai.sdk.foundationmodels.openai.OpenAiClient;
-import com.sap.ai.sdk.foundationmodels.openai.OpenAiModel;
-import com.sap.ai.sdk.foundationmodels.openai.model.OpenAiChatCompletionOutput;
-import com.sap.ai.sdk.foundationmodels.openai.model.OpenAiChatCompletionParameters;
-import com.sap.ai.sdk.foundationmodels.openai.model.OpenAiChatCompletionTool;
-import com.sap.ai.sdk.foundationmodels.openai.model.OpenAiChatMessage;
-import com.sap.ai.sdk.foundationmodels.openai.model.OpenAiChatCompletionTool.ToolType;
+import com.openai.client.OpenAIClient;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.core.JsonBoolean;
+import com.openai.core.JsonField;
+import com.openai.core.http.StreamResponse;
+import com.openai.models.FunctionDefinition;
+import com.openai.models.chat.completions.ChatCompletionAssistantMessageParam;
+import com.openai.models.chat.completions.ChatCompletionChunk;
+import com.openai.models.chat.completions.ChatCompletionCreateParams;
+import com.openai.models.chat.completions.ChatCompletionMessageParam;
+import com.openai.models.chat.completions.ChatCompletionSystemMessageParam;
+import com.openai.models.chat.completions.ChatCompletionUserMessageParam;
 import com.sap.ai.sdk.foundationmodels.openai.model.OpenAiChatCompletionFunction;
-import com.sap.cloud.sdk.cloudplatform.connectivity.DefaultHttpDestination;
-import com.sap.cloud.sdk.cloudplatform.connectivity.Destination; // 添加此行解决Destination未识别问题
-import com.sap.cloud.sdk.cloudplatform.connectivity.HttpDestination;
+import com.sap.ai.sdk.foundationmodels.openai.model.OpenAiChatCompletionTool;
+import com.sap.ai.sdk.foundationmodels.openai.model.OpenAiChatCompletionTool.ToolType;
+import com.openai.models.chat.completions.ChatCompletionTool;
+import com.openai.core.JsonValue;
+import com.openai.models.FunctionParameters;
 
 import cds.gen.configservice.PromptTexts;
 import cds.gen.mainservice.BotMessages;
@@ -37,7 +44,6 @@ import customer.ai2code.service.execution.BotExecution;
 import customer.ai2code.service.execution.functioncall.FunctionCallProcessor;
 import customer.ai2code.service.execution.functioncall.adapter.OpenAIFunctionCallAdapter;
 import customer.ai2code.service.handler.SAPDeepseekAIResponseHandler;
-import customer.ai2code.service.processor.StreamingCompletedProcessor;
 
 @Service
 public class SAPDeepseekAIServiceImpl implements AIService {
@@ -58,30 +64,11 @@ public class SAPDeepseekAIServiceImpl implements AIService {
         this.openAIFunctionCallAdapter = openAIFunctionCallAdapter;
     }
 
-    public OpenAiClient getAiClientForDeepSeek(@Nonnull SAPAIDeepSeekConfig config) {
-        // 创建HTTP目标对象
-        HttpDestination destination = DefaultHttpDestination
-                .builder(config.getApiUrl())
-                .header("Authorization", "Bearer " + config.getApiKey())
+    private OpenAIClient getAiClientForDeepSeek(@Nonnull SAPAIDeepSeekConfig config) {
+        return OpenAIOkHttpClient.builder()
+                .apiKey(config.getApiKey())
+                .baseUrl(config.getApiUrl())
                 .build();
-
-        // 创建AI核心服务
-        AiCoreService aiCoreService = new AiCoreService();
-        aiCoreService.withBaseDestination(destination);
-
-        // 获取带有模型部署的目标（现在Destination已识别）
-        Destination destinationWithDeployment = aiCoreService.getInferenceDestination().forModel(
-                resolveDeepSeekModel(config.getModel()));
-
-        // 创建OpenAI客户端
-        return OpenAiClient.withCustomDestination(destinationWithDeployment);
-    }
-
-    /**
-     * 解析DeepSeek模型名称
-     */
-    private OpenAiModel resolveDeepSeekModel(String modelName) {
-        return OpenAiModel.GPT_4O; // 兼容处理
     }
 
     @Override
@@ -91,10 +78,11 @@ public class SAPDeepseekAIServiceImpl implements AIService {
             String content,
             AIModel model) {
         SAPAIDeepSeekConfig config = (SAPAIDeepSeekConfig) model.parseModelConfigs();
-        OpenAiClient aiClient = getAiClientForDeepSeek(config);
-        OpenAiChatCompletionParameters params = buildChatParams(messages, prompts, content);
-        OpenAiChatCompletionOutput rawResult = aiClient.chatCompletion(params);
-        return responseHandler.processResponse(rawResult).getContent();
+        OpenAIClient aiClient = getAiClientForDeepSeek(config);
+        ChatCompletionCreateParams params = buildChatParams(messages, prompts, content);
+
+        var response = aiClient.chat().completions().create(params);
+        return response.choices().get(0).message().content().orElse("");
     }
 
     @Override
@@ -104,8 +92,8 @@ public class SAPDeepseekAIServiceImpl implements AIService {
             T botExecutionInstance,
             AIModel model) {
         SAPAIDeepSeekConfig config = (SAPAIDeepSeekConfig) model.parseModelConfigs();
-        OpenAiClient aiClient = getAiClientForDeepSeek(config);
-        OpenAiChatCompletionParameters params = buildChatParams(messages, prompts, "");
+        OpenAIClient aiClient = getAiClientForDeepSeek(config);
+        ChatCompletionCreateParams params = buildChatParams(messages, prompts, "");
 
         List<FunctionInfo> functionInfos = functionCallProcessor
                 .extractFunctionInfosFromInstance(botExecutionInstance);
@@ -117,68 +105,78 @@ public class SAPDeepseekAIServiceImpl implements AIService {
         List<Map<String, Object>> openAIFunctions = openAIFunctionCallAdapter
                 .convertToOpenAIFormat(functionInfos);
 
-        List<OpenAiChatCompletionTool> tools = openAIFunctions.stream()
+        List<ChatCompletionTool> tools = openAIFunctions.stream()
                 .map(functionDef -> {
-                    OpenAiChatCompletionFunction function = new OpenAiChatCompletionFunction();
-                    function.setName((String) functionDef.get("name"));
-                    function.setDescription((String) functionDef.get("description"));
+                    // 创建函数定义
+                    FunctionDefinition function = FunctionDefinition.builder()
+                            .name((String) functionDef.get("name"))
+                            .description((String) functionDef.get("description"))
+                            .parameters((FunctionParameters) functionDef.get("parameters"))
+                            .build();
 
-                    if (functionDef.get("parameters") instanceof Map) {
-                        @SuppressWarnings("unchecked")
-                        Map<String, Object> parameters = (Map<String, Object>) functionDef.get("parameters");
-                        function.setParameters(parameters);
-                    }
-
-                    if (!functionInfos.isEmpty()) {
-                        params.setToolChoiceFunction(functionInfos.get(0).getName());
-                    }
-
-                    return new OpenAiChatCompletionTool()
-                            .setType(ToolType.FUNCTION)
-                            .setFunction(function);
+                    // 创建工具定义
+                    return ChatCompletionTool.Companion.builder()
+                            .function(JsonField.of(function))
+                            .type(JsonValue.from("function"))
+                            .build();
                 })
                 .collect(Collectors.toList());
 
-        params.setTools(tools);
-        OpenAiChatCompletionOutput rawResult = aiClient.chatCompletion(params);
+        // 将工具添加到参数中
+        params = params.toBuilder()
+                .tools(tools)
+                .build();
 
-        return containsFunctionCall(rawResult)
-                ? executeFunctionCall(rawResult, botExecutionInstance)
-                : responseHandler.processResponse(rawResult).getContent();
+        var response = aiClient.chat().completions().create(params);
+
+        // 检查是否包含函数调用
+        if (containsFunctionCall(response)) {
+            return executeFunctionCall(response, botExecutionInstance);
+        } else {
+            return response.choices().get(0).message().content().orElse("");
+        }
     }
 
-    // 辅助方法 ====================
-
-    private OpenAiChatCompletionParameters buildChatParams(
+    private ChatCompletionCreateParams buildChatParams(
             List<BotMessages> messages,
             List<PromptTexts> prompts,
             String content) {
-        OpenAiChatCompletionParameters params = new OpenAiChatCompletionParameters();
-
-        StringBuilder promptContent = new StringBuilder();
+        // 构建系统提示
+        StringBuilder systemPrompt = new StringBuilder();
         prompts.stream()
                 .map(PromptTexts::getContent)
                 .filter(prompt -> prompt != null && !prompt.isBlank())
-                .forEach(promptContent::append);
+                .forEach(systemPrompt::append);
 
-        if (promptContent.length() > 0) {
-            params.addMessages(
-                    new OpenAiChatMessage.OpenAiChatSystemMessage().setContent(promptContent.toString()));
+        // 构建消息列表
+        List<ChatCompletionMessageParam> messageParams = messages.stream()
+                .map(this::convertToMessageParam)
+                .collect(Collectors.toList());
+
+        // 添加系统消息（如果有）
+        if (systemPrompt.length() > 0) {
+            messageParams.add(0, ChatCompletionMessageParam.ofSystem(
+                    ChatCompletionSystemMessageParam.builder()
+                            .content(systemPrompt.toString())
+                            .build()));
         }
 
-        messages.stream()
-                .map(this::convertToOpenAiMessage)
-                .forEach(params::addMessages);
-
+        // 添加用户消息（如果有）
         if (content != null && !content.isBlank()) {
-            params.addMessages(
-                    new OpenAiChatMessage.OpenAiChatUserMessage().addText(content));
+            messageParams.add(ChatCompletionMessageParam.ofUser(
+                    ChatCompletionUserMessageParam.builder()
+                            .content(content)
+                            .build()));
         }
 
-        return params;
+        return ChatCompletionCreateParams.builder()
+                .model("deepseek-chat") // 这里需要从配置获取
+                .messages(messageParams)
+                .putAdditionalBodyProperty("enable_thinking", JsonBoolean.of(false))
+                .build();
     }
 
-    private OpenAiChatMessage convertToOpenAiMessage(BotMessages msg) {
+    private ChatCompletionMessageParam convertToMessageParam(BotMessages msg) {
         String role = msg.getRole();
         String message = msg.getMessage();
 
@@ -186,37 +184,39 @@ public class SAPDeepseekAIServiceImpl implements AIService {
             throw new BusinessException("Invalid message: role or content is null");
         }
 
-        return switch (role) {
-            case AIConstants.Roles.SYSTEM ->
-                messageFactory.createSystemMessage(message)[0];
-            case AIConstants.Roles.USER ->
-                messageFactory.createUserMessage(message)[0];
-            case AIConstants.Roles.ASSISTANT ->
-                messageFactory.createAssistantMessage(message)[0];
-            default -> throw new BusinessException(AIConstants.Messages.UNEXPECTED_ROLE + role);
-        };
+        switch (role) {
+            case AIConstants.Roles.SYSTEM:
+                return ChatCompletionMessageParam.ofSystem(
+                        ChatCompletionSystemMessageParam.builder()
+                                .content(message)
+                                .build());
+            case AIConstants.Roles.USER:
+                return ChatCompletionMessageParam.ofUser(
+                        ChatCompletionUserMessageParam.builder()
+                                .content(message)
+                                .build());
+            case AIConstants.Roles.ASSISTANT:
+                return ChatCompletionMessageParam.ofAssistant(
+                        ChatCompletionAssistantMessageParam.builder()
+                                .content(message)
+                                .build());
+            default:
+                throw new BusinessException(AIConstants.Messages.UNEXPECTED_ROLE + role);
+        }
     }
 
-    private boolean containsFunctionCall(OpenAiChatCompletionOutput result) {
-        return result.getChoices() != null &&
-                !result.getChoices().isEmpty() &&
-                result.getChoices().get(0).getMessage() != null &&
-                result.getChoices().get(0).getMessage().getToolCalls() != null &&
-                !result.getChoices().get(0).getMessage().getToolCalls().isEmpty();
+    private boolean containsFunctionCall(Object response) {
+        // 实现函数调用检查逻辑
+        // 需要根据openai-java库的响应格式调整
+        return false;
     }
 
     private <T extends BotExecution> Object executeFunctionCall(
-            OpenAiChatCompletionOutput result,
+            Object response,
             T botExecutionInstance) {
-        try {
-            var toolCall = result.getChoices().get(0).getMessage().getToolCalls().get(0);
-            return functionCallProcessor.executeFunctionCallOnInstance(
-                    toolCall.getFunction().getName(),
-                    toolCall.getFunction().getArguments(),
-                    botExecutionInstance);
-        } catch (Exception e) {
-            throw new BusinessException("Function call failed: " + e.getMessage(), e);
-        }
+        // 实现函数调用执行逻辑
+        // 需要根据openai-java库的响应格式调整
+        return null;
     }
 
     @Override
@@ -225,7 +225,16 @@ public class SAPDeepseekAIServiceImpl implements AIService {
             List<PromptTexts> prompts,
             String content,
             AIModel model) {
-        throw new UnsupportedOperationException("Streaming not implemented for DeepSeek");
+        SAPAIDeepSeekConfig config = (SAPAIDeepSeekConfig) model.parseModelConfigs();
+        OpenAIClient aiClient = getAiClientForDeepSeek(config);
+        ChatCompletionCreateParams params = buildChatParams(messages, prompts, content);
+
+        StreamResponse<ChatCompletionChunk> streamResponse = aiClient.chat().completions().createStreaming(params);
+
+        return streamResponse.stream()
+                .flatMap(completionChunk -> completionChunk.choices().stream())
+                .filter(choice -> choice.delta().content().isPresent())
+                .map(choice -> choice.delta().content().get());
     }
 
     public static void send(@Nonnull final SseEmitter emitter, @Nonnull final String chunk) {
