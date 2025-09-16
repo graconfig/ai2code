@@ -19,7 +19,15 @@ sap.ui.define(
 
           this._currentBotInstanceId = null;
         },
-
+        onAfterRendering: function() {
+          var oInput = this.byId("aiPageMessageInput");
+          if (oInput) {
+            oInput.$().on("keydown", function(e) {
+              // 只让输入框自己处理方向键
+              e.stopPropagation();
+            });
+          }
+        },
         _onRouteMatched(oEvent) {
           const oArguments = oEvent.getParameter("arguments");
           const sBotInstanceId = oArguments.botInstanceId;

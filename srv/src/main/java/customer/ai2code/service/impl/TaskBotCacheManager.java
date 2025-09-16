@@ -69,7 +69,8 @@ public class TaskBotCacheManager implements TaskBotDataService {
             rootCache.put(task.getTask().getId(), taskNode);
         } else if (parentBotInstanceId != null) {
             // 如果有父Bot实例，建立父子关系
-            TaskBotNode parentNode = nodeCache.get(parentBotInstanceId);
+            // TaskBotNode parentNode = nodeCache.get(parentBotInstanceId);
+            TaskBotNode parentNode = getBotInstanceNode(parentBotInstanceId);
             if (parentNode != null) {
                 parentNode.addChild(taskNode);
             }
@@ -89,7 +90,8 @@ public class TaskBotCacheManager implements TaskBotDataService {
         // 建立与任务的父子关系
         String taskId = bot.getBotInstance().getTaskId();
         if (taskId != null) {
-            TaskBotNode taskNode = nodeCache.get(taskId);
+            // TaskBotNode taskNode = nodeCache.get(taskId);
+            TaskBotNode taskNode = getTaskNode(taskId);
             if (taskNode != null) {
                 taskNode.addChild(botNode);
             }
@@ -213,36 +215,63 @@ public class TaskBotCacheManager implements TaskBotDataService {
     }
 
     public List<TaskBotNode> getChildren(TaskBotNode current) {
-        // return new ArrayList<>(nodeCache.values());
-        List<TaskBotNode> children = current.getChildren();
-        if (children == null || children.isEmpty()) {
-            List<TaskBotNode> newChildren = new ArrayList<>();
-            if (current.getType() == NodeType.TASK) {
-                // 如果是任务节点，尝试获取子Bot实例
-                // children = current.getTaskObject().getChildren();
-                genericCqnService.getTaskAndSubBotsById(current.getTaskObject().getTask().getId())
-                        .getBotInstances()
-                        .forEach(botInstance -> {
-                            TaskBotNode botNode = getBotInstanceNode(botInstance.getId());
-                            if (botNode != null) {
-                                newChildren.add(botNode);
-                            }
-                        });
-            } else if (current.getType() == NodeType.BOT_INSTANCE) {
-                // 如果是Bot实例节点，尝试获取子任务
-                // children = current.getBotObject().getChildren();
-                genericCqnService.getBotInstanceAndSubtasksById(current.getBotObject().getBotInstance().getId())
-                        .getTasks()
-                        .forEach(task -> {
-                            TaskBotNode taskNode = getTaskNode(task.getId());
-                            if (taskNode != null) {
-                                newChildren.add(taskNode);
-                            }
-                        });
-            }
-            return newChildren;
+        // 先获取当前缓存的子节点
+        List<TaskBotNode> cachedChildren = current.getChildren();
+        
+        // 使用CAP SELECT count语句查询应有的子节点数量
+        long expectedChildrenCount = 0;
+        if (current.getType() == NodeType.TASK) {
+            // 如果是任务节点，获取子Bot实例数量
+            expectedChildrenCount = genericCqnService.getBotInstanceCountByTaskId(current.getTaskObject().getTask().getId());
+        } else if (current.getType() == NodeType.BOT_INSTANCE) {
+            // 如果是Bot实例节点，获取子任务数量
+            expectedChildrenCount = genericCqnService.getTaskCountByBotInstanceId(current.getBotObject().getBotInstance().getId());
         }
-        return children;
+        
+        // 如果缓存中的子节点数量与数据库中的一致，直接返回缓存
+        if (cachedChildren != null && cachedChildren.size() == expectedChildrenCount) {
+            return cachedChildren;
+        }
+        
+        // 如果数量不一致，重新从数据库获取完整的子节点列表
+        List<TaskBotNode> allChildren = new ArrayList<>();
+        
+        if (current.getType() == NodeType.TASK) {
+            // 如果是任务节点，获取所有子Bot实例
+            genericCqnService.getTaskAndSubBotsById(current.getTaskObject().getTask().getId())
+                    .getBotInstances()
+                    .forEach(botInstance -> {
+                        TaskBotNode botNode = getBotInstanceNode(botInstance.getId());
+                        if (botNode != null) {
+                            allChildren.add(botNode);
+                        }
+                    });
+        } else if (current.getType() == NodeType.BOT_INSTANCE) {
+            // 如果是Bot实例节点，获取所有子任务
+            genericCqnService.getBotInstanceAndSubtasksById(current.getBotObject().getBotInstance().getId())
+                    .getTasks()
+                    .forEach(task -> {
+                        TaskBotNode taskNode = getTaskNode(task.getId());
+                        if (taskNode != null) {
+                            allChildren.add(taskNode);
+                        }
+                    });
+        }
+        
+        // 清空当前节点的子节点缓存，重新建立关系
+        if (cachedChildren != null) {
+            List<TaskBotNode> currentChildren = new ArrayList<>(cachedChildren);
+            for (TaskBotNode child : currentChildren) {
+                current.removeChild(child.getId());
+            }
+        }
+        
+        // 重新添加所有子节点
+        for (TaskBotNode child : allChildren) {
+            current.addChild(child);
+        }
+        
+        return allChildren;
     }
 
     /**
@@ -404,6 +433,9 @@ public class TaskBotCacheManager implements TaskBotDataService {
             if (current.getType() == TaskBotNode.NodeType.TASK) {
                 // return getRoot(current);
                 // Node(current.)
+                if (current.getTaskObject().getTask().getIsMain() == true){
+                    return null;
+                }
                 return getBotInstanceNode(current.getTaskObject().getTask().getBotInstanceId());
             } else {
                 return getTaskNode(current.getBotObject().getBotInstance().getTaskId());

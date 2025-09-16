@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Collections;
 
 /**
  * 任务-Bot树形节点
@@ -51,25 +52,68 @@ public class TaskBotNode {
         this.botObject = bot;
     }
     
-    // 添加子节点
+    // 添加子节点 - 确保不重复
     public void addChild(TaskBotNode child) {
+        if (child == null) {
+            throw new BusinessException("Cannot add null child node");
+        }
+        
+        String childId = child.getId();
+        
+        // 检查是否已存在相同ID的子节点
+        if (childrenMap.containsKey(childId)) {
+            // 如果已存在，不重复添加
+            return;
+        }
+        
+        // 添加新的子节点
         children.add(child);
-        childrenMap.put(child.getId(), child);
+        childrenMap.put(childId, child);
         child.setParent(this);
     }
     
-    // 移除子节点
-    public void removeChild(String childId) {
+    // 移除子节点 - 确保List和Map同步
+    public boolean removeChild(String childId) {
         TaskBotNode child = childrenMap.remove(childId);
         if (child != null) {
-            children.remove(child);
+            boolean removed = children.remove(child);
+            child.setParent(null);
+            return removed;
+        }
+        return false;
+    }
+    
+    // 移除子节点对象
+    public boolean removeChild(TaskBotNode child) {
+        if (child == null) {
+            return false;
+        }
+        return removeChild(child.getId());
+    }
+    
+    // 清空所有子节点 - 确保List和Map同步
+    public void clearChildren() {
+        // 设置所有子节点的parent为null
+        for (TaskBotNode child : children) {
             child.setParent(null);
         }
+        children.clear();
+        childrenMap.clear();
     }
     
     // 查找子节点
     public TaskBotNode findChild(String childId) {
         return childrenMap.get(childId);
+    }
+    
+    // 检查是否包含指定ID的子节点
+    public boolean hasChild(String childId) {
+        return childrenMap.containsKey(childId);
+    }
+    
+    // 检查是否包含指定的子节点对象
+    public boolean hasChild(TaskBotNode child) {
+        return child != null && hasChild(child.getId());
     }
     
     // 递归查找后代节点
@@ -188,7 +232,9 @@ public class TaskBotNode {
     public String getId() { return id; }
     public NodeType getType() { return type; }
     public TaskBotNode getParent() { return parent; }
-    public List<TaskBotNode> getChildren() { return children; }
+    public List<TaskBotNode> getChildren() { 
+        return Collections.unmodifiableList(children); 
+    }
     public Task getTaskObject() { return taskObject; }
     public Bot getBotObject() { return botObject; }
     

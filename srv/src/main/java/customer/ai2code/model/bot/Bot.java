@@ -10,6 +10,7 @@ import cds.gen.configservice.BotTypes;
 import cds.gen.mainservice.BotInstances;
 import cds.gen.mainservice.BotInstancesExecuteContext;
 import customer.ai2code.model.ai.config.model.AIModel;
+import customer.ai2code.service.variable.VariableContext;
 
 public interface Bot {
     // public final Executor executor = null;
@@ -62,4 +63,7 @@ public interface Bot {
      * @return 更新后的BotInstances
      */
     public BotInstances update(BotInstances botInstance);
+
+
+    public VariableContext getVariableContext();
 }

@@ -30,11 +30,11 @@ public class FunctionCallingBot extends AbstractBot {
     private PromptService promptService;
     private AIModelResolver aiModelResolver;
     private BotExecutionFactoryService botExecutionFactoryService; // BotExecution 工厂服务
-    
+
     public FunctionCallingBot(BotInstances botInstance, AIModel aiModel, BotTypes botType,
-                             Locale locale, GenericCqnService genericCqnService,
-                             PromptService promptService, AIModelResolver aiModelResolver,
-                             BotExecutionFactoryService botExecutionFactoryService) {
+            Locale locale, GenericCqnService genericCqnService,
+            PromptService promptService, AIModelResolver aiModelResolver,
+            BotExecutionFactoryService botExecutionFactoryService) {
         super(botInstance, aiModel, botType, locale, genericCqnService);
         this.promptService = promptService;
         this.aiModelResolver = aiModelResolver;
@@ -57,8 +57,12 @@ public class FunctionCallingBot extends AbstractBot {
 
             // 2. 使用genericCqnService.getMainTaskId，再获取Prompt
             // String mainTaskId = genericCqnService.getMainTaskId(botInstance.getId());
+            // 获取prompts
+            List<PromptTexts> retrievedPrompts = promptService.getPrompts(this);
+            if (retrievedPrompts != null && !retrievedPrompts.isEmpty()) {
+                prompts = new ArrayList<>(retrievedPrompts); // 创建可修改的副本
+            }
 
-            prompts = promptService.getPrompts(this);
             System.out.println("- Retrieved " + prompts.size() + " prompts for execution");
 
             // 3. 获取历史消息
@@ -76,7 +80,7 @@ public class FunctionCallingBot extends AbstractBot {
 
             // 4.1 添加rag功能
             PromptTexts ragPrompt = promptService.getRagAsPrompts(this, "");
-            if (ragPrompt != null) {
+            if (ragPrompt != null && ragPrompt.getContent() != null && !ragPrompt.getContent().isEmpty()) {
                 prompts.add(ragPrompt);
             }
 

@@ -24,7 +24,7 @@ entity BotType : cuid, managed {
   description          : String;
   functionType         : Association to BotFunctionType default 'AI_CHAT';
   autoRun              : Boolean default false;
-  executionCondition   : String(1000);
+  executeCondition   : String(1000);
   model                : Association to ModelConfig;
   prompts              : Composition of many PromptText
                            on prompts.botType = $self;
@@ -54,6 +54,7 @@ entity ModelConfig : cuid, managed {
 /** Bot prompt templates, support multilingual and multiple templates */
 entity PromptText : cuid, managed {
   botType : Association to BotType;
+  role    : Association to RoleType;
   lang    : Association to Languages; // Association to enable value help
   name    : String(100);
   content : LargeString;
@@ -102,6 +103,14 @@ entity ContextType : CodeList {
       //array   = 'ARRAY';     // Array
       //table   = 'TABLE';     // Table
       //image   = 'IMAGE';     // Image (base64 or URL)
+      };
+}
+
+entity RoleType : CodeList {
+  key code : String enum {
+        user = 'user';
+        system = 'system';
+        function = 'function';
       };
 }
 

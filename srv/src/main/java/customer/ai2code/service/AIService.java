@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -23,13 +24,14 @@ public interface AIService {
                         String content,
                         AIModel model);
 
-        public SseEmitter chatWithAIStreaming(
+        public Stream<String> chatWithAIStreaming(
                         List<BotMessages> messages,
                         List<PromptTexts> prompts,
                         String content,
-                        AIModel model,
-                        ExecutorService executor,
-                        StreamingCompletedProcessor streamingCompletionProcessor);
+                        AIModel model
+                        // ExecutorService executor,
+                        // StreamingCompletedProcessor streamingCompletionProcessor
+                        );
 
         public <T extends BotExecution> Object functionCalling(
                         List<BotMessages> messages,

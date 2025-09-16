@@ -3,6 +3,8 @@ package customer.ai2code.service;
 import cds.gen.mainservice.CreateTaskWithBotsContext;
 import cds.gen.mainservice.TasksGetHierarchyContext;
 import customer.ai2code.model.task.Task;
+import customer.ai2code.model.tree.TaskBotNode;
+import customer.ai2code.service.impl.TaskServiceImpl.HierarchyNode;
 
 public interface TaskService {
 
@@ -35,6 +37,8 @@ public interface TaskService {
     public String getHierarchy(String taskId);
 
     public String getHierarchy(TasksGetHierarchyContext context);
+
+    public HierarchyNode buildBotHierarchy(TaskBotNode cachedBot);
 
     public String getMainTaskId(String botInstanceId);
 }

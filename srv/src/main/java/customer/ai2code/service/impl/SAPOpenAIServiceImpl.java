@@ -3,6 +3,7 @@ package customer.ai2code.service.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -54,8 +55,8 @@ public class SAPOpenAIServiceImpl implements AIService {
                         AIResponseHandlerFactory responseHandlerFactory,
                         FunctionCallProcessor functionCallProcessor,
                         OpenAIFunctionCallAdapter openAIFunctionCallAdapter
-                        // ObjectMapper objectMapper
-                        ) {
+        // ObjectMapper objectMapper
+        ) {
                 this.messageFactory = messageFactory;
                 this.responseHandlerFactory = responseHandlerFactory;
                 this.functionCallProcessor = functionCallProcessor;
@@ -101,17 +102,35 @@ public class SAPOpenAIServiceImpl implements AIService {
                                         default -> throw new BusinessException(AIConstants.Messages.UNEXPECTED_ROLE +
                                                         msg.getRole());
                                 }).forEach(params::addMessages);
-                // add prompts
+                // add system prompts
+                StringBuilder promptContent = new StringBuilder();
                 prompts.stream()
+                                .filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                                && prompt.getRoleCode() != null
+                                                && AIConstants.Roles.SYSTEM.equals(prompt.getRoleCode()))
                                 .map(PromptTexts::getContent)
-                                .filter(prompt -> prompt != null && !prompt.isBlank())
-                                .forEach(prompt -> params
-                                                .addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage()
-                                                                .setContent(prompt)));
+
+                                .forEach(promptContent::append);
+                // params.addMessages(
+                // new
+                // OpenAiChatMessage.OpenAiChatSystemMessage().setContent(promptContent.toString()));
+                params.addMessages(
+                                messageFactory.createSystemMessage(promptContent.toString()));
+
+                // add user prompt
+                prompts.stream()
+                                .filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                                && prompt.getRoleCode() != null
+                                                && AIConstants.Roles.USER.equals(prompt.getRoleCode()))
+                                .map(PromptTexts::getContent)
+
+                                .forEach(messageFactory::createUserMessage);
 
                 // add user message
                 if (content != null && !content.isBlank()) {
-                        params.addMessages(new OpenAiChatMessage.OpenAiChatUserMessage().addText(content));
+                        // params.addMessages(new
+                        // OpenAiChatMessage.OpenAiChatUserMessage().addText(content));
+                        params.addMessages(messageFactory.createUserMessage(content));
                 }
 
                 OpenAiClient aiClient = getAiClientbyModelUsingBTPDestination(
@@ -126,29 +145,16 @@ public class SAPOpenAIServiceImpl implements AIService {
         }
 
         @Override
-        public SseEmitter chatWithAIStreaming(List<BotMessages> messages, List<PromptTexts> prompts, String content,
-                        AIModel model,
-                        ExecutorService executor,
-                        StreamingCompletedProcessor processor) {
+        public Stream<String> chatWithAIStreaming(List<BotMessages> messages, List<PromptTexts> prompts, String content,
+                        AIModel model
+                        // ExecutorService executor,
+                        // StreamingCompletedProcessor processor
+                        ) {
 
                 // Create streaming chat completion request
                 OpenAiChatCompletionParameters params = new OpenAiChatCompletionParameters();
-                // 1. add prompts
-                // prompts.stream()
-                //                 .map(PromptTexts::getContent)
-                //                 .filter(prompt -> prompt != null && !prompt.isBlank())
-                //                 .forEach(prompt -> params
-                //                                 .addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage()
-                //                                                 .setContent(prompt)));
-                //将prompt合并成一个system消息
-                StringBuilder promptContent = new StringBuilder();
-                prompts.stream()
-                                .map(PromptTexts::getContent)
-                                .filter(prompt -> prompt != null && !prompt.isBlank())
-                                .forEach(promptContent::append);
-                params.addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage().setContent(promptContent.toString()));
 
-                // 2. history messages
+                // 1. history messages
                 messages.stream()
                                 .map(msg -> switch (msg.getRole()) {
                                         case AIConstants.Roles.SYSTEM ->
@@ -161,37 +167,85 @@ public class SAPOpenAIServiceImpl implements AIService {
                                                         msg.getRole());
                                 }).forEach(params::addMessages);
 
+                // 1. add system prompts
+                // prompts.stream()
+                // .map(PromptTexts::getContent)
+                // .filter(prompt -> prompt != null && !prompt.isBlank())
+                // .forEach(prompt -> params
+                // .addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage()
+                // .setContent(prompt)));
+                // 将prompt合并成一个system消息
+                StringBuilder promptContent = new StringBuilder();
+                prompts.stream()
+                                .filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                                && prompt.getRoleCode() != null
+                                                && AIConstants.Roles.SYSTEM.equals(prompt.getRoleCode()))
+                                .map(PromptTexts::getContent)
+                                // .filter(prompt -> prompt != null && !prompt.isBlank())
+                                .forEach(promptContent::append);
+                params.addMessages(
+                                messageFactory.createSystemMessage(promptContent.toString()));
 
-                // add user message
+                // 2. add user prompt
+                prompts.stream()
+                                .filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                                && prompt.getRoleCode() != null
+                                                && AIConstants.Roles.USER.equals(prompt.getRoleCode()))
+                                .map(PromptTexts::getContent)
+
+                                .forEach(messageFactory::createUserMessage);
+                // 3. add user message
                 if (content != null && !content.isBlank()) {
-                        params.addMessages(new OpenAiChatMessage.OpenAiChatUserMessage().addText(content));
+                        params.addMessages(
+                                        messageFactory.createUserMessage(content));
                 }
                 OpenAiClient aiClient = getAiClientbyModelUsingBTPDestination(
                                 (SAPAICoreConfig) model.parseModelConfigs(),
                                 resolveOpenAiModel(model.getModelName()));
 
-                SseEmitter emitter = new SseEmitter(20 * 60 * 1000L); // 3 minutes timeout
-                final StringBuilder responseBuilder = new StringBuilder();
-
-                executor.execute(() -> {
-                        try {
-                                aiClient.streamChatCompletionDeltas(params).forEach(delta -> {
-                                        // Process each delta and send it to the client
-                                        AIService.send(emitter, delta.getDeltaContent());
-                                        responseBuilder.append(delta);
-                                });
-                                // emitter.complete();
-                        } catch (Exception e) {
-                                emitter.completeWithError(e);
-                        } finally {
-                                // process other logic after streaming is complete
-                                if (processor != null) {
-                                        processor.process(responseBuilder.toString());
-                                }
-                                emitter.complete();
-                        }
+                // return aiClient.streamChatCompletionDeltas(params);
+                return aiClient.streamChatCompletionDeltas(params).map(delta ->{
+                        return delta.getDeltaContent();
                 });
-                return emitter;
+                        // .map(delta -> {
+                        //         // Process each delta and send it to the client
+                        //         SseEmitter emitter = new SseEmitter(20 * 60 * 1000L); // 3 minutes timeout
+                        //         AIService.send(emitter, delta.getDeltaContent());
+                        //         return emitter;
+                        // })
+                        // .onComplete(() -> {
+                        //         if (processor != null) {
+                        //                 processor.process("Streaming completed", "botInstanceId");
+                        //         }
+                        // })
+                        // .onError(e -> {
+                        //         if (processor != null) {
+                        //                 processor.process("Error during streaming: " + e.getMessage(), "botInstanceId");
+                        //         }
+                        // });
+
+                // SseEmitter emitter = new SseEmitter(20 * 60 * 1000L); // 3 minutes timeout
+                // final StringBuilder responseBuilder = new StringBuilder();
+
+                // executor.execute(() -> {
+                //         try {
+                //                 aiClient.streamChatCompletionDeltas(params).forEach(delta -> {
+                //                         // Process each delta and send it to the client
+                //                         AIService.send(emitter, delta.getDeltaContent());
+                //                         responseBuilder.append(delta);
+                //                 });
+                //                 // emitter.complete();
+                //         } catch (Exception e) {
+                //                 emitter.completeWithError(e);
+                //         } finally {
+                //                 // process other logic after streaming is complete
+                //                 if (processor != null) {
+                //                         processor.process(responseBuilder.toString(),);
+                //                 }
+                //                 emitter.complete();
+                //         }
+                // });
+                // return emitter;
 
         }
 
@@ -212,21 +266,6 @@ public class SAPOpenAIServiceImpl implements AIService {
                 // 2. 构建 OpenAI Chat Completion 参数
                 OpenAiChatCompletionParameters params = new OpenAiChatCompletionParameters();
 
-                // add prompts
-                // prompts.stream()
-                //                 .map(PromptTexts::getContent)
-                //                 .filter(prompt -> prompt != null && !prompt.isBlank())
-                //                 .forEach(prompt -> params
-                //                                 .addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage()
-                //                                                 .setContent(prompt)));
-                //将prompt合并成一个system消息
-                StringBuilder promptContent = new StringBuilder();
-                prompts.stream()
-                                .map(PromptTexts::getContent)
-                                .filter(prompt -> prompt != null && !prompt.isBlank())
-                                .forEach(promptContent::append);
-                params.addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage().setContent(promptContent.toString()));
-
                 // history messages
                 messages.stream()
                                 .map(msg -> switch (msg.getRole()) {
@@ -240,7 +279,33 @@ public class SAPOpenAIServiceImpl implements AIService {
                                                         msg.getRole());
                                 }).forEach(params::addMessages);
 
+                // 2. add system prompts
+                // prompts.stream()
+                // .map(PromptTexts::getContent)
+                // .filter(prompt -> prompt != null && !prompt.isBlank())
+                // .forEach(prompt -> params
+                // .addMessages(new OpenAiChatMessage.OpenAiChatSystemMessage()
+                // .setContent(prompt)));
+                // 将prompt合并成一个system消息
+                StringBuilder promptContent = new StringBuilder();
+                prompts.stream()
+                                .filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                                && prompt.getRoleCode() != null
+                                                && AIConstants.Roles.SYSTEM.equals(prompt.getRoleCode()))
+                                .map(PromptTexts::getContent)
 
+                                .forEach(promptContent::append);
+                params.addMessages(
+                                messageFactory.createSystemMessage(promptContent.toString()));
+
+                // 2. add user prompts
+                prompts.stream()
+                                .filter(prompt -> prompt.getContent() != null && !prompt.getContent().isBlank()
+                                                && prompt.getRoleCode() != null
+                                                && AIConstants.Roles.USER.equals(prompt.getRoleCode()))
+                                .map(PromptTexts::getContent)
+
+                                .forEach(messageFactory::createUserMessage);
 
                 // 3. 转换为 OpenAI Function Calling 格式并添加到参数中
                 List<Map<String, Object>> openAIFunctions = openAIFunctionCallAdapter
@@ -259,7 +324,7 @@ public class SAPOpenAIServiceImpl implements AIService {
                                                 Map<String, Object> parameters = (Map<String, Object>) parametersObj;
                                                 function.setParameters(parameters);
                                         }
-                                        params.setToolChoiceFunction((String)functionDef.get("name"));
+                                        params.setToolChoiceFunction((String) functionDef.get("name"));
                                         return new OpenAiChatCompletionTool().setType(ToolType.FUNCTION)
                                                         .setFunction(function);
                                 }).toList();
@@ -318,12 +383,10 @@ public class SAPOpenAIServiceImpl implements AIService {
                 // 修复：获取 JSON 字符串
                 String argumentsJson = toolCall.getFunction().getArguments();
 
-
                 // 使用 FunctionCallProcessor 执行函数调用
                 return functionCallProcessor.executeFunctionCallOnInstance(
                                 functionName, argumentsJson, botExecutionInstance);
 
-                
                 // return executionResult;
         }
 

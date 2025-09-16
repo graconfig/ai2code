@@ -1,0 +1,37 @@
+package customer.ai2code.model.aicore.claude.client;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.google.common.annotations.Beta;
+import com.sap.ai.sdk.core.common.ClientError;
+
+import customer.ai2code.model.aicore.claude.ErrorResponse;
+
+// import customer.aireport.service.SAPAICore.claude.generated.model.ErrorResponse;
+import javax.annotation.Nonnull;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Value;
+
+/**
+ * Represents an error response from the OpenAI API.
+ *
+ * @since 1.4.0
+ */
+@Beta
+@Value
+@AllArgsConstructor(onConstructor = @__({@JsonCreator}), access = AccessLevel.PROTECTED)
+public class ClaudeAiError implements ClientError {
+  /** The original error response from the OpenAI API. */
+  ErrorResponse originalResponse;
+
+  /**
+   * Gets the error message from the contained original response.
+   *
+   * @return the error message
+   */
+  @Nonnull
+  public String getMessage() {
+    // return originalResponse.getError().getMessage();
+    return originalResponse.getMessage();
+  }
+}

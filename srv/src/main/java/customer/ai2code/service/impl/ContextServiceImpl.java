@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,6 +21,7 @@ import customer.ai2code.exception.BusinessException;
 import customer.ai2code.model.bot.Bot;
 import customer.ai2code.model.tree.ContextTreeNode;
 import customer.ai2code.service.ContextService;
+import customer.ai2code.service.websocket.ContextNodeChangedEvent;
 import customer.ai2code.service.TaskBotDataService;
 import customer.ai2code.util.PathParser;
 
@@ -30,14 +32,19 @@ public class ContextServiceImpl implements ContextService {
     private final ObjectMapper objectMapper;
     private final PathParser pathParser;
     // private final TaskBotDataService taskBotDataService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public ContextServiceImpl(GenericCqnService genericCqnService, ObjectMapper objectMapper, PathParser pathParser
+    public ContextServiceImpl(  GenericCqnService genericCqnService, 
+                                ObjectMapper objectMapper, 
+                                PathParser pathParser
     // ,TaskBotDataService taskBotDataService
-    ) {
+    ,
+                                ApplicationEventPublisher eventPublisher) {
         this.genericCqnService = genericCqnService;
         this.objectMapper = objectMapper;
         this.pathParser = pathParser;
         // this.taskBotDataService = taskBotDataService;
+        this.eventPublisher = eventPublisher;
     }
 
     // @Override
@@ -209,7 +216,22 @@ public class ContextServiceImpl implements ContextService {
         // String mainTaskId =
         // taskBotDataService.getMainTaskId(bot.getBotInstance().getId());
         String mainTaskId = genericCqnService.getMainTaskId(bot.getBotInstance().getId());
-        return upsertContextWithMainTaskId(mainTaskId, contextPath, contextValue, contextType);
+
+        ContextNodes node = upsertContextWithMainTaskId(mainTaskId, contextPath, contextValue, contextType);
+        // 发布上下文节点变更事件（包含创建/更新的详细信息）
+        eventPublisher.publishEvent(new ContextNodeChangedEvent(
+            this, 
+            node.getId(), 
+            // 若为更新，需获取旧值；若为创建，旧值为null
+            (node.getValue() != null ? node.getValue() : null), 
+            contextValue, 
+            mainTaskId, 
+            node.getPath()
+        ));
+
+        return node;
+        
+        // return upsertContextWithMainTaskId(mainTaskId, contextPath, contextValue, contextType);
         // // 2. 查询是否已存在相同mainTaskId和contextPath的记录
         // ContextNodes existingNode = null;
         // try {
