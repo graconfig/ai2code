@@ -37,6 +37,6 @@ hs_err*
 .cdsrc-private.json
 
 **/dist/
-resources/
+# resources/
 # added by cds
 .cdsrc-private.json
