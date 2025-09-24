@@ -112,3 +112,75 @@ logging:
         cds:
           remote:
             odata: DEBUG
+
+cds:
+  # data-source:
+  #   auto-config:
+  #     enabled: false
+  remote:
+    services:
+      '[com.sap.gateway.srvd.zsrvd_genclas.v0001]':
+        destination:
+          name: S4
+        http:
+          service: zsrvd_genclas/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_genclas/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_genclas.v0001
+        type: odata-v4
+      '[com.sap.gateway.srvd.zsrvd_gentabl.v0001]':
+        destination:
+          name: S4
+        http:
+          service: zsrvd_gentabl/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_gentabl/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_gentabl.v0001
+        type: odata-v4
+      '[com.sap.gateway.srvd.zsrvd_genclas_seo.v0001]':
+        destination:
+          name: S4
+        http:
+          service: zsrvd_genclas_seo/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_genclas_seo/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_genclas_seo.v0001
+        type: odata-v4
+      '[com.sap.gateway.srvd.zsrvd_gensrvd.v0001]':
+        destination:
+          name: S4
+        http:
+          service: zsrvd_gensrvd/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_gensrvd/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_gensrvd.v0001
+        type: odata-v4
+      '[com.sap.gateway.srvd.zsrvd_genddls.v0001]':
+        destination:
+          name: S4
+        http:
+          service: zsrvd_genddls/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_genddls/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_genddls.v0001
+        type: odata-v4
+      '[com.sap.gateway.srvd.zsrvd_genbdef.v0001]':
+        destination:
+          name: S4
+        http:
+          service: zsrvd_genbdef/0001
+          csrf:
+            enabled: true
+          suffix: /sap/opu/odata4/sap/zsrvb_genbdef/srvd/sap
+        model: com.sap.gateway.srvd.zsrvd_genbdef.v0001
+        type: odata-v4
+  sql:
+    hana:
+      search:
+        fuzzinessThreshold: 0.9
+        fuzzy: true
