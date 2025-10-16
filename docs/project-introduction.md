@@ -698,33 +698,6 @@ true → 执行 Bot / false → 标记为 SKIPPED
 
 ---
 
-## 🚀 快速开始
-
-### 环境要求
-- Java 21
-- Maven 3.6.3+
-- Node.js (LTS 版本)
-- SAP BTP 账号（Cloud Foundry）
-
-### 本地运行
-
-#### 方式一：使用 VS Code Debug
-1. 登录 BTP Cloud Foundry 环境：`cf login -a https://api.cf.jp10.hana.ondemand.com --sso-passcode XXXX`
-2. 选择 Org 和 Space
-3. 使用 VS Code 的 Java/Spring Boot Debug 工具运行
-
-#### 方式二：使用 Maven 命令
-1. 登录 BTP Cloud Foundry 环境
-2. 绑定服务：`cds bind --exec '--' node ./writecfenv.js`
-3. 运行应用：`mvn spring-boot:run`
-
-### 访问应用
-- **主服务**：http://localhost:8080
-- **OData 服务**：http://localhost:8080/odata/v4/MainService
-- **H2 控制台**：http://localhost:8080/h2-console（开发环境）
-
----
-
 ## 📚 使用场景
 
 ### 场景 1：自动化代码生成
@@ -751,6 +724,33 @@ true → 执行 Bot / false → 标记为 SKIPPED
 | 2 | 配置多个 Bot，每个处理不同的数据转换步骤 |
 | 3 | Spring Batch 自动编排执行 |
 | 4 | 通过 executeCondition 条件化跳过不需要的步骤 |
+
+---
+
+## 🚀 快速开始
+
+### 环境要求
+- Java 21
+- Maven 3.6.3+
+- Node.js (LTS 版本)
+- SAP BTP 账号（Cloud Foundry）
+
+### 本地运行
+
+#### 方式一：使用 VS Code Debug
+1. 登录 BTP Cloud Foundry 环境：`cf login -a https://api.cf.jp10.hana.ondemand.com --sso-passcode XXXX`
+2. 选择 Org 和 Space
+3. 使用 VS Code 的 Java/Spring Boot Debug 工具运行
+
+#### 方式二：使用 Maven 命令
+1. 登录 BTP Cloud Foundry 环境
+2. 绑定服务：`cds bind --exec '--' node ./writecfenv.js`
+3. 运行应用：`mvn spring-boot:run`
+
+### 访问应用
+- **主服务**：http://localhost:8080
+- **OData 服务**：http://localhost:8080/odata/v4/MainService
+- **H2 控制台**：http://localhost:8080/h2-console（开发环境）
 
 ---
 
